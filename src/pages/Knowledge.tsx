@@ -1,9 +1,9 @@
 import { MainLayout } from '@/components/layout/MainLayout';
-import { FileText, GraduationCap, Plus, Search, Tag, Sparkles, Play, ArrowUpRight, Loader2 } from 'lucide-react';
+import { FileText, GraduationCap, Plus, Search, Tag, Sparkles, Play, ArrowUpRight, Loader2, Edit3, Trash2, Archive, RotateCcw, MoreVertical, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useNotes, useCourses, useCreateNote, useCreateCourse } from '@/hooks/useKnowledge';
+import { useNotes, useCourses, useCreateNote, useCreateCourse, useUpdateNote, useDeleteNote, useArchiveNote, useRestoreNote, useArchivedNotes, useUpdateCourse, useDeleteCourse, Note, Course } from '@/hooks/useKnowledge';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -11,29 +11,41 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Progress } from '@/components/ui/progress';
 
 export default function Knowledge() {
   const { t, currentLanguage } = useLanguage();
   const { data: notes, isLoading: notesLoading } = useNotes();
+  const { data: archivedNotes } = useArchivedNotes();
   const { data: courses, isLoading: coursesLoading } = useCourses();
   const createNote = useCreateNote();
   const createCourse = useCreateCourse();
+  const updateNote = useUpdateNote();
+  const deleteNote = useDeleteNote();
+  const archiveNote = useArchiveNote();
+  const restoreNote = useRestoreNote();
+  const updateCourse = useUpdateCourse();
+  const deleteCourse = useDeleteCourse();
 
-  const [activeTab, setActiveTab] = useState<'notes' | 'courses'>('notes');
+  const [activeTab, setActiveTab] = useState<'notes' | 'courses' | 'archived'>('notes');
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const [isCourseDialogOpen, setIsCourseDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [newNote, setNewNote] = useState({ title: '', content: '', tags: '' });
   const [newCourse, setNewCourse] = useState({ title: '', platform: '', url: '', total_lessons: '' });
+  const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
 
   const isLoading = notesLoading || coursesLoading;
 
-  const tabs = [
-    { id: 'notes' as const, label: t('knowledge.notes'), icon: FileText },
-    { id: 'courses' as const, label: t('knowledge.courses'), icon: GraduationCap },
-  ];
-
   const filteredNotes = notes?.filter(note => 
+    note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    note.content?.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+
+  const filteredArchivedNotes = archivedNotes?.filter(note =>
     note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     note.content?.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
@@ -62,6 +74,50 @@ export default function Knowledge() {
     }
   };
 
+  const handleUpdateNote = async () => {
+    if (!editingNote) return;
+
+    try {
+      await updateNote.mutateAsync({
+        id: editingNote.id,
+        title: editingNote.title,
+        content: editingNote.content,
+        tags: editingNote.tags,
+      });
+      toast.success(t('knowledge.noteUpdated'));
+      setEditingNote(null);
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleDeleteNote = async (id: string) => {
+    try {
+      await deleteNote.mutateAsync(id);
+      toast.success(t('knowledge.noteDeleted'));
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleArchiveNote = async (id: string) => {
+    try {
+      await archiveNote.mutateAsync(id);
+      toast.success(t('knowledge.noteArchived'));
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleRestoreNote = async (id: string) => {
+    try {
+      await restoreNote.mutateAsync(id);
+      toast.success(t('knowledge.noteRestored'));
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
   const handleCreateCourse = async () => {
     if (!newCourse.title) {
       toast.error(t('common.fillAllFields'));
@@ -78,6 +134,57 @@ export default function Knowledge() {
       toast.success(t('knowledge.courseAdded'));
       setIsCourseDialogOpen(false);
       setNewCourse({ title: '', platform: '', url: '', total_lessons: '' });
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleUpdateCourse = async () => {
+    if (!editingCourse) return;
+
+    try {
+      await updateCourse.mutateAsync({
+        id: editingCourse.id,
+        title: editingCourse.title,
+        platform: editingCourse.platform,
+        url: editingCourse.url,
+        total_lessons: editingCourse.total_lessons,
+        completed_lessons: editingCourse.completed_lessons,
+        progress: editingCourse.total_lessons 
+          ? Math.round(((editingCourse.completed_lessons || 0) / editingCourse.total_lessons) * 100)
+          : editingCourse.progress,
+      });
+      toast.success(t('knowledge.courseUpdated'));
+      setEditingCourse(null);
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleDeleteCourse = async (id: string) => {
+    try {
+      await deleteCourse.mutateAsync(id);
+      toast.success(t('knowledge.courseDeleted'));
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleIncrementLesson = async (course: Course) => {
+    const newCompleted = Math.min((course.completed_lessons || 0) + 1, course.total_lessons || 999);
+    const newProgress = course.total_lessons ? Math.round((newCompleted / course.total_lessons) * 100) : 0;
+    const newStatus = newProgress >= 100 ? 'completed' : 'in_progress';
+
+    try {
+      await updateCourse.mutateAsync({
+        id: course.id,
+        completed_lessons: newCompleted,
+        progress: newProgress,
+        status: newStatus as any,
+      });
+      if (newStatus === 'completed') {
+        toast.success(t('knowledge.courseCompleted'));
+      }
     } catch (error) {
       toast.error(t('common.error'));
     }
@@ -106,7 +213,7 @@ export default function Knowledge() {
               <Sparkles className="w-5 h-5 me-2" />
               {t('knowledge.aiInsights')}
             </Button>
-            {activeTab === 'notes' ? (
+            {activeTab === 'notes' && (
               <Dialog open={isNoteDialogOpen} onOpenChange={setIsNoteDialogOpen}>
                 <DialogTrigger asChild>
                   <Button variant="gold" size="lg">
@@ -141,7 +248,8 @@ export default function Knowledge() {
                   </div>
                 </DialogContent>
               </Dialog>
-            ) : (
+            )}
+            {activeTab === 'courses' && (
               <Dialog open={isCourseDialogOpen} onOpenChange={setIsCourseDialogOpen}>
                 <DialogTrigger asChild>
                   <Button variant="gold" size="lg">
@@ -187,108 +295,131 @@ export default function Knowledge() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={cn(
-              'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all',
-              activeTab === tab.id 
-                ? 'bg-primary text-primary-foreground' 
-                : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-            )}
-          >
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-6">
+        <div className="flex items-center justify-between">
+          <TabsList>
+            <TabsTrigger value="notes" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              {t('knowledge.notes')}
+              {notes && notes.length > 0 && (
+                <span className="text-xs bg-muted px-1.5 py-0.5 rounded-full">{notes.length}</span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="courses" className="flex items-center gap-2">
+              <GraduationCap className="w-4 h-4" />
+              {t('knowledge.courses')}
+              {courses && courses.length > 0 && (
+                <span className="text-xs bg-muted px-1.5 py-0.5 rounded-full">{courses.length}</span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="archived" className="flex items-center gap-2">
+              <Archive className="w-4 h-4" />
+              {t('knowledge.archived')}
+              {archivedNotes && archivedNotes.length > 0 && (
+                <span className="text-xs bg-muted px-1.5 py-0.5 rounded-full">{archivedNotes.length}</span>
+              )}
+            </TabsTrigger>
+          </TabsList>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Notes Section */}
-        <div className="lg:col-span-2">
-          <div className="glass-card p-5">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold text-foreground">{t('knowledge.recentNotes')}</h3>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder={t('knowledge.searchNotes')}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 w-64"
-                />
-              </div>
-            </div>
-
-            {filteredNotes.length > 0 ? (
-              <div className="space-y-4">
-                {filteredNotes.map((note) => (
-                  <div
-                    key={note.id}
-                    className="p-4 rounded-xl bg-muted/30 border border-border hover:border-primary/30 transition-all cursor-pointer group"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <h4 className="font-medium text-foreground group-hover:text-primary transition-colors">
-                        {note.title}
-                      </h4>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(note.updated_at), { 
-                          addSuffix: true,
-                          locale: currentLanguage === 'ar' ? ar : enUS 
-                        })}
-                      </span>
-                    </div>
-                    {note.content && (
-                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{note.content}</p>
-                    )}
-                    {note.tags && note.tags.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        {note.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs"
-                          >
-                            <Tag className="w-3 h-3" />
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                <p className="text-muted-foreground">{t('knowledge.noNotes')}</p>
-              </div>
-            )}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder={t('knowledge.searchNotes')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4 py-2 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 w-64"
+            />
           </div>
         </div>
 
-        {/* Courses Section */}
-        <div>
-          <div className="glass-card p-5">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold text-foreground">{t('knowledge.activeCourses')}</h3>
-              <button className="text-primary text-sm font-medium hover:underline flex items-center gap-1">
-                {t('common.viewAll')} <ArrowUpRight className="w-3 h-3" />
-              </button>
+        {/* Notes Tab */}
+        <TabsContent value="notes">
+          {filteredNotes.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredNotes.map((note) => (
+                <div
+                  key={note.id}
+                  className="glass-card p-4 hover:border-primary/30 transition-all cursor-pointer group"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-medium text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                      {note.title}
+                    </h4>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="p-1 rounded-lg hover:bg-muted transition-colors opacity-0 group-hover:opacity-100">
+                          <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setEditingNote(note)}>
+                          <Edit3 className="w-4 h-4 me-2" />
+                          {t('common.edit')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleArchiveNote(note.id)}>
+                          <Archive className="w-4 h-4 me-2" />
+                          {t('knowledge.archiveNote')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleDeleteNote(note.id)}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4 me-2" />
+                          {t('common.delete')}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  
+                  <span className="text-xs text-muted-foreground">
+                    {formatDistanceToNow(new Date(note.updated_at), { 
+                      addSuffix: true,
+                      locale: currentLanguage === 'ar' ? ar : enUS 
+                    })}
+                  </span>
+                  
+                  {note.content && (
+                    <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{note.content}</p>
+                  )}
+                  
+                  {note.tags && note.tags.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-1.5 mt-3">
+                      {note.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs"
+                        >
+                          <Tag className="w-2.5 h-2.5" />
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
+          ) : (
+            <div className="text-center py-16">
+              <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <p className="text-muted-foreground text-lg">{t('knowledge.noNotes')}</p>
+            </div>
+          )}
+        </TabsContent>
 
-            {filteredCourses.length > 0 ? (
-              <div className="space-y-4">
-                {filteredCourses.map((course) => (
-                  <div
-                    key={course.id}
-                    className="p-4 rounded-xl bg-muted/30 border border-border hover:border-primary/30 transition-all cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-3 mb-3">
+        {/* Courses Tab */}
+        <TabsContent value="courses">
+          {filteredCourses.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredCourses.map((course) => (
+                <div
+                  key={course.id}
+                  className="glass-card p-4 hover:border-primary/30 transition-all group"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
                       <span className="text-3xl">📚</span>
-                      <div className="flex-1">
+                      <div>
                         <h4 className="font-medium text-foreground text-sm group-hover:text-primary transition-colors">
                           {course.title}
                         </h4>
@@ -296,41 +427,203 @@ export default function Knowledge() {
                           <span className="text-xs text-muted-foreground">{course.platform}</span>
                         )}
                       </div>
-                      <button className="w-8 h-8 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Play className="w-4 h-4 text-primary-foreground ml-0.5" />
-                      </button>
                     </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="p-1 rounded-lg hover:bg-muted transition-colors opacity-0 group-hover:opacity-100">
+                          <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {course.url && (
+                          <DropdownMenuItem onClick={() => window.open(course.url!, '_blank')}>
+                            <ExternalLink className="w-4 h-4 me-2" />
+                            {currentLanguage === 'ar' ? 'فتح الرابط' : 'Open Link'}
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem onClick={() => setEditingCourse(course)}>
+                          <Edit3 className="w-4 h-4 me-2" />
+                          {t('common.edit')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleDeleteCourse(course.id)}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4 me-2" />
+                          {t('common.delete')}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
 
-                    <div className="mb-2">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs text-muted-foreground">{t('common.progress')}</span>
-                        <span className="text-xs font-medium text-foreground">{course.progress || 0}%</span>
-                      </div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-gold rounded-full transition-all"
-                          style={{ width: `${course.progress || 0}%` }}
-                        />
-                      </div>
+                  <div className="mb-3">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs text-muted-foreground">{t('common.progress')}</span>
+                      <span className="text-xs font-medium text-foreground">{course.progress || 0}%</span>
                     </div>
+                    <Progress value={course.progress || 0} className="h-2" />
+                  </div>
 
+                  <div className="flex items-center justify-between">
                     {course.total_lessons && (
                       <span className="text-xs text-muted-foreground">
                         {course.completed_lessons || 0}/{course.total_lessons} {t('knowledge.lessons')}
                       </span>
                     )}
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleIncrementLesson(course)}
+                      className="h-7 text-xs"
+                    >
+                      <Play className="w-3 h-3 me-1" />
+                      +1
+                    </Button>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <GraduationCap className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                <p className="text-muted-foreground">{t('knowledge.noCourses')}</p>
-              </div>
-            )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <GraduationCap className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <p className="text-muted-foreground text-lg">{t('knowledge.noCourses')}</p>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Archived Tab */}
+        <TabsContent value="archived">
+          {filteredArchivedNotes.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredArchivedNotes.map((note) => (
+                <div
+                  key={note.id}
+                  className="glass-card p-4 opacity-75 hover:opacity-100 transition-all group"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-medium text-foreground line-clamp-1">
+                      {note.title}
+                    </h4>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => handleRestoreNote(note.id)}
+                        className="p-1.5 rounded-lg hover:bg-muted transition-colors"
+                        title={t('knowledge.restoreNote')}
+                      >
+                        <RotateCcw className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteNote(note.id)}
+                        className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors"
+                        title={t('common.delete')}
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {note.content && (
+                    <p className="text-sm text-muted-foreground line-clamp-2">{note.content}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <Archive className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <p className="text-muted-foreground text-lg">
+                {currentLanguage === 'ar' ? 'لا توجد ملاحظات مؤرشفة' : 'No archived notes'}
+              </p>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+
+      {/* Edit Note Dialog */}
+      <Dialog open={!!editingNote} onOpenChange={() => setEditingNote(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('knowledge.editNote')}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <Input
+              placeholder={t('knowledge.noteTitle')}
+              value={editingNote?.title || ''}
+              onChange={(e) => setEditingNote(prev => prev ? { ...prev, title: e.target.value } : null)}
+            />
+            <Textarea
+              placeholder={t('knowledge.noteContent')}
+              value={editingNote?.content || ''}
+              onChange={(e) => setEditingNote(prev => prev ? { ...prev, content: e.target.value } : null)}
+              rows={5}
+            />
+            <Input
+              placeholder={t('knowledge.tags')}
+              value={editingNote?.tags?.join(', ') || ''}
+              onChange={(e) => setEditingNote(prev => prev ? { 
+                ...prev, 
+                tags: e.target.value ? e.target.value.split(',').map(t => t.trim()) : null 
+              } : null)}
+            />
+            <Button onClick={handleUpdateNote} className="w-full" disabled={updateNote.isPending}>
+              {updateNote.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.save')}
+            </Button>
           </div>
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Course Dialog */}
+      <Dialog open={!!editingCourse} onOpenChange={() => setEditingCourse(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('knowledge.editCourse')}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <Input
+              placeholder={t('knowledge.courseTitle')}
+              value={editingCourse?.title || ''}
+              onChange={(e) => setEditingCourse(prev => prev ? { ...prev, title: e.target.value } : null)}
+            />
+            <Input
+              placeholder={t('knowledge.platform')}
+              value={editingCourse?.platform || ''}
+              onChange={(e) => setEditingCourse(prev => prev ? { ...prev, platform: e.target.value } : null)}
+            />
+            <Input
+              placeholder={t('knowledge.url')}
+              value={editingCourse?.url || ''}
+              onChange={(e) => setEditingCourse(prev => prev ? { ...prev, url: e.target.value } : null)}
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm text-muted-foreground mb-1 block">{t('knowledge.totalLessons')}</label>
+                <Input
+                  type="number"
+                  value={editingCourse?.total_lessons || ''}
+                  onChange={(e) => setEditingCourse(prev => prev ? { 
+                    ...prev, 
+                    total_lessons: e.target.value ? parseInt(e.target.value) : null 
+                  } : null)}
+                />
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground mb-1 block">{t('knowledge.completedLessons')}</label>
+                <Input
+                  type="number"
+                  value={editingCourse?.completed_lessons || ''}
+                  onChange={(e) => setEditingCourse(prev => prev ? { 
+                    ...prev, 
+                    completed_lessons: e.target.value ? parseInt(e.target.value) : null 
+                  } : null)}
+                />
+              </div>
+            </div>
+            <Button onClick={handleUpdateCourse} className="w-full" disabled={updateCourse.isPending}>
+              {updateCourse.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.save')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </MainLayout>
   );
 }
