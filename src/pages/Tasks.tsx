@@ -1,7 +1,8 @@
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Plus, Filter, Search, MoreHorizontal, Flag, Calendar, User } from 'lucide-react';
+import { Plus, Filter, Search, MoreHorizontal, Flag, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface Task {
   id: string;
@@ -10,7 +11,6 @@ interface Task {
   priority: 'high' | 'medium' | 'low';
   project?: string;
   dueDate?: string;
-  assignee?: string;
 }
 
 const mockTasks: Record<string, Task[]> = {
@@ -33,32 +33,34 @@ const mockTasks: Record<string, Task[]> = {
   ],
 };
 
-const columns = [
-  { id: 'backlog', title: 'Backlog', color: 'bg-muted-foreground' },
-  { id: 'todo', title: 'To Do', color: 'bg-blue-500' },
-  { id: 'in-progress', title: 'In Progress', color: 'bg-primary' },
-  { id: 'review', title: 'Review', color: 'bg-purple-500' },
-  { id: 'done', title: 'Done', color: 'bg-success' },
-];
-
-const priorityColors = {
-  high: 'text-destructive bg-destructive/10',
-  medium: 'text-primary bg-primary/10',
-  low: 'text-muted-foreground bg-muted',
-};
-
 export default function Tasks() {
+  const { t } = useLanguage();
+
+  const columns = [
+    { id: 'backlog', title: t('tasks.backlog'), color: 'bg-muted-foreground' },
+    { id: 'todo', title: t('tasks.todo'), color: 'bg-blue-500' },
+    { id: 'in-progress', title: t('tasks.inProgress'), color: 'bg-primary' },
+    { id: 'review', title: t('tasks.review'), color: 'bg-purple-500' },
+    { id: 'done', title: t('tasks.done'), color: 'bg-success' },
+  ];
+
+  const priorityColors: Record<string, { class: string; label: string }> = {
+    high: { class: 'text-destructive bg-destructive/10', label: t('tasks.priority.high') },
+    medium: { class: 'text-primary bg-primary/10', label: t('tasks.priority.medium') },
+    low: { class: 'text-muted-foreground bg-muted', label: t('tasks.priority.low') },
+  };
+
   return (
     <MainLayout>
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Tasks</h1>
-            <p className="text-muted-foreground mt-1">Drag and drop to organize your workflow</p>
+            <h1 className="text-3xl font-bold text-foreground">{t('tasks.title')}</h1>
+            <p className="text-muted-foreground mt-1">{t('tasks.subtitle')}</p>
           </div>
           <Button variant="gold" size="lg">
-            <Plus className="w-5 h-5 mr-2" />
-            New Task
+            <Plus className="w-5 h-5 me-2" />
+            {t('tasks.newTask')}
           </Button>
         </div>
 
@@ -68,13 +70,13 @@ export default function Tasks() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search tasks..."
+              placeholder={t('tasks.searchTasks')}
               className="w-full pl-10 pr-4 py-2 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
           </div>
           <Button variant="outline" size="default">
-            <Filter className="w-4 h-4 mr-2" />
-            Filter
+            <Filter className="w-4 h-4 me-2" />
+            {t('common.filter')}
           </Button>
         </div>
       </div>
@@ -105,7 +107,7 @@ export default function Tasks() {
                   className="glass-card p-4 hover:border-primary/30 transition-all duration-200 cursor-grab active:cursor-grabbing group"
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h4 className="text-sm font-medium text-foreground group-hover:text-primary transition-colors flex-1 pr-2">
+                    <h4 className="text-sm font-medium text-foreground group-hover:text-primary transition-colors flex-1 pe-2">
                       {task.title}
                     </h4>
                     <button className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-muted transition-all">
@@ -123,10 +125,10 @@ export default function Tasks() {
                     <div className="flex items-center gap-2">
                       <span className={cn(
                         'flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium',
-                        priorityColors[task.priority]
+                        priorityColors[task.priority].class
                       )}>
                         <Flag className="w-3 h-3" />
-                        {task.priority}
+                        {priorityColors[task.priority].label}
                       </span>
                     </div>
                     

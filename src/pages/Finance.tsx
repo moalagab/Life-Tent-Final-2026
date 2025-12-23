@@ -1,10 +1,11 @@
 import { MainLayout } from '@/components/layout/MainLayout';
 import { 
-  Wallet, TrendingUp, TrendingDown, CreditCard, Building2, 
+  Wallet, TrendingUp, TrendingDown, 
   PiggyBank, ArrowUpRight, ArrowDownRight, Plus, RefreshCw 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/hooks/useLanguage';
 
 const currencies = ['SAR', 'USD', 'AED', 'KWD'];
 
@@ -33,21 +34,30 @@ const subscriptions = [
 ];
 
 export default function Finance() {
+  const { t } = useLanguage();
+
+  const stats = [
+    { label: t('finance.netWorth'), value: 'SAR 245,780', change: '+12.5%', trend: 'up', icon: Wallet, color: 'primary' },
+    { label: t('finance.monthlyIncome'), value: 'SAR 42,000', change: '+8.2%', trend: 'up', icon: TrendingUp, color: 'success' },
+    { label: t('finance.monthlyExpenses'), value: 'SAR 18,420', change: '-5.2%', trend: 'down', icon: TrendingDown, color: 'destructive' },
+    { label: t('finance.savingsRate'), value: '56%', change: '+3.1%', trend: 'up', icon: PiggyBank, color: 'primary' },
+  ];
+
   return (
     <MainLayout>
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Finance</h1>
-            <p className="text-muted-foreground mt-1">Advanced wealth management dashboard</p>
+            <h1 className="text-3xl font-bold text-foreground">{t('finance.title')}</h1>
+            <p className="text-muted-foreground mt-1">{t('finance.subtitle')}</p>
           </div>
           <div className="flex items-center gap-3">
             <select className="px-3 py-2 rounded-xl bg-muted/50 border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
               {currencies.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
             <Button variant="gold" size="lg">
-              <Plus className="w-5 h-5 mr-2" />
-              Add Transaction
+              <Plus className="w-5 h-5 me-2" />
+              {t('finance.addTransaction')}
             </Button>
           </div>
         </div>
@@ -55,12 +65,7 @@ export default function Finance() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {[
-          { label: 'Net Worth', value: 'SAR 245,780', change: '+12.5%', trend: 'up', icon: Wallet, color: 'primary' },
-          { label: 'Monthly Income', value: 'SAR 42,000', change: '+8.2%', trend: 'up', icon: TrendingUp, color: 'success' },
-          { label: 'Monthly Expenses', value: 'SAR 18,420', change: '-5.2%', trend: 'down', icon: TrendingDown, color: 'destructive' },
-          { label: 'Savings Rate', value: '56%', change: '+3.1%', trend: 'up', icon: PiggyBank, color: 'primary' },
-        ].map((stat) => (
+        {stats.map((stat) => (
           <div key={stat.label} className="glass-card p-5">
             <div className="flex items-center justify-between mb-3">
               <div className={cn(
@@ -94,9 +99,9 @@ export default function Finance() {
         {/* Recent Transactions */}
         <div className="lg:col-span-2 glass-card p-5">
           <div className="flex items-center justify-between mb-5">
-            <h3 className="text-lg font-semibold text-foreground">Recent Transactions</h3>
+            <h3 className="text-lg font-semibold text-foreground">{t('finance.recentTransactions')}</h3>
             <button className="text-primary text-sm font-medium hover:underline flex items-center gap-1">
-              View All <ArrowUpRight className="w-3 h-3" />
+              {t('common.viewAll')} <ArrowUpRight className="w-3 h-3" />
             </button>
           </div>
 
@@ -133,7 +138,7 @@ export default function Finance() {
         {/* Subscriptions */}
         <div className="glass-card p-5">
           <div className="flex items-center justify-between mb-5">
-            <h3 className="text-lg font-semibold text-foreground">Subscriptions</h3>
+            <h3 className="text-lg font-semibold text-foreground">{t('finance.subscriptions')}</h3>
             <RefreshCw className="w-4 h-4 text-muted-foreground" />
           </div>
 
@@ -144,7 +149,7 @@ export default function Finance() {
                   <span className="text-2xl">{sub.logo}</span>
                   <div>
                     <p className="text-sm font-medium text-foreground">{sub.name}</p>
-                    <p className="text-xs text-muted-foreground">Next: {sub.nextBilling}</p>
+                    <p className="text-xs text-muted-foreground">{t('finance.next')}: {sub.nextBilling}</p>
                   </div>
                 </div>
                 <span className="text-sm font-bold text-foreground">
@@ -156,7 +161,7 @@ export default function Finance() {
 
           <div className="mt-4 pt-4 border-t border-border">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Monthly Total</span>
+              <span className="text-sm text-muted-foreground">{t('finance.monthlyTotal')}</span>
               <span className="font-bold gold-text">
                 {subscriptions.reduce((acc, s) => acc + s.amount, 0)} SAR
               </span>

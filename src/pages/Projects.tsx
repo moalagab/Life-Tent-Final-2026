@@ -2,6 +2,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Plus, Filter, Search, MoreHorizontal, Play, Pause, Archive, FolderKanban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface Project {
   id: string;
@@ -31,24 +32,41 @@ const phaseColors: Record<string, string> = {
   Closing: 'bg-muted text-muted-foreground border-muted',
 };
 
-const statusConfig = {
-  active: { icon: Play, color: 'text-success', label: 'Active' },
-  'on-hold': { icon: Pause, color: 'text-warning', label: 'On Hold' },
-  completed: { icon: Archive, color: 'text-muted-foreground', label: 'Completed' },
-};
-
 export default function Projects() {
+  const { t } = useLanguage();
+
+  const statusConfig = {
+    active: { icon: Play, color: 'text-success', label: t('projects.status.active') },
+    'on-hold': { icon: Pause, color: 'text-warning', label: t('projects.status.onHold') },
+    completed: { icon: Archive, color: 'text-muted-foreground', label: t('projects.status.completed') },
+  };
+
+  const phaseLabels: Record<string, string> = {
+    Initiation: t('projects.phase.initiation'),
+    Planning: t('projects.phase.planning'),
+    Execution: t('projects.phase.execution'),
+    Monitoring: t('projects.phase.monitoring'),
+    Closing: t('projects.phase.closing'),
+  };
+
+  const paraTabs = [
+    { id: 'Projects', label: t('common.projects') },
+    { id: 'Areas', label: t('projects.areas') },
+    { id: 'Resources', label: t('projects.resources') },
+    { id: 'Archives', label: t('projects.archives') },
+  ];
+
   return (
     <MainLayout>
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Projects</h1>
-            <p className="text-muted-foreground mt-1">PARA + PMP powered project management</p>
+            <h1 className="text-3xl font-bold text-foreground">{t('projects.title')}</h1>
+            <p className="text-muted-foreground mt-1">{t('projects.subtitle')}</p>
           </div>
           <Button variant="gold" size="lg">
-            <Plus className="w-5 h-5 mr-2" />
-            New Project
+            <Plus className="w-5 h-5 me-2" />
+            {t('projects.newProject')}
           </Button>
         </div>
 
@@ -58,30 +76,30 @@ export default function Projects() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search projects..."
+              placeholder={t('projects.searchProjects')}
               className="w-full pl-10 pr-4 py-2 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
           </div>
           <Button variant="outline" size="default">
-            <Filter className="w-4 h-4 mr-2" />
-            Filter
+            <Filter className="w-4 h-4 me-2" />
+            {t('common.filter')}
           </Button>
         </div>
       </div>
 
       {/* PARA Tabs */}
       <div className="flex gap-2 mb-6">
-        {['Projects', 'Areas', 'Resources', 'Archives'].map((tab) => (
+        {paraTabs.map((tab) => (
           <button
-            key={tab}
+            key={tab.id}
             className={cn(
               'px-4 py-2 rounded-xl text-sm font-medium transition-all',
-              tab === 'Projects' 
+              tab.id === 'Projects' 
                 ? 'bg-primary text-primary-foreground' 
                 : 'bg-muted/50 text-muted-foreground hover:bg-muted'
             )}
           >
-            {tab}
+            {tab.label}
           </button>
         ))}
       </div>
@@ -122,7 +140,7 @@ export default function Projects() {
                   'px-3 py-1 rounded-full text-xs font-medium border',
                   phaseColors[project.phase]
                 )}>
-                  {project.phase}
+                  {phaseLabels[project.phase]}
                 </span>
                 <span className={cn(
                   'flex items-center gap-1 text-xs',
@@ -136,7 +154,7 @@ export default function Projects() {
               {/* Progress */}
               <div className="mb-4">
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-xs text-muted-foreground">Progress</span>
+                  <span className="text-xs text-muted-foreground">{t('common.progress')}</span>
                   <span className="text-xs font-medium text-foreground">{project.progress}%</span>
                 </div>
                 <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -148,8 +166,8 @@ export default function Projects() {
               </div>
 
               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>{project.tasksCompleted}/{project.totalTasks} tasks</span>
-                <span>Due: {project.dueDate}</span>
+                <span>{project.tasksCompleted}/{project.totalTasks} {t('projects.tasksCount')}</span>
+                <span>{t('common.due')}: {project.dueDate}</span>
               </div>
             </div>
           );
