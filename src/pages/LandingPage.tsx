@@ -141,25 +141,25 @@ export default function LandingPage() {
   const stats = [
     { value: '8+', label: t('landing.integratedModules'), icon: Layers },
     { value: '24/7', label: t('landing.alwaysAvailable'), icon: Clock },
-    { value: '100%', label: t('landing.freeToStart'), icon: Rocket },
+    { value: '3', label: t('landing.freeTrialBadge'), icon: Rocket },
     { value: '∞', label: t('landing.unlimited'), icon: TrendingUp }
   ];
 
-  const testimonials = [
+  const showcaseFeatures = [
     {
-      quote: t('landing.testimonialQuote1'),
-      author: t('landing.testimonialAuthor1'),
-      role: t('landing.testimonialRole1')
+      icon: BarChart3,
+      title: t('landing.feature1Title'),
+      description: t('landing.feature1Desc')
     },
     {
-      quote: t('landing.testimonialQuote2'),
-      author: t('landing.testimonialAuthor2'),
-      role: t('landing.testimonialRole2')
+      icon: LineChart,
+      title: t('landing.feature2Title'),
+      description: t('landing.feature2Desc')
     },
     {
-      quote: t('landing.testimonialQuote3'),
-      author: t('landing.testimonialAuthor3'),
-      role: t('landing.testimonialRole3')
+      icon: Globe,
+      title: t('landing.feature3Title'),
+      description: t('landing.feature3Desc')
     }
   ];
 
@@ -399,24 +399,24 @@ export default function LandingPage() {
                     </div>
                     <div className="glass-card p-6 text-center group hover:scale-105 transition-all duration-300">
                       <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform shadow-lg">
-                        <Users className="w-7 h-7 text-white" />
+                        <Clock className="w-7 h-7 text-white" />
                       </div>
-                      <div className="text-3xl font-bold gold-text mb-1">∞</div>
-                      <div className="text-sm text-muted-foreground">{t('landing.unlimited')}</div>
+                      <div className="text-3xl font-bold gold-text mb-1">24/7</div>
+                      <div className="text-sm text-muted-foreground">{t('landing.alwaysAvailable')}</div>
                     </div>
                     <div className="glass-card p-6 text-center group hover:scale-105 transition-all duration-300">
                       <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform shadow-lg">
-                        <LineChart className="w-7 h-7 text-white" />
+                        <Rocket className="w-7 h-7 text-white" />
                       </div>
-                      <div className="text-3xl font-bold gold-text mb-1">100%</div>
-                      <div className="text-sm text-muted-foreground">{t('landing.freeToStart')}</div>
+                      <div className="text-3xl font-bold gold-text mb-1">3</div>
+                      <div className="text-sm text-muted-foreground">{t('landing.freeTrialBadge')}</div>
                     </div>
                     <div className="glass-card p-6 text-center group hover:scale-105 transition-all duration-300">
                       <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform shadow-lg">
-                        <Award className="w-7 h-7 text-white" />
+                        <TrendingUp className="w-7 h-7 text-white" />
                       </div>
-                      <div className="text-3xl font-bold gold-text mb-1">5★</div>
-                      <div className="text-sm text-muted-foreground">{t('landing.alwaysAvailable')}</div>
+                      <div className="text-3xl font-bold gold-text mb-1">∞</div>
+                      <div className="text-sm text-muted-foreground">{t('landing.unlimited')}</div>
                     </div>
                   </div>
                 </div>
@@ -430,40 +430,48 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* Features Showcase Section */}
       <section className="py-24 px-4 bg-gradient-to-b from-background via-secondary/30 to-background">
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary mb-6">
-              <Users className="w-4 h-4" />
-              <span className="text-sm font-medium">{t('landing.userTestimonials')}</span>
+              <Sparkles className="w-4 h-4" />
+              <span className="text-sm font-medium">{t('landing.featuresShowcase')}</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              {t('landing.userTestimonials')}
+              {t('landing.featuresShowcase')}
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
+            {showcaseFeatures.map((feature, index) => (
               <div 
                 key={index}
-                className="glass-card p-8 relative group hover:scale-105 transition-all duration-300"
+                className="glass-card p-8 relative group hover:scale-105 transition-all duration-300 text-center"
               >
-                <div className="absolute -top-3 -right-3 w-8 h-8 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center shadow-lg">
-                  <Star className="w-4 h-4 text-primary-foreground fill-current" />
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                  <feature.icon className="w-8 h-8 text-primary" />
                 </div>
-                <p className="text-lg mb-6 leading-relaxed text-foreground/90">"{testimonial.quote}"</p>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
-                    <span className="text-lg font-bold text-primary">{testimonial.author[0]}</span>
-                  </div>
-                  <div>
-                    <div className="font-semibold">{testimonial.author}</div>
-                    <div className="text-sm text-muted-foreground">{testimonial.role}</div>
-                  </div>
-                </div>
+                <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">{feature.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
               </div>
             ))}
+          </div>
+
+          {/* Pricing Info */}
+          <div className="mt-16 text-center">
+            <div className="inline-flex flex-col sm:flex-row items-center gap-4 px-8 py-6 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border border-primary/20">
+              <div className="flex items-center gap-2">
+                <Rocket className="w-6 h-6 text-primary" />
+                <span className="text-lg font-bold text-primary">{t('landing.freeTrialBadge')}</span>
+              </div>
+              <div className="hidden sm:block w-px h-8 bg-border" />
+              <div className="text-muted-foreground">
+                <span>{t('landing.thenSubscription')}</span>
+                <span className="mx-2">•</span>
+                <span>{t('landing.priceComingSoon')}</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
