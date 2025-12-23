@@ -298,14 +298,14 @@ export function NoteDetailDialog({
                 {currentLanguage === 'ar' ? 'ربط بمشروع' : 'Link to Project'}
               </Label>
               <Select 
-                value={editedNote.project_id || ''} 
-                onValueChange={(v) => setEditedNote({ ...editedNote, project_id: v || null })}
+                value={editedNote.project_id || 'none'} 
+                onValueChange={(v) => setEditedNote({ ...editedNote, project_id: v === 'none' ? null : v })}
               >
                 <SelectTrigger className="bg-muted/50">
                   <SelectValue placeholder={currentLanguage === 'ar' ? 'اختر مشروع' : 'Select Project'} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{currentLanguage === 'ar' ? 'بدون' : 'None'}</SelectItem>
+                  <SelectItem value="none">{currentLanguage === 'ar' ? 'بدون' : 'None'}</SelectItem>
                   {projects.map(p => (
                     <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
                   ))}
@@ -320,14 +320,14 @@ export function NoteDetailDialog({
                 {currentLanguage === 'ar' ? 'ربط بهدف' : 'Link to Goal'}
               </Label>
               <Select 
-                value={editedNote.goal_id || ''} 
-                onValueChange={(v) => setEditedNote({ ...editedNote, goal_id: v || null })}
+                value={editedNote.goal_id || 'none'} 
+                onValueChange={(v) => setEditedNote({ ...editedNote, goal_id: v === 'none' ? null : v })}
               >
                 <SelectTrigger className="bg-muted/50">
                   <SelectValue placeholder={currentLanguage === 'ar' ? 'اختر هدف' : 'Select Goal'} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{currentLanguage === 'ar' ? 'بدون' : 'None'}</SelectItem>
+                  <SelectItem value="none">{currentLanguage === 'ar' ? 'بدون' : 'None'}</SelectItem>
                   {goals.map(g => (
                     <SelectItem key={g.id} value={g.id}>{g.title}</SelectItem>
                   ))}
