@@ -36,7 +36,8 @@
     "close": "Close",
     "export": "Export",
     "exportSuccess": "Export successful",
-    "exportError": "Export failed"
+    "exportError": "Export failed",
+    "update": "Update"
   },
   "dashboard": {
     "greeting": "Hello",
@@ -431,7 +432,10 @@
     "taskDeadlines": "Task Deadlines",
     "courseSchedule": "Course Schedule",
     "subscriptionBills": "Subscription Bills",
-    "debtPayments": "Debt Payments"
+    "debtPayments": "Debt Payments",
+    "events": "Events",
+    "quickLinks": "Quick Links",
+    "color": "Color"
   },
   "knowledge": {
     "title": "Knowledge Base",
