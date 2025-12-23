@@ -211,15 +211,15 @@ export default function LandingPage() {
         {/* Animated Background */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           {/* Gradient orbs */}
-          <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-gradient-to-br from-primary/20 to-primary/5 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
-          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-gradient-to-tl from-primary/15 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s', animationDelay: '1s' }} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-primary/10 to-transparent rounded-full" />
+          <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-gradient-to-br from-primary/10 to-primary/[0.02] rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
+          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-gradient-to-tl from-primary/8 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s', animationDelay: '1s' }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-primary/5 to-transparent rounded-full" />
           
           {/* Floating particles */}
           {[...Array(20)].map((_, i) => (
             <div
               key={i}
-              className="absolute w-1 h-1 bg-primary/30 rounded-full animate-float"
+              className="absolute w-1 h-1 bg-primary/20 rounded-full animate-float"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
@@ -230,7 +230,7 @@ export default function LandingPage() {
           ))}
           
           {/* Grid pattern */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,180,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,180,0,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,180,0,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,180,0,0.015)_1px,transparent_1px)] bg-[size:50px_50px]" />
         </div>
 
         <div className="container mx-auto text-center relative z-10">
@@ -458,21 +458,6 @@ export default function LandingPage() {
             ))}
           </div>
 
-          {/* Pricing Info */}
-          <div className="mt-16 text-center">
-            <div className="inline-flex flex-col sm:flex-row items-center gap-4 px-8 py-6 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border border-primary/20">
-              <div className="flex items-center gap-2">
-                <Rocket className="w-6 h-6 text-primary" />
-                <span className="text-lg font-bold text-primary">{t('landing.freeTrialBadge')}</span>
-              </div>
-              <div className="hidden sm:block w-px h-8 bg-border" />
-              <div className="text-muted-foreground">
-                <span>{t('landing.thenSubscription')}</span>
-                <span className="mx-2">•</span>
-                <span>{t('landing.priceComingSoon')}</span>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
