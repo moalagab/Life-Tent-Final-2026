@@ -58,10 +58,10 @@ export default function Goals() {
     { id: 'learning' as const, label: t('goals.category.learning'), icon: GraduationCap },
   ];
 
-  // Stats - personal goals are those without a perspective set
+  // Stats
   const stats = useMemo(() => {
     if (!goals) return { total: 0, personal: 0, completed: 0 };
-    const personal = goals.filter(g => !g.perspective).length;
+    const personal = goals.filter(g => g.perspective === 'personal').length;
     const completed = goals.filter(g => {
       const krs = keyResults?.filter(kr => kr.goal_id === g.id) || [];
       if (krs.length === 0) return false;
@@ -89,12 +89,7 @@ export default function Goals() {
     let filtered = goals || [];
     
     if (selectedCategory !== 'all') {
-      // 'personal' category maps to goals without a perspective
-      if (selectedCategory === 'personal') {
-        filtered = filtered.filter(goal => !goal.perspective);
-      } else {
-        filtered = filtered.filter(goal => goal.perspective === selectedCategory);
-      }
+      filtered = filtered.filter(goal => goal.perspective === selectedCategory);
     }
     
     if (searchQuery) {
