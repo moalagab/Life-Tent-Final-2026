@@ -50,6 +50,8 @@ export default function Auth() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [resetSent, setResetSent] = useState(false);
+  const [signupComplete, setSignupComplete] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
   
   // Security: Rate limiting state
   const [loginAttempts, setLoginAttempts] = useState(0);
@@ -227,9 +229,14 @@ export default function Auth() {
             });
           }
         } else {
+          // Show email verification message
+          setSignupComplete(true);
+          setRegisteredEmail(email.trim().toLowerCase());
           toast({
             title: t('auth.accountCreated'),
-            description: t('auth.welcomeLifeTent')
+            description: language === 'ar' 
+              ? 'يرجى التحقق من بريدك الإلكتروني لتفعيل حسابك'
+              : 'Please check your email to verify your account'
           });
         }
       }
@@ -242,6 +249,7 @@ export default function Auth() {
     setMode(newMode);
     setErrors({});
     setResetSent(false);
+    setSignupComplete(false);
   };
 
   return (
@@ -342,6 +350,41 @@ export default function Auth() {
                   </Button>
                 </form>
               )}
+            </>
+          ) : signupComplete ? (
+            <>
+              {/* Email Verification Message */}
+              <div className="text-center py-6">
+                <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
+                  <Mail className="w-8 h-8 text-green-500" />
+                </div>
+                <h3 className="text-lg font-medium text-foreground mb-2">
+                  {language === 'ar' ? 'تحقق من بريدك الإلكتروني' : 'Check Your Email'}
+                </h3>
+                <p className="text-muted-foreground text-sm mb-4">
+                  {language === 'ar' 
+                    ? `أرسلنا رابط التحقق إلى ${registeredEmail}` 
+                    : `We sent a verification link to ${registeredEmail}`}
+                </p>
+                <div className="bg-secondary/50 rounded-lg p-4 mb-4">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Shield className="w-4 h-4 text-primary" />
+                    <span>
+                      {language === 'ar' 
+                        ? 'لن تتمكن من الدخول حتى تتحقق من بريدك الإلكتروني'
+                        : 'You cannot sign in until you verify your email'}
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="mt-2"
+                  onClick={() => switchMode('login')}
+                >
+                  {language === 'ar' ? 'العودة لتسجيل الدخول' : 'Back to Sign In'}
+                </Button>
+              </div>
             </>
           ) : (
             <>
