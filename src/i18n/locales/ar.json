@@ -378,7 +378,36 @@
     "markAsPaid": "تحديد كمدفوع",
     "paymentSchedule": "جدول السداد",
     "editPayment": "تعديل الدفعة",
-    "sdg": "جنيه سوداني"
+    "sdg": "جنيه سوداني",
+    "envelopeCreated": "تم إنشاء المظروف",
+    "sinkingFundCreated": "تم إنشاء صندوق الادخار",
+    "sinkingFundUpdated": "تم تحديث صندوق الادخار",
+    "expensesExceedIncome": "المصروفات تتجاوز الدخل هذا الشهر",
+    "lowSavingsRate": "معدل الادخار منخفض جداً",
+    "subscriptionsRenewing": "اشتراكات تُجدد خلال أسبوع",
+    "currencies": {
+      "SAR": "ريال سعودي",
+      "USD": "دولار أمريكي",
+      "AED": "درهم إماراتي",
+      "SDG": "جنيه سوداني",
+      "EGP": "جنيه مصري",
+      "KWD": "دينار كويتي",
+      "EUR": "يورو"
+    },
+    "months": {
+      "january": "يناير",
+      "february": "فبراير",
+      "march": "مارس",
+      "april": "أبريل",
+      "may": "مايو",
+      "june": "يونيو",
+      "july": "يوليو",
+      "august": "أغسطس",
+      "september": "سبتمبر",
+      "october": "أكتوبر",
+      "november": "نوفمبر",
+      "december": "ديسمبر"
+    }
   },
   "habits": {
     "title": "العادات والمزاج",
@@ -478,7 +507,16 @@
     "archiveNote": "أرشفة الملاحظة",
     "noteArchived": "تم أرشفة الملاحظة",
     "restoreNote": "استعادة الملاحظة",
-    "noteRestored": "تم استعادة الملاحظة"
+    "noteRestored": "تم استعادة الملاحظة",
+    "lessonAdded": "تمت إضافة الدرس",
+    "flashcardAdded": "تمت إضافة البطاقة",
+    "openCourse": "فتح الدورة",
+    "folder": "المجلد",
+    "selectFolder": "اختر مجلد",
+    "linkToProject": "ربط بمشروع",
+    "linkToGoal": "ربط بهدف",
+    "personal": "شخصي",
+    "dropTasksHere": "اسحب المهام هنا"
   },
   "studio": {
     "title": "الاستوديو",

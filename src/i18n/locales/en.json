@@ -378,7 +378,36 @@
     "markAsPaid": "Mark as Paid",
     "paymentSchedule": "Payment Schedule",
     "editPayment": "Edit Payment",
-    "sdg": "Sudanese Pound"
+    "sdg": "Sudanese Pound",
+    "envelopeCreated": "Envelope created",
+    "sinkingFundCreated": "Sinking fund created",
+    "sinkingFundUpdated": "Sinking fund updated",
+    "expensesExceedIncome": "Expenses exceed income this month",
+    "lowSavingsRate": "Savings rate is very low",
+    "subscriptionsRenewing": "subscriptions renewing within a week",
+    "currencies": {
+      "SAR": "Saudi Riyal",
+      "USD": "US Dollar",
+      "AED": "UAE Dirham",
+      "SDG": "Sudanese Pound",
+      "EGP": "Egyptian Pound",
+      "KWD": "Kuwaiti Dinar",
+      "EUR": "Euro"
+    },
+    "months": {
+      "january": "January",
+      "february": "February",
+      "march": "March",
+      "april": "April",
+      "may": "May",
+      "june": "June",
+      "july": "July",
+      "august": "August",
+      "september": "September",
+      "october": "October",
+      "november": "November",
+      "december": "December"
+    }
   },
   "habits": {
     "title": "Habits & Mood",
@@ -478,7 +507,16 @@
     "archiveNote": "Archive Note",
     "noteArchived": "Note archived",
     "restoreNote": "Restore Note",
-    "noteRestored": "Note restored"
+    "noteRestored": "Note restored",
+    "lessonAdded": "Lesson added",
+    "flashcardAdded": "Flashcard added",
+    "openCourse": "Open Course",
+    "folder": "Folder",
+    "selectFolder": "Select folder",
+    "linkToProject": "Link to Project",
+    "linkToGoal": "Link to Goal",
+    "personal": "Personal",
+    "dropTasksHere": "Drop tasks here"
   },
   "studio": {
     "title": "Studio",
