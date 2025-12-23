@@ -11,14 +11,16 @@ import { GoalProgress } from '@/components/dashboard/GoalProgress';
 import { KnowledgeWidget } from '@/components/dashboard/KnowledgeWidget';
 import { StudioWidget } from '@/components/dashboard/StudioWidget';
 import { useAutoReminders } from '@/hooks/useAutoReminders';
+import { useLanguage } from '@/hooks/useLanguage';
 
 const Index = () => {
   // Initialize automatic reminders
   useAutoReminders();
+  const { currentLanguage } = useLanguage();
 
   return (
     <MainLayout>
-      <div className="space-y-8 animate-fade-in">
+      <div className="space-y-6 lg:space-y-8 animate-fade-in">
         {/* Greeting Section */}
         <GreetingHeader />
         
@@ -27,11 +29,11 @@ const Index = () => {
           <QuickActions />
         </section>
 
-        {/* Main Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Column - Prayer & Finance */}
-          <div className="lg:col-span-3 space-y-6">
-            <section className="slide-up" style={{ animationDelay: '150ms' }}>
+        {/* Main Dashboard Grid - Improved Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
+          {/* Left Column - Prayer & Finance (Sticky on Desktop) */}
+          <div className="lg:col-span-3 space-y-4 lg:space-y-6">
+            <section className="slide-up lg:sticky lg:top-4" style={{ animationDelay: '150ms' }}>
               <PrayerWidget />
             </section>
             <section className="slide-up" style={{ animationDelay: '200ms' }}>
@@ -39,12 +41,15 @@ const Index = () => {
             </section>
           </div>
 
-          {/* Center Column - Projects, Tasks, Habits & Goals */}
-          <div className="lg:col-span-6 space-y-6">
+          {/* Center Column - Main Content */}
+          <div className="lg:col-span-6 space-y-4 lg:space-y-6">
+            {/* Projects - Full Width in Center */}
             <section className="slide-up" style={{ animationDelay: '250ms' }}>
               <ProjectsOverview />
             </section>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Tasks & Habits - Side by Side */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
               <section className="slide-up" style={{ animationDelay: '300ms' }}>
                 <FocusTasks />
               </section>
@@ -52,7 +57,9 @@ const Index = () => {
                 <HabitStreaks />
               </section>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Goals & Knowledge - Side by Side */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
               <section className="slide-up" style={{ animationDelay: '400ms' }}>
                 <GoalProgress />
               </section>
@@ -63,7 +70,7 @@ const Index = () => {
           </div>
 
           {/* Right Column - Events & Studio */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="lg:col-span-3 space-y-4 lg:space-y-6">
             <section className="slide-up" style={{ animationDelay: '500ms' }}>
               <UpcomingEvents />
             </section>
@@ -72,6 +79,9 @@ const Index = () => {
             </section>
           </div>
         </div>
+
+        {/* Footer Spacer for Mobile */}
+        <div className="h-4 lg:h-0" />
       </div>
     </MainLayout>
   );

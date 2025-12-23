@@ -18,6 +18,7 @@ import CalendarPage from "./pages/CalendarPage";
 import Studio from "./pages/Studio";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
+import Pomodoro from "./pages/Pomodoro";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/habits" element={<ProtectedRoute><Habits /></ProtectedRoute>} />
             <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
             <Route path="/studio" element={<ProtectedRoute><Studio /></ProtectedRoute>} />
+            <Route path="/pomodoro" element={<ProtectedRoute><Pomodoro /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
