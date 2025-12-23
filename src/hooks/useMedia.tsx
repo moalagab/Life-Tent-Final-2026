@@ -14,6 +14,26 @@ export function useMediaItems() {
       const { data, error } = await supabase
         .from('media_items')
         .select('*')
+        .neq('status', 'abandoned')
+        .order('updated_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+}
+
+export function useArchivedMediaItems() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['archived-media-items', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('media_items')
+        .select('*')
+        .eq('status', 'abandoned')
         .order('updated_at', { ascending: false });
       
       if (error) throw error;
@@ -33,6 +53,7 @@ export function useBooks() {
         .from('media_items')
         .select('*')
         .eq('type', 'book')
+        .neq('status', 'abandoned')
         .order('updated_at', { ascending: false });
       
       if (error) throw error;
@@ -52,6 +73,7 @@ export function useMovies() {
         .from('media_items')
         .select('*')
         .in('type', ['movie', 'series'])
+        .neq('status', 'abandoned')
         .order('updated_at', { ascending: false });
       
       if (error) throw error;
@@ -79,8 +101,28 @@ export function useReadingStats() {
       if (error) throw error;
       return {
         booksRead: data.length,
-        goal: 24, // Could be stored in user settings
+        goal: 24,
       };
+    },
+    enabled: !!user,
+  });
+}
+
+export function useCurrentlyReading() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['currently-reading', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('media_items')
+        .select('*')
+        .eq('status', 'in_progress')
+        .order('updated_at', { ascending: false })
+        .limit(5);
+      
+      if (error) throw error;
+      return data;
     },
     enabled: !!user,
   });
@@ -101,10 +143,12 @@ export function useCreateMediaItem() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['media-items'] });
       queryClient.invalidateQueries({ queryKey: ['books'] });
       queryClient.invalidateQueries({ queryKey: ['movies'] });
       queryClient.invalidateQueries({ queryKey: ['reading-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['currently-reading'] });
     },
   });
 }
@@ -125,9 +169,12 @@ export function useUpdateMediaItem() {
       return data;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['media-items'] });
+      queryClient.invalidateQueries({ queryKey: ['archived-media-items'] });
       queryClient.invalidateQueries({ queryKey: ['books'] });
       queryClient.invalidateQueries({ queryKey: ['movies'] });
       queryClient.invalidateQueries({ queryKey: ['reading-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['currently-reading'] });
     },
   });
 }
@@ -145,9 +192,62 @@ export function useDeleteMediaItem() {
       if (error) throw error;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['media-items'] });
+      queryClient.invalidateQueries({ queryKey: ['archived-media-items'] });
       queryClient.invalidateQueries({ queryKey: ['books'] });
       queryClient.invalidateQueries({ queryKey: ['movies'] });
       queryClient.invalidateQueries({ queryKey: ['reading-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['currently-reading'] });
+    },
+  });
+}
+
+export function useArchiveMediaItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase
+        .from('media_items')
+        .update({ status: 'abandoned' })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['media-items'] });
+      queryClient.invalidateQueries({ queryKey: ['archived-media-items'] });
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+      queryClient.invalidateQueries({ queryKey: ['movies'] });
+      queryClient.invalidateQueries({ queryKey: ['currently-reading'] });
+    },
+  });
+}
+
+export function useRestoreMediaItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase
+        .from('media_items')
+        .update({ status: 'want' })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['media-items'] });
+      queryClient.invalidateQueries({ queryKey: ['archived-media-items'] });
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+      queryClient.invalidateQueries({ queryKey: ['movies'] });
+      queryClient.invalidateQueries({ queryKey: ['currently-reading'] });
     },
   });
 }

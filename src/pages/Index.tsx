@@ -9,6 +9,7 @@ import { ProjectsOverview } from '@/components/dashboard/ProjectsOverview';
 import { UpcomingEvents } from '@/components/dashboard/UpcomingEvents';
 import { GoalProgress } from '@/components/dashboard/GoalProgress';
 import { KnowledgeWidget } from '@/components/dashboard/KnowledgeWidget';
+import { StudioWidget } from '@/components/dashboard/StudioWidget';
 import { useAutoReminders } from '@/hooks/useAutoReminders';
 
 const Index = () => {
@@ -61,10 +62,13 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Right Column - Events */}
-          <div className="lg:col-span-3">
+          {/* Right Column - Events & Studio */}
+          <div className="lg:col-span-3 space-y-6">
             <section className="slide-up" style={{ animationDelay: '500ms' }}>
               <UpcomingEvents />
+            </section>
+            <section className="slide-up" style={{ animationDelay: '550ms' }}>
+              <StudioWidget />
             </section>
           </div>
         </div>
