@@ -1,66 +1,87 @@
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Plus, Filter, Search, MoreHorizontal, Flag, Calendar, Loader2 } from 'lucide-react';
+import { 
+  Plus, Filter, Search, MoreHorizontal, Flag, Calendar, Loader2, 
+  FolderKanban, Target, Sparkles, User, Clock, Trash2, Edit3, GripVertical
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useTasks, useCreateTask, useUpdateTask, useDeleteTask, Task } from '@/hooks/useTasks';
+import { useProjects } from '@/hooks/useProjects';
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { TaskFormDialog } from '@/components/tasks/TaskFormDialog';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 type TaskStatus = 'backlog' | 'todo' | 'in_progress' | 'review' | 'done';
 
 export default function Tasks() {
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const { data: tasks, isLoading } = useTasks();
+  const { data: projects } = useProjects();
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newTask, setNewTask] = useState({
-    title: '',
-    priority: 'medium' as 'low' | 'medium' | 'high' | 'urgent',
-    status: 'todo' as TaskStatus,
-  });
+  const [dialogStatus, setDialogStatus] = useState<TaskStatus>('todo');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [draggedTask, setDraggedTask] = useState<string | null>(null);
 
   const columns = [
-    { id: 'backlog' as const, title: t('tasks.backlog'), color: 'bg-muted-foreground' },
-    { id: 'todo' as const, title: t('tasks.todo'), color: 'bg-blue-500' },
-    { id: 'in_progress' as const, title: t('tasks.inProgress'), color: 'bg-primary' },
-    { id: 'review' as const, title: t('tasks.review'), color: 'bg-purple-500' },
-    { id: 'done' as const, title: t('tasks.done'), color: 'bg-success' },
+    { id: 'backlog' as const, title: t('tasks.backlog'), color: 'bg-muted-foreground', gradient: 'from-muted-foreground/20 to-muted-foreground/5' },
+    { id: 'todo' as const, title: t('tasks.todo'), color: 'bg-blue-500', gradient: 'from-blue-500/20 to-blue-500/5' },
+    { id: 'in_progress' as const, title: t('tasks.inProgress'), color: 'bg-primary', gradient: 'from-primary/20 to-primary/5' },
+    { id: 'review' as const, title: t('tasks.review'), color: 'bg-purple-500', gradient: 'from-purple-500/20 to-purple-500/5' },
+    { id: 'done' as const, title: t('tasks.done'), color: 'bg-success', gradient: 'from-success/20 to-success/5' },
   ];
 
-  const priorityColors: Record<string, { class: string; label: string }> = {
-    high: { class: 'text-destructive bg-destructive/10', label: t('tasks.priority.high') },
-    urgent: { class: 'text-destructive bg-destructive/10', label: t('tasks.priority.high') },
-    medium: { class: 'text-primary bg-primary/10', label: t('tasks.priority.medium') },
-    low: { class: 'text-muted-foreground bg-muted', label: t('tasks.priority.low') },
+  const priorityConfig: Record<string, { class: string; label: string; dotColor: string }> = {
+    urgent: { class: 'bg-destructive text-destructive-foreground', label: t('tasks.priority.urgent'), dotColor: 'bg-destructive' },
+    high: { class: 'bg-destructive/20 text-destructive', label: t('tasks.priority.high'), dotColor: 'bg-destructive' },
+    medium: { class: 'bg-primary/20 text-primary', label: t('tasks.priority.medium'), dotColor: 'bg-primary' },
+    low: { class: 'bg-muted text-muted-foreground', label: t('tasks.priority.low'), dotColor: 'bg-muted-foreground' },
   };
 
   const getTasksByStatus = (status: TaskStatus) => {
-    return tasks?.filter(task => task.status === status) || [];
+    let filtered = tasks?.filter(task => task.status === status) || [];
+    if (searchQuery) {
+      filtered = filtered.filter(task => 
+        task.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    return filtered;
   };
 
-  const handleCreateTask = async () => {
-    if (!newTask.title.trim()) return;
-    
+  const getProjectById = (projectId: string | null) => {
+    if (!projectId) return null;
+    return projects?.find(p => p.id === projectId);
+  };
+
+  const handleCreateTask = async (formData: any) => {
     try {
       await createTask.mutateAsync({
-        title: newTask.title,
-        priority: newTask.priority,
-        status: newTask.status,
+        title: formData.title,
+        description: formData.description || null,
+        priority: formData.priority,
+        status: formData.status,
+        due_date: formData.due_date ? format(formData.due_date, 'yyyy-MM-dd') : null,
+        due_time: formData.due_time || null,
+        project_id: formData.project_id,
+        is_focus: formData.is_focus,
+        recurrence: formData.recurrence,
       });
-      toast.success(t('common.save'));
+      toast.success(t('tasks.taskAdded'));
       setIsDialogOpen(false);
-      setNewTask({ title: '', priority: 'medium', status: 'todo' });
     } catch (error) {
-      toast.error(t('auth.error'));
+      toast.error(t('common.error'));
     }
   };
 
@@ -71,16 +92,49 @@ export default function Tasks() {
         status: newStatus,
         completed_at: newStatus === 'done' ? new Date().toISOString() : null,
       });
+      toast.success(t('tasks.taskUpdated'));
     } catch (error) {
-      toast.error(t('auth.error'));
+      toast.error(t('common.error'));
     }
+  };
+
+  const handleDelete = async (taskId: string) => {
+    try {
+      await deleteTask.mutateAsync(taskId);
+      toast.success(t('tasks.taskDeleted'));
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleDragStart = (taskId: string) => {
+    setDraggedTask(taskId);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (status: TaskStatus) => {
+    if (draggedTask) {
+      handleStatusChange(draggedTask, status);
+      setDraggedTask(null);
+    }
+  };
+
+  const openDialogForStatus = (status: TaskStatus) => {
+    setDialogStatus(status);
+    setIsDialogOpen(true);
   };
 
   if (isLoading) {
     return (
       <MainLayout>
         <div className="flex items-center justify-center h-96">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <div className="text-center space-y-4">
+            <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto" />
+            <p className="text-muted-foreground">{t('common.loading')}</p>
+          </div>
         </div>
       </MainLayout>
     );
@@ -88,150 +142,207 @@ export default function Tasks() {
 
   return (
     <MainLayout>
-      <div className="mb-8">
+      <div className="mb-8 animate-fade-in">
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground">{t('tasks.title')}</h1>
             <p className="text-muted-foreground mt-1">{t('tasks.subtitle')}</p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="gold" size="lg">
-                <Plus className="w-5 h-5 me-2" />
-                {t('tasks.newTask')}
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{t('tasks.newTask')}</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 mt-4">
-                <div>
-                  <Label>{t('tasks.title')}</Label>
-                  <Input
-                    value={newTask.title}
-                    onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-                    placeholder={t('tasks.title')}
-                  />
-                </div>
-                <div>
-                  <Label>{t('common.filter')}</Label>
-                  <Select
-                    value={newTask.priority}
-                    onValueChange={(value: 'low' | 'medium' | 'high' | 'urgent') => 
-                      setNewTask({ ...newTask, priority: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">{t('tasks.priority.low')}</SelectItem>
-                      <SelectItem value="medium">{t('tasks.priority.medium')}</SelectItem>
-                      <SelectItem value="high">{t('tasks.priority.high')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button onClick={handleCreateTask} className="w-full" disabled={createTask.isPending}>
-                  {createTask.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.save')}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <Button 
+            onClick={() => openDialogForStatus('todo')} 
+            className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/25"
+          >
+            <Plus className="w-5 h-5 me-2" />
+            {t('tasks.newTask')}
+          </Button>
         </div>
 
-        {/* Filters */}
+        {/* Search & Filters */}
         <div className="flex items-center gap-4 mt-6">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('tasks.searchTasks')}
-              className="w-full pl-10 pr-4 py-2 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="w-full ps-10 pe-4 py-2.5 rounded-xl bg-muted/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
             />
           </div>
-          <Button variant="outline" size="default">
-            <Filter className="w-4 h-4 me-2" />
+          <Button variant="outline" className="gap-2 rounded-xl">
+            <Filter className="w-4 h-4" />
             {t('common.filter')}
           </Button>
         </div>
       </div>
 
       {/* Kanban Board */}
-      <div className="flex gap-4 overflow-x-auto pb-4">
-        {columns.map((column) => {
+      <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2">
+        {columns.map((column, colIndex) => {
           const columnTasks = getTasksByStatus(column.id);
           
           return (
-            <div key={column.id} className="flex-shrink-0 w-72">
+            <div 
+              key={column.id} 
+              className="flex-shrink-0 w-80 animate-fade-in"
+              style={{ animationDelay: `${colIndex * 50}ms` }}
+              onDragOver={handleDragOver}
+              onDrop={() => handleDrop(column.id)}
+            >
               {/* Column Header */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className={cn('w-3 h-3 rounded-full', column.color)} />
+              <div className={cn(
+                'flex items-center justify-between mb-4 p-3 rounded-xl bg-gradient-to-r',
+                column.gradient
+              )}>
+                <div className="flex items-center gap-3">
+                  <div className={cn('w-3 h-3 rounded-full shadow-lg', column.color)} />
                   <span className="font-semibold text-foreground">{column.title}</span>
-                  <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                  <Badge variant="secondary" className="text-xs px-2 py-0.5 rounded-full">
                     {columnTasks.length}
-                  </span>
+                  </Badge>
                 </div>
                 <button 
-                  className="p-1 rounded hover:bg-muted transition-colors"
-                  onClick={() => {
-                    setNewTask({ ...newTask, status: column.id });
-                    setIsDialogOpen(true);
-                  }}
+                  className="p-1.5 rounded-lg hover:bg-background/50 transition-colors"
+                  onClick={() => openDialogForStatus(column.id)}
                 >
-                  <Plus className="w-4 h-4 text-muted-foreground" />
+                  <Plus className="w-4 h-4 text-muted-foreground hover:text-foreground transition-colors" />
                 </button>
               </div>
 
-              {/* Tasks */}
-              <div className="space-y-3">
-                {columnTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="glass-card p-4 hover:border-primary/30 transition-all duration-200 cursor-pointer group"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <h4 className="text-sm font-medium text-foreground group-hover:text-primary transition-colors flex-1 pe-2">
-                        {task.title}
-                      </h4>
-                      <button className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-muted transition-all">
-                        <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
-                      </button>
-                    </div>
+              {/* Tasks Container */}
+              <div className="space-y-3 min-h-[200px]">
+                {columnTasks.map((task, taskIndex) => {
+                  const project = getProjectById(task.project_id);
+                  const priority = priorityConfig[task.priority || 'medium'];
+                  
+                  return (
+                    <div
+                      key={task.id}
+                      draggable
+                      onDragStart={() => handleDragStart(task.id)}
+                      className={cn(
+                        'group relative p-4 rounded-xl bg-card/80 backdrop-blur-sm border border-border/50',
+                        'hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5',
+                        'transition-all duration-200 cursor-grab active:cursor-grabbing',
+                        draggedTask === task.id && 'opacity-50 scale-95'
+                      )}
+                      style={{ animationDelay: `${taskIndex * 30}ms` }}
+                    >
+                      {/* Drag Handle */}
+                      <div className="absolute top-2 start-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <GripVertical className="w-4 h-4 text-muted-foreground" />
+                      </div>
 
-                    {task.description && (
-                      <span className="text-xs text-muted-foreground block mb-3 line-clamp-2">
-                        {task.description}
-                      </span>
-                    )}
+                      {/* Action Menu */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="absolute top-2 end-2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-muted transition-all">
+                            <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem className="gap-2">
+                            <Edit3 className="w-4 h-4" />
+                            {t('common.edit')}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="gap-2 text-destructive focus:text-destructive"
+                            onClick={() => handleDelete(task.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            {t('common.delete')}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
 
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {task.priority && (
-                          <span className={cn(
-                            'flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium',
-                            priorityColors[task.priority]?.class || priorityColors.medium.class
-                          )}>
+                      {/* Task Content */}
+                      <div className="pt-1">
+                        <h4 className="text-sm font-medium text-foreground mb-2 pe-6 group-hover:text-primary transition-colors">
+                          {task.title}
+                        </h4>
+
+                        {task.description && (
+                          <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
+                            {task.description}
+                          </p>
+                        )}
+
+                        {/* Task Meta */}
+                        <div className="flex flex-wrap items-center gap-2 mb-3">
+                          {/* Priority Badge */}
+                          <Badge className={cn('text-xs gap-1 font-medium', priority.class)}>
                             <Flag className="w-3 h-3" />
-                            {priorityColors[task.priority]?.label || t('tasks.priority.medium')}
-                          </span>
+                            {priority.label}
+                          </Badge>
+
+                          {/* Focus Badge */}
+                          {task.is_focus && (
+                            <Badge className="text-xs gap-1 bg-amber-500/20 text-amber-600">
+                              <Target className="w-3 h-3" />
+                              {currentLanguage === 'ar' ? 'تركيز' : 'Focus'}
+                            </Badge>
+                          )}
+                        </div>
+
+                        {/* Project & Date */}
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          {project ? (
+                            <span className="flex items-center gap-1.5">
+                              <div 
+                                className="w-2 h-2 rounded-full" 
+                                style={{ backgroundColor: project.color || '#6366f1' }}
+                              />
+                              <FolderKanban className="w-3 h-3" />
+                              <span className="truncate max-w-[100px]">{project.title}</span>
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1.5">
+                              <User className="w-3 h-3" />
+                              {currentLanguage === 'ar' ? 'شخصي' : 'Personal'}
+                            </span>
+                          )}
+                          
+                          {task.due_date && (
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {format(new Date(task.due_date), 'MMM d')}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Recurrence Indicator */}
+                        {task.recurrence && task.recurrence !== 'none' && (
+                          <div className="mt-2 pt-2 border-t border-border/50">
+                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Clock className="w-3 h-3" />
+                              {task.recurrence === 'daily' && (currentLanguage === 'ar' ? 'يومياً' : 'Daily')}
+                              {task.recurrence === 'weekly' && (currentLanguage === 'ar' ? 'أسبوعياً' : 'Weekly')}
+                              {task.recurrence === 'monthly' && (currentLanguage === 'ar' ? 'شهرياً' : 'Monthly')}
+                              {task.recurrence === 'yearly' && (currentLanguage === 'ar' ? 'سنوياً' : 'Yearly')}
+                            </span>
+                          </div>
                         )}
                       </div>
-                      
-                      {task.due_date && (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Calendar className="w-3 h-3" />
-                          {format(new Date(task.due_date), 'MMM d')}
-                        </span>
-                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 
                 {columnTasks.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground text-sm">
-                    {t('common.noData')}
+                  <div className="text-center py-12 rounded-xl border-2 border-dashed border-border/50">
+                    <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                      <Sparkles className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                    <p className="text-muted-foreground text-sm">{t('tasks.noTasks')}</p>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="mt-2 text-primary"
+                      onClick={() => openDialogForStatus(column.id)}
+                    >
+                      <Plus className="w-4 h-4 me-1" />
+                      {t('common.add')}
+                    </Button>
                   </div>
                 )}
               </div>
@@ -239,6 +350,15 @@ export default function Tasks() {
           );
         })}
       </div>
+
+      {/* Task Form Dialog */}
+      <TaskFormDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        onSubmit={handleCreateTask}
+        initialStatus={dialogStatus}
+        isLoading={createTask.isPending}
+      />
     </MainLayout>
   );
 }
