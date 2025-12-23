@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Plus, Filter, Search, Loader2, FolderKanban } from 'lucide-react';
+import { Plus, Filter, Search, Loader2, FolderKanban, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useProjects, useUpdateProject, useDeleteProject, Project } from '@/hooks/useProjects';
@@ -11,9 +11,11 @@ import { ProjectCard } from '@/components/projects/ProjectCard';
 import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog';
 import { ProjectDetailDialog } from '@/components/projects/ProjectDetailDialog';
 import { PlanningPipelineView } from '@/components/projects/PlanningPipelineView';
+import { ProjectReports } from '@/components/projects/ProjectReports';
+import { ProjectNotifications } from '@/components/projects/ProjectNotifications';
 
 export default function Projects() {
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const { data: projects, isLoading } = useProjects();
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
@@ -22,7 +24,12 @@ export default function Projects() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showReports, setShowReports] = useState(false);
 
+  const handleProjectFromNotification = (projectId: string) => {
+    const project = projects?.find(p => p.id === projectId);
+    if (project) setSelectedProject(project);
+  };
   const handleDelete = async (projectId: string) => {
     try {
       await deleteProject.mutateAsync(projectId);
@@ -105,7 +112,7 @@ export default function Projects() {
           </Button>
         </div>
 
-        {/* Search */}
+        {/* Search & Actions */}
         <div className="flex items-center gap-4 mt-6">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -117,12 +124,30 @@ export default function Projects() {
               className="w-full pl-10 pr-4 py-2 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
           </div>
+          <Button 
+            variant={showReports ? 'default' : 'outline'} 
+            size="default"
+            onClick={() => setShowReports(!showReports)}
+          >
+            <BarChart3 className="w-4 h-4 me-2" />
+            {currentLanguage === 'ar' ? 'التقارير' : 'Reports'}
+          </Button>
           <Button variant="outline" size="default">
             <Filter className="w-4 h-4 me-2" />
             {t('common.filter')}
           </Button>
         </div>
       </div>
+
+      {/* Notifications */}
+      <ProjectNotifications onProjectClick={handleProjectFromNotification} />
+
+      {/* Reports */}
+      {showReports && (
+        <div className="mb-6">
+          <ProjectReports />
+        </div>
+      )}
 
       {/* PARA Tabs */}
       <ProjectTabs activeTab={activeTab} onTabChange={setActiveTab} />

@@ -82,6 +82,7 @@
     "areas": "Areas",
     "resources": "Resources",
     "archives": "Archives",
+    "pipeline": "Pipeline",
     "phase": {
       "initiation": "Initiation",
       "planning": "Planning",
@@ -92,12 +93,16 @@
     "status": {
       "active": "Active",
       "onHold": "On Hold",
-      "completed": "Completed"
+      "completed": "Completed",
+      "archived": "Archived"
     },
     "tasksCount": "tasks",
     "projectAdded": "Project added",
     "projectUpdated": "Project updated",
-    "projectDeleted": "Project deleted"
+    "projectDeleted": "Project deleted",
+    "noProjects": "No projects",
+    "editProject": "Edit Project",
+    "projectName": "Project name"
   },
   "goals": {
     "title": "Goals & OKRs",
