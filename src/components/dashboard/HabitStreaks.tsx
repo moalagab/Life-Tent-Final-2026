@@ -1,4 +1,4 @@
-import { Flame, Check, Loader2, Trash2, Edit3, Sparkles, Zap } from 'lucide-react';
+import { Flame, Check, Loader2, Trash2, Edit3, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useHabits, useHabitLogs, useLogHabit, useDeleteHabit, useUpdateHabit } from '@/hooks/useHabits';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { format, subDays } from 'date-fns';
+import { DashboardWidgetShell, DashboardEmptyState } from './DashboardWidgetShell';
 
 export function HabitStreaks() {
   const { t, currentLanguage } = useLanguage();
@@ -55,7 +56,7 @@ export function HabitStreaks() {
     try {
       await logHabit.mutateAsync({ habit_id: habitId });
       toast.success(t('habits.habitLogged'));
-    } catch (error) {
+    } catch {
       toast.error(t('common.error'));
     }
   };
@@ -64,7 +65,7 @@ export function HabitStreaks() {
     try {
       await deleteHabit.mutateAsync(id);
       toast.success(t('habits.habitDeleted'));
-    } catch (error) {
+    } catch {
       toast.error(t('common.error'));
     }
   };
@@ -75,161 +76,156 @@ export function HabitStreaks() {
       await updateHabit.mutateAsync({ id: editingHabit.id, name: editingHabit.name });
       toast.success(t('habits.habitUpdated'));
       setEditingHabit(null);
-    } catch (error) {
+    } catch {
       toast.error(t('common.error'));
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="relative overflow-hidden rounded-2xl bg-card/50 backdrop-blur-xl border border-border/50 p-5 h-full flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-primary" />
-      </div>
-    );
-  }
 
   const displayHabits = habits?.slice(0, 4) || [];
   const totalStreak = displayHabits.reduce((acc, h) => acc + getHabitStreak(h.id), 0);
   const completedToday = displayHabits.filter(h => isCompletedToday(h.id)).length;
 
   const habitColors = [
-    { bg: 'bg-primary', gradient: 'from-primary to-primary/50' },
-    { bg: 'bg-success', gradient: 'from-success to-success/50' },
-    { bg: 'bg-blue-500', gradient: 'from-blue-500 to-blue-500/50' },
-    { bg: 'bg-purple-500', gradient: 'from-purple-500 to-purple-500/50' },
+    { bg: 'bg-primary', light: 'bg-primary/20' },
+    { bg: 'bg-success', light: 'bg-success/20' },
+    { bg: 'bg-blue-500', light: 'bg-blue-500/20' },
+    { bg: 'bg-purple-500', light: 'bg-purple-500/20' },
   ];
 
-  return (
-    <div className="relative overflow-hidden rounded-2xl bg-card/50 backdrop-blur-xl border border-border/50 p-5 h-full">
-      {/* Decorative Elements */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-destructive/5 rounded-full blur-3xl" />
-      
-      <div className="relative">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center">
-              <Flame className="w-4 h-4 text-destructive" />
-            </div>
-            <h3 className="text-lg font-semibold text-foreground">{t('dashboard.habitStreaks')}</h3>
+  if (isLoading) {
+    return (
+      <DashboardWidgetShell
+        title={t('dashboard.habitStreaks')}
+        icon={Flame}
+        iconColor="text-destructive"
+        iconBg="bg-destructive/10"
+        accentColor="bg-destructive/10"
+        headerAction={
+          <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-destructive/10">
+            <Zap className="w-3.5 h-3.5 text-destructive" />
+            <span className="text-xs font-bold text-foreground">0</span>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-destructive/20 to-primary/20 border border-destructive/20">
-            <Zap className="w-4 h-4 text-destructive" />
-            <span className="font-bold text-foreground">{totalStreak}</span>
-          </div>
+        }
+      >
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="w-5 h-5 animate-spin text-primary" />
         </div>
+      </DashboardWidgetShell>
+    );
+  }
 
-        {displayHabits.length > 0 ? (
-          <>
-            {/* Habits Grid */}
-            <div className="grid grid-cols-2 gap-3">
-              {displayHabits.map((habit, index) => {
-                const completed = isCompletedToday(habit.id);
-                const streak = getHabitStreak(habit.id);
-                const colorConfig = habitColors[index % habitColors.length];
+  return (
+    <DashboardWidgetShell
+      title={t('dashboard.habitStreaks')}
+      icon={Flame}
+      iconColor="text-destructive"
+      iconBg="bg-destructive/10"
+      accentColor="bg-destructive/10"
+      headerAction={
+        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-destructive/10">
+          <Zap className="w-3.5 h-3.5 text-destructive" />
+          <span className="text-xs font-bold text-foreground">{totalStreak}</span>
+        </div>
+      }
+    >
+      {displayHabits.length > 0 ? (
+        <>
+          {/* Habits Grid */}
+          <div className="grid grid-cols-2 gap-2.5">
+            {displayHabits.map((habit, index) => {
+              const completed = isCompletedToday(habit.id);
+              const streak = getHabitStreak(habit.id);
+              const colorConfig = habitColors[index % habitColors.length];
 
-                return (
-                  <div
-                    key={habit.id}
-                    onClick={() => toggleHabit(habit.id)}
-                    className={cn(
-                      'group relative p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer',
-                      completed 
-                        ? 'bg-gradient-to-br border-primary/50 shadow-lg' 
-                        : 'bg-muted/30 border-border/50 hover:border-primary/30 hover:bg-muted/50',
-                      completed && `bg-gradient-to-br ${colorConfig.gradient}`
-                    )}
-                  >
-                    {/* Completed Check */}
-                    {completed && (
-                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center shadow-lg ring-4 ring-card">
-                        <Check className="w-3.5 h-3.5 text-primary-foreground" />
-                      </div>
-                    )}
+              return (
+                <div
+                  key={habit.id}
+                  onClick={() => toggleHabit(habit.id)}
+                  className={cn(
+                    'group relative p-3 rounded-xl border transition-all duration-200 cursor-pointer',
+                    completed 
+                      ? `${colorConfig.bg} border-transparent` 
+                      : 'bg-muted/30 border-border/40 hover:border-primary/30 hover:bg-muted/50'
+                  )}
+                >
+                  {/* Completed Check */}
+                  {completed && (
+                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-background rounded-full flex items-center justify-center shadow-sm ring-2 ring-background">
+                      <Check className="w-3 h-3 text-success" />
+                    </div>
+                  )}
 
-                    {/* Action Buttons */}
-                    <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setEditingHabit({ id: habit.id, name: habit.name }); }}
-                        className="p-1.5 rounded-lg bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
-                      >
-                        <Edit3 className="w-3 h-3 text-muted-foreground" />
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleDelete(habit.id); }}
-                        className="p-1.5 rounded-lg bg-background/80 backdrop-blur-sm hover:bg-destructive/10 transition-colors"
-                      >
-                        <Trash2 className="w-3 h-3 text-destructive" />
-                      </button>
-                    </div>
-                    
-                    {/* Habit Icon */}
-                    <div className={cn(
-                      'w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-3 transition-transform duration-300 group-hover:scale-110',
-                      completed ? 'bg-primary-foreground/20' : colorConfig.bg
-                    )}>
-                      {habit.icon || '✨'}
-                    </div>
-                    
-                    {/* Habit Name */}
-                    <p className={cn(
-                      'text-sm font-medium truncate',
-                      completed ? 'text-primary-foreground' : 'text-foreground'
-                    )}>
-                      {habit.name}
-                    </p>
-                    
-                    {/* Streak */}
-                    <div className="flex items-center gap-1 mt-2">
-                      <Flame className={cn(
-                        'w-3.5 h-3.5',
-                        completed ? 'text-primary-foreground/70' : 'text-destructive'
-                      )} />
-                      <span className={cn(
-                        'text-xs font-medium',
-                        completed ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                      )}>
-                        {streak} {t('habits.dayStreak')}
-                      </span>
-                    </div>
+                  {/* Action Buttons */}
+                  <div className="absolute top-1.5 left-1.5 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setEditingHabit({ id: habit.id, name: habit.name }); }}
+                      className="p-1 rounded bg-background/80 hover:bg-background transition-colors"
+                    >
+                      <Edit3 className="w-2.5 h-2.5 text-muted-foreground" />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDelete(habit.id); }}
+                      className="p-1 rounded bg-background/80 hover:bg-destructive/10 transition-colors"
+                    >
+                      <Trash2 className="w-2.5 h-2.5 text-destructive" />
+                    </button>
                   </div>
-                );
-              })}
-            </div>
-
-            {/* Today's Progress */}
-            <div className="mt-5 pt-4 border-t border-border/50">
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-sm text-muted-foreground flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                  {currentLanguage === 'ar' ? 'عادات اليوم' : "Today's Habits"}
-                </span>
-                <span className="text-sm font-bold gold-text">{completedToday}/{displayHabits.length}</span>
-              </div>
-              <div className="flex gap-1.5">
-                {displayHabits.map((habit, index) => (
-                  <div
-                    key={habit.id}
-                    className={cn(
-                      'flex-1 h-2.5 rounded-full transition-all duration-500',
-                      isCompletedToday(habit.id) 
-                        ? `bg-gradient-to-r ${habitColors[index % habitColors.length].gradient}` 
-                        : 'bg-muted'
-                    )}
-                  />
-                ))}
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="text-center py-8">
-            <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
-              <Flame className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <p className="text-muted-foreground text-sm">{t('habits.noHabits')}</p>
+                  
+                  {/* Habit Icon */}
+                  <div className={cn(
+                    'w-8 h-8 rounded-lg flex items-center justify-center text-base mb-2',
+                    completed ? 'bg-white/20' : colorConfig.light
+                  )}>
+                    {habit.icon || '✨'}
+                  </div>
+                  
+                  {/* Habit Name */}
+                  <p className={cn(
+                    'text-xs font-medium truncate',
+                    completed ? 'text-white' : 'text-foreground'
+                  )}>
+                    {habit.name}
+                  </p>
+                  
+                  {/* Streak */}
+                  <div className="flex items-center gap-1 mt-1">
+                    <Flame className={cn('w-3 h-3', completed ? 'text-white/70' : 'text-destructive')} />
+                    <span className={cn('text-[10px] font-medium', completed ? 'text-white/70' : 'text-muted-foreground')}>
+                      {streak} {t('habits.dayStreak')}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        )}
-      </div>
+
+          {/* Today's Progress */}
+          <div className="mt-4 pt-3 border-t border-border/40">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-xs text-muted-foreground">
+                {currentLanguage === 'ar' ? 'اليوم' : "Today"}
+              </span>
+              <span className="text-xs font-bold text-foreground">{completedToday}/{displayHabits.length}</span>
+            </div>
+            <div className="flex gap-1">
+              {displayHabits.map((habit, index) => (
+                <div
+                  key={habit.id}
+                  className={cn(
+                    'flex-1 h-2 rounded-full transition-all duration-300',
+                    isCompletedToday(habit.id) ? habitColors[index % habitColors.length].bg : 'bg-muted'
+                  )}
+                />
+              ))}
+            </div>
+          </div>
+        </>
+      ) : (
+        <DashboardEmptyState
+          icon={Flame}
+          message={t('habits.noHabits')}
+        />
+      )}
 
       {/* Edit Dialog */}
       <Dialog open={!!editingHabit} onOpenChange={() => setEditingHabit(null)}>
@@ -255,6 +251,6 @@ export function HabitStreaks() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </DashboardWidgetShell>
   );
 }
