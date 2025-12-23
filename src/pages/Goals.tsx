@@ -1,68 +1,75 @@
+import { useState, useMemo } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Target, Plus, TrendingUp, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { 
+  Target, Plus, TrendingUp, Loader2, Search, Filter,
+  User, Users, Cog, GraduationCap, LayoutGrid, List, Sparkles
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useGoals, useKeyResults, useCreateGoal } from '@/hooks/useGoals';
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useGoals, useKeyResults, useCreateGoal, useCreateKeyResult } from '@/hooks/useGoals';
+import { GoalFormDialog } from '@/components/goals/GoalFormDialog';
+import { GoalCard } from '@/components/goals/GoalCard';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-const categoryColors: Record<string, string> = {
-  financial: 'bg-primary/10 text-primary border-primary/20',
-  customer: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-  processes: 'bg-success/10 text-success border-success/20',
-  learning: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+type CategoryFilter = 'all' | 'personal' | 'financial' | 'customer' | 'processes' | 'learning';
+
+const categoryConfig = {
+  all: { icon: LayoutGrid, color: 'bg-foreground text-background' },
+  personal: { icon: User, color: 'bg-amber-500 text-white' },
+  financial: { icon: TrendingUp, color: 'bg-primary text-primary-foreground' },
+  customer: { icon: Users, color: 'bg-blue-500 text-white' },
+  processes: { icon: Cog, color: 'bg-success text-white' },
+  learning: { icon: GraduationCap, color: 'bg-purple-500 text-white' },
 };
 
-function getProgressColor(progress: number): string {
-  if (progress >= 80) return 'bg-success';
-  if (progress >= 50) return 'bg-primary';
-  return 'bg-destructive';
-}
-
-function getProgressIcon(progress: number) {
-  if (progress >= 80) return <CheckCircle className="w-4 h-4 text-success" />;
-  if (progress >= 50) return <TrendingUp className="w-4 h-4 text-primary" />;
-  return <AlertCircle className="w-4 h-4 text-destructive" />;
-}
-
 export default function Goals() {
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const { data: goals, isLoading } = useGoals();
   const { data: keyResults } = useKeyResults();
   const createGoal = useCreateGoal();
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const createKeyResult = useCreateKeyResult();
+
+  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newGoal, setNewGoal] = useState({
+  const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  
+  // Key Result Dialog
+  const [krDialogOpen, setKrDialogOpen] = useState(false);
+  const [krGoalId, setKrGoalId] = useState<string | null>(null);
+  const [newKeyResult, setNewKeyResult] = useState({
     title: '',
-    description: '',
-    perspective: 'financial' as 'financial' | 'customer' | 'processes' | 'learning',
     target_value: '',
     unit: '',
   });
 
-  const categoryLabels: Record<string, string> = {
-    financial: t('goals.category.financial'),
-    customer: t('goals.category.customer'),
-    processes: t('goals.category.processes'),
-    learning: t('goals.category.learning'),
-  };
-
   const tabs = [
-    { id: null, label: t('goals.category.all') },
-    { id: 'financial', label: t('goals.category.financial') },
-    { id: 'customer', label: t('goals.category.customer') },
-    { id: 'processes', label: t('goals.category.processes') },
-    { id: 'learning', label: t('goals.category.learning') },
+    { id: 'all' as const, label: t('goals.category.all'), icon: LayoutGrid },
+    { id: 'personal' as const, label: t('goals.category.personal'), icon: User },
+    { id: 'financial' as const, label: t('goals.category.financial'), icon: TrendingUp },
+    { id: 'customer' as const, label: t('goals.category.customer'), icon: Users },
+    { id: 'processes' as const, label: t('goals.category.processes'), icon: Cog },
+    { id: 'learning' as const, label: t('goals.category.learning'), icon: GraduationCap },
   ];
 
-  const filteredGoals = goals?.filter(goal => 
-    !selectedCategory || goal.perspective === selectedCategory
-  ) || [];
+  // Stats
+  const stats = useMemo(() => {
+    if (!goals) return { total: 0, personal: 0, completed: 0 };
+    const personal = goals.filter(g => g.perspective === 'personal').length;
+    const completed = goals.filter(g => {
+      const krs = keyResults?.filter(kr => kr.goal_id === g.id) || [];
+      if (krs.length === 0) return false;
+      const progress = krs.reduce((sum, kr) => sum + ((kr.current_value || 0) / kr.target_value * 100), 0) / krs.length;
+      return progress >= 100;
+    }).length;
+    return { total: goals.length, personal, completed };
+  }, [goals, keyResults]);
 
   const getGoalKeyResults = (goalId: string) => {
     return keyResults?.filter(kr => kr.goal_id === goalId) || [];
@@ -71,32 +78,71 @@ export default function Goals() {
   const calculateProgress = (goalId: string) => {
     const krs = getGoalKeyResults(goalId);
     if (krs.length === 0) return 0;
-    
     const totalProgress = krs.reduce((sum, kr) => {
       const progress = kr.target_value > 0 ? ((kr.current_value || 0) / kr.target_value) * 100 : 0;
       return sum + Math.min(progress, 100);
     }, 0);
-    
     return Math.round(totalProgress / krs.length);
   };
 
-  const handleCreateGoal = async () => {
-    if (!newGoal.title) {
+  const filteredGoals = useMemo(() => {
+    let filtered = goals || [];
+    
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(goal => goal.perspective === selectedCategory);
+    }
+    
+    if (searchQuery) {
+      filtered = filtered.filter(goal => 
+        goal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        goal.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    return filtered;
+  }, [goals, selectedCategory, searchQuery]);
+
+  const handleCreateGoal = async (formData: any) => {
+    try {
+      await createGoal.mutateAsync({
+        title: formData.title,
+        description: formData.description || null,
+        perspective: formData.perspective,
+        target_value: formData.target_value ? parseFloat(formData.target_value) : null,
+        current_value: formData.current_value ? parseFloat(formData.current_value) : 0,
+        unit: formData.unit || null,
+        start_date: formData.start_date ? format(formData.start_date, 'yyyy-MM-dd') : null,
+        end_date: formData.end_date ? format(formData.end_date, 'yyyy-MM-dd') : null,
+      });
+      toast.success(t('goals.goalAdded'));
+      setIsDialogOpen(false);
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleAddKeyResult = (goalId: string) => {
+    setKrGoalId(goalId);
+    setKrDialogOpen(true);
+  };
+
+  const handleCreateKeyResult = async () => {
+    if (!krGoalId || !newKeyResult.title || !newKeyResult.target_value) {
       toast.error(t('common.fillAllFields'));
       return;
     }
 
     try {
-      await createGoal.mutateAsync({
-        title: newGoal.title,
-        description: newGoal.description || null,
-        perspective: newGoal.perspective,
-        target_value: newGoal.target_value ? parseFloat(newGoal.target_value) : null,
-        unit: newGoal.unit || null,
+      await createKeyResult.mutateAsync({
+        goal_id: krGoalId,
+        title: newKeyResult.title,
+        target_value: parseFloat(newKeyResult.target_value),
+        unit: newKeyResult.unit || null,
       });
-      toast.success(t('goals.goalAdded'));
-      setIsDialogOpen(false);
-      setNewGoal({ title: '', description: '', perspective: 'financial', target_value: '', unit: '' });
+      toast.success(t('goals.keyResultAdded'));
+      setKrDialogOpen(false);
+      setNewKeyResult({ title: '', target_value: '', unit: '' });
+      setKrGoalId(null);
     } catch (error) {
       toast.error(t('common.error'));
     }
@@ -105,8 +151,11 @@ export default function Goals() {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center space-y-4">
+            <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto" />
+            <p className="text-muted-foreground">{t('common.loading')}</p>
+          </div>
         </div>
       </MainLayout>
     );
@@ -114,177 +163,220 @@ export default function Goals() {
 
   return (
     <MainLayout>
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
+      <div className="space-y-6 animate-fade-in">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-foreground">{t('goals.title')}</h1>
             <p className="text-muted-foreground mt-1">{t('goals.subtitle')}</p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="gold" size="lg">
-                <Plus className="w-5 h-5 me-2" />
-                {t('goals.newObjective')}
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{t('goals.newObjective')}</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 mt-4">
-                <Input
-                  placeholder={t('goals.goalTitle')}
-                  value={newGoal.title}
-                  onChange={(e) => setNewGoal({ ...newGoal, title: e.target.value })}
-                />
-                <Textarea
-                  placeholder={t('goals.goalDescription')}
-                  value={newGoal.description}
-                  onChange={(e) => setNewGoal({ ...newGoal, description: e.target.value })}
-                />
-                <Select 
-                  value={newGoal.perspective} 
-                  onValueChange={(value: 'financial' | 'customer' | 'processes' | 'learning') => 
-                    setNewGoal({ ...newGoal, perspective: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="financial">{t('goals.category.financial')}</SelectItem>
-                    <SelectItem value="customer">{t('goals.category.customer')}</SelectItem>
-                    <SelectItem value="processes">{t('goals.category.processes')}</SelectItem>
-                    <SelectItem value="learning">{t('goals.category.learning')}</SelectItem>
-                  </SelectContent>
-                </Select>
-                <div className="grid grid-cols-2 gap-4">
-                  <Input
-                    type="number"
-                    placeholder={t('goals.targetValue')}
-                    value={newGoal.target_value}
-                    onChange={(e) => setNewGoal({ ...newGoal, target_value: e.target.value })}
-                  />
-                  <Input
-                    placeholder={t('goals.unit')}
-                    value={newGoal.unit}
-                    onChange={(e) => setNewGoal({ ...newGoal, unit: e.target.value })}
-                  />
-                </div>
-                <Button onClick={handleCreateGoal} className="w-full" disabled={createGoal.isPending}>
-                  {createGoal.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.add')}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
-
-      {/* Category Tabs */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id || 'all'}
-            onClick={() => setSelectedCategory(tab.id)}
-            className={cn(
-              'px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap',
-              selectedCategory === tab.id 
-                ? 'bg-primary text-primary-foreground' 
-                : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-            )}
+          <Button 
+            onClick={() => setIsDialogOpen(true)}
+            className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/25"
           >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Objectives */}
-      {filteredGoals.length > 0 ? (
-        <div className="space-y-6">
-          {filteredGoals.map((goal) => {
-            const progress = calculateProgress(goal.id);
-            const goalKeyResults = getGoalKeyResults(goal.id);
-
-            return (
-              <div key={goal.id} className="glass-card p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold-glow-sm">
-                      <Target className="w-6 h-6 text-primary-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-foreground">{goal.title}</h3>
-                      {goal.perspective && (
-                        <span className={cn(
-                          'px-2 py-0.5 rounded-full text-xs font-medium border',
-                          categoryColors[goal.perspective]
-                        )}>
-                          {categoryLabels[goal.perspective]}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {getProgressIcon(progress)}
-                    <span className="text-lg font-bold text-foreground">{progress}%</span>
-                  </div>
-                </div>
-
-                {goal.description && (
-                  <p className="text-sm text-muted-foreground mb-4">{goal.description}</p>
-                )}
-
-                {/* Overall Progress */}
-                <div className="mb-6">
-                  <div className="h-3 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className={cn('h-full rounded-full transition-all duration-500', getProgressColor(progress))}
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Key Results */}
-                {goalKeyResults.length > 0 && (
-                  <div className="space-y-4">
-                    <h4 className="text-sm font-medium text-muted-foreground">{t('goals.keyResults')}</h4>
-                    {goalKeyResults.map((kr) => {
-                      const krProgress = Math.min((kr.current_value || 0) / kr.target_value * 100, 100);
-                      
-                      return (
-                        <div key={kr.id} className="p-3 rounded-xl bg-muted/30 border border-border">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm text-foreground">{kr.title}</span>
-                            <span className="text-sm font-medium text-muted-foreground">
-                              {(kr.current_value || 0).toLocaleString()} / {kr.target_value.toLocaleString()} {kr.unit}
-                            </span>
-                          </div>
-                          <div className="h-2 bg-muted rounded-full overflow-hidden">
-                            <div
-                              className={cn('h-full rounded-full transition-all duration-500', getProgressColor(krProgress))}
-                              style={{ width: `${krProgress}%` }}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="glass-card p-12 text-center">
-          <Target className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-          <h3 className="text-lg font-medium text-foreground mb-2">{t('goals.noGoals')}</h3>
-          <p className="text-muted-foreground mb-4">{t('goals.noGoalsDescription')}</p>
-          <Button variant="gold" onClick={() => setIsDialogOpen(true)}>
             <Plus className="w-5 h-5 me-2" />
             {t('goals.newObjective')}
           </Button>
         </div>
-      )}
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                <Target className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">{stats.total}</p>
+                <p className="text-xs text-muted-foreground">{t('goals.activeGoals')}</p>
+              </div>
+            </div>
+          </div>
+          <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 border border-amber-500/20">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                <User className="w-5 h-5 text-amber-500" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">{stats.personal}</p>
+                <p className="text-xs text-muted-foreground">{t('goals.personalGoals')}</p>
+              </div>
+            </div>
+          </div>
+          <div className="p-4 rounded-xl bg-gradient-to-br from-success/10 to-success/5 border border-success/20">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-success/20 flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-success" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">{stats.completed}</p>
+                <p className="text-xs text-muted-foreground">{t('goals.completedGoals')}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Filters & Search */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={currentLanguage === 'ar' ? 'البحث في الأهداف...' : 'Search goals...'}
+              className="w-full ps-10 pe-4 py-2.5 rounded-xl bg-muted/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant={viewMode === 'grid' ? 'default' : 'outline'} 
+              size="icon"
+              onClick={() => setViewMode('grid')}
+              className="rounded-xl"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </Button>
+            <Button 
+              variant={viewMode === 'list' ? 'default' : 'outline'} 
+              size="icon"
+              onClick={() => setViewMode('list')}
+              className="rounded-xl"
+            >
+              <List className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Category Tabs */}
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isSelected = selectedCategory === tab.id;
+            const config = categoryConfig[tab.id];
+            
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setSelectedCategory(tab.id)}
+                className={cn(
+                  'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap',
+                  isSelected 
+                    ? config.color + ' shadow-lg'
+                    : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
+                )}
+              >
+                <Icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Goals Grid/List */}
+        {filteredGoals.length > 0 ? (
+          <div className={cn(
+            viewMode === 'grid' 
+              ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4' 
+              : 'space-y-4'
+          )}>
+            {filteredGoals.map((goal, index) => (
+              <div 
+                key={goal.id} 
+                className="animate-fade-in"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <GoalCard
+                  goal={goal}
+                  keyResults={getGoalKeyResults(goal.id)}
+                  progress={calculateProgress(goal.id)}
+                  onAddKeyResult={() => handleAddKeyResult(goal.id)}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16 rounded-2xl border-2 border-dashed border-border/50 bg-muted/20">
+            <div className="w-20 h-20 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+              <Target className="w-10 h-10 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">{t('goals.noGoals')}</h3>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">{t('goals.noGoalsDescription')}</p>
+            <Button onClick={() => setIsDialogOpen(true)} className="shadow-lg">
+              <Plus className="w-5 h-5 me-2" />
+              {t('goals.newObjective')}
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Goal Form Dialog */}
+      <GoalFormDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        onSubmit={handleCreateGoal}
+        isLoading={createGoal.isPending}
+      />
+
+      {/* Key Result Dialog */}
+      <Dialog open={krDialogOpen} onOpenChange={setKrDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Target className="w-5 h-5 text-primary" />
+              </div>
+              {t('goals.addKeyResult')}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label>{t('goals.keyResultTitle')}</Label>
+              <Input
+                value={newKeyResult.title}
+                onChange={(e) => setNewKeyResult({ ...newKeyResult, title: e.target.value })}
+                placeholder={currentLanguage === 'ar' ? 'مثال: قراءة 12 كتاب' : 'e.g., Read 12 books'}
+                className="bg-muted/50"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>{t('goals.targetValue')}</Label>
+                <Input
+                  type="number"
+                  value={newKeyResult.target_value}
+                  onChange={(e) => setNewKeyResult({ ...newKeyResult, target_value: e.target.value })}
+                  placeholder="12"
+                  className="bg-muted/50"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>{t('goals.unit')}</Label>
+                <Input
+                  value={newKeyResult.unit}
+                  onChange={(e) => setNewKeyResult({ ...newKeyResult, unit: e.target.value })}
+                  placeholder={currentLanguage === 'ar' ? 'كتاب' : 'books'}
+                  className="bg-muted/50"
+                />
+              </div>
+            </div>
+            <Button 
+              onClick={handleCreateKeyResult} 
+              className="w-full" 
+              disabled={createKeyResult.isPending}
+            >
+              {createKeyResult.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 me-2" />
+                  {t('common.add')}
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </MainLayout>
   );
 }
