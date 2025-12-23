@@ -2220,7 +2220,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_service_role: { Args: never; Returns: boolean }
     }
     Enums: {
       account_type: "bank" | "wallet" | "cash" | "credit" | "investment"
