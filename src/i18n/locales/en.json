@@ -155,17 +155,54 @@
     "title": "Goals & OKRs",
     "subtitle": "Balanced Scorecard strategy center",
     "newObjective": "New Objective",
+    "editGoal": "Edit Goal",
+    "goalTitle": "Goal Title",
+    "goalDescription": "Goal Description",
     "keyResults": "Key Results",
+    "addKeyResult": "Add Key Result",
+    "keyResultTitle": "Key Result Title",
+    "targetValue": "Target Value",
+    "currentValue": "Current Value",
+    "unit": "Unit",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "progress": "Progress",
     "category": {
       "all": "All",
       "financial": "Financial",
       "customer": "Customer",
       "processes": "Processes",
-      "learning": "Learning"
+      "learning": "Learning",
+      "personal": "Personal"
     },
+    "type": {
+      "okr": "OKR",
+      "personal": "Personal",
+      "project": "Project Linked"
+    },
+    "status": {
+      "onTrack": "On Track",
+      "atRisk": "At Risk",
+      "behind": "Behind",
+      "completed": "Completed"
+    },
+    "noGoals": "No goals",
+    "noGoalsDescription": "Start by adding your first goal",
+    "personalGoals": "Personal Goals",
+    "businessGoals": "Business Goals",
+    "linkedTasks": "Linked Tasks",
+    "linkedProjects": "Linked Projects",
+    "linkToProject": "Link to Project",
+    "linkToHabit": "Link to Habit",
     "goalAdded": "Goal added",
     "goalUpdated": "Goal updated",
-    "goalDeleted": "Goal deleted"
+    "goalDeleted": "Goal deleted",
+    "keyResultAdded": "Key result added",
+    "keyResultUpdated": "Key result updated",
+    "overallProgress": "Overall Progress",
+    "activeGoals": "active goals",
+    "completedGoals": "completed goals",
+    "dueThisMonth": "Due this month"
   },
   "finance": {
     "title": "Finance",

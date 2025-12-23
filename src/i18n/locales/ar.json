@@ -155,17 +155,54 @@
     "title": "الأهداف و OKRs",
     "subtitle": "مركز استراتيجية بطاقة الأداء المتوازن",
     "newObjective": "هدف جديد",
+    "editGoal": "تعديل الهدف",
+    "goalTitle": "عنوان الهدف",
+    "goalDescription": "وصف الهدف",
     "keyResults": "النتائج الرئيسية",
+    "addKeyResult": "إضافة نتيجة رئيسية",
+    "keyResultTitle": "عنوان النتيجة",
+    "targetValue": "القيمة المستهدفة",
+    "currentValue": "القيمة الحالية",
+    "unit": "الوحدة",
+    "startDate": "تاريخ البدء",
+    "endDate": "تاريخ الانتهاء",
+    "progress": "التقدم",
     "category": {
       "all": "الكل",
       "financial": "المالية",
       "customer": "العملاء",
       "processes": "العمليات",
-      "learning": "التعلم"
+      "learning": "التعلم",
+      "personal": "شخصي"
     },
+    "type": {
+      "okr": "OKR",
+      "personal": "شخصي",
+      "project": "مرتبط بمشروع"
+    },
+    "status": {
+      "onTrack": "على المسار",
+      "atRisk": "في خطر",
+      "behind": "متأخر",
+      "completed": "مكتمل"
+    },
+    "noGoals": "لا توجد أهداف",
+    "noGoalsDescription": "ابدأ بإضافة هدفك الأول",
+    "personalGoals": "الأهداف الشخصية",
+    "businessGoals": "أهداف العمل",
+    "linkedTasks": "المهام المرتبطة",
+    "linkedProjects": "المشاريع المرتبطة",
+    "linkToProject": "ربط بمشروع",
+    "linkToHabit": "ربط بعادة",
     "goalAdded": "تمت إضافة الهدف",
     "goalUpdated": "تم تحديث الهدف",
-    "goalDeleted": "تم حذف الهدف"
+    "goalDeleted": "تم حذف الهدف",
+    "keyResultAdded": "تمت إضافة النتيجة الرئيسية",
+    "keyResultUpdated": "تم تحديث النتيجة الرئيسية",
+    "overallProgress": "التقدم الإجمالي",
+    "activeGoals": "أهداف نشطة",
+    "completedGoals": "أهداف مكتملة",
+    "dueThisMonth": "مستحقة هذا الشهر"
   },
   "finance": {
     "title": "المالية",
