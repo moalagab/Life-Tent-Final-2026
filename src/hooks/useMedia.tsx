@@ -5,6 +5,24 @@ import { useAuth } from './useAuth';
 
 export type MediaItem = Tables<'media_items'>;
 
+export function useMediaItems() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['media-items', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('media_items')
+        .select('*')
+        .order('updated_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+}
+
 export function useBooks() {
   const { user } = useAuth();
 
