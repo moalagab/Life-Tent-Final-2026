@@ -202,7 +202,17 @@
     "overallProgress": "التقدم الإجمالي",
     "activeGoals": "أهداف نشطة",
     "completedGoals": "أهداف مكتملة",
-    "dueThisMonth": "مستحقة هذا الشهر"
+    "archivedGoals": "أهداف مؤرشفة",
+    "dueThisMonth": "مستحقة هذا الشهر",
+    "archiveGoal": "أرشفة الهدف",
+    "goalArchived": "تم أرشفة الهدف",
+    "restoreGoal": "استعادة الهدف",
+    "goalRestored": "تم استعادة الهدف",
+    "updateProgress": "تحديث التقدم",
+    "linkedProject": "المشروع المرتبط",
+    "noProject": "غير مرتبط",
+    "viewArchive": "عرض الأرشيف",
+    "archive": "الأرشيف"
   },
   "finance": {
     "title": "المالية",

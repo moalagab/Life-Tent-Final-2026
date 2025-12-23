@@ -1,14 +1,18 @@
 import { useState, useMemo } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { 
-  Target, Plus, TrendingUp, Loader2, Search, Trash2,
+  Target, Plus, TrendingUp, Loader2, Search, Trash2, Archive,
   User, Users, Cog, GraduationCap, LayoutGrid, List, Sparkles, BarChart3
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useGoals, useKeyResults, useCreateGoal, useCreateKeyResult, useUpdateGoal, useDeleteGoal, Goal } from '@/hooks/useGoals';
+import { 
+  useGoals, useKeyResults, useCreateGoal, useCreateKeyResult, 
+  useUpdateGoal, useDeleteGoal, useArchiveGoal, useRestoreGoal,
+  useArchivedGoals, useUpdateKeyResult, Goal 
+} from '@/hooks/useGoals';
 import { GoalFormDialog } from '@/components/goals/GoalFormDialog';
 import { GoalCard } from '@/components/goals/GoalCard';
 import { GoalAnalytics } from '@/components/goals/GoalAnalytics';
@@ -43,17 +47,21 @@ const categoryConfig = {
 export default function Goals() {
   const { t, currentLanguage } = useLanguage();
   const { data: goals, isLoading } = useGoals();
+  const { data: archivedGoals } = useArchivedGoals();
   const { data: keyResults } = useKeyResults();
   const createGoal = useCreateGoal();
   const createKeyResult = useCreateKeyResult();
   const updateGoal = useUpdateGoal();
   const deleteGoal = useDeleteGoal();
+  const archiveGoal = useArchiveGoal();
+  const restoreGoal = useRestoreGoal();
+  const updateKeyResult = useUpdateKeyResult();
 
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [activeTab, setActiveTab] = useState<'goals' | 'analytics'>('goals');
+  const [activeTab, setActiveTab] = useState<'goals' | 'analytics' | 'archive'>('goals');
   
   // Edit state
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
@@ -194,6 +202,33 @@ export default function Goals() {
     setKrDialogOpen(true);
   };
 
+  const handleArchiveGoal = async (goalId: string) => {
+    try {
+      await archiveGoal.mutateAsync(goalId);
+      toast.success(t('goals.goalArchived'));
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleRestoreGoal = async (goalId: string) => {
+    try {
+      await restoreGoal.mutateAsync(goalId);
+      toast.success(t('goals.goalRestored'));
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleUpdateKeyResult = async (krId: string, value: number) => {
+    try {
+      await updateKeyResult.mutateAsync({ id: krId, current_value: value });
+      toast.success(t('goals.keyResultUpdated'));
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
   const handleCreateKeyResult = async () => {
     if (!krGoalId || !newKeyResult.title || !newKeyResult.target_value) {
       toast.error(t('common.fillAllFields'));
@@ -240,6 +275,17 @@ export default function Goals() {
           </div>
           <div className="flex items-center gap-2">
             <Button 
+              variant={activeTab === 'archive' ? 'default' : 'outline'}
+              onClick={() => setActiveTab(activeTab === 'archive' ? 'goals' : 'archive')}
+              className="gap-2"
+            >
+              <Archive className="w-4 h-4" />
+              {t('goals.archive')}
+              {archivedGoals && archivedGoals.length > 0 && (
+                <Badge variant="secondary" className="ms-1">{archivedGoals.length}</Badge>
+              )}
+            </Button>
+            <Button 
               variant={activeTab === 'analytics' ? 'default' : 'outline'}
               onClick={() => setActiveTab(activeTab === 'analytics' ? 'goals' : 'analytics')}
               className="gap-2"
@@ -259,6 +305,56 @@ export default function Goals() {
 
         {activeTab === 'analytics' ? (
           <GoalAnalytics goals={goals || []} keyResults={keyResults || []} />
+        ) : activeTab === 'archive' ? (
+          // Archived Goals Section
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
+                <Archive className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold">{t('goals.archivedGoals')}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {currentLanguage === 'ar' ? 'الأهداف المكتملة والمؤرشفة' : 'Completed and archived goals'}
+                </p>
+              </div>
+            </div>
+
+            {archivedGoals && archivedGoals.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {archivedGoals.map((goal, index) => (
+                  <div 
+                    key={goal.id} 
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <GoalCard
+                      goal={goal}
+                      keyResults={getGoalKeyResults(goal.id)}
+                      progress={calculateProgress(goal.id)}
+                      onDelete={() => handleConfirmDelete(goal)}
+                      onRestore={() => handleRestoreGoal(goal.id)}
+                      isArchived
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 rounded-2xl border-2 border-dashed border-border/50 bg-muted/20">
+                <div className="w-20 h-20 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                  <Archive className="w-10 h-10 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  {currentLanguage === 'ar' ? 'لا توجد أهداف مؤرشفة' : 'No archived goals'}
+                </h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  {currentLanguage === 'ar' 
+                    ? 'عند اكتمال هدف بنسبة 100%، يمكنك أرشفته من القائمة'
+                    : 'When a goal reaches 100%, you can archive it from the menu'}
+                </p>
+              </div>
+            )}
+          </div>
         ) : (
           <>
             {/* Stats Cards */}
@@ -375,6 +471,8 @@ export default function Goals() {
                       onEdit={() => handleEditGoal(goal)}
                       onDelete={() => handleConfirmDelete(goal)}
                       onAddKeyResult={() => handleAddKeyResult(goal.id)}
+                      onUpdateKeyResult={handleUpdateKeyResult}
+                      onArchive={calculateProgress(goal.id) >= 100 ? () => handleArchiveGoal(goal.id) : undefined}
                     />
                   </div>
                 ))}
