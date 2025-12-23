@@ -251,6 +251,8 @@ export function SubscriptionsManager() {
                       <SelectItem value="SAR">SAR</SelectItem>
                       <SelectItem value="USD">USD</SelectItem>
                       <SelectItem value="AED">AED</SelectItem>
+                      <SelectItem value="SDG">SDG</SelectItem>
+                      <SelectItem value="EGP">EGP</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
