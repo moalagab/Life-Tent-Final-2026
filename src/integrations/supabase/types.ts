@@ -252,6 +252,188 @@ export type Database = {
           },
         ]
       }
+      course_flashcards: {
+        Row: {
+          answer: string
+          correct_count: number | null
+          course_id: string
+          created_at: string
+          difficulty: number | null
+          id: string
+          lesson_id: string | null
+          next_review_at: string | null
+          question: string
+          review_count: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          correct_count?: number | null
+          course_id: string
+          created_at?: string
+          difficulty?: number | null
+          id?: string
+          lesson_id?: string | null
+          next_review_at?: string | null
+          question: string
+          review_count?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          correct_count?: number | null
+          course_id?: string
+          created_at?: string
+          difficulty?: number | null
+          id?: string
+          lesson_id?: string | null
+          next_review_at?: string | null
+          question?: string
+          review_count?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_flashcards_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_flashcards_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "course_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_lessons: {
+        Row: {
+          completed_at: string | null
+          course_id: string
+          created_at: string
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          is_completed: boolean | null
+          notes: string | null
+          order_index: number | null
+          resources: Json | null
+          title: string
+          updated_at: string
+          user_id: string
+          video_url: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          course_id: string
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_completed?: boolean | null
+          notes?: string | null
+          order_index?: number | null
+          resources?: Json | null
+          title: string
+          updated_at?: string
+          user_id: string
+          video_url?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          course_id?: string
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_completed?: boolean | null
+          notes?: string | null
+          order_index?: number | null
+          resources?: Json | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_lessons_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_notes: {
+        Row: {
+          content: string | null
+          course_id: string
+          created_at: string
+          id: string
+          is_important: boolean | null
+          last_reviewed_at: string | null
+          lesson_id: string | null
+          note_type: string | null
+          review_count: number | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          course_id: string
+          created_at?: string
+          id?: string
+          is_important?: boolean | null
+          last_reviewed_at?: string | null
+          lesson_id?: string | null
+          note_type?: string | null
+          review_count?: number | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          course_id?: string
+          created_at?: string
+          id?: string
+          is_important?: boolean | null
+          last_reviewed_at?: string | null
+          lesson_id?: string | null
+          note_type?: string | null
+          review_count?: number | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_notes_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_notes_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "course_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           completed_lessons: number | null

@@ -1,5 +1,5 @@
 import { MainLayout } from '@/components/layout/MainLayout';
-import { FileText, GraduationCap, Plus, Search, Tag, Sparkles, Play, ArrowUpRight, Loader2, Edit3, Trash2, Archive, RotateCcw, MoreVertical, ExternalLink } from 'lucide-react';
+import { FileText, GraduationCap, Plus, Search, Tag, Sparkles, Play, ArrowUpRight, Loader2, Edit3, Trash2, Archive, RotateCcw, MoreVertical, ExternalLink, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -14,6 +14,7 @@ import { ar, enUS } from 'date-fns/locale';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Progress } from '@/components/ui/progress';
+import { CourseDetailView } from '@/components/knowledge/CourseDetailView';
 
 export default function Knowledge() {
   const { t, currentLanguage } = useLanguage();
@@ -34,9 +35,9 @@ export default function Knowledge() {
   const [isCourseDialogOpen, setIsCourseDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [newNote, setNewNote] = useState({ title: '', content: '', tags: '' });
-  const [newCourse, setNewCourse] = useState({ title: '', platform: '', url: '', total_lessons: '' });
+  const [newCourse, setNewCourse] = useState({ title: '', description: '', platform: '', url: '' });
   const [editingNote, setEditingNote] = useState<Note | null>(null);
-  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
 
   const isLoading = notesLoading || coursesLoading;
 
@@ -127,35 +128,25 @@ export default function Knowledge() {
     try {
       await createCourse.mutateAsync({
         title: newCourse.title,
+        description: newCourse.description || null,
         platform: newCourse.platform || null,
         url: newCourse.url || null,
-        total_lessons: newCourse.total_lessons ? parseInt(newCourse.total_lessons) : null,
+        total_lessons: 0,
+        completed_lessons: 0,
+        progress: 0,
+        status: 'not_started',
       });
       toast.success(t('knowledge.courseAdded'));
       setIsCourseDialogOpen(false);
-      setNewCourse({ title: '', platform: '', url: '', total_lessons: '' });
+      setNewCourse({ title: '', description: '', platform: '', url: '' });
     } catch (error) {
       toast.error(t('common.error'));
     }
   };
 
-  const handleUpdateCourse = async () => {
-    if (!editingCourse) return;
-
+  const handleUpdateCourse = async (id: string, updates: Partial<Course>) => {
     try {
-      await updateCourse.mutateAsync({
-        id: editingCourse.id,
-        title: editingCourse.title,
-        platform: editingCourse.platform,
-        url: editingCourse.url,
-        total_lessons: editingCourse.total_lessons,
-        completed_lessons: editingCourse.completed_lessons,
-        progress: editingCourse.total_lessons 
-          ? Math.round(((editingCourse.completed_lessons || 0) / editingCourse.total_lessons) * 100)
-          : editingCourse.progress,
-      });
-      toast.success(t('knowledge.courseUpdated'));
-      setEditingCourse(null);
+      await updateCourse.mutateAsync({ id, ...updates });
     } catch (error) {
       toast.error(t('common.error'));
     }
@@ -170,32 +161,28 @@ export default function Knowledge() {
     }
   };
 
-  const handleIncrementLesson = async (course: Course) => {
-    const newCompleted = Math.min((course.completed_lessons || 0) + 1, course.total_lessons || 999);
-    const newProgress = course.total_lessons ? Math.round((newCompleted / course.total_lessons) * 100) : 0;
-    const newStatus = newProgress >= 100 ? 'completed' : 'in_progress';
-
-    try {
-      await updateCourse.mutateAsync({
-        id: course.id,
-        completed_lessons: newCompleted,
-        progress: newProgress,
-        status: newStatus as any,
-      });
-      if (newStatus === 'completed') {
-        toast.success(t('knowledge.courseCompleted'));
-      }
-    } catch (error) {
-      toast.error(t('common.error'));
-    }
-  };
-
   if (isLoading) {
     return (
       <MainLayout>
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
+      </MainLayout>
+    );
+  }
+
+  // Show course detail view if a course is selected
+  if (selectedCourse) {
+    return (
+      <MainLayout>
+        <CourseDetailView 
+          course={selectedCourse}
+          onBack={() => setSelectedCourse(null)}
+          onUpdateCourse={(updates) => {
+            handleUpdateCourse(selectedCourse.id, updates);
+            setSelectedCourse({ ...selectedCourse, ...updates });
+          }}
+        />
       </MainLayout>
     );
   }
@@ -267,6 +254,12 @@ export default function Knowledge() {
                       value={newCourse.title}
                       onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })}
                     />
+                    <Textarea
+                      placeholder={currentLanguage === 'ar' ? 'وصف الدورة (اختياري)' : 'Course description (optional)'}
+                      value={newCourse.description}
+                      onChange={(e) => setNewCourse({ ...newCourse, description: e.target.value })}
+                      rows={3}
+                    />
                     <Input
                       placeholder={t('knowledge.platform')}
                       value={newCourse.platform}
@@ -276,12 +269,6 @@ export default function Knowledge() {
                       placeholder={t('knowledge.url')}
                       value={newCourse.url}
                       onChange={(e) => setNewCourse({ ...newCourse, url: e.target.value })}
-                    />
-                    <Input
-                      type="number"
-                      placeholder={t('knowledge.totalLessons')}
-                      value={newCourse.total_lessons}
-                      onChange={(e) => setNewCourse({ ...newCourse, total_lessons: e.target.value })}
                     />
                     <Button onClick={handleCreateCourse} className="w-full" disabled={createCourse.isPending}>
                       {createCourse.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.add')}
@@ -414,13 +401,16 @@ export default function Knowledge() {
               {filteredCourses.map((course) => (
                 <div
                   key={course.id}
-                  className="glass-card p-4 hover:border-primary/30 transition-all group"
+                  className="glass-card p-5 hover:border-primary/30 transition-all group cursor-pointer"
+                  onClick={() => setSelectedCourse(course)}
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <span className="text-3xl">📚</span>
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <BookOpen className="w-6 h-6 text-primary" />
+                      </div>
                       <div>
-                        <h4 className="font-medium text-foreground text-sm group-hover:text-primary transition-colors">
+                        <h4 className="font-medium text-foreground group-hover:text-primary transition-colors">
                           {course.title}
                         </h4>
                         {course.platform && (
@@ -429,24 +419,20 @@ export default function Knowledge() {
                       </div>
                     </div>
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                         <button className="p-1 rounded-lg hover:bg-muted transition-colors opacity-0 group-hover:opacity-100">
                           <MoreVertical className="w-4 h-4 text-muted-foreground" />
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         {course.url && (
-                          <DropdownMenuItem onClick={() => window.open(course.url!, '_blank')}>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); window.open(course.url!, '_blank'); }}>
                             <ExternalLink className="w-4 h-4 me-2" />
                             {currentLanguage === 'ar' ? 'فتح الرابط' : 'Open Link'}
                           </DropdownMenuItem>
                         )}
-                        <DropdownMenuItem onClick={() => setEditingCourse(course)}>
-                          <Edit3 className="w-4 h-4 me-2" />
-                          {t('common.edit')}
-                        </DropdownMenuItem>
                         <DropdownMenuItem 
-                          onClick={() => handleDeleteCourse(course.id)}
+                          onClick={(e) => { e.stopPropagation(); handleDeleteCourse(course.id); }}
                           className="text-destructive"
                         >
                           <Trash2 className="w-4 h-4 me-2" />
@@ -456,6 +442,10 @@ export default function Knowledge() {
                     </DropdownMenu>
                   </div>
 
+                  {course.description && (
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{course.description}</p>
+                  )}
+
                   <div className="mb-3">
                     <div className="flex justify-between items-center mb-1">
                       <span className="text-xs text-muted-foreground">{t('common.progress')}</span>
@@ -464,21 +454,20 @@ export default function Knowledge() {
                     <Progress value={course.progress || 0} className="h-2" />
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    {course.total_lessons && (
-                      <span className="text-xs text-muted-foreground">
-                        {course.completed_lessons || 0}/{course.total_lessons} {t('knowledge.lessons')}
-                      </span>
-                    )}
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => handleIncrementLesson(course)}
-                      className="h-7 text-xs"
-                    >
-                      <Play className="w-3 h-3 me-1" />
-                      +1
-                    </Button>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>
+                      {course.completed_lessons || 0}/{course.total_lessons || 0} {t('knowledge.lessons')}
+                    </span>
+                    <span className={cn(
+                      "px-2 py-0.5 rounded-full",
+                      course.status === 'completed' ? "bg-green-500/10 text-green-500" :
+                      course.status === 'in_progress' ? "bg-primary/10 text-primary" :
+                      "bg-muted text-muted-foreground"
+                    )}>
+                      {course.status === 'completed' ? (currentLanguage === 'ar' ? 'مكتمل' : 'Completed') :
+                       course.status === 'in_progress' ? (currentLanguage === 'ar' ? 'قيد التنفيذ' : 'In Progress') :
+                       (currentLanguage === 'ar' ? 'لم يبدأ' : 'Not Started')}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -487,6 +476,9 @@ export default function Knowledge() {
             <div className="text-center py-16">
               <GraduationCap className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
               <p className="text-muted-foreground text-lg">{t('knowledge.noCourses')}</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {currentLanguage === 'ar' ? 'أضف دورة جديدة للبدء في نظام التعلم' : 'Add a new course to start the learning system'}
+              </p>
             </div>
           )}
         </TabsContent>
@@ -567,59 +559,6 @@ export default function Knowledge() {
             />
             <Button onClick={handleUpdateNote} className="w-full" disabled={updateNote.isPending}>
               {updateNote.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.save')}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Course Dialog */}
-      <Dialog open={!!editingCourse} onOpenChange={() => setEditingCourse(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('knowledge.editCourse')}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 mt-4">
-            <Input
-              placeholder={t('knowledge.courseTitle')}
-              value={editingCourse?.title || ''}
-              onChange={(e) => setEditingCourse(prev => prev ? { ...prev, title: e.target.value } : null)}
-            />
-            <Input
-              placeholder={t('knowledge.platform')}
-              value={editingCourse?.platform || ''}
-              onChange={(e) => setEditingCourse(prev => prev ? { ...prev, platform: e.target.value } : null)}
-            />
-            <Input
-              placeholder={t('knowledge.url')}
-              value={editingCourse?.url || ''}
-              onChange={(e) => setEditingCourse(prev => prev ? { ...prev, url: e.target.value } : null)}
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm text-muted-foreground mb-1 block">{t('knowledge.totalLessons')}</label>
-                <Input
-                  type="number"
-                  value={editingCourse?.total_lessons || ''}
-                  onChange={(e) => setEditingCourse(prev => prev ? { 
-                    ...prev, 
-                    total_lessons: e.target.value ? parseInt(e.target.value) : null 
-                  } : null)}
-                />
-              </div>
-              <div>
-                <label className="text-sm text-muted-foreground mb-1 block">{t('knowledge.completedLessons')}</label>
-                <Input
-                  type="number"
-                  value={editingCourse?.completed_lessons || ''}
-                  onChange={(e) => setEditingCourse(prev => prev ? { 
-                    ...prev, 
-                    completed_lessons: e.target.value ? parseInt(e.target.value) : null 
-                  } : null)}
-                />
-              </div>
-            </div>
-            <Button onClick={handleUpdateCourse} className="w-full" disabled={updateCourse.isPending}>
-              {updateCourse.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.save')}
             </Button>
           </div>
         </DialogContent>
