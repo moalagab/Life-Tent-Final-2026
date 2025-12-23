@@ -1,15 +1,18 @@
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Flame, Plus, TrendingUp, Smile, Frown, Meh, Zap, Moon, Loader2 } from 'lucide-react';
+import { Flame, Plus, TrendingUp, Smile, Frown, Meh, Zap, Moon, Loader2, Edit3, Trash2, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useHabitsWithLogs, useCreateHabit, useLogHabit } from '@/hooks/useHabits';
-import { useState } from 'react';
+import { useHabitsWithLogs, useCreateHabit, useLogHabit, useUpdateHabit, useDeleteHabit } from '@/hooks/useHabits';
+import { useTodayMoodLog, useUpsertMoodLog } from '@/hooks/useMoodLogs';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { format, subDays, isSameDay } from 'date-fns';
+import { Slider } from '@/components/ui/slider';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 // Generate mock contribution data for the year (will be replaced with real data later)
 const generateContributionData = () => {
@@ -42,14 +45,34 @@ const habitColors = ['bg-primary', 'bg-success', 'bg-purple-500', 'bg-blue-500',
 export default function Habits() {
   const { t } = useLanguage();
   const { data: habits, isLoading } = useHabitsWithLogs();
+  const { data: todayMood } = useTodayMoodLog();
   const createHabit = useCreateHabit();
   const logHabit = useLogHabit();
+  const updateHabit = useUpdateHabit();
+  const deleteHabit = useDeleteHabit();
+  const upsertMoodLog = useUpsertMoodLog();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingHabit, setEditingHabit] = useState<any>(null);
   const [newHabit, setNewHabit] = useState({
     name: '',
     icon: '✨',
   });
+
+  // Mood state
+  const [selectedMood, setSelectedMood] = useState<number>(3);
+  const [energyLevel, setEnergyLevel] = useState<number>(75);
+  const [sleepQuality, setSleepQuality] = useState<number>(85);
+
+  // Load existing mood data
+  useEffect(() => {
+    if (todayMood) {
+      setSelectedMood(todayMood.mood_score || 3);
+      setEnergyLevel((todayMood.energy_level || 7.5) * 10);
+      setSleepQuality(((10 - (todayMood.stress_level || 1.5)) / 10) * 100);
+    }
+  }, [todayMood]);
 
   const today = new Date();
   const weekDates = Array.from({ length: 7 }, (_, i) => subDays(today, 6 - i));
@@ -87,6 +110,32 @@ export default function Habits() {
     }
   };
 
+  const handleUpdateHabit = async () => {
+    if (!editingHabit || !editingHabit.name.trim()) return;
+    
+    try {
+      await updateHabit.mutateAsync({
+        id: editingHabit.id,
+        name: editingHabit.name,
+        icon: editingHabit.icon,
+      });
+      toast.success(t('common.save'));
+      setIsEditDialogOpen(false);
+      setEditingHabit(null);
+    } catch (error) {
+      toast.error(t('auth.error'));
+    }
+  };
+
+  const handleDeleteHabit = async (id: string) => {
+    try {
+      await deleteHabit.mutateAsync(id);
+      toast.success(t('common.delete'));
+    } catch (error) {
+      toast.error(t('auth.error'));
+    }
+  };
+
   const handleLogHabit = async (habitId: string, date: Date) => {
     try {
       await logHabit.mutateAsync({
@@ -95,6 +144,48 @@ export default function Habits() {
       });
     } catch (error) {
       toast.error(t('auth.error'));
+    }
+  };
+
+  const handleMoodChange = async (mood: number) => {
+    setSelectedMood(mood);
+    try {
+      await upsertMoodLog.mutateAsync({
+        mood_score: mood,
+        energy_level: Math.round(energyLevel / 10),
+        stress_level: Math.round(10 - (sleepQuality / 10)),
+      });
+      toast.success(t('common.save'));
+    } catch (error) {
+      toast.error(t('auth.error'));
+    }
+  };
+
+  const handleEnergyChange = async (value: number[]) => {
+    const energy = value[0];
+    setEnergyLevel(energy);
+    try {
+      await upsertMoodLog.mutateAsync({
+        mood_score: selectedMood,
+        energy_level: Math.round(energy / 10),
+        stress_level: Math.round(10 - (sleepQuality / 10)),
+      });
+    } catch (error) {
+      // Silent fail for slider updates
+    }
+  };
+
+  const handleSleepChange = async (value: number[]) => {
+    const sleep = value[0];
+    setSleepQuality(sleep);
+    try {
+      await upsertMoodLog.mutateAsync({
+        mood_score: selectedMood,
+        energy_level: Math.round(energyLevel / 10),
+        stress_level: Math.round(10 - (sleep / 10)),
+      });
+    } catch (error) {
+      // Silent fail for slider updates
     }
   };
 
@@ -187,6 +278,46 @@ export default function Habits() {
         </div>
       </div>
 
+      {/* Edit Habit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('common.edit')}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label>{t('habits.dailyHabits')}</Label>
+              <Input
+                value={editingHabit?.name || ''}
+                onChange={(e) => setEditingHabit({ ...editingHabit, name: e.target.value })}
+                placeholder={t('habits.dailyHabits')}
+              />
+            </div>
+            <div>
+              <Label>Icon</Label>
+              <div className="flex gap-2 flex-wrap mt-2">
+                {['📚', '🏋️', '🧘', '💧', '📖', '🎯', '💪', '🏃', '🧠', '✍️'].map(icon => (
+                  <button
+                    key={icon}
+                    type="button"
+                    onClick={() => setEditingHabit({ ...editingHabit, icon })}
+                    className={cn(
+                      'text-2xl p-2 rounded-lg transition-all',
+                      editingHabit?.icon === icon ? 'bg-primary/20 ring-2 ring-primary' : 'hover:bg-muted'
+                    )}
+                  >
+                    {icon}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <Button onClick={handleUpdateHabit} className="w-full" disabled={updateHabit.isPending}>
+              {updateHabit.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.save')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Habits Tracker */}
         <div className="lg:col-span-2 glass-card p-5">
@@ -216,6 +347,29 @@ export default function Habits() {
                         </div>
                       </div>
                     </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+                          <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => {
+                          setEditingHabit(habit);
+                          setIsEditDialogOpen(true);
+                        }}>
+                          <Edit3 className="w-4 h-4 me-2" />
+                          {t('common.edit')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleDeleteHabit(habit.id)}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4 me-2" />
+                          {t('common.delete')}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
 
                   <div className="flex gap-2">
@@ -271,16 +425,17 @@ export default function Habits() {
                 {moodOptions.map((mood) => (
                   <button
                     key={mood.value}
+                    onClick={() => handleMoodChange(mood.value)}
                     className={cn(
                       'flex flex-col items-center gap-2 p-3 rounded-xl transition-all',
-                      mood.value === 3 
+                      selectedMood === mood.value 
                         ? 'bg-primary/10 border border-primary/30' 
                         : 'hover:bg-muted'
                     )}
                   >
                     <mood.icon className={cn(
                       'w-8 h-8',
-                      mood.value === 3 ? 'text-primary' : 'text-muted-foreground'
+                      selectedMood === mood.value ? 'text-primary' : 'text-muted-foreground'
                     )} />
                     <span className="text-xs text-muted-foreground">{mood.label}</span>
                   </button>
@@ -291,24 +446,32 @@ export default function Habits() {
             {/* Energy Level */}
             <div>
               <p className="text-sm text-muted-foreground mb-3">{t('habits.energyLevel')}</p>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <Zap className="w-4 h-4 text-primary" />
-                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-gold rounded-full" style={{ width: '75%' }} />
-                </div>
-                <span className="text-sm font-medium">75%</span>
+                <Slider
+                  value={[energyLevel]}
+                  onValueChange={handleEnergyChange}
+                  max={100}
+                  step={10}
+                  className="flex-1"
+                />
+                <span className="text-sm font-medium w-10">{Math.round(energyLevel)}%</span>
               </div>
             </div>
 
             {/* Sleep Quality */}
             <div>
               <p className="text-sm text-muted-foreground mb-3">{t('habits.sleepQuality')}</p>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <Moon className="w-4 h-4 text-purple-500" />
-                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-purple-500 rounded-full" style={{ width: '85%' }} />
-                </div>
-                <span className="text-sm font-medium">85%</span>
+                <Slider
+                  value={[sleepQuality]}
+                  onValueChange={handleSleepChange}
+                  max={100}
+                  step={10}
+                  className="flex-1"
+                />
+                <span className="text-sm font-medium w-10">{Math.round(sleepQuality)}%</span>
               </div>
             </div>
 
