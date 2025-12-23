@@ -1,13 +1,17 @@
 import { MainLayout } from '@/components/layout/MainLayout';
-import { FileText, GraduationCap, Plus, Search, Tag, Sparkles, Play, ArrowUpRight, Loader2, Edit3, Trash2, Archive, RotateCcw, MoreVertical, ExternalLink, BookOpen } from 'lucide-react';
+import { FileText, GraduationCap, Plus, Search, Tag, Sparkles, Play, ArrowUpRight, Loader2, Edit3, Trash2, Archive, RotateCcw, MoreVertical, ExternalLink, BookOpen, FolderOpen, Target, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useNotes, useCourses, useCreateNote, useCreateCourse, useUpdateNote, useDeleteNote, useArchiveNote, useRestoreNote, useArchivedNotes, useUpdateCourse, useDeleteCourse, Note, Course } from '@/hooks/useKnowledge';
+import { useProjects } from '@/hooks/useProjects';
+import { useGoals } from '@/hooks/useGoals';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
@@ -21,6 +25,8 @@ export default function Knowledge() {
   const { data: notes, isLoading: notesLoading } = useNotes();
   const { data: archivedNotes } = useArchivedNotes();
   const { data: courses, isLoading: coursesLoading } = useCourses();
+  const { data: projects } = useProjects();
+  const { data: goals } = useGoals();
   const createNote = useCreateNote();
   const createCourse = useCreateCourse();
   const updateNote = useUpdateNote();
@@ -34,9 +40,9 @@ export default function Knowledge() {
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const [isCourseDialogOpen, setIsCourseDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [newNote, setNewNote] = useState({ title: '', content: '', tags: '' });
+  const [newNote, setNewNote] = useState({ title: '', content: '', tags: '', project_id: '', goal_id: '', folder: '' });
   const [newCourse, setNewCourse] = useState({ title: '', description: '', platform: '', url: '' });
-  const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [editingNote, setEditingNote] = useState<(Note & { project_id?: string; goal_id?: string; folder?: string }) | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
 
   const isLoading = notesLoading || coursesLoading;
@@ -66,10 +72,13 @@ export default function Knowledge() {
         title: newNote.title,
         content: newNote.content || null,
         tags: newNote.tags ? newNote.tags.split(',').map(t => t.trim()) : null,
-      });
+        project_id: newNote.project_id || null,
+        goal_id: newNote.goal_id || null,
+        folder: newNote.folder || null,
+      } as any);
       toast.success(t('knowledge.noteAdded'));
       setIsNoteDialogOpen(false);
-      setNewNote({ title: '', content: '', tags: '' });
+      setNewNote({ title: '', content: '', tags: '', project_id: '', goal_id: '', folder: '' });
     } catch (error) {
       toast.error(t('common.error'));
     }
@@ -84,7 +93,10 @@ export default function Knowledge() {
         title: editingNote.title,
         content: editingNote.content,
         tags: editingNote.tags,
-      });
+        project_id: editingNote.project_id || null,
+        goal_id: editingNote.goal_id || null,
+        folder: editingNote.folder || null,
+      } as any);
       toast.success(t('knowledge.noteUpdated'));
       setEditingNote(null);
     } catch (error) {
@@ -229,6 +241,58 @@ export default function Knowledge() {
                       value={newNote.tags}
                       onChange={(e) => setNewNote({ ...newNote, tags: e.target.value })}
                     />
+                    
+                    {/* Link to Project */}
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <Briefcase className="w-4 h-4" />
+                        {currentLanguage === 'ar' ? 'ربط بمشروع' : 'Link to Project'}
+                      </Label>
+                      <Select value={newNote.project_id} onValueChange={(v) => setNewNote({ ...newNote, project_id: v })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder={currentLanguage === 'ar' ? 'اختر مشروع' : 'Select Project'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">{currentLanguage === 'ar' ? 'بدون' : 'None'}</SelectItem>
+                          {projects?.map(p => (
+                            <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Link to Goal */}
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <Target className="w-4 h-4" />
+                        {currentLanguage === 'ar' ? 'ربط بهدف' : 'Link to Goal'}
+                      </Label>
+                      <Select value={newNote.goal_id} onValueChange={(v) => setNewNote({ ...newNote, goal_id: v })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder={currentLanguage === 'ar' ? 'اختر هدف' : 'Select Goal'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">{currentLanguage === 'ar' ? 'بدون' : 'None'}</SelectItem>
+                          {goals?.map(g => (
+                            <SelectItem key={g.id} value={g.id}>{g.title}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Folder */}
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <FolderOpen className="w-4 h-4" />
+                        {currentLanguage === 'ar' ? 'المجلد' : 'Folder'}
+                      </Label>
+                      <Input
+                        placeholder={currentLanguage === 'ar' ? 'اسم المجلد (اختياري)' : 'Folder name (optional)'}
+                        value={newNote.folder}
+                        onChange={(e) => setNewNote({ ...newNote, folder: e.target.value })}
+                      />
+                    </div>
+
                     <Button onClick={handleCreateNote} className="w-full" disabled={createNote.isPending}>
                       {createNote.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.add')}
                     </Button>
@@ -557,6 +621,64 @@ export default function Knowledge() {
                 tags: e.target.value ? e.target.value.split(',').map(t => t.trim()) : null 
               } : null)}
             />
+            
+            {/* Link to Project */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Briefcase className="w-4 h-4" />
+                {currentLanguage === 'ar' ? 'ربط بمشروع' : 'Link to Project'}
+              </Label>
+              <Select 
+                value={editingNote?.project_id || ''} 
+                onValueChange={(v) => setEditingNote(prev => prev ? { ...prev, project_id: v || undefined } : null)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={currentLanguage === 'ar' ? 'اختر مشروع' : 'Select Project'} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">{currentLanguage === 'ar' ? 'بدون' : 'None'}</SelectItem>
+                  {projects?.map(p => (
+                    <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Link to Goal */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Target className="w-4 h-4" />
+                {currentLanguage === 'ar' ? 'ربط بهدف' : 'Link to Goal'}
+              </Label>
+              <Select 
+                value={editingNote?.goal_id || ''} 
+                onValueChange={(v) => setEditingNote(prev => prev ? { ...prev, goal_id: v || undefined } : null)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={currentLanguage === 'ar' ? 'اختر هدف' : 'Select Goal'} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">{currentLanguage === 'ar' ? 'بدون' : 'None'}</SelectItem>
+                  {goals?.map(g => (
+                    <SelectItem key={g.id} value={g.id}>{g.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Folder */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <FolderOpen className="w-4 h-4" />
+                {currentLanguage === 'ar' ? 'المجلد' : 'Folder'}
+              </Label>
+              <Input
+                placeholder={currentLanguage === 'ar' ? 'اسم المجلد (اختياري)' : 'Folder name (optional)'}
+                value={editingNote?.folder || ''}
+                onChange={(e) => setEditingNote(prev => prev ? { ...prev, folder: e.target.value } : null)}
+              />
+            </div>
+
             <Button onClick={handleUpdateNote} className="w-full" disabled={updateNote.isPending}>
               {updateNote.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.save')}
             </Button>

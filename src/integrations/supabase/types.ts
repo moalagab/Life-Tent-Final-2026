@@ -1347,8 +1347,11 @@ export type Database = {
         Row: {
           content: string | null
           created_at: string
+          folder: string | null
+          goal_id: string | null
           id: string
           is_archived: boolean | null
+          project_id: string | null
           tags: string[] | null
           title: string
           updated_at: string
@@ -1357,8 +1360,11 @@ export type Database = {
         Insert: {
           content?: string | null
           created_at?: string
+          folder?: string | null
+          goal_id?: string | null
           id?: string
           is_archived?: boolean | null
+          project_id?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string
@@ -1367,14 +1373,32 @@ export type Database = {
         Update: {
           content?: string | null
           created_at?: string
+          folder?: string | null
+          goal_id?: string | null
           id?: string
           is_archived?: boolean | null
+          project_id?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notes_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payees: {
         Row: {
