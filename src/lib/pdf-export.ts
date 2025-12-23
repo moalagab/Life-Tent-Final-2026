@@ -63,6 +63,146 @@ export async function exportToPDF(elementId: string, options: PDFExportOptions):
   pdf.save(`${options.filename}_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
 }
 
+export function generateCourseNotesPDF(data: {
+  courseTitle: string;
+  notes: Array<{ title: string; content: string | null; note_type: string | null; is_important: boolean | null }>;
+  lessons?: Array<{ title: string; is_completed: boolean | null }>;
+}) {
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  const pageWidth = 210;
+  const pageHeight = 297;
+  const margin = 15;
+  const contentWidth = pageWidth - margin * 2;
+  let y = 20;
+
+  const checkPageBreak = (requiredSpace: number) => {
+    if (y + requiredSpace > pageHeight - 20) {
+      pdf.addPage();
+      y = 20;
+      return true;
+    }
+    return false;
+  };
+
+  // Header
+  pdf.setFontSize(22);
+  pdf.setTextColor(40, 40, 40);
+  pdf.text(data.courseTitle, pageWidth / 2, y, { align: 'center' });
+  y += 8;
+
+  pdf.setFontSize(12);
+  pdf.setTextColor(100, 100, 100);
+  pdf.text('Course Notes', pageWidth / 2, y, { align: 'center' });
+  y += 5;
+
+  pdf.setFontSize(9);
+  pdf.text(`Generated: ${format(new Date(), 'MMMM d, yyyy')}`, pageWidth / 2, y, { align: 'center' });
+  y += 15;
+
+  // Course Progress Section (if lessons provided)
+  if (data.lessons && data.lessons.length > 0) {
+    const completed = data.lessons.filter(l => l.is_completed).length;
+    const total = data.lessons.length;
+    const progress = Math.round((completed / total) * 100);
+
+    pdf.setFontSize(14);
+    pdf.setTextColor(40, 40, 40);
+    pdf.text('Course Progress', margin, y);
+    y += 6;
+
+    pdf.setFontSize(10);
+    pdf.setTextColor(100, 100, 100);
+    pdf.text(`${completed} of ${total} lessons completed (${progress}%)`, margin, y);
+    y += 10;
+
+    // Draw progress bar
+    pdf.setDrawColor(220, 220, 220);
+    pdf.setFillColor(220, 220, 220);
+    pdf.roundedRect(margin, y, contentWidth, 4, 2, 2, 'F');
+    
+    if (progress > 0) {
+      pdf.setFillColor(34, 197, 94);
+      pdf.roundedRect(margin, y, (contentWidth * progress) / 100, 4, 2, 2, 'F');
+    }
+    y += 15;
+  }
+
+  // Notes Section
+  pdf.setFontSize(14);
+  pdf.setTextColor(40, 40, 40);
+  pdf.text(`Notes (${data.notes.length})`, margin, y);
+  y += 10;
+
+  if (data.notes.length === 0) {
+    pdf.setFontSize(10);
+    pdf.setTextColor(150, 150, 150);
+    pdf.text('No notes available.', margin, y);
+    y += 10;
+  } else {
+    data.notes.forEach((note, index) => {
+      checkPageBreak(30);
+
+      // Note type badge
+      const noteType = note.note_type || 'note';
+      const typeColors: Record<string, [number, number, number]> = {
+        'note': [100, 100, 100],
+        'summary': [59, 130, 246],
+        'key_point': [234, 179, 8],
+        'question': [168, 85, 247],
+      };
+      const typeColor = typeColors[noteType] || typeColors['note'];
+
+      // Note container
+      pdf.setDrawColor(230, 230, 230);
+      pdf.setFillColor(250, 250, 250);
+      const noteHeight = 25 + (note.content ? Math.ceil(note.content.length / 80) * 5 : 0);
+      pdf.roundedRect(margin, y, contentWidth, Math.min(noteHeight, 60), 3, 3, 'FD');
+
+      // Important indicator
+      if (note.is_important) {
+        pdf.setFillColor(234, 179, 8);
+        pdf.circle(margin + 5, y + 6, 2, 'F');
+      }
+
+      // Note title
+      pdf.setFontSize(11);
+      pdf.setTextColor(40, 40, 40);
+      const titleX = note.is_important ? margin + 10 : margin + 5;
+      pdf.text(note.title, titleX, y + 8);
+
+      // Note type label
+      pdf.setFontSize(8);
+      pdf.setTextColor(typeColor[0], typeColor[1], typeColor[2]);
+      pdf.text(noteType.replace('_', ' ').toUpperCase(), margin + contentWidth - 5, y + 8, { align: 'right' });
+
+      // Note content
+      if (note.content) {
+        pdf.setFontSize(9);
+        pdf.setTextColor(80, 80, 80);
+        const lines = pdf.splitTextToSize(note.content, contentWidth - 10);
+        const maxLines = 4;
+        const displayLines = lines.slice(0, maxLines);
+        if (lines.length > maxLines) {
+          displayLines[maxLines - 1] = displayLines[maxLines - 1].substring(0, displayLines[maxLines - 1].length - 3) + '...';
+        }
+        pdf.text(displayLines, margin + 5, y + 16);
+      }
+
+      y += Math.min(noteHeight, 60) + 5;
+    });
+  }
+
+  // Footer
+  checkPageBreak(20);
+  pdf.setFontSize(8);
+  pdf.setTextColor(150, 150, 150);
+  pdf.text('Generated with Lovable - Your Personal Learning Platform', pageWidth / 2, pageHeight - 10, { align: 'center' });
+
+  // Save
+  const safeFilename = data.courseTitle.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').substring(0, 50);
+  pdf.save(`${safeFilename}_notes_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+}
+
 export function generateFinanceReportPDF(data: {
   netWorth: number;
   income: number;

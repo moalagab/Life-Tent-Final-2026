@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { 
   ArrowLeft, BookOpen, GraduationCap, Plus, Check, Clock, FileText, 
   Lightbulb, Play, Trash2, Edit3, MoreVertical, Star, RotateCcw,
-  ChevronDown, ChevronUp, ExternalLink, Loader2
+  ChevronDown, ChevronUp, ExternalLink, Loader2, Download
 } from 'lucide-react';
+import { generateCourseNotesPDF } from '@/lib/pdf-export';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -300,10 +301,29 @@ export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetai
             </Button>
           )}
           {activeTab === 'notes' && (
-            <Button variant="gold" size="sm" onClick={() => setIsAddNoteOpen(true)}>
-              <Plus className="w-4 h-4 me-1" />
-              {currentLanguage === 'ar' ? 'إضافة ملاحظة' : 'Add Note'}
-            </Button>
+            <div className="flex gap-2">
+              {notes && notes.length > 0 && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => {
+                    generateCourseNotesPDF({
+                      courseTitle: course.title,
+                      notes: notes,
+                      lessons: lessons,
+                    });
+                    toast.success(currentLanguage === 'ar' ? 'تم تصدير الملاحظات' : 'Notes exported to PDF');
+                  }}
+                >
+                  <Download className="w-4 h-4 me-1" />
+                  {currentLanguage === 'ar' ? 'تصدير PDF' : 'Export PDF'}
+                </Button>
+              )}
+              <Button variant="gold" size="sm" onClick={() => setIsAddNoteOpen(true)}>
+                <Plus className="w-4 h-4 me-1" />
+                {currentLanguage === 'ar' ? 'إضافة ملاحظة' : 'Add Note'}
+              </Button>
+            </div>
           )}
           {activeTab === 'flashcards' && (
             <div className="flex gap-2">
