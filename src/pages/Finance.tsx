@@ -4,10 +4,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   LayoutDashboard, Wallet, Receipt, PiggyBank, 
   CreditCard, RefreshCw, TrendingUp, FileText, Briefcase, Upload,
-  Globe, Lock
+  Globe, Lock, Gauge
 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
-import { FinanceHome } from '@/components/finance/FinanceHome';
+import { FinanceDashboard } from '@/components/finance/FinanceDashboard';
 import { AccountsManager } from '@/components/finance/AccountsManager';
 import { TransactionsManager } from '@/components/finance/TransactionsManager';
 import { BudgetManager } from '@/components/finance/BudgetManager';
@@ -26,7 +26,7 @@ export default function Finance() {
   const [activeTab, setActiveTab] = useState('overview');
 
   const tabs = [
-    { id: 'overview', label: language === 'ar' ? 'نظرة عامة' : 'Overview', icon: LayoutDashboard },
+    { id: 'dashboard', label: language === 'ar' ? 'لوحة التحكم' : 'Dashboard', icon: Gauge },
     { id: 'accounts', label: language === 'ar' ? 'الحسابات' : 'Accounts', icon: Wallet },
     { id: 'transactions', label: language === 'ar' ? 'العمليات' : 'Transactions', icon: Receipt },
     { id: 'budget', label: language === 'ar' ? 'الميزانية' : 'Budget', icon: PiggyBank },
@@ -67,7 +67,7 @@ export default function Finance() {
           </TabsList>
         </div>
 
-        <TabsContent value="overview"><FinanceHome /></TabsContent>
+        <TabsContent value="dashboard"><FinanceDashboard /></TabsContent>
         <TabsContent value="accounts"><AccountsManager /></TabsContent>
         <TabsContent value="transactions"><TransactionsManager /></TabsContent>
         <TabsContent value="budget"><BudgetManager /></TabsContent>
