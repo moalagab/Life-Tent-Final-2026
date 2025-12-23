@@ -141,7 +141,7 @@ export default function LandingPage() {
   const stats = [
     { value: '8+', label: t('landing.integratedModules'), icon: Layers },
     { value: '24/7', label: t('landing.alwaysAvailable'), icon: Clock },
-    { value: '3', label: t('landing.freeTrialBadge'), icon: Rocket },
+    { value: '100%', label: t('landing.cloudBased'), icon: Globe },
     { value: '∞', label: t('landing.unlimited'), icon: TrendingUp }
   ];
 
@@ -211,15 +211,15 @@ export default function LandingPage() {
         {/* Animated Background */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           {/* Gradient orbs */}
-          <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-gradient-to-br from-primary/10 to-primary/[0.02] rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
-          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-gradient-to-tl from-primary/8 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s', animationDelay: '1s' }} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-primary/5 to-transparent rounded-full" />
+          <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-gradient-to-br from-primary/5 to-primary/[0.01] rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
+          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-gradient-to-tl from-primary/[0.04] to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s', animationDelay: '1s' }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-primary/[0.02] to-transparent rounded-full" />
           
           {/* Floating particles */}
           {[...Array(20)].map((_, i) => (
             <div
               key={i}
-              className="absolute w-1 h-1 bg-primary/20 rounded-full animate-float"
+              className="absolute w-1 h-1 bg-primary/10 rounded-full animate-float"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
@@ -230,7 +230,7 @@ export default function LandingPage() {
           ))}
           
           {/* Grid pattern */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,180,0,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,180,0,0.015)_1px,transparent_1px)] bg-[size:50px_50px]" />
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,180,0,0.008)_1px,transparent_1px),linear-gradient(90deg,rgba(255,180,0,0.008)_1px,transparent_1px)] bg-[size:50px_50px]" />
         </div>
 
         <div className="container mx-auto text-center relative z-10">
@@ -307,7 +307,7 @@ export default function LandingPage() {
       {/* Features Section */}
       <section id="features" className="py-24 px-4 bg-gradient-to-b from-secondary/50 to-background relative overflow-hidden">
         {/* Background decoration */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,180,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,180,0,0.02)_1px,transparent_1px)] bg-[size:100px_100px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,180,0,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,180,0,0.01)_1px,transparent_1px)] bg-[size:100px_100px]" />
         
         <div className="container mx-auto relative z-10">
           <div className="text-center mb-20">
@@ -491,9 +491,6 @@ export default function LandingPage() {
                 {isRTL ? <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" /> : <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />}
               </Button>
             </div>
-            <p className="text-sm text-muted-foreground mt-6">
-              {t('landing.noCardRequired')}
-            </p>
           </div>
         </div>
       </section>

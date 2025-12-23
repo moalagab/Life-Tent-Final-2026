@@ -770,6 +770,7 @@
     "recentSessions": "Recent Sessions"
   },
   "landing": {
+    "cloudBased": "Cloud Based",
     "systemBadge": "#1 Complete Life Management System",
     "yourLifeSystem": "Your Life System",
     "signIn": "Sign In",
