@@ -82,6 +82,7 @@
     "areas": "المجالات",
     "resources": "الموارد",
     "archives": "الأرشيف",
+    "pipeline": "خط التخطيط",
     "phase": {
       "initiation": "البدء",
       "planning": "التخطيط",
@@ -92,12 +93,16 @@
     "status": {
       "active": "نشط",
       "onHold": "متوقف",
-      "completed": "مكتمل"
+      "completed": "مكتمل",
+      "archived": "مؤرشف"
     },
     "tasksCount": "مهام",
     "projectAdded": "تمت إضافة المشروع",
     "projectUpdated": "تم تحديث المشروع",
-    "projectDeleted": "تم حذف المشروع"
+    "projectDeleted": "تم حذف المشروع",
+    "noProjects": "لا توجد مشاريع",
+    "editProject": "تعديل المشروع",
+    "projectName": "اسم المشروع"
   },
   "goals": {
     "title": "الأهداف و OKRs",

@@ -522,6 +522,110 @@ export type Database = {
         }
         Relationships: []
       }
+      planning_pipeline: {
+        Row: {
+          business_completed: boolean | null
+          business_cost_structure: string | null
+          business_revenue_model: string | null
+          business_value_proposition: string | null
+          created_at: string
+          current_stage: number | null
+          decision: string | null
+          decision_date: string | null
+          decision_notes: string | null
+          description: string | null
+          feasibility_completed: boolean | null
+          feasibility_financial: string | null
+          feasibility_resources: string | null
+          feasibility_technical: string | null
+          feasibility_timeline: string | null
+          id: string
+          project_id: string | null
+          status: string | null
+          strategy_completed: boolean | null
+          strategy_vision: string | null
+          strategy_where: string | null
+          strategy_why: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          validation_completed: boolean | null
+          validation_problem: string | null
+          validation_solution: string | null
+          validation_target_market: string | null
+        }
+        Insert: {
+          business_completed?: boolean | null
+          business_cost_structure?: string | null
+          business_revenue_model?: string | null
+          business_value_proposition?: string | null
+          created_at?: string
+          current_stage?: number | null
+          decision?: string | null
+          decision_date?: string | null
+          decision_notes?: string | null
+          description?: string | null
+          feasibility_completed?: boolean | null
+          feasibility_financial?: string | null
+          feasibility_resources?: string | null
+          feasibility_technical?: string | null
+          feasibility_timeline?: string | null
+          id?: string
+          project_id?: string | null
+          status?: string | null
+          strategy_completed?: boolean | null
+          strategy_vision?: string | null
+          strategy_where?: string | null
+          strategy_why?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          validation_completed?: boolean | null
+          validation_problem?: string | null
+          validation_solution?: string | null
+          validation_target_market?: string | null
+        }
+        Update: {
+          business_completed?: boolean | null
+          business_cost_structure?: string | null
+          business_revenue_model?: string | null
+          business_value_proposition?: string | null
+          created_at?: string
+          current_stage?: number | null
+          decision?: string | null
+          decision_date?: string | null
+          decision_notes?: string | null
+          description?: string | null
+          feasibility_completed?: boolean | null
+          feasibility_financial?: string | null
+          feasibility_resources?: string | null
+          feasibility_technical?: string | null
+          feasibility_timeline?: string | null
+          id?: string
+          project_id?: string | null
+          status?: string | null
+          strategy_completed?: boolean | null
+          strategy_vision?: string | null
+          strategy_where?: string | null
+          strategy_why?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          validation_completed?: boolean | null
+          validation_problem?: string | null
+          validation_solution?: string | null
+          validation_target_market?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planning_pipeline_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pomodoro_sessions: {
         Row: {
           completed_at: string
@@ -596,48 +700,163 @@ export type Database = {
         }
         Relationships: []
       }
-      projects: {
+      project_key_results: {
         Row: {
-          color: string | null
           created_at: string
-          description: string | null
-          due_date: string | null
+          current_value: number | null
           id: string
-          para_category: Database["public"]["Enums"]["para_category"] | null
-          phase: Database["public"]["Enums"]["project_phase"] | null
-          progress: number | null
-          status: Database["public"]["Enums"]["project_status"] | null
+          okr_id: string
+          target_value: number
           title: string
+          unit: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
-          color?: string | null
           created_at?: string
-          description?: string | null
-          due_date?: string | null
+          current_value?: number | null
           id?: string
-          para_category?: Database["public"]["Enums"]["para_category"] | null
-          phase?: Database["public"]["Enums"]["project_phase"] | null
-          progress?: number | null
-          status?: Database["public"]["Enums"]["project_status"] | null
+          okr_id: string
+          target_value: number
           title: string
+          unit?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          created_at?: string
+          current_value?: number | null
+          id?: string
+          okr_id?: string
+          target_value?: number
+          title?: string
+          unit?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_key_results_okr_id_fkey"
+            columns: ["okr_id"]
+            isOneToOne: false
+            referencedRelation: "project_okrs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_okrs: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          objective: string
+          progress: number | null
+          project_id: string
+          quarter: string | null
+          status: string | null
+          updated_at: string
+          user_id: string
+          year: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          objective: string
+          progress?: number | null
+          project_id: string
+          quarter?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+          year?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          objective?: string
+          progress?: number | null
+          project_id?: string
+          quarter?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_okrs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          actual_budget: number | null
+          color: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          estimated_budget: number | null
+          expected_roi: string | null
+          id: string
+          investment_notes: string | null
+          para_category: Database["public"]["Enums"]["para_category"] | null
+          phase: Database["public"]["Enums"]["project_phase"] | null
+          progress: number | null
+          risk_level: string | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["project_status"] | null
+          title: string
+          updated_at: string
+          user_id: string
+          vision: string | null
+        }
+        Insert: {
+          actual_budget?: number | null
           color?: string | null
           created_at?: string
           description?: string | null
           due_date?: string | null
+          estimated_budget?: number | null
+          expected_roi?: string | null
           id?: string
+          investment_notes?: string | null
           para_category?: Database["public"]["Enums"]["para_category"] | null
           phase?: Database["public"]["Enums"]["project_phase"] | null
           progress?: number | null
+          risk_level?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["project_status"] | null
+          title: string
+          updated_at?: string
+          user_id: string
+          vision?: string | null
+        }
+        Update: {
+          actual_budget?: number | null
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          estimated_budget?: number | null
+          expected_roi?: string | null
+          id?: string
+          investment_notes?: string | null
+          para_category?: Database["public"]["Enums"]["para_category"] | null
+          phase?: Database["public"]["Enums"]["project_phase"] | null
+          progress?: number | null
+          risk_level?: string | null
+          start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"] | null
           title?: string
           updated_at?: string
           user_id?: string
+          vision?: string | null
         }
         Relationships: []
       }
