@@ -171,11 +171,13 @@ export function AccountsManager() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="SAR">SAR</SelectItem>
-                  <SelectItem value="USD">USD</SelectItem>
-                  <SelectItem value="AED">AED</SelectItem>
-                  <SelectItem value="KWD">KWD</SelectItem>
-                  <SelectItem value="EUR">EUR</SelectItem>
+                  <SelectItem value="SAR">SAR - {t('finance.accounts') === 'الحسابات' ? 'ريال سعودي' : 'Saudi Riyal'}</SelectItem>
+                  <SelectItem value="USD">USD - {t('finance.accounts') === 'الحسابات' ? 'دولار أمريكي' : 'US Dollar'}</SelectItem>
+                  <SelectItem value="AED">AED - {t('finance.accounts') === 'الحسابات' ? 'درهم إماراتي' : 'UAE Dirham'}</SelectItem>
+                  <SelectItem value="SDG">SDG - {t('finance.accounts') === 'الحسابات' ? 'جنيه سوداني' : 'Sudanese Pound'}</SelectItem>
+                  <SelectItem value="EGP">EGP - {t('finance.accounts') === 'الحسابات' ? 'جنيه مصري' : 'Egyptian Pound'}</SelectItem>
+                  <SelectItem value="KWD">KWD - {t('finance.accounts') === 'الحسابات' ? 'دينار كويتي' : 'Kuwaiti Dinar'}</SelectItem>
+                  <SelectItem value="EUR">EUR - {t('finance.accounts') === 'الحسابات' ? 'يورو' : 'Euro'}</SelectItem>
                 </SelectContent>
               </Select>
               <Input
