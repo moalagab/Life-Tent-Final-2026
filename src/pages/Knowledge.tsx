@@ -1,5 +1,5 @@
 import { MainLayout } from '@/components/layout/MainLayout';
-import { FileText, GraduationCap, Plus, Search, Tag, Sparkles, Play, ArrowUpRight, Loader2, Edit3, Trash2, Archive, RotateCcw, MoreVertical, ExternalLink, BookOpen, FolderOpen, Target, Briefcase } from 'lucide-react';
+import { FileText, GraduationCap, Plus, Search, Tag, Sparkles, Loader2, Archive, RotateCcw, MoreVertical, ExternalLink, BookOpen, FolderOpen, Target, Briefcase, Trash2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Progress } from '@/components/ui/progress';
 import { CourseDetailView } from '@/components/knowledge/CourseDetailView';
+import { NoteDetailDialog } from '@/components/knowledge/NoteDetailDialog';
 
 export default function Knowledge() {
   const { t, currentLanguage } = useLanguage();
@@ -42,7 +43,7 @@ export default function Knowledge() {
   const [searchQuery, setSearchQuery] = useState('');
   const [newNote, setNewNote] = useState({ title: '', content: '', tags: '', project_id: '', goal_id: '', folder: '' });
   const [newCourse, setNewCourse] = useState({ title: '', description: '', platform: '', url: '' });
-  const [editingNote, setEditingNote] = useState<(Note & { project_id?: string; goal_id?: string; folder?: string }) | null>(null);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
 
   const isLoading = notesLoading || coursesLoading;
@@ -84,21 +85,22 @@ export default function Knowledge() {
     }
   };
 
-  const handleUpdateNote = async () => {
-    if (!editingNote) return;
-
+  const handleUpdateNote = async (noteData: Partial<Note> & { id: string }) => {
     try {
       await updateNote.mutateAsync({
-        id: editingNote.id,
-        title: editingNote.title,
-        content: editingNote.content,
-        tags: editingNote.tags,
-        project_id: editingNote.project_id || null,
-        goal_id: editingNote.goal_id || null,
-        folder: editingNote.folder || null,
+        id: noteData.id,
+        title: noteData.title,
+        content: noteData.content,
+        tags: noteData.tags,
+        project_id: noteData.project_id || null,
+        goal_id: noteData.goal_id || null,
+        folder: noteData.folder || null,
       } as any);
       toast.success(t('knowledge.noteUpdated'));
-      setEditingNote(null);
+      // Update selected note with new data
+      if (selectedNote && selectedNote.id === noteData.id) {
+        setSelectedNote({ ...selectedNote, ...noteData } as Note);
+      }
     } catch (error) {
       toast.error(t('common.error'));
     }
@@ -391,6 +393,7 @@ export default function Knowledge() {
               {filteredNotes.map((note) => (
                 <div
                   key={note.id}
+                  onClick={() => setSelectedNote(note)}
                   className="glass-card p-4 hover:border-primary/30 transition-all cursor-pointer group"
                 >
                   <div className="flex items-start justify-between mb-2">
@@ -398,22 +401,22 @@ export default function Knowledge() {
                       {note.title}
                     </h4>
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                         <button className="p-1 rounded-lg hover:bg-muted transition-colors opacity-0 group-hover:opacity-100">
                           <MoreVertical className="w-4 h-4 text-muted-foreground" />
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setEditingNote(note)}>
-                          <Edit3 className="w-4 h-4 me-2" />
-                          {t('common.edit')}
+                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setSelectedNote(note); }}>
+                          <Eye className="w-4 h-4 me-2" />
+                          {currentLanguage === 'ar' ? 'عرض وتعديل' : 'View & Edit'}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleArchiveNote(note.id)}>
+                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleArchiveNote(note.id); }}>
                           <Archive className="w-4 h-4 me-2" />
                           {t('knowledge.archiveNote')}
                         </DropdownMenuItem>
                         <DropdownMenuItem 
-                          onClick={() => handleDeleteNote(note.id)}
+                          onClick={(e) => { e.stopPropagation(); handleDeleteNote(note.id); }}
                           className="text-destructive"
                         >
                           <Trash2 className="w-4 h-4 me-2" />
@@ -433,6 +436,26 @@ export default function Knowledge() {
                   {note.content && (
                     <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{note.content}</p>
                   )}
+                  
+                  {/* Links indicators */}
+                  <div className="flex items-center gap-2 mt-2">
+                    {note.project_id && (
+                      <span className="flex items-center gap-1 text-[10px] text-blue-500">
+                        <Briefcase className="w-3 h-3" />
+                      </span>
+                    )}
+                    {note.goal_id && (
+                      <span className="flex items-center gap-1 text-[10px] text-success">
+                        <Target className="w-3 h-3" />
+                      </span>
+                    )}
+                    {note.folder && (
+                      <span className="flex items-center gap-1 text-[10px] text-amber-500">
+                        <FolderOpen className="w-3 h-3" />
+                        {note.folder}
+                      </span>
+                    )}
+                  </div>
                   
                   {note.tags && note.tags.length > 0 && (
                     <div className="flex flex-wrap items-center gap-1.5 mt-3">
@@ -595,96 +618,22 @@ export default function Knowledge() {
         </TabsContent>
       </Tabs>
 
-      {/* Edit Note Dialog */}
-      <Dialog open={!!editingNote} onOpenChange={() => setEditingNote(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('knowledge.editNote')}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 mt-4">
-            <Input
-              placeholder={t('knowledge.noteTitle')}
-              value={editingNote?.title || ''}
-              onChange={(e) => setEditingNote(prev => prev ? { ...prev, title: e.target.value } : null)}
-            />
-            <Textarea
-              placeholder={t('knowledge.noteContent')}
-              value={editingNote?.content || ''}
-              onChange={(e) => setEditingNote(prev => prev ? { ...prev, content: e.target.value } : null)}
-              rows={5}
-            />
-            <Input
-              placeholder={t('knowledge.tags')}
-              value={editingNote?.tags?.join(', ') || ''}
-              onChange={(e) => setEditingNote(prev => prev ? { 
-                ...prev, 
-                tags: e.target.value ? e.target.value.split(',').map(t => t.trim()) : null 
-              } : null)}
-            />
-            
-            {/* Link to Project */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <Briefcase className="w-4 h-4" />
-                {currentLanguage === 'ar' ? 'ربط بمشروع' : 'Link to Project'}
-              </Label>
-              <Select 
-                value={editingNote?.project_id || ''} 
-                onValueChange={(v) => setEditingNote(prev => prev ? { ...prev, project_id: v || undefined } : null)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={currentLanguage === 'ar' ? 'اختر مشروع' : 'Select Project'} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">{currentLanguage === 'ar' ? 'بدون' : 'None'}</SelectItem>
-                  {projects?.map(p => (
-                    <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Link to Goal */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <Target className="w-4 h-4" />
-                {currentLanguage === 'ar' ? 'ربط بهدف' : 'Link to Goal'}
-              </Label>
-              <Select 
-                value={editingNote?.goal_id || ''} 
-                onValueChange={(v) => setEditingNote(prev => prev ? { ...prev, goal_id: v || undefined } : null)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={currentLanguage === 'ar' ? 'اختر هدف' : 'Select Goal'} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">{currentLanguage === 'ar' ? 'بدون' : 'None'}</SelectItem>
-                  {goals?.map(g => (
-                    <SelectItem key={g.id} value={g.id}>{g.title}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Folder */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <FolderOpen className="w-4 h-4" />
-                {currentLanguage === 'ar' ? 'المجلد' : 'Folder'}
-              </Label>
-              <Input
-                placeholder={currentLanguage === 'ar' ? 'اسم المجلد (اختياري)' : 'Folder name (optional)'}
-                value={editingNote?.folder || ''}
-                onChange={(e) => setEditingNote(prev => prev ? { ...prev, folder: e.target.value } : null)}
-              />
-            </div>
-
-            <Button onClick={handleUpdateNote} className="w-full" disabled={updateNote.isPending}>
-              {updateNote.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.save')}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Note Detail Dialog */}
+      <NoteDetailDialog
+        note={selectedNote}
+        isOpen={!!selectedNote}
+        onClose={() => setSelectedNote(null)}
+        onSave={handleUpdateNote}
+        onDelete={async (id) => {
+          await handleDeleteNote(id);
+        }}
+        onArchive={async (id) => {
+          await handleArchiveNote(id);
+        }}
+        projects={projects || []}
+        goals={goals || []}
+        isSaving={updateNote.isPending}
+      />
     </MainLayout>
   );
 }
