@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { formatHijriDate } from '@/lib/hijri';
-import { MapPin, Sun, Cloud, Sparkles } from 'lucide-react';
+import { MapPin, Sun, Sparkles, Clock, CalendarDays } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
@@ -22,18 +22,28 @@ function getGreeting(lang: string): string {
   return 'Good Night';
 }
 
+function getGreetingEmoji(): string {
+  const hour = new Date().getHours();
+  if (hour < 5) return '🌙';
+  if (hour < 12) return '☀️';
+  if (hour < 17) return '🌤️';
+  if (hour < 21) return '🌅';
+  return '🌙';
+}
+
 export function GreetingHeader() {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const { currentLanguage, isRTL } = useLanguage();
+  const { currentLanguage, isRTL, t } = useLanguage();
   const { user } = useAuth();
   const greeting = getGreeting(currentLanguage);
+  const emoji = getGreetingEmoji();
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
-  const gregorianDate = format(currentTime, 'EEEE, MMMM d, yyyy');
+  const gregorianDate = format(currentTime, currentLanguage === 'ar' ? 'EEEE، d MMMM yyyy' : 'EEEE, MMMM d, yyyy');
   const hijriDate = formatHijriDate(currentTime, 'ar');
   const timeString = format(currentTime, 'HH:mm');
   const seconds = format(currentTime, 'ss');
@@ -41,23 +51,24 @@ export function GreetingHeader() {
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || (currentLanguage === 'ar' ? 'المستخدم' : 'User');
 
   return (
-    <div className="relative mb-8 overflow-hidden">
-      {/* Decorative Background Elements */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse-slow" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-gold-500/5 rounded-full blur-3xl animate-float" />
+    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-xl border border-border/50 p-6 lg:p-8">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse-slow" />
+        <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-gold-500/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-radial from-primary/5 to-transparent rounded-full" />
       </div>
 
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+      <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         {/* Main Greeting Section */}
-        <div className="space-y-4">
+        <div className="space-y-4 flex-1">
           {/* Location & Weather Badge */}
-          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-muted/50 backdrop-blur-sm border border-border/50">
+          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-muted/50 backdrop-blur-sm border border-border/30 shadow-sm">
             <div className="flex items-center gap-2 text-muted-foreground text-sm">
               <MapPin className="w-4 h-4" />
               <span>{currentLanguage === 'ar' ? 'الرياض، السعودية' : 'Riyadh, KSA'}</span>
             </div>
-            <div className="w-px h-4 bg-border" />
+            <div className="w-px h-4 bg-border/50" />
             <div className="flex items-center gap-2 text-sm">
               <Sun className="w-4 h-4 text-primary" />
               <span className="text-foreground font-medium">34°</span>
@@ -66,18 +77,20 @@ export function GreetingHeader() {
           </div>
 
           {/* Greeting Text */}
-          <div>
-            <h1 className="text-4xl lg:text-6xl font-bold tracking-tight">
-              <span className="text-foreground">{greeting}</span>
-              <span className="text-muted-foreground/60">، </span>
-              <span className="relative inline-block">
-                <span className="gold-text">{userName}</span>
-                <Sparkles className="absolute -top-1 -right-4 w-5 h-5 text-primary animate-pulse" />
-              </span>
-            </h1>
-            <p className="text-muted-foreground text-lg mt-2 flex items-center gap-2">
-              {currentLanguage === 'ar' ? 'لوحة تحكم شخصية لحياتك' : 'Your personal life dashboard'}
-              <span className="inline-block animate-float">👋</span>
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">{emoji}</span>
+              <h1 className="text-3xl lg:text-5xl font-bold tracking-tight">
+                <span className="text-foreground">{greeting}</span>
+                <span className="text-muted-foreground/50">، </span>
+                <span className="relative inline-block">
+                  <span className="gold-text">{userName}</span>
+                  <Sparkles className="absolute -top-1 -right-5 w-5 h-5 text-primary animate-pulse" />
+                </span>
+              </h1>
+            </div>
+            <p className="text-muted-foreground text-base lg:text-lg flex items-center gap-2">
+              {t('dashboard.subtitle')}
             </p>
           </div>
         </div>
@@ -85,32 +98,38 @@ export function GreetingHeader() {
         {/* Time & Date Card */}
         <div 
           className={cn(
-            "relative group",
-            "p-6 rounded-2xl",
-            "bg-gradient-to-br from-card/80 to-card/40",
-            "backdrop-blur-xl border border-border/50",
+            "relative group flex-shrink-0",
+            "p-5 lg:p-6 rounded-2xl",
+            "bg-gradient-to-br from-muted/50 to-muted/20",
+            "backdrop-blur-xl border border-border/30",
             "shadow-lg hover:shadow-xl transition-all duration-500",
-            "hover:border-primary/30"
+            "hover:border-primary/30 hover:scale-[1.02]"
           )} 
           dir={isRTL ? 'rtl' : 'ltr'}
         >
           {/* Glow Effect */}
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           
-          <div className="relative">
+          <div className="relative space-y-4">
             {/* Time Display */}
-            <div className="flex items-baseline gap-1 mb-3">
-              <span className="text-4xl font-bold gold-text tabular-nums">{timeString}</span>
-              <span className="text-lg text-muted-foreground tabular-nums">:{seconds}</span>
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-primary" />
+              <div className="flex items-baseline gap-1">
+                <span className="text-4xl lg:text-5xl font-bold gold-text tabular-nums tracking-tight">{timeString}</span>
+                <span className="text-lg text-muted-foreground tabular-nums">:{seconds}</span>
+              </div>
             </div>
             
             {/* Dates */}
-            <div className="space-y-1">
+            <div className="space-y-2 pt-2 border-t border-border/30">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                 <span className="text-sm font-medium text-foreground">{hijriDate}</span>
               </div>
-              <p className="text-xs text-muted-foreground ps-4">{gregorianDate}</p>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <CalendarDays className="w-3.5 h-3.5" />
+                <span>{gregorianDate}</span>
+              </div>
             </div>
           </div>
         </div>

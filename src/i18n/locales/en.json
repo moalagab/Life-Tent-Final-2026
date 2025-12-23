@@ -53,7 +53,29 @@
     "netWorth": "Net Worth",
     "monthlyBalance": "Monthly Balance",
     "prayerTimes": "Prayer Times",
-    "nextPrayer": "Next Prayer"
+    "nextPrayer": "Next Prayer",
+    "welcomeBack": "Welcome back",
+    "todayProgress": "Today's Progress",
+    "completed": "completed",
+    "remaining": "remaining",
+    "noTasks": "No tasks",
+    "noHabits": "No habits",
+    "noProjects": "No projects",
+    "noEvents": "No events"
+  },
+  "quickActions": {
+    "newTask": "New Task",
+    "newTaskDesc": "Create a new task",
+    "quickNote": "Quick Note",
+    "quickNoteDesc": "Write a quick note",
+    "addGoal": "Add Goal",
+    "addGoalDesc": "Set a new goal",
+    "logExpense": "Log Expense",
+    "logExpenseDesc": "Record a transaction",
+    "schedule": "Schedule Event",
+    "scheduleDesc": "Add to calendar",
+    "pomodoro": "Pomodoro",
+    "pomodoroDesc": "Start focus timer"
   },
   "tasks": {
     "title": "Tasks",
