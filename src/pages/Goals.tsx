@@ -1,21 +1,33 @@
 import { useState, useMemo } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { 
-  Target, Plus, TrendingUp, Loader2, Search, Filter,
-  User, Users, Cog, GraduationCap, LayoutGrid, List, Sparkles
+  Target, Plus, TrendingUp, Loader2, Search, Trash2,
+  User, Users, Cog, GraduationCap, LayoutGrid, List, Sparkles, BarChart3
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useGoals, useKeyResults, useCreateGoal, useCreateKeyResult } from '@/hooks/useGoals';
+import { useGoals, useKeyResults, useCreateGoal, useCreateKeyResult, useUpdateGoal, useDeleteGoal, Goal } from '@/hooks/useGoals';
 import { GoalFormDialog } from '@/components/goals/GoalFormDialog';
 import { GoalCard } from '@/components/goals/GoalCard';
+import { GoalAnalytics } from '@/components/goals/GoalAnalytics';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 type CategoryFilter = 'all' | 'personal' | 'financial' | 'customer' | 'processes' | 'learning';
 
@@ -34,11 +46,21 @@ export default function Goals() {
   const { data: keyResults } = useKeyResults();
   const createGoal = useCreateGoal();
   const createKeyResult = useCreateKeyResult();
+  const updateGoal = useUpdateGoal();
+  const deleteGoal = useDeleteGoal();
 
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [activeTab, setActiveTab] = useState<'goals' | 'analytics'>('goals');
+  
+  // Edit state
+  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  
+  // Delete confirmation
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [goalToDelete, setGoalToDelete] = useState<Goal | null>(null);
   
   // Key Result Dialog
   const [krDialogOpen, setKrDialogOpen] = useState(false);
@@ -113,12 +135,58 @@ export default function Goals() {
         unit: formData.unit || null,
         start_date: formData.start_date ? format(formData.start_date, 'yyyy-MM-dd') : null,
         end_date: formData.end_date ? format(formData.end_date, 'yyyy-MM-dd') : null,
+        project_id: formData.project_id || null,
       });
       toast.success(t('goals.goalAdded'));
       setIsDialogOpen(false);
     } catch (error) {
       toast.error(t('common.error'));
     }
+  };
+
+  const handleUpdateGoal = async (formData: any) => {
+    if (!editingGoal) return;
+    
+    try {
+      await updateGoal.mutateAsync({
+        id: editingGoal.id,
+        title: formData.title,
+        description: formData.description || null,
+        perspective: formData.perspective,
+        target_value: formData.target_value ? parseFloat(formData.target_value) : null,
+        current_value: formData.current_value ? parseFloat(formData.current_value) : 0,
+        unit: formData.unit || null,
+        start_date: formData.start_date ? format(formData.start_date, 'yyyy-MM-dd') : null,
+        end_date: formData.end_date ? format(formData.end_date, 'yyyy-MM-dd') : null,
+        project_id: formData.project_id || null,
+      });
+      toast.success(t('goals.goalUpdated'));
+      setEditingGoal(null);
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleDeleteGoal = async () => {
+    if (!goalToDelete) return;
+    
+    try {
+      await deleteGoal.mutateAsync(goalToDelete.id);
+      toast.success(t('goals.goalDeleted'));
+      setDeleteDialogOpen(false);
+      setGoalToDelete(null);
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleEditGoal = (goal: Goal) => {
+    setEditingGoal(goal);
+  };
+
+  const handleConfirmDelete = (goal: Goal) => {
+    setGoalToDelete(goal);
+    setDeleteDialogOpen(true);
   };
 
   const handleAddKeyResult = (goalId: string) => {
@@ -170,153 +238,222 @@ export default function Goals() {
             <h1 className="text-3xl font-bold text-foreground">{t('goals.title')}</h1>
             <p className="text-muted-foreground mt-1">{t('goals.subtitle')}</p>
           </div>
-          <Button 
-            onClick={() => setIsDialogOpen(true)}
-            className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/25"
-          >
-            <Plus className="w-5 h-5 me-2" />
-            {t('goals.newObjective')}
-          </Button>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                <Target className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">{stats.total}</p>
-                <p className="text-xs text-muted-foreground">{t('goals.activeGoals')}</p>
-              </div>
-            </div>
-          </div>
-          <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 border border-amber-500/20">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                <User className="w-5 h-5 text-amber-500" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">{stats.personal}</p>
-                <p className="text-xs text-muted-foreground">{t('goals.personalGoals')}</p>
-              </div>
-            </div>
-          </div>
-          <div className="p-4 rounded-xl bg-gradient-to-br from-success/10 to-success/5 border border-success/20">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-success/20 flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-success" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">{stats.completed}</p>
-                <p className="text-xs text-muted-foreground">{t('goals.completedGoals')}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Filters & Search */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={currentLanguage === 'ar' ? 'البحث في الأهداف...' : 'Search goals...'}
-              className="w-full ps-10 pe-4 py-2.5 rounded-xl bg-muted/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
-            />
-          </div>
           <div className="flex items-center gap-2">
             <Button 
-              variant={viewMode === 'grid' ? 'default' : 'outline'} 
-              size="icon"
-              onClick={() => setViewMode('grid')}
-              className="rounded-xl"
+              variant={activeTab === 'analytics' ? 'default' : 'outline'}
+              onClick={() => setActiveTab(activeTab === 'analytics' ? 'goals' : 'analytics')}
+              className="gap-2"
             >
-              <LayoutGrid className="w-4 h-4" />
+              <BarChart3 className="w-4 h-4" />
+              {currentLanguage === 'ar' ? 'التحليلات' : 'Analytics'}
             </Button>
             <Button 
-              variant={viewMode === 'list' ? 'default' : 'outline'} 
-              size="icon"
-              onClick={() => setViewMode('list')}
-              className="rounded-xl"
+              onClick={() => setIsDialogOpen(true)}
+              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/25"
             >
-              <List className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Category Tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isSelected = selectedCategory === tab.id;
-            const config = categoryConfig[tab.id];
-            
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setSelectedCategory(tab.id)}
-                className={cn(
-                  'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap',
-                  isSelected 
-                    ? config.color + ' shadow-lg'
-                    : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
-                )}
-              >
-                <Icon className="w-4 h-4" />
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Goals Grid/List */}
-        {filteredGoals.length > 0 ? (
-          <div className={cn(
-            viewMode === 'grid' 
-              ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4' 
-              : 'space-y-4'
-          )}>
-            {filteredGoals.map((goal, index) => (
-              <div 
-                key={goal.id} 
-                className="animate-fade-in"
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                <GoalCard
-                  goal={goal}
-                  keyResults={getGoalKeyResults(goal.id)}
-                  progress={calculateProgress(goal.id)}
-                  onAddKeyResult={() => handleAddKeyResult(goal.id)}
-                />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-16 rounded-2xl border-2 border-dashed border-border/50 bg-muted/20">
-            <div className="w-20 h-20 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
-              <Target className="w-10 h-10 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">{t('goals.noGoals')}</h3>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">{t('goals.noGoalsDescription')}</p>
-            <Button onClick={() => setIsDialogOpen(true)} className="shadow-lg">
               <Plus className="w-5 h-5 me-2" />
               {t('goals.newObjective')}
             </Button>
           </div>
+        </div>
+
+        {activeTab === 'analytics' ? (
+          <GoalAnalytics goals={goals || []} keyResults={keyResults || []} />
+        ) : (
+          <>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                    <Target className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-foreground">{stats.total}</p>
+                    <p className="text-xs text-muted-foreground">{t('goals.activeGoals')}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 border border-amber-500/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                    <User className="w-5 h-5 text-amber-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-foreground">{stats.personal}</p>
+                    <p className="text-xs text-muted-foreground">{t('goals.personalGoals')}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 rounded-xl bg-gradient-to-br from-success/10 to-success/5 border border-success/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-success/20 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-success" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-foreground">{stats.completed}</p>
+                    <p className="text-xs text-muted-foreground">{t('goals.completedGoals')}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Filters & Search */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={currentLanguage === 'ar' ? 'البحث في الأهداف...' : 'Search goals...'}
+                  className="w-full ps-10 pe-4 py-2.5 rounded-xl bg-muted/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant={viewMode === 'grid' ? 'default' : 'outline'} 
+                  size="icon"
+                  onClick={() => setViewMode('grid')}
+                  className="rounded-xl"
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </Button>
+                <Button 
+                  variant={viewMode === 'list' ? 'default' : 'outline'} 
+                  size="icon"
+                  onClick={() => setViewMode('list')}
+                  className="rounded-xl"
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Category Tabs */}
+            <div className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                const isSelected = selectedCategory === tab.id;
+                const config = categoryConfig[tab.id];
+                
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setSelectedCategory(tab.id)}
+                    className={cn(
+                      'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap',
+                      isSelected 
+                        ? config.color + ' shadow-lg'
+                        : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
+                    )}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Goals Grid/List */}
+            {filteredGoals.length > 0 ? (
+              <div className={cn(
+                viewMode === 'grid' 
+                  ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4' 
+                  : 'space-y-4'
+              )}>
+                {filteredGoals.map((goal, index) => (
+                  <div 
+                    key={goal.id} 
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <GoalCard
+                      goal={goal}
+                      keyResults={getGoalKeyResults(goal.id)}
+                      progress={calculateProgress(goal.id)}
+                      onEdit={() => handleEditGoal(goal)}
+                      onDelete={() => handleConfirmDelete(goal)}
+                      onAddKeyResult={() => handleAddKeyResult(goal.id)}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 rounded-2xl border-2 border-dashed border-border/50 bg-muted/20">
+                <div className="w-20 h-20 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                  <Target className="w-10 h-10 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{t('goals.noGoals')}</h3>
+                <p className="text-muted-foreground mb-6 max-w-md mx-auto">{t('goals.noGoalsDescription')}</p>
+                <Button onClick={() => setIsDialogOpen(true)} className="shadow-lg">
+                  <Plus className="w-5 h-5 me-2" />
+                  {t('goals.newObjective')}
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
-      {/* Goal Form Dialog */}
+      {/* Create Goal Dialog */}
       <GoalFormDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         onSubmit={handleCreateGoal}
         isLoading={createGoal.isPending}
       />
+
+      {/* Edit Goal Dialog */}
+      <GoalFormDialog
+        open={!!editingGoal}
+        onOpenChange={(open) => !open && setEditingGoal(null)}
+        onSubmit={handleUpdateGoal}
+        isLoading={updateGoal.isPending}
+        initialData={editingGoal ? {
+          title: editingGoal.title,
+          description: editingGoal.description || '',
+          perspective: (editingGoal.perspective as any) || 'personal',
+          target_value: editingGoal.target_value?.toString() || '',
+          current_value: editingGoal.current_value?.toString() || '0',
+          unit: editingGoal.unit || '',
+          start_date: editingGoal.start_date ? new Date(editingGoal.start_date) : null,
+          end_date: editingGoal.end_date ? new Date(editingGoal.end_date) : null,
+        } : undefined}
+        isEditing
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
+                <Trash2 className="w-5 h-5 text-destructive" />
+              </div>
+              {currentLanguage === 'ar' ? 'حذف الهدف' : 'Delete Goal'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {currentLanguage === 'ar' 
+                ? `هل أنت متأكد من حذف "${goalToDelete?.title}"؟ سيتم حذف جميع النتائج الرئيسية المرتبطة به.`
+                : `Are you sure you want to delete "${goalToDelete?.title}"? All related key results will also be deleted.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteGoal}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteGoal.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                t('common.delete')
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Key Result Dialog */}
       <Dialog open={krDialogOpen} onOpenChange={setKrDialogOpen}>
