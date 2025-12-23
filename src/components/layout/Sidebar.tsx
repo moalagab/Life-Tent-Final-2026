@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/hooks/useLanguage';
 import {
   LayoutDashboard,
   FolderKanban,
@@ -19,23 +20,24 @@ import {
   LogOut,
 } from 'lucide-react';
 
-const navItems = [
-  { path: '/', icon: LayoutDashboard, label: 'Dashboard', labelAr: 'لوحة التحكم' },
-  { path: '/projects', icon: FolderKanban, label: 'Projects', labelAr: 'المشاريع' },
-  { path: '/tasks', icon: CheckSquare, label: 'Tasks', labelAr: 'المهام' },
-  { path: '/goals', icon: Target, label: 'Goals', labelAr: 'الأهداف' },
-  { path: '/finance', icon: Wallet, label: 'Finance', labelAr: 'المالية' },
-  { path: '/knowledge', icon: BookOpen, label: 'Knowledge', labelAr: 'المعرفة' },
-  { path: '/habits', icon: Repeat, label: 'Habits', labelAr: 'العادات' },
-  { path: '/calendar', icon: Calendar, label: 'Calendar', labelAr: 'التقويم' },
-  { path: '/studio', icon: Film, label: 'Studio', labelAr: 'الاستوديو' },
-];
-
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
+  const { t, isRTL } = useLanguage();
+
+  const navItems = [
+    { path: '/', icon: LayoutDashboard, labelKey: 'common.dashboard' },
+    { path: '/projects', icon: FolderKanban, labelKey: 'common.projects' },
+    { path: '/tasks', icon: CheckSquare, labelKey: 'common.tasks' },
+    { path: '/goals', icon: Target, labelKey: 'common.goals' },
+    { path: '/finance', icon: Wallet, labelKey: 'common.finance' },
+    { path: '/knowledge', icon: BookOpen, labelKey: 'common.knowledge' },
+    { path: '/habits', icon: Repeat, labelKey: 'common.habits' },
+    { path: '/calendar', icon: Calendar, labelKey: 'common.calendar' },
+    { path: '/studio', icon: Film, labelKey: 'common.studio' },
+  ];
 
   const handleSignOut = async () => {
     await signOut();
@@ -45,8 +47,9 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        'fixed top-0 left-0 z-40 h-screen transition-all duration-300 ease-in-out',
-        'bg-sidebar border-r border-sidebar-border',
+        'fixed top-0 z-40 h-screen transition-all duration-300 ease-in-out',
+        'bg-sidebar border-sidebar-border',
+        isRTL ? 'right-0 border-l' : 'left-0 border-r',
         collapsed ? 'w-20' : 'w-64'
       )}
     >
@@ -84,7 +87,10 @@ export function Sidebar() {
               )}
             >
               {isActive && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-gold rounded-r-full" />
+                <div className={cn(
+                  'absolute top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-gold rounded-full',
+                  isRTL ? 'right-0 rounded-l-full rounded-r-none' : 'left-0 rounded-r-full rounded-l-none'
+                )} />
               )}
               <item.icon
                 className={cn(
@@ -99,12 +105,15 @@ export function Sidebar() {
                     isActive ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'
                   )}
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </span>
               )}
               {collapsed && (
-                <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-sm rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-lg border border-border">
-                  {item.label}
+                <div className={cn(
+                  'absolute px-2 py-1 bg-popover text-popover-foreground text-sm rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-lg border border-border',
+                  isRTL ? 'right-full mr-2' : 'left-full ml-2'
+                )}>
+                  {t(item.labelKey)}
                 </div>
               )}
             </NavLink>
@@ -125,7 +134,7 @@ export function Sidebar() {
           <Settings className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
           {!collapsed && (
             <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground">
-              Settings
+              {t('common.settings')}
             </span>
           )}
         </NavLink>
@@ -141,7 +150,7 @@ export function Sidebar() {
           <LogOut className="w-5 h-5" />
           {!collapsed && (
             <span className="text-sm font-medium">
-              تسجيل خروج
+              {t('common.signOut')}
             </span>
           )}
         </button>
@@ -155,12 +164,20 @@ export function Sidebar() {
           )}
         >
           {collapsed ? (
-            <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
+            isRTL ? (
+              <ChevronLeft className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
+            ) : (
+              <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
+            )
           ) : (
             <>
-              <ChevronLeft className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
+              {isRTL ? (
+                <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
+              ) : (
+                <ChevronLeft className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
+              )}
               <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground">
-                Collapse
+                {t('common.collapse')}
               </span>
             </>
           )}

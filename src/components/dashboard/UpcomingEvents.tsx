@@ -1,20 +1,23 @@
 import { Calendar, Clock, MapPin, Video, CreditCard } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface Event {
   id: string;
   title: string;
+  titleAr: string;
   time: string;
   type: 'meeting' | 'task' | 'bill' | 'prayer';
   location?: string;
+  locationAr?: string;
   isVirtual?: boolean;
 }
 
 const mockEvents: Event[] = [
-  { id: '1', title: 'Team Standup', time: '10:00 AM', type: 'meeting', isVirtual: true },
-  { id: '2', title: 'Dhuhr Prayer', time: '12:14 PM', type: 'prayer' },
-  { id: '3', title: 'Client Presentation', time: '2:00 PM', type: 'meeting', location: 'Conference Room A' },
-  { id: '4', title: 'Netflix Subscription', time: 'Today', type: 'bill' },
+  { id: '1', title: 'Team Standup', titleAr: 'اجتماع الفريق', time: '10:00 AM', type: 'meeting', isVirtual: true },
+  { id: '2', title: 'Dhuhr Prayer', titleAr: 'صلاة الظهر', time: '12:14 PM', type: 'prayer' },
+  { id: '3', title: 'Client Presentation', titleAr: 'عرض للعميل', time: '2:00 PM', type: 'meeting', location: 'Conference Room A', locationAr: 'غرفة الاجتماعات أ' },
+  { id: '4', title: 'Netflix Subscription', titleAr: 'اشتراك نتفليكس', time: 'Today', type: 'bill' },
 ];
 
 const typeConfig = {
@@ -25,10 +28,12 @@ const typeConfig = {
 };
 
 export function UpcomingEvents() {
+  const { t, currentLanguage } = useLanguage();
+
   return (
     <div className="glass-card p-5 h-full">
       <div className="flex items-center justify-between mb-5">
-        <h3 className="text-lg font-semibold text-foreground">Upcoming</h3>
+        <h3 className="text-lg font-semibold text-foreground">{t('dashboard.upcomingEvents')}</h3>
         <Calendar className="w-5 h-5 text-muted-foreground" />
       </div>
 
@@ -52,7 +57,9 @@ export function UpcomingEvents() {
               </div>
               
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{event.title}</p>
+                <p className="text-sm font-medium text-foreground truncate">
+                  {currentLanguage === 'ar' ? event.titleAr : event.title}
+                </p>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Clock className="w-3 h-3" />
                   <span>{event.time}</span>
@@ -60,14 +67,16 @@ export function UpcomingEvents() {
                     <>
                       <span>•</span>
                       <MapPin className="w-3 h-3" />
-                      <span className="truncate">{event.location}</span>
+                      <span className="truncate">
+                        {currentLanguage === 'ar' ? event.locationAr : event.location}
+                      </span>
                     </>
                   )}
                   {event.isVirtual && (
                     <>
                       <span>•</span>
                       <Video className="w-3 h-3" />
-                      <span>Virtual</span>
+                      <span>{currentLanguage === 'ar' ? 'افتراضي' : 'Virtual'}</span>
                     </>
                   )}
                 </div>
