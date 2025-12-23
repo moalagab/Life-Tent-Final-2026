@@ -1,19 +1,5 @@
 {
   "common": {
-    "add": "إضافة",
-    "save": "حفظ",
-    "cancel": "إلغاء",
-    "delete": "حذف",
-    "edit": "تعديل",
-    "viewAll": "عرض الكل",
-    "today": "اليوم",
-    "progress": "التقدم",
-    "all": "الكل",
-    "fillAllFields": "يرجى ملء جميع الحقول المطلوبة",
-    "error": "حدث خطأ",
-    "loading": "جاري التحميل..."
-  },
-  "common": {
     "dashboard": "لوحة التحكم",
     "projects": "المشاريع",
     "tasks": "المهام",
@@ -41,7 +27,15 @@
     "today": "اليوم",
     "progress": "التقدم",
     "due": "الاستحقاق",
-    "all": "الكل"
+    "all": "الكل",
+    "fillAllFields": "يرجى ملء جميع الحقول المطلوبة",
+    "error": "حدث خطأ",
+    "success": "تم بنجاح",
+    "confirm": "تأكيد",
+    "close": "إغلاق",
+    "export": "تصدير",
+    "exportSuccess": "تم التصدير بنجاح",
+    "exportError": "فشل التصدير"
   },
   "dashboard": {
     "greeting": "مرحباً",
@@ -74,7 +68,10 @@
       "high": "عالي",
       "medium": "متوسط",
       "low": "منخفض"
-    }
+    },
+    "taskAdded": "تمت إضافة المهمة",
+    "taskUpdated": "تم تحديث المهمة",
+    "taskDeleted": "تم حذف المهمة"
   },
   "projects": {
     "title": "المشاريع",
@@ -96,7 +93,10 @@
       "onHold": "متوقف",
       "completed": "مكتمل"
     },
-    "tasksCount": "مهام"
+    "tasksCount": "مهام",
+    "projectAdded": "تمت إضافة المشروع",
+    "projectUpdated": "تم تحديث المشروع",
+    "projectDeleted": "تم حذف المشروع"
   },
   "goals": {
     "title": "الأهداف و OKRs",
@@ -109,12 +109,16 @@
       "customer": "العملاء",
       "processes": "العمليات",
       "learning": "التعلم"
-    }
+    },
+    "goalAdded": "تمت إضافة الهدف",
+    "goalUpdated": "تم تحديث الهدف",
+    "goalDeleted": "تم حذف الهدف"
   },
   "finance": {
     "title": "المالية",
     "subtitle": "لوحة إدارة الثروة المتقدمة",
     "addTransaction": "إضافة معاملة",
+    "addAccount": "إضافة حساب",
     "netWorth": "صافي الثروة",
     "monthlyIncome": "الدخل الشهري",
     "monthlyExpenses": "المصروفات الشهرية",
@@ -122,7 +126,27 @@
     "recentTransactions": "المعاملات الأخيرة",
     "subscriptions": "الاشتراكات",
     "monthlyTotal": "الإجمالي الشهري",
-    "next": "التالي"
+    "next": "التالي",
+    "accountName": "اسم الحساب",
+    "checking": "جاري",
+    "savings": "توفير",
+    "credit": "ائتمان",
+    "investment": "استثمار",
+    "balance": "الرصيد",
+    "description": "الوصف",
+    "amount": "المبلغ",
+    "income": "دخل",
+    "expense": "مصروف",
+    "selectAccount": "اختر حساب",
+    "category": "الفئة",
+    "transactionAdded": "تمت إضافة المعاملة",
+    "accountAdded": "تم إضافة الحساب",
+    "noTransactions": "لا توجد معاملات",
+    "noSubscriptions": "لا توجد اشتراكات",
+    "uncategorized": "بدون تصنيف",
+    "exportData": "تصدير البيانات",
+    "exportTransactions": "تصدير المعاملات",
+    "exportAccounts": "تصدير الحسابات"
   },
   "habits": {
     "title": "العادات والمزاج",
@@ -141,7 +165,10 @@
     "aiInsight": "رؤية الذكاء الاصطناعي",
     "yearlyActivity": "النشاط السنوي",
     "less": "أقل",
-    "more": "أكثر"
+    "more": "أكثر",
+    "habitAdded": "تمت إضافة العادة",
+    "habitUpdated": "تم تحديث العادة",
+    "habitDeleted": "تم حذف العادة"
   },
   "calendar": {
     "title": "التقويم",
@@ -151,7 +178,10 @@
     "addEvent": "إضافة حدث",
     "quickTimeBlock": "حظر وقت سريع",
     "dropTask": "أسقط مهمة هنا",
-    "dragTasks": "اسحب المهام هنا لجدولتها"
+    "dragTasks": "اسحب المهام هنا لجدولتها",
+    "eventAdded": "تمت إضافة الحدث",
+    "eventUpdated": "تم تحديث الحدث",
+    "eventDeleted": "تم حذف الحدث"
   },
   "knowledge": {
     "title": "قاعدة المعرفة",
@@ -163,7 +193,10 @@
     "recentNotes": "الملاحظات الأخيرة",
     "searchNotes": "البحث في الملاحظات...",
     "activeCourses": "الدورات النشطة",
-    "lessons": "دروس"
+    "lessons": "دروس",
+    "noteAdded": "تمت إضافة الملاحظة",
+    "noteUpdated": "تم تحديث الملاحظة",
+    "noteDeleted": "تم حذف الملاحظة"
   },
   "studio": {
     "title": "الاستوديو",
@@ -181,7 +214,10 @@
       "watching": "مشاهدة",
       "wantToWatch": "أريد مشاهدتها",
       "watched": "تمت المشاهدة"
-    }
+    },
+    "itemAdded": "تمت إضافة العنصر",
+    "itemUpdated": "تم تحديث العنصر",
+    "itemDeleted": "تم حذف العنصر"
   },
   "settings": {
     "title": "الإعدادات",
@@ -201,7 +237,19 @@
     "selectLanguage": "اختر اللغة",
     "arabic": "العربية",
     "english": "الإنجليزية",
-    "languageChanged": "تم تغيير اللغة"
+    "languageChanged": "تم تغيير اللغة",
+    "selectTheme": "اختر المظهر",
+    "lightMode": "الوضع الفاتح",
+    "darkMode": "الوضع الداكن",
+    "themeChanged": "تم تغيير المظهر",
+    "notificationSettings": "إعدادات الإشعارات",
+    "enableNotifications": "تفعيل الإشعارات",
+    "taskReminders": "تذكيرات المهام",
+    "eventReminders": "تذكيرات الأحداث",
+    "habitReminders": "تذكيرات العادات",
+    "notificationsEnabled": "تم تفعيل الإشعارات",
+    "notificationsDisabled": "تم إيقاف الإشعارات",
+    "notificationPermissionDenied": "تم رفض إذن الإشعارات"
   },
   "auth": {
     "signIn": "تسجيل الدخول",
@@ -264,5 +312,14 @@
     "invalidEmail": "البريد الإلكتروني غير صحيح",
     "passwordMinLength": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
     "nameMinLength": "الاسم يجب أن يكون حرفين على الأقل"
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "noNotifications": "لا توجد إشعارات",
+    "taskDue": "موعد المهمة",
+    "eventSoon": "حدث قادم",
+    "habitReminder": "تذكير بالعادة",
+    "markAllRead": "تحديد الكل كمقروء",
+    "clearAll": "مسح الكل"
   }
 }
