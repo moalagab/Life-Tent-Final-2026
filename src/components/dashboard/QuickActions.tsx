@@ -36,55 +36,46 @@ export function QuickActions() {
       id: 'task', 
       icon: Plus, 
       label: t('quickActions.newTask'),
-      description: t('quickActions.newTaskDesc') || 'Create a new task',
-      gradient: 'from-primary/20 to-primary/5',
-      iconBg: 'bg-primary/20',
-      iconColor: 'text-primary'
+      iconBg: 'bg-primary/15',
+      iconColor: 'text-primary',
+      hoverBg: 'group-hover:bg-primary/10'
     },
     { 
       id: 'note', 
       icon: FileText, 
       label: t('quickActions.quickNote'),
-      description: t('quickActions.quickNoteDesc') || 'Write a quick note',
-      gradient: 'from-blue-500/20 to-blue-500/5',
-      iconBg: 'bg-blue-500/20',
-      iconColor: 'text-blue-500'
+      iconBg: 'bg-blue-500/15',
+      iconColor: 'text-blue-500',
+      hoverBg: 'group-hover:bg-blue-500/10'
     },
     { 
       id: 'goal', 
       icon: Target, 
       label: t('quickActions.addGoal'),
-      description: t('quickActions.addGoalDesc') || 'Set a new goal',
-      gradient: 'from-success/20 to-success/5',
-      iconBg: 'bg-success/20',
-      iconColor: 'text-success'
+      iconBg: 'bg-success/15',
+      iconColor: 'text-success',
+      hoverBg: 'group-hover:bg-success/10'
     },
     { 
       id: 'expense', 
       icon: Wallet, 
       label: t('quickActions.logExpense'),
-      description: t('quickActions.logExpenseDesc') || 'Log an expense',
-      gradient: 'from-destructive/20 to-destructive/5',
-      iconBg: 'bg-destructive/20',
-      iconColor: 'text-destructive'
+      iconBg: 'bg-destructive/15',
+      iconColor: 'text-destructive',
+      hoverBg: 'group-hover:bg-destructive/10'
     },
     { 
       id: 'schedule', 
       icon: Calendar, 
       label: t('quickActions.schedule'),
-      description: t('quickActions.scheduleDesc') || 'Schedule an event',
-      gradient: 'from-purple-500/20 to-purple-500/5',
-      iconBg: 'bg-purple-500/20',
-      iconColor: 'text-purple-500'
+      iconBg: 'bg-purple-500/15',
+      iconColor: 'text-purple-500',
+      hoverBg: 'group-hover:bg-purple-500/10'
     },
     { 
       id: 'pomodoro', 
       icon: Timer, 
       label: t('quickActions.pomodoro'),
-      description: t('quickActions.pomodoroDesc') || 'Start focus timer',
-      gradient: 'from-primary to-gold-600',
-      iconBg: 'bg-primary-foreground/20',
-      iconColor: 'text-primary-foreground',
       special: true
     },
   ];
@@ -181,61 +172,46 @@ export function QuickActions() {
 
   return (
     <>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        {actions.map((action, index) => (
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-2.5">
+        {actions.map((action) => (
           <button
             key={action.id}
             onClick={() => handleAction(action.id)}
             onMouseEnter={() => setHoveredAction(action.id)}
             onMouseLeave={() => setHoveredAction(null)}
             className={cn(
-              "group relative overflow-hidden rounded-2xl p-4 transition-all duration-300",
-              "border border-border/50 hover:border-primary/30",
-              "hover:shadow-lg hover:-translate-y-1",
+              "group relative overflow-hidden rounded-xl p-3 transition-all duration-200",
+              "border hover:shadow-md hover:-translate-y-0.5",
               action.special 
-                ? "bg-gradient-to-br from-primary to-gold-600 text-primary-foreground" 
-                : "bg-card/50 backdrop-blur-sm hover:bg-card/80"
+                ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-primary/50" 
+                : "bg-card/60 backdrop-blur-sm border-border/40 hover:border-primary/30"
             )}
-            style={{ animationDelay: `${index * 50}ms` }}
           >
-            {/* Background Gradient on Hover */}
+            {/* Background hover effect */}
             {!action.special && (
               <div className={cn(
-                "absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-300",
-                action.gradient
+                "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200",
+                action.hoverBg
               )} />
             )}
             
-            {/* Shine Effect */}
-            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-            
-            <div className="relative flex flex-col items-center gap-3 text-center">
-              {/* Icon Container */}
+            <div className="relative flex flex-col items-center gap-2 text-center">
               <div className={cn(
-                "w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110",
-                action.special ? "bg-primary-foreground/20" : action.iconBg
+                "w-10 h-10 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-105",
+                action.special ? "bg-white/20" : action.iconBg
               )}>
                 <action.icon className={cn(
-                  "w-6 h-6 transition-transform duration-300",
-                  action.special ? "text-primary-foreground" : action.iconColor,
-                  hoveredAction === action.id && "scale-110"
+                  "w-5 h-5",
+                  action.special ? "text-primary-foreground" : action.iconColor
                 )} />
               </div>
               
-              {/* Label */}
               <span className={cn(
-                "text-sm font-medium transition-colors",
+                "text-[11px] font-medium leading-tight",
                 action.special ? "text-primary-foreground" : "text-foreground"
               )}>
                 {action.label}
               </span>
-              
-              {/* Arrow on Hover */}
-              <ArrowRight className={cn(
-                "w-4 h-4 absolute bottom-2 right-2 opacity-0 translate-x-2 transition-all duration-300",
-                "group-hover:opacity-100 group-hover:translate-x-0",
-                action.special ? "text-primary-foreground/70" : "text-muted-foreground"
-              )} />
             </div>
           </button>
         ))}
@@ -263,7 +239,7 @@ export function QuickActions() {
               placeholder={t('finance.description')}
               value={taskForm.description}
               onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })}
-              className="bg-muted/50 min-h-[100px]"
+              className="bg-muted/50 min-h-[80px]"
             />
             <Select value={taskForm.priority} onValueChange={(v) => setTaskForm({ ...taskForm, priority: v })}>
               <SelectTrigger className="bg-muted/50">
@@ -304,7 +280,7 @@ export function QuickActions() {
               placeholder={t('finance.description')}
               value={goalForm.description}
               onChange={(e) => setGoalForm({ ...goalForm, description: e.target.value })}
-              className="bg-muted/50 min-h-[100px]"
+              className="bg-muted/50 min-h-[80px]"
             />
             <Select value={goalForm.perspective} onValueChange={(v) => setGoalForm({ ...goalForm, perspective: v })}>
               <SelectTrigger className="bg-muted/50">
