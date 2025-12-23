@@ -3,7 +3,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   LayoutDashboard, Wallet, Receipt, PiggyBank, 
-  CreditCard, RefreshCw, TrendingUp, FileText 
+  CreditCard, RefreshCw, TrendingUp, FileText, Briefcase, Upload
 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { FinanceHome } from '@/components/finance/FinanceHome';
@@ -13,8 +13,9 @@ import { BudgetManager } from '@/components/finance/BudgetManager';
 import { DebtsManager } from '@/components/finance/DebtsManager';
 import { SubscriptionsManager } from '@/components/finance/SubscriptionsManager';
 import { InvestmentsManager } from '@/components/finance/InvestmentsManager';
-import { FinanceCharts } from '@/components/finance/FinanceCharts';
-import { MonthlyReport } from '@/components/finance/MonthlyReport';
+import { ProjectFinanceManager } from '@/components/finance/ProjectFinanceManager';
+import { FinanceReports } from '@/components/finance/FinanceReports';
+import { DataImport } from '@/components/finance/DataImport';
 
 export default function Finance() {
   const { currentLanguage } = useLanguage();
@@ -29,7 +30,9 @@ export default function Finance() {
     { id: 'debts', label: language === 'ar' ? 'الديون' : 'Debts', icon: CreditCard },
     { id: 'subscriptions', label: language === 'ar' ? 'الاشتراكات' : 'Subscriptions', icon: RefreshCw },
     { id: 'investments', label: language === 'ar' ? 'الاستثمارات' : 'Investments', icon: TrendingUp },
+    { id: 'projects', label: language === 'ar' ? 'المشاريع' : 'Projects', icon: Briefcase },
     { id: 'reports', label: language === 'ar' ? 'التقارير' : 'Reports', icon: FileText },
+    { id: 'import', label: language === 'ar' ? 'استيراد' : 'Import', icon: Upload },
   ];
 
   return (
@@ -50,7 +53,7 @@ export default function Finance() {
               <TabsTrigger 
                 key={tab.id} 
                 value={tab.id}
-                className="flex items-center gap-2 px-4 py-2 whitespace-nowrap"
+                className="flex items-center gap-2 px-3 py-2 whitespace-nowrap"
               >
                 <tab.icon className="w-4 h-4" />
                 <span className="hidden sm:inline">{tab.label}</span>
@@ -59,38 +62,16 @@ export default function Finance() {
           </TabsList>
         </div>
 
-        <TabsContent value="overview" className="space-y-6">
-          <FinanceHome />
-        </TabsContent>
-
-        <TabsContent value="accounts">
-          <AccountsManager />
-        </TabsContent>
-
-        <TabsContent value="transactions">
-          <TransactionsManager />
-        </TabsContent>
-
-        <TabsContent value="budget">
-          <BudgetManager />
-        </TabsContent>
-
-        <TabsContent value="debts">
-          <DebtsManager />
-        </TabsContent>
-
-        <TabsContent value="subscriptions">
-          <SubscriptionsManager />
-        </TabsContent>
-
-        <TabsContent value="investments">
-          <InvestmentsManager />
-        </TabsContent>
-
-        <TabsContent value="reports" className="space-y-6">
-          <FinanceCharts />
-          <MonthlyReport />
-        </TabsContent>
+        <TabsContent value="overview"><FinanceHome /></TabsContent>
+        <TabsContent value="accounts"><AccountsManager /></TabsContent>
+        <TabsContent value="transactions"><TransactionsManager /></TabsContent>
+        <TabsContent value="budget"><BudgetManager /></TabsContent>
+        <TabsContent value="debts"><DebtsManager /></TabsContent>
+        <TabsContent value="subscriptions"><SubscriptionsManager /></TabsContent>
+        <TabsContent value="investments"><InvestmentsManager /></TabsContent>
+        <TabsContent value="projects"><ProjectFinanceManager /></TabsContent>
+        <TabsContent value="reports"><FinanceReports /></TabsContent>
+        <TabsContent value="import"><DataImport /></TabsContent>
       </Tabs>
     </MainLayout>
   );
