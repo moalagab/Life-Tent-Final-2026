@@ -146,7 +146,9 @@
     "uncategorized": "Uncategorized",
     "exportData": "Export Data",
     "exportTransactions": "Export Transactions",
-    "exportAccounts": "Export Accounts"
+    "exportAccounts": "Export Accounts",
+    "incomeVsExpenses": "Income vs Expenses",
+    "categoryBreakdown": "Category Breakdown"
   },
   "habits": {
     "title": "Habits & Mood",
@@ -321,5 +323,18 @@
     "habitReminder": "Habit reminder",
     "markAllRead": "Mark all as read",
     "clearAll": "Clear all"
+  },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "Manage your account information",
+    "profileUpdated": "Profile updated",
+    "avatarUpdated": "Avatar updated",
+    "fileTooLarge": "File too large (max 2MB)",
+    "clickToChange": "Click to change photo",
+    "emailCannotChange": "Email cannot be changed",
+    "timezone": "Timezone",
+    "accountInfo": "Account Info",
+    "memberSince": "Member since",
+    "lastSignIn": "Last sign in"
   }
 }

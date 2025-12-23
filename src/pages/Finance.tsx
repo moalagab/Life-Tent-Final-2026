@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { FinanceCharts } from '@/components/finance/FinanceCharts';
 
 const currencies = ['SAR', 'USD', 'AED', 'KWD'];
 
@@ -365,6 +366,9 @@ export default function Finance() {
           )}
         </div>
       </div>
+
+      {/* Charts */}
+      <FinanceCharts />
     </MainLayout>
   );
 }
