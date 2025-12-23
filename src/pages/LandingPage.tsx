@@ -34,7 +34,7 @@ import {
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const { currentLanguage: language } = useLanguage();
+  const { currentLanguage: language, t } = useLanguage();
   const { user } = useAuth();
   const isRTL = language === 'ar';
   const [scrolled, setScrolled] = useState(false);
@@ -67,66 +67,50 @@ export default function LandingPage() {
   const features = [
     {
       icon: Target,
-      title: isRTL ? 'إدارة الأهداف' : 'Goal Management',
-      description: isRTL 
-        ? 'حدد أهدافك وتتبع تقدمك نحو تحقيقها بطريقة ذكية مع مؤشرات الأداء'
-        : 'Set your goals and track your progress with smart KPIs',
+      title: t('landing.goalManagement'),
+      description: t('landing.goalManagementDesc'),
       color: 'from-amber-500 to-orange-600'
     },
     {
       icon: CheckCircle,
-      title: isRTL ? 'إدارة المهام' : 'Task Management',
-      description: isRTL 
-        ? 'نظّم مهامك اليومية بكفاءة عالية وأولوية واضحة مع تذكيرات ذكية'
-        : 'Organize tasks efficiently with smart reminders',
+      title: t('landing.taskManagement'),
+      description: t('landing.taskManagementDesc'),
       color: 'from-emerald-500 to-teal-600'
     },
     {
       icon: Calendar,
-      title: isRTL ? 'التقويم الذكي' : 'Smart Calendar',
-      description: isRTL 
-        ? 'تقويم هجري وميلادي متكامل مع أوقات الصلاة والمناسبات'
-        : 'Integrated Hijri & Gregorian calendar with prayer times',
+      title: t('landing.smartCalendar'),
+      description: t('landing.smartCalendarDesc'),
       color: 'from-blue-500 to-indigo-600'
     },
     {
       icon: Wallet,
-      title: isRTL ? 'إدارة المالية' : 'Financial Management',
-      description: isRTL 
-        ? 'تحكم في ميزانيتك وتتبع نفقاتك ودخلك واستثماراتك'
-        : 'Control budget, track expenses, income & investments',
+      title: t('landing.financialManagement'),
+      description: t('landing.financialManagementDesc'),
       color: 'from-green-500 to-emerald-600'
     },
     {
       icon: BookOpen,
-      title: isRTL ? 'مركز المعرفة' : 'Knowledge Center',
-      description: isRTL 
-        ? 'نظّم دوراتك التعليمية وملاحظاتك وبطاقات الحفظ الذكية'
-        : 'Organize courses, notes, and smart flashcards',
+      title: t('landing.knowledgeCenter'),
+      description: t('landing.knowledgeCenterDesc'),
       color: 'from-purple-500 to-violet-600'
     },
     {
       icon: BarChart3,
-      title: isRTL ? 'إدارة المشاريع' : 'Project Management',
-      description: isRTL 
-        ? 'لوحة كانبان احترافية مع OKRs وتقارير الأداء'
-        : 'Professional Kanban with OKRs and performance reports',
+      title: t('landing.projectManagement'),
+      description: t('landing.projectManagementDesc'),
       color: 'from-rose-500 to-pink-600'
     },
     {
       icon: Clock,
-      title: isRTL ? 'تقنية بومودورو' : 'Pomodoro Timer',
-      description: isRTL 
-        ? 'حسّن إنتاجيتك باستخدام تقنية إدارة الوقت المثبتة علمياً'
-        : 'Boost productivity with scientifically proven technique',
+      title: t('landing.pomodoroTimer'),
+      description: t('landing.pomodoroTimerDesc'),
       color: 'from-red-500 to-rose-600'
     },
     {
       icon: Heart,
-      title: isRTL ? 'العادات والمزاج' : 'Habits & Mood',
-      description: isRTL 
-        ? 'تتبع عاداتك اليومية وحالتك المزاجية مع إحصائيات تفصيلية'
-        : 'Track daily habits and mood with detailed statistics',
+      title: t('landing.habitsMood'),
+      description: t('landing.habitsMoodDesc'),
       color: 'from-pink-500 to-fuchsia-600'
     }
   ];
@@ -134,62 +118,48 @@ export default function LandingPage() {
   const benefits = [
     {
       icon: Brain,
-      title: isRTL ? 'تنظيم شامل' : 'Complete Organization',
-      description: isRTL 
-        ? 'كل ما تحتاجه في مكان واحد - وداعاً لعشرات التطبيقات'
-        : 'Everything you need in one place - goodbye to dozens of apps'
+      title: t('landing.completeOrganization'),
+      description: t('landing.completeOrganizationDesc')
     },
     {
       icon: Zap,
-      title: isRTL ? 'إنتاجية مضاعفة' : 'Double Productivity',
-      description: isRTL 
-        ? 'أدوات ذكية تساعدك على إنجاز المزيد في وقت أقل'
-        : 'Smart tools help you accomplish more in less time'
+      title: t('landing.doubleProductivity'),
+      description: t('landing.doubleProductivityDesc')
     },
     {
       icon: Shield,
-      title: isRTL ? 'أمان متقدم' : 'Advanced Security',
-      description: isRTL 
-        ? 'بياناتك محمية بأعلى معايير التشفير والأمان'
-        : 'Your data protected with highest encryption standards'
+      title: t('landing.advancedSecurity'),
+      description: t('landing.advancedSecurityDesc')
     },
     {
       icon: Globe,
-      title: isRTL ? 'عربي وإنجليزي' : 'Arabic & English',
-      description: isRTL 
-        ? 'واجهة كاملة تدعم اللغتين بسلاسة تامة'
-        : 'Full interface supporting both languages seamlessly'
+      title: t('landing.arabicEnglish'),
+      description: t('landing.arabicEnglishDesc')
     }
   ];
 
   const stats = [
-    { value: '8+', label: isRTL ? 'أقسام متكاملة' : 'Integrated Modules', icon: Layers },
-    { value: '24/7', label: isRTL ? 'متاح دائماً' : 'Always Available', icon: Clock },
-    { value: '100%', label: isRTL ? 'مجاني للبدء' : 'Free to Start', icon: Rocket },
-    { value: '∞', label: isRTL ? 'إمكانيات لا محدودة' : 'Unlimited', icon: TrendingUp }
+    { value: '8+', label: t('landing.integratedModules'), icon: Layers },
+    { value: '24/7', label: t('landing.alwaysAvailable'), icon: Clock },
+    { value: '100%', label: t('landing.freeToStart'), icon: Rocket },
+    { value: '∞', label: t('landing.unlimited'), icon: TrendingUp }
   ];
 
   const testimonials = [
     {
-      quote: isRTL 
-        ? 'غيّر LIFE TENT طريقة إدارتي لحياتي تماماً. أصبحت أكثر إنتاجية وتنظيماً.'
-        : 'LIFE TENT completely changed how I manage my life. I became more productive and organized.',
-      author: isRTL ? 'أحمد محمد' : 'Ahmed Mohamed',
-      role: isRTL ? 'رائد أعمال' : 'Entrepreneur'
+      quote: t('landing.testimonialQuote1'),
+      author: t('landing.testimonialAuthor1'),
+      role: t('landing.testimonialRole1')
     },
     {
-      quote: isRTL 
-        ? 'أخيراً وجدت تطبيقاً يجمع كل ما أحتاجه في مكان واحد مع دعم كامل للعربية.'
-        : 'Finally found an app that combines everything I need in one place with full Arabic support.',
-      author: isRTL ? 'سارة أحمد' : 'Sara Ahmed',
-      role: isRTL ? 'مديرة مشاريع' : 'Project Manager'
+      quote: t('landing.testimonialQuote2'),
+      author: t('landing.testimonialAuthor2'),
+      role: t('landing.testimonialRole2')
     },
     {
-      quote: isRTL 
-        ? 'نظام إدارة المالية رائع! أستطيع تتبع كل شيء بسهولة مع التقارير التفصيلية.'
-        : 'The financial management system is amazing! I can track everything easily with detailed reports.',
-      author: isRTL ? 'خالد العلي' : 'Khalid Al-Ali',
-      role: isRTL ? 'محاسب' : 'Accountant'
+      quote: t('landing.testimonialQuote3'),
+      author: t('landing.testimonialAuthor3'),
+      role: t('landing.testimonialRole3')
     }
   ];
 
@@ -212,7 +182,7 @@ export default function LandingPage() {
             <div className="flex flex-col">
               <span className="text-xl font-bold gold-text tracking-wide">LIFE TENT</span>
               <span className="text-[10px] text-muted-foreground -mt-1 hidden sm:block">
-                {isRTL ? 'نظام حياتك المتكامل' : 'Your Life System'}
+                {t('landing.yourLifeSystem')}
               </span>
             </div>
           </div>
@@ -222,14 +192,14 @@ export default function LandingPage() {
               onClick={() => navigate('/auth')}
               className="hidden sm:flex hover:bg-primary/10 transition-colors"
             >
-              {isRTL ? 'تسجيل الدخول' : 'Sign In'}
+              {t('landing.signIn')}
             </Button>
             <Button 
               variant="gold" 
               onClick={() => navigate('/auth')}
               className="gap-2 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
             >
-              {isRTL ? 'ابدأ مجاناً' : 'Start Free'}
+              {t('landing.startFree')}
               {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
             </Button>
           </div>
@@ -268,7 +238,7 @@ export default function LandingPage() {
           <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 border border-primary/30 text-primary mb-8 animate-fade-in backdrop-blur-sm">
             <Sparkles className="w-4 h-4 animate-pulse" />
             <span className="text-sm font-semibold tracking-wide">
-              {isRTL ? 'نظام إدارة الحياة المتكامل #1' : '#1 Complete Life Management System'}
+              {t('landing.systemBadge')}
             </span>
             <Award className="w-4 h-4" />
           </div>
@@ -277,19 +247,17 @@ export default function LandingPage() {
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 leading-tight">
             <span className="block animate-fade-in" style={{ animationDelay: '0.1s' }}>
               <span className="bg-gradient-to-r from-primary via-yellow-500 to-primary bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
-                {isRTL ? 'نظّم حياتك' : 'Organize Life'}
+                {t('landing.heroTitle1')}
               </span>
             </span>
             <span className="block text-foreground animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              {isRTL ? 'حقق أهدافك' : 'Achieve Goals'}
+              {t('landing.heroTitle2')}
             </span>
           </h1>
 
           {/* Subtitle */}
           <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto mb-12 animate-fade-in leading-relaxed" style={{ animationDelay: '0.3s' }}>
-            {isRTL 
-              ? 'منصة متكاملة لإدارة المهام والأهداف والمالية والمشاريع والمعرفة — كل ما تحتاجه لحياة منظمة وناجحة'
-              : 'An all-in-one platform for tasks, goals, finances, projects & knowledge — everything for an organized, successful life'}
+            {t('landing.heroSubtitle')}
           </p>
 
           {/* CTA Buttons */}
@@ -301,7 +269,7 @@ export default function LandingPage() {
               className="text-lg px-10 py-7 gap-3 shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105 group"
             >
               <Rocket className="w-5 h-5 group-hover:animate-bounce" />
-              {isRTL ? 'ابدأ رحلتك مجاناً' : 'Start Your Journey Free'}
+              {t('landing.startJourneyFree')}
               {isRTL ? <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" /> : <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
             </Button>
             <Button 
@@ -311,7 +279,7 @@ export default function LandingPage() {
               className="text-lg px-10 py-7 gap-3 border-2 hover:bg-primary/5 transition-all duration-300"
             >
               <Play className="w-5 h-5" />
-              {isRTL ? 'شاهد المميزات' : 'See Features'}
+              {t('landing.seeFeatures')}
             </Button>
           </div>
 
@@ -345,16 +313,14 @@ export default function LandingPage() {
           <div className="text-center mb-20">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary mb-6">
               <Layers className="w-4 h-4" />
-              <span className="text-sm font-medium">{isRTL ? 'مميزات متكاملة' : 'Integrated Features'}</span>
+              <span className="text-sm font-medium">{t('landing.integratedFeatures')}</span>
             </div>
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-              {isRTL ? 'كل ما تحتاجه في' : 'Everything You Need'}
-              <span className="gold-text"> {isRTL ? 'مكان واحد' : 'In One Place'}</span>
+              {t('landing.everythingYouNeed')}
+              <span className="gold-text"> {t('landing.onePlace')}</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {isRTL 
-                ? 'اكتشف مجموعة شاملة من الأدوات المصممة لمساعدتك على تحقيق أقصى إمكانياتك'
-                : 'Discover a comprehensive set of tools designed to help you reach your full potential'}
+              {t('landing.featuresDescription')}
             </p>
           </div>
 
@@ -391,17 +357,15 @@ export default function LandingPage() {
             <div className="order-2 lg:order-1">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary mb-6">
                 <Star className="w-4 h-4" />
-                <span className="text-sm font-medium">{isRTL ? 'لماذا نحن؟' : 'Why Us?'}</span>
+                <span className="text-sm font-medium">{t('landing.whyChoose')}</span>
               </div>
               <h2 className="text-4xl md:text-5xl font-bold mb-8">
-                {isRTL ? 'لماذا تختار' : 'Why Choose'}
+                {t('landing.whyChoose')}
                 <span className="gold-text"> LIFE TENT</span>
                 {isRTL ? '؟' : '?'}
               </h2>
               <p className="text-lg text-muted-foreground mb-10 leading-relaxed">
-                {isRTL 
-                  ? 'صُمم LIFE TENT ليكون رفيقك الموثوق في رحلة تحقيق أهدافك وتنظيم حياتك بأفضل طريقة ممكنة. نحن نؤمن بأن التنظيم هو مفتاح النجاح.'
-                  : 'LIFE TENT is designed to be your trusted companion in the journey of achieving your goals and organizing your life. We believe organization is the key to success.'}
+                {t('landing.benefitsDescription')}
               </p>
               <div className="space-y-6">
                 {benefits.map((benefit, index) => (
@@ -431,28 +395,28 @@ export default function LandingPage() {
                         <Target className="w-7 h-7 text-white" />
                       </div>
                       <div className="text-3xl font-bold gold-text mb-1">8+</div>
-                      <div className="text-sm text-muted-foreground">{isRTL ? 'أقسام متكاملة' : 'Integrated Sections'}</div>
+                      <div className="text-sm text-muted-foreground">{t('landing.integratedModules')}</div>
                     </div>
                     <div className="glass-card p-6 text-center group hover:scale-105 transition-all duration-300">
                       <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform shadow-lg">
                         <Users className="w-7 h-7 text-white" />
                       </div>
                       <div className="text-3xl font-bold gold-text mb-1">∞</div>
-                      <div className="text-sm text-muted-foreground">{isRTL ? 'مشاريع ومهام' : 'Projects & Tasks'}</div>
+                      <div className="text-sm text-muted-foreground">{t('landing.unlimited')}</div>
                     </div>
                     <div className="glass-card p-6 text-center group hover:scale-105 transition-all duration-300">
                       <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform shadow-lg">
                         <LineChart className="w-7 h-7 text-white" />
                       </div>
                       <div className="text-3xl font-bold gold-text mb-1">100%</div>
-                      <div className="text-sm text-muted-foreground">{isRTL ? 'تحكم كامل' : 'Full Control'}</div>
+                      <div className="text-sm text-muted-foreground">{t('landing.freeToStart')}</div>
                     </div>
                     <div className="glass-card p-6 text-center group hover:scale-105 transition-all duration-300">
                       <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform shadow-lg">
                         <Award className="w-7 h-7 text-white" />
                       </div>
                       <div className="text-3xl font-bold gold-text mb-1">5★</div>
-                      <div className="text-sm text-muted-foreground">{isRTL ? 'تجربة مميزة' : 'Premium Experience'}</div>
+                      <div className="text-sm text-muted-foreground">{t('landing.alwaysAvailable')}</div>
                     </div>
                   </div>
                 </div>
@@ -472,11 +436,10 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary mb-6">
               <Users className="w-4 h-4" />
-              <span className="text-sm font-medium">{isRTL ? 'آراء المستخدمين' : 'User Reviews'}</span>
+              <span className="text-sm font-medium">{t('landing.userTestimonials')}</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              {isRTL ? 'ماذا يقول' : 'What Our'}
-              <span className="gold-text"> {isRTL ? 'مستخدمونا' : 'Users Say'}</span>
+              {t('landing.userTestimonials')}
             </h2>
           </div>
 
@@ -515,15 +478,13 @@ export default function LandingPage() {
           <div className="max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary mb-8">
               <Rocket className="w-4 h-4" />
-              <span className="text-sm font-medium">{isRTL ? 'ابدأ الآن' : 'Get Started'}</span>
+              <span className="text-sm font-medium">{t('landing.startFree')}</span>
             </div>
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8">
-              {isRTL ? 'جاهز لتغيير حياتك؟' : 'Ready to Transform Your Life?'}
+              {t('landing.readyToTransform')}
             </h2>
             <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed">
-              {isRTL 
-                ? 'انضم إلى آلاف المستخدمين الذين غيّروا طريقة إدارتهم لحياتهم مع LIFE TENT'
-                : 'Join thousands of users who have transformed the way they manage their lives with LIFE TENT'}
+              {t('landing.ctaDescription')}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
               <Button 
@@ -533,12 +494,12 @@ export default function LandingPage() {
                 className="text-xl px-12 py-8 gap-3 shadow-2xl hover:shadow-primary/30 transition-all duration-300 hover:scale-105 group"
               >
                 <MousePointerClick className="w-6 h-6 group-hover:animate-pulse" />
-                {isRTL ? 'سجّل مجاناً الآن' : 'Sign Up Free Now'}
+                {t('landing.startNowFree')}
                 {isRTL ? <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" /> : <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />}
               </Button>
             </div>
             <p className="text-sm text-muted-foreground mt-6">
-              {isRTL ? 'لا حاجة لبطاقة ائتمان • إعداد في دقيقتين' : 'No credit card required • Setup in 2 minutes'}
+              {t('landing.noCardRequired')}
             </p>
           </div>
         </div>
@@ -554,14 +515,12 @@ export default function LandingPage() {
               </div>
               <div>
                 <span className="text-2xl font-bold gold-text block">LIFE TENT</span>
-                <span className="text-xs text-muted-foreground">{isRTL ? 'نظام حياتك المتكامل' : 'Your Complete Life System'}</span>
+                <span className="text-xs text-muted-foreground">{t('landing.yourLifeSystem')}</span>
               </div>
             </div>
             
             <p className="text-sm text-muted-foreground text-center">
-              {isRTL 
-                ? '© 2025 LIFE TENT. جميع الحقوق محفوظة.'
-                : '© 2025 LIFE TENT. All rights reserved.'}
+              {t('landing.copyright')}
             </p>
             
             <div className="flex items-center gap-3">
@@ -571,7 +530,7 @@ export default function LandingPage() {
                 onClick={() => navigate('/auth')}
                 className="hover:bg-primary/10"
               >
-                {isRTL ? 'تسجيل الدخول' : 'Sign In'}
+                {t('landing.signIn')}
               </Button>
               <Button 
                 variant="gold" 
@@ -579,7 +538,7 @@ export default function LandingPage() {
                 onClick={() => navigate('/auth')}
                 className="shadow-lg"
               >
-                {isRTL ? 'إنشاء حساب' : 'Sign Up'}
+                {t('landing.startFree')}
               </Button>
             </div>
           </div>
