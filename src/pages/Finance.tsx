@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { FinanceCharts } from '@/components/finance/FinanceCharts';
+import { MonthlyReport } from '@/components/finance/MonthlyReport';
 
 const currencies = ['SAR', 'USD', 'AED', 'KWD'];
 
@@ -369,6 +370,9 @@ export default function Finance() {
 
       {/* Charts */}
       <FinanceCharts />
+      
+      {/* Monthly Report */}
+      <MonthlyReport />
     </MainLayout>
   );
 }
