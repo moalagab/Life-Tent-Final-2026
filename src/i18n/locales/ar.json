@@ -1,5 +1,19 @@
 {
   "common": {
+    "add": "إضافة",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "viewAll": "عرض الكل",
+    "today": "اليوم",
+    "progress": "التقدم",
+    "all": "الكل",
+    "fillAllFields": "يرجى ملء جميع الحقول المطلوبة",
+    "error": "حدث خطأ",
+    "loading": "جاري التحميل..."
+  },
+  "common": {
     "dashboard": "لوحة التحكم",
     "projects": "المشاريع",
     "tasks": "المهام",

@@ -25,6 +25,24 @@ export function useGoals() {
   });
 }
 
+export function useKeyResults() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['key-results', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('key_results')
+        .select('*')
+        .order('created_at', { ascending: true });
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+}
+
 export function useGoalsWithKeyResults() {
   const { user } = useAuth();
 
