@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
 import {
   LayoutDashboard,
   FolderKanban,
@@ -15,6 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Tent,
+  LogOut,
 } from 'lucide-react';
 
 const navItems = [
@@ -32,6 +34,13 @@ const navItems = [
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut, user } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
 
   return (
     <aside
@@ -120,6 +129,22 @@ export function Sidebar() {
             </span>
           )}
         </NavLink>
+
+        <button
+          onClick={handleSignOut}
+          className={cn(
+            'flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 w-full mt-1',
+            'hover:bg-destructive/20 group text-destructive',
+            collapsed && 'justify-center'
+          )}
+        >
+          <LogOut className="w-5 h-5" />
+          {!collapsed && (
+            <span className="text-sm font-medium">
+              تسجيل خروج
+            </span>
+          )}
+        </button>
         
         <button
           onClick={() => setCollapsed(!collapsed)}
