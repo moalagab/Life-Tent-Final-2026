@@ -87,8 +87,9 @@ export function useUploadAvatar() {
       if (!user) throw new Error('Not authenticated');
 
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
+      const fileName = `${Date.now()}.${fileExt}`;
+      // Use user.id as folder name to match RLS policy
+      const filePath = `${user.id}/${fileName}`;
 
       // Upload to storage
       const { error: uploadError } = await supabase.storage
