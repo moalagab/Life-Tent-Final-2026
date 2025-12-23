@@ -1,13 +1,42 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { MainLayout } from '@/components/layout/MainLayout';
+import { GreetingHeader } from '@/components/dashboard/GreetingHeader';
+import { PrayerWidget } from '@/components/dashboard/PrayerWidget';
+import { FinanceSnapshot } from '@/components/dashboard/FinanceSnapshot';
+import { FocusTasks } from '@/components/dashboard/FocusTasks';
+import { HabitStreaks } from '@/components/dashboard/HabitStreaks';
+import { QuickActions } from '@/components/dashboard/QuickActions';
+import { ProjectsOverview } from '@/components/dashboard/ProjectsOverview';
+import { UpcomingEvents } from '@/components/dashboard/UpcomingEvents';
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <MainLayout>
+      <GreetingHeader />
+      
+      <QuickActions />
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+        {/* Left Column - Prayer & Finance */}
+        <div className="lg:col-span-3 space-y-6">
+          <PrayerWidget />
+          <FinanceSnapshot />
+        </div>
+
+        {/* Center Column - Tasks & Projects */}
+        <div className="lg:col-span-6 space-y-6">
+          <ProjectsOverview />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FocusTasks />
+            <HabitStreaks />
+          </div>
+        </div>
+
+        {/* Right Column - Events */}
+        <div className="lg:col-span-3">
+          <UpcomingEvents />
+        </div>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 
