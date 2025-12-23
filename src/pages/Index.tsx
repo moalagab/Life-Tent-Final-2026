@@ -7,8 +7,8 @@ import { HabitStreaks } from '@/components/dashboard/HabitStreaks';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { ProjectsOverview } from '@/components/dashboard/ProjectsOverview';
 import { UpcomingEvents } from '@/components/dashboard/UpcomingEvents';
+import { GoalProgress } from '@/components/dashboard/GoalProgress';
 import { useAutoReminders } from '@/hooks/useAutoReminders';
-import { cn } from '@/lib/utils';
 
 const Index = () => {
   // Initialize automatic reminders
@@ -50,11 +50,14 @@ const Index = () => {
                 <HabitStreaks />
               </section>
             </div>
+            <section className="slide-up" style={{ animationDelay: '400ms' }}>
+              <GoalProgress />
+            </section>
           </div>
 
           {/* Right Column - Events */}
           <div className="lg:col-span-3">
-            <section className="slide-up" style={{ animationDelay: '400ms' }}>
+            <section className="slide-up" style={{ animationDelay: '450ms' }}>
               <UpcomingEvents />
             </section>
           </div>
