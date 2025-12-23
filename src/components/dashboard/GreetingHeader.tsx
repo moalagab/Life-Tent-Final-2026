@@ -6,37 +6,51 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
-function getGreeting(lang: string): string {
-  const hour = new Date().getHours();
-  if (lang === 'ar') {
-    if (hour < 5) return 'طابت ليلتك';
-    if (hour < 12) return 'صباح الخير';
-    if (hour < 17) return 'مساء الخير';
-    if (hour < 21) return 'مساء النور';
-    return 'طابت ليلتك';
-  }
-  if (hour < 5) return 'Good Night';
-  if (hour < 12) return 'Good Morning';
-  if (hour < 17) return 'Good Afternoon';
-  if (hour < 21) return 'Good Evening';
-  return 'Good Night';
+interface GreetingInfo {
+  greeting: string;
+  subMessage: string;
+  emoji: string;
 }
 
-function getGreetingEmoji(): string {
+function getGreetingInfo(lang: string): GreetingInfo {
   const hour = new Date().getHours();
-  if (hour < 5) return '🌙';
-  if (hour < 12) return '☀️';
-  if (hour < 17) return '🌤️';
-  if (hour < 21) return '🌅';
-  return '🌙';
+  
+  if (lang === 'ar') {
+    if (hour < 5) {
+      return { greeting: 'طابت ليلتك', subMessage: 'الراحة مهمة للإنتاجية', emoji: '🌙' };
+    }
+    if (hour < 12) {
+      return { greeting: 'صباح الخير', subMessage: 'يوم جديد مليء بالفرص', emoji: '☀️' };
+    }
+    if (hour < 17) {
+      return { greeting: 'مساء الخير', subMessage: 'استمر في تحقيق أهدافك', emoji: '🌤️' };
+    }
+    if (hour < 21) {
+      return { greeting: 'مساء النور', subMessage: 'وقت مثالي لمراجعة إنجازاتك', emoji: '🌅' };
+    }
+    return { greeting: 'طابت ليلتك', subMessage: 'أحسنت اليوم، استرح جيداً', emoji: '🌙' };
+  }
+  
+  if (hour < 5) {
+    return { greeting: 'Good Night', subMessage: 'Rest is key to productivity', emoji: '🌙' };
+  }
+  if (hour < 12) {
+    return { greeting: 'Good Morning', subMessage: 'A new day full of opportunities', emoji: '☀️' };
+  }
+  if (hour < 17) {
+    return { greeting: 'Good Afternoon', subMessage: 'Keep achieving your goals', emoji: '🌤️' };
+  }
+  if (hour < 21) {
+    return { greeting: 'Good Evening', subMessage: 'Perfect time to review your progress', emoji: '🌅' };
+  }
+  return { greeting: 'Good Night', subMessage: 'Great job today, rest well', emoji: '🌙' };
 }
 
 export function GreetingHeader() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const { currentLanguage, isRTL, t } = useLanguage();
   const { user } = useAuth();
-  const greeting = getGreeting(currentLanguage);
-  const emoji = getGreetingEmoji();
+  const greetingInfo = getGreetingInfo(currentLanguage);
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -79,9 +93,9 @@ export function GreetingHeader() {
           {/* Greeting Text */}
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <span className="text-3xl">{emoji}</span>
+              <span className="text-3xl">{greetingInfo.emoji}</span>
               <h1 className="text-3xl lg:text-5xl font-bold tracking-tight">
-                <span className="text-foreground">{greeting}</span>
+                <span className="text-foreground">{greetingInfo.greeting}</span>
                 <span className="text-muted-foreground/50">، </span>
                 <span className="relative inline-block">
                   <span className="gold-text">{userName}</span>
@@ -90,7 +104,7 @@ export function GreetingHeader() {
               </h1>
             </div>
             <p className="text-muted-foreground text-base lg:text-lg flex items-center gap-2">
-              {t('dashboard.subtitle')}
+              {greetingInfo.subMessage}
             </p>
           </div>
         </div>

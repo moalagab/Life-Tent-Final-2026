@@ -140,7 +140,7 @@
 
 @layer components {
   .glass-card {
-    @apply relative overflow-hidden rounded-2xl;
+    @apply relative overflow-hidden rounded-2xl transition-all duration-300;
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -148,10 +148,23 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   }
 
+  .glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    border-color: hsla(43, 100%, 50%, 0.2);
+  }
+
   .dark .glass-card {
     box-shadow: 
       0 8px 32px rgba(0, 0, 0, 0.3),
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .dark .glass-card:hover {
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      0 0 20px hsla(43, 100%, 50%, 0.1);
   }
 
   .glass-card::before {
@@ -162,6 +175,78 @@
     right: 0;
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  }
+
+  /* Interactive Card with enhanced hover */
+  .interactive-card {
+    @apply relative overflow-hidden rounded-2xl transition-all duration-300 cursor-pointer;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+  }
+
+  .interactive-card:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 
+      0 20px 40px rgba(0, 0, 0, 0.15),
+      0 0 0 1px hsla(43, 100%, 50%, 0.2);
+  }
+
+  .interactive-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, hsla(43, 100%, 50%, 0) 0%, hsla(43, 100%, 50%, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .interactive-card:hover::after {
+    opacity: 1;
+  }
+
+  /* Button hover enhancements */
+  .btn-hover-lift {
+    @apply transition-all duration-300;
+  }
+
+  .btn-hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px hsla(43, 100%, 50%, 0.25);
+  }
+
+  .btn-hover-lift:active {
+    transform: translateY(0);
+  }
+
+  /* Icon hover effect */
+  .icon-hover {
+    @apply transition-all duration-300;
+  }
+
+  .icon-hover:hover {
+    transform: scale(1.1) rotate(5deg);
+    color: hsl(43, 100%, 50%);
+  }
+
+  /* Link underline animation */
+  .link-underline {
+    @apply relative;
+  }
+
+  .link-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: hsl(43, 100%, 50%);
+    transition: width 0.3s ease;
+  }
+
+  .link-underline:hover::after {
+    width: 100%;
   }
 
   .gold-glow {
@@ -187,6 +272,29 @@
     animation: shimmer 2s linear infinite;
     background-size: 200% 100%;
   }
+
+  /* Hover glow effect */
+  .hover-glow {
+    @apply transition-all duration-300;
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 0 30px hsla(43, 100%, 50%, 0.2);
+  }
+
+  /* Subtle bounce on hover */
+  .hover-bounce {
+    @apply transition-transform duration-300;
+  }
+
+  .hover-bounce:hover {
+    animation: subtle-bounce 0.5s ease;
+  }
+}
+
+@keyframes subtle-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
 }
 
 @keyframes float {
