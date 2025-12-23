@@ -45,58 +45,56 @@ export function PrayerWidget() {
   ];
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-card/50 backdrop-blur-xl border border-border/50 p-5 h-full">
+    <div className="relative overflow-hidden rounded-2xl bg-card/50 backdrop-blur-xl border border-border/50 p-4 h-auto">
       {/* Decorative Elements */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-24 h-24 bg-gold-500/10 rounded-full blur-2xl" />
+      <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-16 h-16 bg-gold-500/10 rounded-full blur-xl pointer-events-none" />
       
       <div className="relative">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Moon className="w-4 h-4 text-primary" />
+            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Moon className="w-3.5 h-3.5 text-primary" />
             </div>
-            <h3 className="text-lg font-semibold text-foreground">{t('dashboard.prayerTimes')}</h3>
+            <h3 className="text-sm font-semibold text-foreground">{t('dashboard.prayerTimes')}</h3>
           </div>
           {isRamadanPeriod && (
-            <span className="px-3 py-1.5 rounded-full bg-gradient-to-r from-primary/20 to-gold-500/20 text-primary text-xs font-medium border border-primary/20">
-              رمضان كريم 🌙
+            <span className="px-2 py-1 rounded-full bg-gradient-to-r from-primary/20 to-gold-500/20 text-primary text-[10px] font-medium border border-primary/20">
+              رمضان 🌙
             </span>
           )}
         </div>
 
-        {/* Next Prayer Highlight */}
-        <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary to-gold-600 p-5 mb-4">
-          {/* Decorative Pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-2 right-2 w-16 h-16 border-2 border-primary-foreground rounded-full" />
-            <div className="absolute bottom-2 left-2 w-12 h-12 border-2 border-primary-foreground rounded-full" />
+        {/* Next Prayer Highlight - Compact */}
+        <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary to-gold-600 p-3 mb-3">
+          <div className="absolute inset-0 opacity-10 pointer-events-none">
+            <div className="absolute top-1 right-1 w-10 h-10 border border-primary-foreground rounded-full" />
           </div>
           
           <div className="relative flex items-center justify-between">
             <div>
-              <div className="flex items-center gap-2 text-primary-foreground/70 text-sm mb-1">
-                <Clock className="w-4 h-4" />
+              <div className="flex items-center gap-1.5 text-primary-foreground/70 text-[10px] mb-0.5">
+                <Clock className="w-3 h-3" />
                 <span>{t('dashboard.nextPrayer')}</span>
               </div>
-              <p className="text-2xl font-bold text-primary-foreground">
+              <p className="text-base font-bold text-primary-foreground">
                 {currentLanguage === 'ar' ? nextPrayer.prayer.nameAr : nextPrayer.prayer.name}
               </p>
             </div>
             <div className="text-end">
-              <p className="text-3xl font-bold text-primary-foreground tabular-nums">
+              <p className="text-xl font-bold text-primary-foreground tabular-nums">
                 {nextPrayer.prayer.time}
               </p>
-              <p className="text-primary-foreground/70 text-sm mt-1">
+              <p className="text-primary-foreground/70 text-[10px]">
                 {currentLanguage === 'ar' ? `خلال ${nextPrayer.remaining}` : `in ${nextPrayer.remaining}`}
               </p>
             </div>
           </div>
           
           {isRamadanPeriod && nextPrayer.prayer.name === 'Maghrib' && (
-            <div className="mt-4 pt-3 border-t border-primary-foreground/20 text-center">
-              <p className="text-primary-foreground font-medium flex items-center justify-center gap-2">
+            <div className="mt-2 pt-2 border-t border-primary-foreground/20 text-center">
+              <p className="text-primary-foreground text-xs font-medium flex items-center justify-center gap-1">
                 <span>🌙</span>
                 {currentLanguage === 'ar' ? 'وقت الإفطار' : 'Iftar Time'}
               </p>
@@ -104,8 +102,8 @@ export function PrayerWidget() {
           )}
         </div>
 
-        {/* All Prayers List */}
-        <div className="space-y-1">
+        {/* All Prayers List - Compact */}
+        <div className="space-y-0.5">
           {allPrayers.map((prayer, index) => {
             const isNext = prayer.name === nextPrayer.prayer.name;
             const isPast = prayer.timestamp < new Date();
@@ -114,29 +112,28 @@ export function PrayerWidget() {
               <div
                 key={prayer.name}
                 className={cn(
-                  'flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300',
-                  isNext && 'bg-primary/10 border border-primary/20 shadow-sm',
+                  'flex items-center justify-between px-2.5 py-2 rounded-lg transition-all duration-300',
+                  isNext && 'bg-primary/10 border border-primary/20',
                   isPast && !isNext && 'opacity-40',
                   !isNext && !isPast && 'hover:bg-muted/50'
                 )}
-                style={{ animationDelay: `${index * 50}ms` }}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <div className={cn(
-                    'w-8 h-8 rounded-lg flex items-center justify-center',
+                    'w-6 h-6 rounded-md flex items-center justify-center',
                     isNext ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
                   )}>
                     {prayerIcons[prayer.name]}
                   </div>
                   <span className={cn(
-                    'text-sm font-medium',
+                    'text-xs font-medium',
                     isNext ? 'text-foreground' : 'text-muted-foreground'
                   )}>
                     {currentLanguage === 'ar' ? prayer.nameAr : prayer.name}
                   </span>
                 </div>
                 <span className={cn(
-                  'text-sm font-semibold tabular-nums',
+                  'text-xs font-semibold tabular-nums',
                   isNext ? 'text-primary' : 'text-foreground'
                 )}>
                   {prayer.time}
