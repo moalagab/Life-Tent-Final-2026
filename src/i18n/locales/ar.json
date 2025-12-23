@@ -399,6 +399,22 @@
     "longBreakTime": "وقت استراحة طويلة!",
     "workTime": "وقت العمل!",
     "takeBreak": "خذ استراحة",
-    "backToWork": "عد للعمل"
+    "backToWork": "عد للعمل",
+    "timer": "المؤقت",
+    "statistics": "الإحصائيات",
+    "linkToTask": "ربط بمهمة",
+    "selectTask": "اختر مهمة...",
+    "focusingOn": "التركيز على",
+    "todaySessions": "جلسات اليوم",
+    "todayFocusTime": "وقت تركيز اليوم",
+    "totalSessions": "إجمالي الجلسات",
+    "totalHours": "إجمالي الساعات",
+    "thisWeek": "هذا الأسبوع",
+    "avgSession": "متوسط الجلسة",
+    "weeklyActivity": "النشاط الأسبوعي",
+    "focusTime": "وقت التركيز",
+    "sessionsTrend": "اتجاه الجلسات",
+    "sessions": "جلسات",
+    "recentSessions": "الجلسات الأخيرة"
   }
 }
