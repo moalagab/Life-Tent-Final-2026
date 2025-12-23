@@ -1,10 +1,11 @@
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Clock, MapPin } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, addMonths, subMonths } from 'date-fns';
 import { useState } from 'react';
 import { formatHijriDate } from '@/lib/hijri';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface Event {
   id: string;
@@ -31,6 +32,7 @@ const mockEvents: Record<string, Event[]> = {
 };
 
 export default function CalendarPage() {
+  const { t, currentLanguage } = useLanguage();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -45,17 +47,27 @@ export default function CalendarPage() {
   const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
   const selectedEvents = mockEvents[selectedDateStr] || [];
 
+  const weekDays = [
+    t('weekDays.mon'),
+    t('weekDays.tue'),
+    t('weekDays.wed'),
+    t('weekDays.thu'),
+    t('weekDays.fri'),
+    t('weekDays.sat'),
+    t('weekDays.sun')
+  ];
+
   return (
     <MainLayout>
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Calendar</h1>
-            <p className="text-muted-foreground mt-1">Unified timeline with Hijri dates & prayer times</p>
+            <h1 className="text-3xl font-bold text-foreground">{t('calendar.title')}</h1>
+            <p className="text-muted-foreground mt-1">{t('calendar.subtitle')}</p>
           </div>
           <Button variant="gold" size="lg">
-            <Plus className="w-5 h-5 mr-2" />
-            New Event
+            <Plus className="w-5 h-5 me-2" />
+            {t('calendar.newEvent')}
           </Button>
         </div>
       </div>
@@ -84,7 +96,7 @@ export default function CalendarPage() {
                 onClick={() => setCurrentMonth(new Date())}
                 className="px-3 py-2 rounded-lg bg-muted text-sm font-medium hover:bg-muted/80 transition-colors"
               >
-                Today
+                {t('common.today')}
               </button>
               <button
                 onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
@@ -97,7 +109,7 @@ export default function CalendarPage() {
 
           {/* Weekday Headers */}
           <div className="grid grid-cols-7 gap-1 mb-2">
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+            {weekDays.map((day) => (
               <div key={day} className="text-center text-sm text-muted-foreground py-2">
                 {day}
               </div>
@@ -159,17 +171,17 @@ export default function CalendarPage() {
               {format(selectedDate, 'EEEE, MMMM d')}
             </h3>
             <p className="text-sm text-muted-foreground" dir="rtl">
-              {formatHijriDate(selectedDate, 'ar')}
+              {formatHijriDate(selectedDate, currentLanguage as 'ar' | 'en')}
             </p>
           </div>
 
           {selectedEvents.length === 0 ? (
             <div className="text-center py-8">
               <CalendarIcon className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-              <p className="text-muted-foreground">No events scheduled</p>
+              <p className="text-muted-foreground">{t('calendar.noEvents')}</p>
               <Button variant="outline" size="sm" className="mt-4">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Event
+                <Plus className="w-4 h-4 me-2" />
+                {t('calendar.addEvent')}
               </Button>
             </div>
           ) : (
@@ -196,12 +208,12 @@ export default function CalendarPage() {
 
           {/* Time Blocking */}
           <div className="mt-6 pt-6 border-t border-border">
-            <h4 className="text-sm font-medium text-foreground mb-3">Quick Time Block</h4>
+            <h4 className="text-sm font-medium text-foreground mb-3">{t('calendar.quickTimeBlock')}</h4>
             <p className="text-xs text-muted-foreground mb-3">
-              Drag tasks here to schedule them
+              {t('calendar.dragTasks')}
             </p>
             <div className="p-4 rounded-xl border-2 border-dashed border-border text-center">
-              <p className="text-sm text-muted-foreground">Drop a task here</p>
+              <p className="text-sm text-muted-foreground">{t('calendar.dropTask')}</p>
             </div>
           </div>
         </div>

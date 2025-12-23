@@ -25,7 +25,9 @@
     "loading": "جاري التحميل...",
     "noData": "لا توجد بيانات",
     "today": "اليوم",
-    "progress": "التقدم"
+    "progress": "التقدم",
+    "due": "الاستحقاق",
+    "all": "الكل"
   },
   "dashboard": {
     "greeting": "مرحباً",
@@ -105,7 +107,8 @@
     "savingsRate": "معدل الادخار",
     "recentTransactions": "المعاملات الأخيرة",
     "subscriptions": "الاشتراكات",
-    "monthlyTotal": "الإجمالي الشهري"
+    "monthlyTotal": "الإجمالي الشهري",
+    "next": "التالي"
   },
   "habits": {
     "title": "العادات والمزاج",
@@ -133,7 +136,8 @@
     "noEvents": "لا توجد أحداث مجدولة",
     "addEvent": "إضافة حدث",
     "quickTimeBlock": "حظر وقت سريع",
-    "dropTask": "أسقط مهمة هنا"
+    "dropTask": "أسقط مهمة هنا",
+    "dragTasks": "اسحب المهام هنا لجدولتها"
   },
   "knowledge": {
     "title": "قاعدة المعرفة",
@@ -191,15 +195,47 @@
     "email": "البريد الإلكتروني",
     "password": "كلمة المرور",
     "fullName": "الاسم الكامل",
+    "enterName": "أدخل اسمك",
     "forgotPassword": "نسيت كلمة المرور؟",
     "noAccount": "ليس لديك حساب؟",
     "haveAccount": "لديك حساب بالفعل؟",
-    "resetPassword": "إعادة تعيين كلمة المرور",
-    "sendResetLink": "إرسال رابط إعادة التعيين",
+    "resetPassword": "استعادة كلمة المرور",
+    "sendResetLink": "إرسال رابط الاستعادة",
     "backToSignIn": "العودة لتسجيل الدخول",
     "updatePassword": "تحديث كلمة المرور",
     "newPassword": "كلمة المرور الجديدة",
-    "confirmPassword": "تأكيد كلمة المرور"
+    "confirmPassword": "تأكيد كلمة المرور",
+    "back": "العودة",
+    "resetDesc": "أدخل بريدك الإلكتروني وسنرسل لك رابط لإعادة تعيين كلمة المرور",
+    "checkEmail": "تحقق من بريدك",
+    "resetSent": "تم إرسال رابط إعادة تعيين كلمة المرور إلى",
+    "processing": "جاري المعالجة...",
+    "sending": "جاري الإرسال...",
+    "updating": "جاري التحديث...",
+    "createAccount": "إنشاء حساب جديد",
+    "tagline": "نظام إدارة الحياة المتكامل",
+    "setNewPassword": "تعيين كلمة مرور جديدة",
+    "copyright": "© 2025 LIFE TENT. جميع الحقوق محفوظة",
+    "passwordMinLength": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+    "passwordsNotMatch": "كلمات المرور غير متطابقة",
+    "error": "خطأ",
+    "sent": "تم الإرسال!",
+    "checkEmailReset": "تحقق من بريدك الإلكتروني لإعادة تعيين كلمة المرور",
+    "loginError": "خطأ في تسجيل الدخول",
+    "invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+    "welcome": "مرحباً بك!",
+    "loginSuccess": "تم تسجيل الدخول بنجاح",
+    "userExists": "المستخدم موجود",
+    "emailRegistered": "هذا البريد الإلكتروني مسجل بالفعل. جرب تسجيل الدخول",
+    "accountCreated": "تم إنشاء الحساب!",
+    "welcomeLifeTent": "مرحباً بك في LIFE TENT",
+    "success": "تم بنجاح!",
+    "passwordUpdated": "تم تحديث كلمة المرور بنجاح"
+  },
+  "notFound": {
+    "title": "404",
+    "subtitle": "عذراً! الصفحة غير موجودة",
+    "returnHome": "العودة للصفحة الرئيسية"
   },
   "weekDays": {
     "mon": "اثنين",
@@ -209,5 +245,10 @@
     "fri": "جمعة",
     "sat": "سبت",
     "sun": "أحد"
+  },
+  "validation": {
+    "invalidEmail": "البريد الإلكتروني غير صحيح",
+    "passwordMinLength": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+    "nameMinLength": "الاسم يجب أن يكون حرفين على الأقل"
   }
 }

@@ -25,7 +25,9 @@
     "loading": "Loading...",
     "noData": "No data",
     "today": "Today",
-    "progress": "Progress"
+    "progress": "Progress",
+    "due": "Due",
+    "all": "All"
   },
   "dashboard": {
     "greeting": "Hello",
@@ -105,7 +107,8 @@
     "savingsRate": "Savings Rate",
     "recentTransactions": "Recent Transactions",
     "subscriptions": "Subscriptions",
-    "monthlyTotal": "Monthly Total"
+    "monthlyTotal": "Monthly Total",
+    "next": "Next"
   },
   "habits": {
     "title": "Habits & Mood",
@@ -133,7 +136,8 @@
     "noEvents": "No events scheduled",
     "addEvent": "Add Event",
     "quickTimeBlock": "Quick Time Block",
-    "dropTask": "Drop a task here"
+    "dropTask": "Drop a task here",
+    "dragTasks": "Drag tasks here to schedule them"
   },
   "knowledge": {
     "title": "Knowledge Base",
@@ -191,6 +195,7 @@
     "email": "Email",
     "password": "Password",
     "fullName": "Full Name",
+    "enterName": "Enter your name",
     "forgotPassword": "Forgot password?",
     "noAccount": "Don't have an account?",
     "haveAccount": "Already have an account?",
@@ -199,7 +204,38 @@
     "backToSignIn": "Back to Sign In",
     "updatePassword": "Update Password",
     "newPassword": "New Password",
-    "confirmPassword": "Confirm Password"
+    "confirmPassword": "Confirm Password",
+    "back": "Back",
+    "resetDesc": "Enter your email and we'll send you a link to reset your password",
+    "checkEmail": "Check your email",
+    "resetSent": "Password reset link has been sent to",
+    "processing": "Processing...",
+    "sending": "Sending...",
+    "updating": "Updating...",
+    "createAccount": "Create new account",
+    "tagline": "Integrated Life Management System",
+    "setNewPassword": "Set new password",
+    "copyright": "© 2025 LIFE TENT. All rights reserved",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "passwordsNotMatch": "Passwords do not match",
+    "error": "Error",
+    "sent": "Sent!",
+    "checkEmailReset": "Check your email to reset your password",
+    "loginError": "Login Error",
+    "invalidCredentials": "Invalid email or password",
+    "welcome": "Welcome!",
+    "loginSuccess": "Successfully signed in",
+    "userExists": "User exists",
+    "emailRegistered": "This email is already registered. Try signing in",
+    "accountCreated": "Account created!",
+    "welcomeLifeTent": "Welcome to LIFE TENT",
+    "success": "Success!",
+    "passwordUpdated": "Password updated successfully"
+  },
+  "notFound": {
+    "title": "404",
+    "subtitle": "Oops! Page not found",
+    "returnHome": "Return to Home"
   },
   "weekDays": {
     "mon": "Mon",
@@ -209,5 +245,10 @@
     "fri": "Fri",
     "sat": "Sat",
     "sun": "Sun"
+  },
+  "validation": {
+    "invalidEmail": "Invalid email address",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "nameMinLength": "Name must be at least 2 characters"
   }
 }

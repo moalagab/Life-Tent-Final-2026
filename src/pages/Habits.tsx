@@ -2,6 +2,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Flame, Plus, TrendingUp, Smile, Frown, Meh, Zap, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface Habit {
   id: string;
@@ -19,8 +20,6 @@ const mockHabits: Habit[] = [
   { id: '4', name: 'Water Intake', icon: '💧', streak: 30, completedDays: [true, true, true, true, true, true, true], color: 'bg-blue-500' },
   { id: '5', name: 'Quran Reading', icon: '📖', streak: 45, completedDays: [true, true, true, true, true, true, true], color: 'bg-emerald-500' },
 ];
-
-const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 // Generate mock contribution data for the year
 const generateContributionData = () => {
@@ -49,17 +48,35 @@ const getContributionColor = (level: number) => {
 };
 
 export default function Habits() {
+  const { t } = useLanguage();
+
+  const weekDays = [
+    t('weekDays.mon'),
+    t('weekDays.tue'),
+    t('weekDays.wed'),
+    t('weekDays.thu'),
+    t('weekDays.fri'),
+    t('weekDays.sat'),
+    t('weekDays.sun')
+  ];
+
+  const moodOptions = [
+    { icon: Frown, label: t('habits.bad'), value: 1 },
+    { icon: Meh, label: t('habits.okay'), value: 2 },
+    { icon: Smile, label: t('habits.good'), value: 3 },
+  ];
+
   return (
     <MainLayout>
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Habits & Mood</h1>
-            <p className="text-muted-foreground mt-1">Track your daily habits and emotional wellbeing</p>
+            <h1 className="text-3xl font-bold text-foreground">{t('habits.title')}</h1>
+            <p className="text-muted-foreground mt-1">{t('habits.subtitle')}</p>
           </div>
           <Button variant="gold" size="lg">
-            <Plus className="w-5 h-5 mr-2" />
-            New Habit
+            <Plus className="w-5 h-5 me-2" />
+            {t('habits.newHabit')}
           </Button>
         </div>
       </div>
@@ -68,10 +85,10 @@ export default function Habits() {
         {/* Habits Tracker */}
         <div className="lg:col-span-2 glass-card p-5">
           <div className="flex items-center justify-between mb-5">
-            <h3 className="text-lg font-semibold text-foreground">Daily Habits</h3>
+            <h3 className="text-lg font-semibold text-foreground">{t('habits.dailyHabits')}</h3>
             <div className="flex items-center gap-1 text-primary">
               <Flame className="w-5 h-5" />
-              <span className="font-bold">{mockHabits.reduce((acc, h) => acc + h.streak, 0)} total days</span>
+              <span className="font-bold">{mockHabits.reduce((acc, h) => acc + h.streak, 0)} {t('habits.totalDays')}</span>
             </div>
           </div>
 
@@ -88,7 +105,7 @@ export default function Habits() {
                       <h4 className="font-medium text-foreground">{habit.name}</h4>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Flame className="w-3 h-3 text-destructive" />
-                        <span>{habit.streak} day streak</span>
+                        <span>{habit.streak} {t('habits.dayStreak')}</span>
                       </div>
                     </div>
                   </div>
@@ -116,18 +133,14 @@ export default function Habits() {
 
         {/* Mood Tracker */}
         <div className="glass-card p-5">
-          <h3 className="text-lg font-semibold text-foreground mb-5">Today's Mood</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-5">{t('habits.todaysMood')}</h3>
 
           <div className="space-y-6">
             {/* Mood Selection */}
             <div>
-              <p className="text-sm text-muted-foreground mb-3">How are you feeling?</p>
+              <p className="text-sm text-muted-foreground mb-3">{t('habits.howFeeling')}</p>
               <div className="flex justify-between">
-                {[
-                  { icon: Frown, label: 'Bad', value: 1 },
-                  { icon: Meh, label: 'Okay', value: 2 },
-                  { icon: Smile, label: 'Good', value: 3 },
-                ].map((mood) => (
+                {moodOptions.map((mood) => (
                   <button
                     key={mood.value}
                     className={cn(
@@ -149,7 +162,7 @@ export default function Habits() {
 
             {/* Energy Level */}
             <div>
-              <p className="text-sm text-muted-foreground mb-3">Energy Level</p>
+              <p className="text-sm text-muted-foreground mb-3">{t('habits.energyLevel')}</p>
               <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4 text-primary" />
                 <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
@@ -161,7 +174,7 @@ export default function Habits() {
 
             {/* Sleep Quality */}
             <div>
-              <p className="text-sm text-muted-foreground mb-3">Sleep Quality</p>
+              <p className="text-sm text-muted-foreground mb-3">{t('habits.sleepQuality')}</p>
               <div className="flex items-center gap-2">
                 <Moon className="w-4 h-4 text-purple-500" />
                 <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
@@ -175,7 +188,7 @@ export default function Habits() {
             <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-foreground">AI Insight</span>
+                <span className="text-sm font-medium text-foreground">{t('habits.aiInsight')}</span>
               </div>
               <p className="text-sm text-muted-foreground">
                 Your mood is 20% higher on days you complete morning reading. Keep it up!
@@ -187,7 +200,7 @@ export default function Habits() {
 
       {/* Contribution Graph */}
       <div className="glass-card p-5 mt-6">
-        <h3 className="text-lg font-semibold text-foreground mb-5">Yearly Activity</h3>
+        <h3 className="text-lg font-semibold text-foreground mb-5">{t('habits.yearlyActivity')}</h3>
         <div className="overflow-x-auto">
           <div className="flex gap-1 min-w-max">
             {contributionData.map((week, weekIndex) => (
@@ -207,11 +220,11 @@ export default function Habits() {
           </div>
         </div>
         <div className="flex items-center gap-2 mt-4 text-xs text-muted-foreground">
-          <span>Less</span>
+          <span>{t('habits.less')}</span>
           {[0, 1, 2, 3, 4].map((level) => (
             <div key={level} className={cn('w-3 h-3 rounded-sm', getContributionColor(level))} />
           ))}
-          <span>More</span>
+          <span>{t('habits.more')}</span>
         </div>
       </div>
     </MainLayout>

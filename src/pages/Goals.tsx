@@ -2,6 +2,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Target, Plus, TrendingUp, AlertCircle, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface KeyResult {
   id: string;
@@ -75,34 +76,51 @@ function getProgressIcon(progress: number) {
 }
 
 export default function Goals() {
+  const { t } = useLanguage();
+
+  const categoryLabels: Record<string, string> = {
+    Financial: t('goals.category.financial'),
+    Customer: t('goals.category.customer'),
+    Processes: t('goals.category.processes'),
+    Learning: t('goals.category.learning'),
+  };
+
+  const tabs = [
+    { id: 'All', label: t('goals.category.all') },
+    { id: 'Financial', label: t('goals.category.financial') },
+    { id: 'Customer', label: t('goals.category.customer') },
+    { id: 'Processes', label: t('goals.category.processes') },
+    { id: 'Learning', label: t('goals.category.learning') },
+  ];
+
   return (
     <MainLayout>
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Goals & OKRs</h1>
-            <p className="text-muted-foreground mt-1">Balanced Scorecard strategy center</p>
+            <h1 className="text-3xl font-bold text-foreground">{t('goals.title')}</h1>
+            <p className="text-muted-foreground mt-1">{t('goals.subtitle')}</p>
           </div>
           <Button variant="gold" size="lg">
-            <Plus className="w-5 h-5 mr-2" />
-            New Objective
+            <Plus className="w-5 h-5 me-2" />
+            {t('goals.newObjective')}
           </Button>
         </div>
       </div>
 
       {/* Category Tabs */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-        {['All', 'Financial', 'Customer', 'Processes', 'Learning'].map((tab) => (
+        {tabs.map((tab) => (
           <button
-            key={tab}
+            key={tab.id}
             className={cn(
               'px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap',
-              tab === 'All' 
+              tab.id === 'All' 
                 ? 'bg-primary text-primary-foreground' 
                 : 'bg-muted/50 text-muted-foreground hover:bg-muted'
             )}
           >
-            {tab}
+            {tab.label}
           </button>
         ))}
       </div>
@@ -122,7 +140,7 @@ export default function Goals() {
                     'px-2 py-0.5 rounded-full text-xs font-medium border',
                     categoryColors[objective.category]
                   )}>
-                    {objective.category}
+                    {categoryLabels[objective.category]}
                   </span>
                 </div>
               </div>
@@ -144,7 +162,7 @@ export default function Goals() {
 
             {/* Key Results */}
             <div className="space-y-4">
-              <h4 className="text-sm font-medium text-muted-foreground">Key Results</h4>
+              <h4 className="text-sm font-medium text-muted-foreground">{t('goals.keyResults')}</h4>
               {objective.keyResults.map((kr) => {
                 const progress = Math.min((kr.current / kr.target) * 100, 100);
                 

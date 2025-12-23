@@ -2,6 +2,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { BookOpen, Film, Plus, Search, Star, Target, ArrowUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface Book {
   id: string;
@@ -35,31 +36,54 @@ const mockMovies: Movie[] = [
   { id: '3', title: 'Dune: Part Two', year: 2024, poster: '🎞️', rating: 0, status: 'want-to-watch' },
 ];
 
-const statusColors = {
-  reading: 'bg-primary/10 text-primary border-primary/20',
-  'want-to-read': 'bg-muted text-muted-foreground border-muted',
-  read: 'bg-success/10 text-success border-success/20',
-  abandoned: 'bg-destructive/10 text-destructive border-destructive/20',
-  watching: 'bg-primary/10 text-primary border-primary/20',
-  'want-to-watch': 'bg-muted text-muted-foreground border-muted',
-  watched: 'bg-success/10 text-success border-success/20',
-};
-
 const booksRead = 18;
 const booksGoal = 24;
 
 export default function Studio() {
+  const { t } = useLanguage();
+
+  const statusColors: Record<string, string> = {
+    reading: 'bg-primary/10 text-primary border-primary/20',
+    'want-to-read': 'bg-muted text-muted-foreground border-muted',
+    read: 'bg-success/10 text-success border-success/20',
+    abandoned: 'bg-destructive/10 text-destructive border-destructive/20',
+    watching: 'bg-primary/10 text-primary border-primary/20',
+    'want-to-watch': 'bg-muted text-muted-foreground border-muted',
+    watched: 'bg-success/10 text-success border-success/20',
+  };
+
+  const statusLabels: Record<string, string> = {
+    reading: t('studio.status.reading'),
+    'want-to-read': t('studio.status.wantToRead'),
+    read: t('studio.status.read'),
+    watching: t('studio.status.watching'),
+    'want-to-watch': t('studio.status.wantToWatch'),
+    watched: t('studio.status.watched'),
+  };
+
+  const tabs = [
+    { id: 'books', label: t('studio.books'), icon: BookOpen },
+    { id: 'movies', label: t('studio.moviesShows'), icon: Film },
+  ];
+
+  const shelfFilters = [
+    t('common.all'),
+    t('studio.status.reading'),
+    t('studio.status.wantToRead'),
+    t('studio.status.read')
+  ];
+
   return (
     <MainLayout>
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Studio</h1>
-            <p className="text-muted-foreground mt-1">Your personal media library</p>
+            <h1 className="text-3xl font-bold text-foreground">{t('studio.title')}</h1>
+            <p className="text-muted-foreground mt-1">{t('studio.subtitle')}</p>
           </div>
           <Button variant="gold" size="lg">
-            <Plus className="w-5 h-5 mr-2" />
-            Add Item
+            <Plus className="w-5 h-5 me-2" />
+            {t('studio.addItem')}
           </Button>
         </div>
       </div>
@@ -72,8 +96,8 @@ export default function Studio() {
               <Target className="w-6 h-6 text-primary-foreground" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">2024 Reading Goal</h3>
-              <p className="text-sm text-muted-foreground">{booksRead} of {booksGoal} books</p>
+              <h3 className="font-semibold text-foreground">2024 {t('studio.readingGoal')}</h3>
+              <p className="text-sm text-muted-foreground">{booksRead} {t('studio.booksOf')} {booksGoal} {t('studio.books').toLowerCase()}</p>
             </div>
           </div>
           <span className="text-2xl font-bold gold-text">{Math.round((booksRead / booksGoal) * 100)}%</span>
@@ -88,10 +112,7 @@ export default function Studio() {
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6">
-        {[
-          { id: 'books', label: 'Books', icon: BookOpen },
-          { id: 'movies', label: 'Movies & Shows', icon: Film },
-        ].map((tab) => (
+        {tabs.map((tab) => (
           <button
             key={tab.id}
             className={cn(
@@ -111,12 +132,12 @@ export default function Studio() {
         {/* Books Section */}
         <div className="glass-card p-5">
           <div className="flex items-center justify-between mb-5">
-            <h3 className="text-lg font-semibold text-foreground">Books</h3>
+            <h3 className="text-lg font-semibold text-foreground">{t('studio.books')}</h3>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search by title or ISBN..."
+                placeholder={t('studio.searchBooks')}
                 className="pl-10 pr-4 py-2 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 w-48"
               />
             </div>
@@ -124,12 +145,12 @@ export default function Studio() {
 
           {/* Shelf Filters */}
           <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-            {['All', 'Reading', 'Want to Read', 'Read'].map((shelf) => (
+            {shelfFilters.map((shelf, index) => (
               <button
                 key={shelf}
                 className={cn(
                   'px-3 py-1 rounded-full text-xs font-medium transition-all whitespace-nowrap',
-                  shelf === 'All' 
+                  index === 0 
                     ? 'bg-primary/10 text-primary' 
                     : 'bg-muted/50 text-muted-foreground hover:bg-muted'
                 )}
@@ -179,7 +200,7 @@ export default function Studio() {
                     'px-2 py-0.5 rounded-full text-xs font-medium border',
                     statusColors[book.status]
                   )}>
-                    {book.status.replace('-', ' ')}
+                    {statusLabels[book.status]}
                   </span>
                 </div>
               </div>
@@ -190,9 +211,9 @@ export default function Studio() {
         {/* Movies Section */}
         <div className="glass-card p-5">
           <div className="flex items-center justify-between mb-5">
-            <h3 className="text-lg font-semibold text-foreground">Movies & Shows</h3>
+            <h3 className="text-lg font-semibold text-foreground">{t('studio.moviesShows')}</h3>
             <button className="text-primary text-sm font-medium hover:underline flex items-center gap-1">
-              View All <ArrowUpRight className="w-3 h-3" />
+              {t('common.viewAll')} <ArrowUpRight className="w-3 h-3" />
             </button>
           </div>
 
@@ -227,7 +248,7 @@ export default function Studio() {
                     'px-2 py-0.5 rounded-full text-xs font-medium border',
                     statusColors[movie.status]
                   )}>
-                    {movie.status.replace('-', ' ')}
+                    {statusLabels[movie.status]}
                   </span>
                 </div>
               </div>

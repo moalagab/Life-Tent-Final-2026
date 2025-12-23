@@ -7,23 +7,26 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Mail, Lock, User, Tent, ArrowLeft } from 'lucide-react';
 import { z } from 'zod';
-
-const loginSchema = z.object({
-  email: z.string().trim().email({ message: "Invalid email address" }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" })
-});
-
-const signupSchema = loginSchema.extend({
-  fullName: z.string().trim().min(2, { message: "Name must be at least 2 characters" }).max(100)
-});
-
-const resetSchema = z.object({
-  email: z.string().trim().email({ message: "Invalid email address" })
-});
+import { useLanguage } from '@/hooks/useLanguage';
 
 type AuthMode = 'login' | 'signup' | 'forgot';
 
 export default function Auth() {
+  const { t } = useLanguage();
+  
+  const loginSchema = z.object({
+    email: z.string().trim().email({ message: t('validation.invalidEmail') }),
+    password: z.string().min(6, { message: t('validation.passwordMinLength') })
+  });
+
+  const signupSchema = loginSchema.extend({
+    fullName: z.string().trim().min(2, { message: t('validation.nameMinLength') }).max(100)
+  });
+
+  const resetSchema = z.object({
+    email: z.string().trim().email({ message: t('validation.invalidEmail') })
+  });
+
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -84,15 +87,15 @@ export default function Auth() {
         const { error } = await resetPassword(email.trim());
         if (error) {
           toast({
-            title: "خطأ",
+            title: t('auth.error'),
             description: error.message,
             variant: "destructive"
           });
         } else {
           setResetSent(true);
           toast({
-            title: "تم الإرسال!",
-            description: "تحقق من بريدك الإلكتروني لإعادة تعيين كلمة المرور"
+            title: t('auth.sent'),
+            description: t('auth.checkEmailReset')
           });
         }
       } else if (mode === 'login') {
@@ -100,21 +103,21 @@ export default function Auth() {
         if (error) {
           if (error.message.includes('Invalid login credentials')) {
             toast({
-              title: "خطأ في تسجيل الدخول",
-              description: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+              title: t('auth.loginError'),
+              description: t('auth.invalidCredentials'),
               variant: "destructive"
             });
           } else {
             toast({
-              title: "خطأ",
+              title: t('auth.error'),
               description: error.message,
               variant: "destructive"
             });
           }
         } else {
           toast({
-            title: "مرحباً بك!",
-            description: "تم تسجيل الدخول بنجاح"
+            title: t('auth.welcome'),
+            description: t('auth.loginSuccess')
           });
         }
       } else {
@@ -122,21 +125,21 @@ export default function Auth() {
         if (error) {
           if (error.message.includes('User already registered')) {
             toast({
-              title: "المستخدم موجود",
-              description: "هذا البريد الإلكتروني مسجل بالفعل. جرب تسجيل الدخول",
+              title: t('auth.userExists'),
+              description: t('auth.emailRegistered'),
               variant: "destructive"
             });
           } else {
             toast({
-              title: "خطأ",
+              title: t('auth.error'),
               description: error.message,
               variant: "destructive"
             });
           }
         } else {
           toast({
-            title: "تم إنشاء الحساب!",
-            description: "مرحباً بك في LIFE TENT"
+            title: t('auth.accountCreated'),
+            description: t('auth.welcomeLifeTent')
           });
         }
       }
@@ -166,7 +169,7 @@ export default function Auth() {
             <Tent className="w-10 h-10 text-primary" />
           </div>
           <h1 className="text-3xl font-bold gold-text mb-2">LIFE TENT</h1>
-          <p className="text-muted-foreground">نظام إدارة الحياة المتكامل</p>
+          <p className="text-muted-foreground">{t('auth.tagline')}</p>
         </div>
 
         {/* Auth Card */}
@@ -181,13 +184,13 @@ export default function Auth() {
                   className="text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-2 mb-4"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  العودة
+                  {t('auth.back')}
                 </button>
                 <h2 className="text-xl font-semibold text-foreground text-center">
-                  استعادة كلمة المرور
+                  {t('auth.resetPassword')}
                 </h2>
                 <p className="text-muted-foreground text-center text-sm mt-2">
-                  أدخل بريدك الإلكتروني وسنرسل لك رابط لإعادة تعيين كلمة المرور
+                  {t('auth.resetDesc')}
                 </p>
               </div>
 
@@ -196,9 +199,9 @@ export default function Auth() {
                   <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
                     <Mail className="w-8 h-8 text-primary" />
                   </div>
-                  <h3 className="text-lg font-medium text-foreground mb-2">تحقق من بريدك</h3>
+                  <h3 className="text-lg font-medium text-foreground mb-2">{t('auth.checkEmail')}</h3>
                   <p className="text-muted-foreground text-sm">
-                    تم إرسال رابط إعادة تعيين كلمة المرور إلى {email}
+                    {t('auth.resetSent')} {email}
                   </p>
                   <Button
                     type="button"
@@ -206,14 +209,14 @@ export default function Auth() {
                     className="mt-4"
                     onClick={() => switchMode('login')}
                   >
-                    العودة لتسجيل الدخول
+                    {t('auth.backToSignIn')}
                   </Button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-foreground">
-                      البريد الإلكتروني
+                      {t('auth.email')}
                     </Label>
                     <div className="relative">
                       <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -241,10 +244,10 @@ export default function Auth() {
                     {isSubmitting ? (
                       <span className="flex items-center gap-2">
                         <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                        جاري الإرسال...
+                        {t('auth.sending')}
                       </span>
                     ) : (
-                      'إرسال رابط الاستعادة'
+                      t('auth.sendResetLink')
                     )}
                   </Button>
                 </form>
@@ -260,7 +263,7 @@ export default function Auth() {
                   className="flex-1"
                   onClick={() => switchMode('login')}
                 >
-                  تسجيل الدخول
+                  {t('auth.signIn')}
                 </Button>
                 <Button
                   type="button"
@@ -268,7 +271,7 @@ export default function Auth() {
                   className="flex-1"
                   onClick={() => switchMode('signup')}
                 >
-                  حساب جديد
+                  {t('auth.signUp')}
                 </Button>
               </div>
 
@@ -276,7 +279,7 @@ export default function Auth() {
                 {mode === 'signup' && (
                   <div className="space-y-2">
                     <Label htmlFor="fullName" className="text-foreground">
-                      الاسم الكامل
+                      {t('auth.fullName')}
                     </Label>
                     <div className="relative">
                       <User className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -285,7 +288,7 @@ export default function Auth() {
                         type="text"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
-                        placeholder="أدخل اسمك"
+                        placeholder={t('auth.enterName')}
                         className="pr-10 bg-secondary/50 border-border focus:border-primary text-right"
                         dir="rtl"
                       />
@@ -298,7 +301,7 @@ export default function Auth() {
 
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-foreground">
-                    البريد الإلكتروني
+                    {t('auth.email')}
                   </Label>
                   <div className="relative">
                     <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -319,7 +322,7 @@ export default function Auth() {
 
                 <div className="space-y-2">
                   <Label htmlFor="password" className="text-foreground">
-                    كلمة المرور
+                    {t('auth.password')}
                   </Label>
                   <div className="relative">
                     <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -352,7 +355,7 @@ export default function Auth() {
                       onClick={() => switchMode('forgot')}
                       className="text-primary hover:underline text-sm font-medium"
                     >
-                      نسيت كلمة المرور؟
+                      {t('auth.forgotPassword')}
                     </button>
                   </div>
                 )}
@@ -366,25 +369,25 @@ export default function Auth() {
                   {isSubmitting ? (
                     <span className="flex items-center gap-2">
                       <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                      جاري المعالجة...
+                      {t('auth.processing')}
                     </span>
                   ) : mode === 'login' ? (
-                    'تسجيل الدخول'
+                    t('auth.signIn')
                   ) : (
-                    'إنشاء حساب'
+                    t('auth.signUp')
                   )}
                 </Button>
               </form>
 
               <div className="mt-6 text-center">
                 <p className="text-muted-foreground text-sm">
-                  {mode === 'login' ? 'ليس لديك حساب؟' : 'لديك حساب بالفعل؟'}
+                  {mode === 'login' ? t('auth.noAccount') : t('auth.haveAccount')}
                   <button
                     type="button"
                     onClick={() => switchMode(mode === 'login' ? 'signup' : 'login')}
                     className="text-primary hover:underline mr-2 font-medium"
                   >
-                    {mode === 'login' ? 'إنشاء حساب جديد' : 'تسجيل الدخول'}
+                    {mode === 'login' ? t('auth.createAccount') : t('auth.signIn')}
                   </button>
                 </p>
               </div>
@@ -394,7 +397,7 @@ export default function Auth() {
 
         {/* Footer */}
         <p className="text-center text-muted-foreground text-sm mt-6 slide-up" style={{ animationDelay: '0.2s' }}>
-          © 2025 LIFE TENT. جميع الحقوق محفوظة
+          {t('auth.copyright')}
         </p>
       </div>
     </div>

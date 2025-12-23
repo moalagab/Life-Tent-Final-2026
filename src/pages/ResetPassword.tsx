@@ -7,16 +7,19 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Lock, Tent, ArrowLeft } from 'lucide-react';
 import { z } from 'zod';
-
-const passwordSchema = z.object({
-  password: z.string().min(6, { message: "كلمة المرور يجب أن تكون 6 أحرف على الأقل" }),
-  confirmPassword: z.string()
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "كلمات المرور غير متطابقة",
-  path: ["confirmPassword"]
-});
+import { useLanguage } from '@/hooks/useLanguage';
 
 export default function ResetPassword() {
+  const { t } = useLanguage();
+  
+  const passwordSchema = z.object({
+    password: z.string().min(6, { message: t('auth.passwordMinLength') }),
+    confirmPassword: z.string()
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: t('auth.passwordsNotMatch'),
+    path: ["confirmPassword"]
+  });
+
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -66,14 +69,14 @@ export default function ResetPassword() {
       const { error } = await updatePassword(password);
       if (error) {
         toast({
-          title: "خطأ",
+          title: t('auth.error'),
           description: error.message,
           variant: "destructive"
         });
       } else {
         toast({
-          title: "تم بنجاح!",
-          description: "تم تحديث كلمة المرور بنجاح"
+          title: t('auth.success'),
+          description: t('auth.passwordUpdated')
         });
         navigate('/', { replace: true });
       }
@@ -97,19 +100,19 @@ export default function ResetPassword() {
             <Tent className="w-10 h-10 text-primary" />
           </div>
           <h1 className="text-3xl font-bold gold-text mb-2">LIFE TENT</h1>
-          <p className="text-muted-foreground">تعيين كلمة مرور جديدة</p>
+          <p className="text-muted-foreground">{t('auth.setNewPassword')}</p>
         </div>
 
         {/* Reset Password Card */}
         <div className="glass-card p-8 slide-up" style={{ animationDelay: '0.1s' }}>
           <h2 className="text-xl font-semibold text-foreground text-center mb-6">
-            كلمة المرور الجديدة
+            {t('auth.newPassword')}
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="password" className="text-foreground">
-                كلمة المرور الجديدة
+                {t('auth.newPassword')}
               </Label>
               <div className="relative">
                 <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -137,7 +140,7 @@ export default function ResetPassword() {
 
             <div className="space-y-2">
               <Label htmlFor="confirmPassword" className="text-foreground">
-                تأكيد كلمة المرور
+                {t('auth.confirmPassword')}
               </Label>
               <div className="relative">
                 <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -172,10 +175,10 @@ export default function ResetPassword() {
               {isSubmitting ? (
                 <span className="flex items-center gap-2">
                   <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  جاري التحديث...
+                  {t('auth.updating')}
                 </span>
               ) : (
-                'تحديث كلمة المرور'
+                t('auth.updatePassword')
               )}
             </Button>
           </form>
@@ -187,14 +190,14 @@ export default function ResetPassword() {
               className="text-primary hover:underline text-sm font-medium inline-flex items-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
-              العودة لتسجيل الدخول
+              {t('auth.backToSignIn')}
             </button>
           </div>
         </div>
 
         {/* Footer */}
         <p className="text-center text-muted-foreground text-sm mt-6 slide-up" style={{ animationDelay: '0.2s' }}>
-          © 2025 LIFE TENT. جميع الحقوق محفوظة
+          {t('auth.copyright')}
         </p>
       </div>
     </div>
