@@ -1,17 +1,21 @@
 import { useState, useMemo } from 'react';
 import { 
   Plus, Wallet, Target, TrendingUp, AlertTriangle,
-  ChevronRight, Lock, Unlock, Loader2, MoreVertical
+  ChevronRight, Loader2, Edit, Trash2, Calculator
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useMonthlyStats, useTransactions } from '@/hooks/useFinance';
-import { useEnvelopes, useCreateEnvelope, useUpdateEnvelope, useSinkingFunds, useCreateSinkingFund, useUpdateSinkingFund } from '@/hooks/useAdvancedFinance';
+import { useEnvelopes, useCreateEnvelope, useUpdateEnvelope, useSinkingFunds, useCreateSinkingFund, useUpdateSinkingFund, useCategories } from '@/hooks/useAdvancedFinance';
+import { useBudgets, useCreateBudget, useUpdateBudget, useDeleteBudget, useBudgetLines, useCreateBudgetLine, useUpdateBudgetLine, useDeleteBudgetLine, Budget } from '@/hooks/useBudgets';
 import { toast } from 'sonner';
 import { format, differenceInMonths } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
@@ -21,19 +25,36 @@ export function BudgetManager() {
   const language = currentLanguage;
   const locale = language === 'ar' ? ar : enUS;
 
+  const currentDate = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+
   const { data: monthlyStats } = useMonthlyStats();
   const { data: transactions } = useTransactions();
   const { data: envelopes, isLoading: envelopesLoading } = useEnvelopes();
   const { data: sinkingFunds, isLoading: fundsLoading } = useSinkingFunds();
+  const { data: categories } = useCategories();
+  const { data: budgets, isLoading: budgetsLoading } = useBudgets(selectedMonth, selectedYear);
   
   const createEnvelope = useCreateEnvelope();
   const updateEnvelope = useUpdateEnvelope();
   const createSinkingFund = useCreateSinkingFund();
   const updateSinkingFund = useUpdateSinkingFund();
+  const createBudget = useCreateBudget();
+  const updateBudget = useUpdateBudget();
+  const deleteBudget = useDeleteBudget();
+  const createBudgetLine = useCreateBudgetLine();
+  const updateBudgetLine = useUpdateBudgetLine();
+  const deleteBudgetLine = useDeleteBudgetLine();
 
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('budgets');
   const [isEnvelopeDialogOpen, setIsEnvelopeDialogOpen] = useState(false);
   const [isFundDialogOpen, setIsFundDialogOpen] = useState(false);
+  const [isBudgetDialogOpen, setIsBudgetDialogOpen] = useState(false);
+  const [isEditBudgetDialogOpen, setIsEditBudgetDialogOpen] = useState(false);
+  const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
+
+  const { data: budgetLines } = useBudgetLines(selectedBudget?.id || null);
 
   const [newEnvelope, setNewEnvelope] = useState({
     name: '',
@@ -46,6 +67,12 @@ export function BudgetManager() {
     target_amount: '',
     target_date: '',
     monthly_contribution: '',
+  });
+
+  const [newBudget, setNewBudget] = useState({
+    category: '',
+    limit_amount: '',
+    notes: '',
   });
 
   // Calculate category spending
@@ -75,6 +102,10 @@ export function BudgetManager() {
   const totalCash = monthlyStats?.netWorth || 0;
   const runwayMonths = Math.floor(totalCash / monthlyExpenses);
 
+  // Budget totals
+  const totalBudgeted = budgets?.reduce((sum, b) => sum + b.limit_amount, 0) || 0;
+  const totalSpent = budgets?.reduce((sum, b) => sum + (b.spent_amount || 0), 0) || 0;
+
   const handleCreateEnvelope = async () => {
     if (!newEnvelope.name) {
       toast.error(t('common.fillAllFields'));
@@ -88,7 +119,7 @@ export function BudgetManager() {
         color: newEnvelope.color,
         available_amount: 0,
       });
-      toast.success(t('finance.envelopeCreated'));
+      toast.success(language === 'ar' ? 'تم إنشاء المظروف' : 'Envelope created');
       setIsEnvelopeDialogOpen(false);
       setNewEnvelope({ name: '', target_amount: '', color: '#10b981' });
     } catch (error) {
@@ -102,7 +133,6 @@ export function BudgetManager() {
       return;
     }
 
-    // Calculate monthly contribution if target date is set
     let monthlyContribution = parseFloat(newFund.monthly_contribution) || 0;
     if (newFund.target_date && !newFund.monthly_contribution) {
       const months = differenceInMonths(new Date(newFund.target_date), new Date());
@@ -120,9 +150,60 @@ export function BudgetManager() {
         current_amount: 0,
         is_active: true,
       });
-      toast.success(t('finance.fundCreated'));
+      toast.success(language === 'ar' ? 'تم إنشاء صندوق الادخار' : 'Sinking fund created');
       setIsFundDialogOpen(false);
       setNewFund({ name: '', target_amount: '', target_date: '', monthly_contribution: '' });
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleCreateBudget = async () => {
+    if (!newBudget.category || !newBudget.limit_amount) {
+      toast.error(t('common.fillAllFields'));
+      return;
+    }
+
+    try {
+      await createBudget.mutateAsync({
+        category: newBudget.category,
+        limit_amount: parseFloat(newBudget.limit_amount),
+        month: selectedMonth,
+        year: selectedYear,
+        status: 'active',
+        notes: newBudget.notes || undefined,
+      });
+      toast.success(language === 'ar' ? 'تم إنشاء الميزانية' : 'Budget created');
+      setIsBudgetDialogOpen(false);
+      setNewBudget({ category: '', limit_amount: '', notes: '' });
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleUpdateBudget = async () => {
+    if (!selectedBudget) return;
+
+    try {
+      await updateBudget.mutateAsync({
+        id: selectedBudget.id,
+        category: newBudget.category || selectedBudget.category,
+        limit_amount: parseFloat(newBudget.limit_amount) || selectedBudget.limit_amount,
+        notes: newBudget.notes,
+      });
+      toast.success(language === 'ar' ? 'تم تحديث الميزانية' : 'Budget updated');
+      setIsEditBudgetDialogOpen(false);
+      setSelectedBudget(null);
+      setNewBudget({ category: '', limit_amount: '', notes: '' });
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleDeleteBudget = async (budgetId: string) => {
+    try {
+      await deleteBudget.mutateAsync(budgetId);
+      toast.success(language === 'ar' ? 'تم حذف الميزانية' : 'Budget deleted');
     } catch (error) {
       toast.error(t('common.error'));
     }
@@ -137,7 +218,7 @@ export function BudgetManager() {
         id,
         available_amount: (envelope.available_amount || 0) + amount,
       });
-      toast.success(t('finance.envelopeUpdated'));
+      toast.success(language === 'ar' ? 'تم التحديث' : 'Updated');
     } catch (error) {
       toast.error(t('common.error'));
     }
@@ -152,13 +233,23 @@ export function BudgetManager() {
         id,
         current_amount: (fund.current_amount || 0) + amount,
       });
-      toast.success(t('finance.fundUpdated'));
+      toast.success(language === 'ar' ? 'تم التحديث' : 'Updated');
     } catch (error) {
       toast.error(t('common.error'));
     }
   };
 
-  const isLoading = envelopesLoading || fundsLoading;
+  const openEditBudget = (budget: Budget) => {
+    setSelectedBudget(budget);
+    setNewBudget({
+      category: budget.category,
+      limit_amount: budget.limit_amount.toString(),
+      notes: budget.notes || '',
+    });
+    setIsEditBudgetDialogOpen(true);
+  };
+
+  const isLoading = envelopesLoading || fundsLoading || budgetsLoading;
 
   if (isLoading) {
     return (
@@ -168,85 +259,209 @@ export function BudgetManager() {
     );
   }
 
+  const months = [
+    { value: 1, label: language === 'ar' ? 'يناير' : 'January' },
+    { value: 2, label: language === 'ar' ? 'فبراير' : 'February' },
+    { value: 3, label: language === 'ar' ? 'مارس' : 'March' },
+    { value: 4, label: language === 'ar' ? 'أبريل' : 'April' },
+    { value: 5, label: language === 'ar' ? 'مايو' : 'May' },
+    { value: 6, label: language === 'ar' ? 'يونيو' : 'June' },
+    { value: 7, label: language === 'ar' ? 'يوليو' : 'July' },
+    { value: 8, label: language === 'ar' ? 'أغسطس' : 'August' },
+    { value: 9, label: language === 'ar' ? 'سبتمبر' : 'September' },
+    { value: 10, label: language === 'ar' ? 'أكتوبر' : 'October' },
+    { value: 11, label: language === 'ar' ? 'نوفمبر' : 'November' },
+    { value: 12, label: language === 'ar' ? 'ديسمبر' : 'December' },
+  ];
+
+  const years = Array.from({ length: 5 }, (_, i) => currentDate.getFullYear() - 2 + i);
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-2xl font-bold">{t('finance.budget')}</h2>
+          <h2 className="text-2xl font-bold">{language === 'ar' ? 'الميزانية' : 'Budget'}</h2>
           <p className="text-muted-foreground">{format(new Date(), 'MMMM yyyy', { locale })}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Select value={selectedMonth.toString()} onValueChange={(v) => setSelectedMonth(parseInt(v))}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {months.map(m => (
+                <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={selectedYear.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
+            <SelectTrigger className="w-24">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {years.map(y => (
+                <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
       {/* ZBB Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="glass-card p-4">
-          <p className="text-sm text-muted-foreground">{t('finance.monthlyIncome')}</p>
+          <p className="text-sm text-muted-foreground">{language === 'ar' ? 'الدخل الشهري' : 'Monthly Income'}</p>
           <p className="text-2xl font-bold text-success">+{totalIncome.toLocaleString()} SAR</p>
         </div>
         <div className="glass-card p-4">
-          <p className="text-sm text-muted-foreground">{t('finance.assigned')}</p>
-          <p className="text-2xl font-bold">{totalAssigned.toLocaleString()} SAR</p>
+          <p className="text-sm text-muted-foreground">{language === 'ar' ? 'إجمالي الميزانية' : 'Total Budgeted'}</p>
+          <p className="text-2xl font-bold">{totalBudgeted.toLocaleString()} SAR</p>
         </div>
         <div className="glass-card p-4">
-          <p className="text-sm text-muted-foreground">{t('finance.unassigned')}</p>
+          <p className="text-sm text-muted-foreground">{language === 'ar' ? 'المنفق' : 'Spent'}</p>
           <p className={cn(
             'text-2xl font-bold',
-            unassigned > 0 ? 'text-warning' : unassigned < 0 ? 'text-destructive' : 'text-success'
+            totalSpent > totalBudgeted ? 'text-destructive' : 'text-foreground'
           )}>
-            {unassigned.toLocaleString()} SAR
+            {totalSpent.toLocaleString()} SAR
           </p>
-          {unassigned !== 0 && (
-            <p className="text-xs text-muted-foreground mt-1">
-              {unassigned > 0 ? t('finance.assignRemaining') : t('finance.overAssigned')}
-            </p>
-          )}
         </div>
         <div className="glass-card p-4">
-          <p className="text-sm text-muted-foreground">{t('finance.runway')}</p>
-          <p className="text-2xl font-bold">{runwayMonths} {t('finance.months')}</p>
-          <p className="text-xs text-muted-foreground mt-1">{t('finance.ifIncomeStops')}</p>
+          <p className="text-sm text-muted-foreground">{language === 'ar' ? 'المتبقي' : 'Remaining'}</p>
+          <p className={cn(
+            'text-2xl font-bold',
+            totalBudgeted - totalSpent >= 0 ? 'text-success' : 'text-destructive'
+          )}>
+            {(totalBudgeted - totalSpent).toLocaleString()} SAR
+          </p>
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="overview">{t('finance.overview')}</TabsTrigger>
-          <TabsTrigger value="envelopes">{t('finance.envelopes')}</TabsTrigger>
-          <TabsTrigger value="sinkingFunds">{t('finance.sinkingFunds')}</TabsTrigger>
-          <TabsTrigger value="forecast">{t('finance.forecast')}</TabsTrigger>
+          <TabsTrigger value="budgets">{language === 'ar' ? 'الميزانيات' : 'Budgets'}</TabsTrigger>
+          <TabsTrigger value="envelopes">{language === 'ar' ? 'المظاريف' : 'Envelopes'}</TabsTrigger>
+          <TabsTrigger value="sinkingFunds">{language === 'ar' ? 'صناديق الادخار' : 'Sinking Funds'}</TabsTrigger>
+          <TabsTrigger value="forecast">{language === 'ar' ? 'التوقعات' : 'Forecast'}</TabsTrigger>
         </TabsList>
 
-        {/* Overview */}
-        <TabsContent value="overview" className="space-y-6 mt-6">
-          {/* Category Spending */}
-          <div className="glass-card p-5">
-            <h3 className="font-semibold mb-4">{t('finance.spendingByCategory')}</h3>
-            <div className="space-y-4">
-              {categorySpending.slice(0, 8).map(({ category, amount }) => {
-                const budget = 5000; // Default budget per category
-                const percentage = Math.min((amount / budget) * 100, 100);
-                const isOver = amount > budget;
-                
-                return (
-                  <div key={category}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium">{category}</span>
-                      <span className={cn(
-                        'text-sm font-bold',
-                        isOver ? 'text-destructive' : 'text-foreground'
-                      )}>
-                        {amount.toLocaleString()} / {budget.toLocaleString()} SAR
-                      </span>
-                    </div>
-                    <Progress 
-                      value={percentage} 
-                      className={cn('h-2', isOver && '[&>div]:bg-destructive')}
+        {/* Budgets Tab */}
+        <TabsContent value="budgets" className="space-y-6 mt-6">
+          <div className="flex justify-end">
+            <Dialog open={isBudgetDialogOpen} onOpenChange={setIsBudgetDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="gold">
+                  <Plus className="w-4 h-4 me-2" />
+                  {language === 'ar' ? 'إنشاء ميزانية' : 'Create Budget'}
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{language === 'ar' ? 'إنشاء ميزانية جديدة' : 'Create New Budget'}</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 mt-4">
+                  <div>
+                    <Label>{language === 'ar' ? 'الفئة' : 'Category'}</Label>
+                    <Input
+                      placeholder={language === 'ar' ? 'مثال: الطعام، المواصلات...' : 'e.g., Food, Transport...'}
+                      value={newBudget.category}
+                      onChange={(e) => setNewBudget({ ...newBudget, category: e.target.value })}
                     />
                   </div>
-                );
-              })}
-            </div>
+                  <div>
+                    <Label>{language === 'ar' ? 'الحد الأقصى' : 'Limit Amount'}</Label>
+                    <Input
+                      type="number"
+                      placeholder="0.00"
+                      value={newBudget.limit_amount}
+                      onChange={(e) => setNewBudget({ ...newBudget, limit_amount: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>{language === 'ar' ? 'ملاحظات' : 'Notes'}</Label>
+                    <Textarea
+                      placeholder={language === 'ar' ? 'ملاحظات اختيارية...' : 'Optional notes...'}
+                      value={newBudget.notes}
+                      onChange={(e) => setNewBudget({ ...newBudget, notes: e.target.value })}
+                    />
+                  </div>
+                  <Button onClick={handleCreateBudget} className="w-full" disabled={createBudget.isPending}>
+                    {createBudget.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : (language === 'ar' ? 'إنشاء' : 'Create')}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <div className="space-y-4">
+            {budgets?.map((budget) => {
+              const spent = budget.spent_amount || 0;
+              const percentage = budget.limit_amount > 0 ? (spent / budget.limit_amount) * 100 : 0;
+              const isOver = spent > budget.limit_amount;
+              const remaining = budget.limit_amount - spent;
+
+              return (
+                <div key={budget.id} className="glass-card p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h4 className="font-semibold text-lg">{budget.category}</h4>
+                      {budget.notes && (
+                        <p className="text-sm text-muted-foreground">{budget.notes}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={cn(
+                        'px-2 py-1 rounded text-xs font-medium',
+                        budget.status === 'active' ? 'bg-success/20 text-success' :
+                        budget.status === 'closed' ? 'bg-muted text-muted-foreground' :
+                        'bg-warning/20 text-warning'
+                      )}>
+                        {budget.status === 'active' ? (language === 'ar' ? 'نشط' : 'Active') :
+                         budget.status === 'closed' ? (language === 'ar' ? 'مغلق' : 'Closed') :
+                         (language === 'ar' ? 'مسودة' : 'Draft')}
+                      </span>
+                      <Button variant="ghost" size="icon" onClick={() => openEditBudget(budget)}>
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDeleteBudget(budget.id)}>
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </div>
+                  <Progress 
+                    value={Math.min(percentage, 100)} 
+                    className={cn('h-3 mb-2', isOver && '[&>div]:bg-destructive')}
+                  />
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      {spent.toLocaleString()} / {budget.limit_amount.toLocaleString()} SAR
+                    </span>
+                    <span className={cn(
+                      'font-medium',
+                      remaining >= 0 ? 'text-success' : 'text-destructive'
+                    )}>
+                      {remaining >= 0 ? '+' : ''}{remaining.toLocaleString()} SAR {language === 'ar' ? 'متبقي' : 'remaining'}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+
+            {(!budgets || budgets.length === 0) && (
+              <div className="text-center py-12">
+                <Calculator className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                <p className="text-muted-foreground">{language === 'ar' ? 'لا توجد ميزانيات لهذا الشهر' : 'No budgets for this month'}</p>
+                <Button 
+                  variant="outline" 
+                  className="mt-4"
+                  onClick={() => setIsBudgetDialogOpen(true)}
+                >
+                  <Plus className="w-4 h-4 me-2" />
+                  {language === 'ar' ? 'إنشاء ميزانية' : 'Create Budget'}
+                </Button>
+              </div>
+            )}
           </div>
         </TabsContent>
 
@@ -257,32 +472,41 @@ export function BudgetManager() {
               <DialogTrigger asChild>
                 <Button variant="gold">
                   <Plus className="w-4 h-4 me-2" />
-                  {t('finance.createEnvelope')}
+                  {language === 'ar' ? 'إنشاء مظروف' : 'Create Envelope'}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>{t('finance.createEnvelope')}</DialogTitle>
+                  <DialogTitle>{language === 'ar' ? 'إنشاء مظروف جديد' : 'Create New Envelope'}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 mt-4">
-                  <Input
-                    placeholder={t('finance.envelopeName')}
-                    value={newEnvelope.name}
-                    onChange={(e) => setNewEnvelope({ ...newEnvelope, name: e.target.value })}
-                  />
-                  <Input
-                    type="number"
-                    placeholder={t('finance.targetAmount')}
-                    value={newEnvelope.target_amount}
-                    onChange={(e) => setNewEnvelope({ ...newEnvelope, target_amount: e.target.value })}
-                  />
-                  <Input
-                    type="color"
-                    value={newEnvelope.color}
-                    onChange={(e) => setNewEnvelope({ ...newEnvelope, color: e.target.value })}
-                  />
+                  <div>
+                    <Label>{language === 'ar' ? 'الاسم' : 'Name'}</Label>
+                    <Input
+                      placeholder={language === 'ar' ? 'اسم المظروف' : 'Envelope name'}
+                      value={newEnvelope.name}
+                      onChange={(e) => setNewEnvelope({ ...newEnvelope, name: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>{language === 'ar' ? 'المبلغ المستهدف' : 'Target Amount'}</Label>
+                    <Input
+                      type="number"
+                      placeholder="0.00"
+                      value={newEnvelope.target_amount}
+                      onChange={(e) => setNewEnvelope({ ...newEnvelope, target_amount: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>{language === 'ar' ? 'اللون' : 'Color'}</Label>
+                    <Input
+                      type="color"
+                      value={newEnvelope.color}
+                      onChange={(e) => setNewEnvelope({ ...newEnvelope, color: e.target.value })}
+                    />
+                  </div>
                   <Button onClick={handleCreateEnvelope} className="w-full" disabled={createEnvelope.isPending}>
-                    {createEnvelope.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.create')}
+                    {createEnvelope.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : (language === 'ar' ? 'إنشاء' : 'Create')}
                   </Button>
                 </div>
               </DialogContent>
@@ -308,12 +532,12 @@ export function BudgetManager() {
                   <div className="space-y-2">
                     <Progress value={Math.min(percentage, 100)} className="h-2" />
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">{t('finance.available')}</span>
+                      <span className="text-muted-foreground">{language === 'ar' ? 'متاح' : 'Available'}</span>
                       <span className="font-bold">{available.toLocaleString()} SAR</span>
                     </div>
                     {target > 0 && (
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">{t('finance.target')}</span>
+                        <span className="text-muted-foreground">{language === 'ar' ? 'الهدف' : 'Target'}</span>
                         <span>{target.toLocaleString()} SAR</span>
                       </div>
                     )}
@@ -343,7 +567,7 @@ export function BudgetManager() {
             {(!envelopes || envelopes.length === 0) && (
               <div className="col-span-full text-center py-12">
                 <Wallet className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                <p className="text-muted-foreground">{t('finance.noEnvelopes')}</p>
+                <p className="text-muted-foreground">{language === 'ar' ? 'لا توجد مظاريف' : 'No envelopes'}</p>
               </div>
             )}
           </div>
@@ -356,39 +580,50 @@ export function BudgetManager() {
               <DialogTrigger asChild>
                 <Button variant="gold">
                   <Plus className="w-4 h-4 me-2" />
-                  {t('finance.createSinkingFund')}
+                  {language === 'ar' ? 'إنشاء صندوق ادخار' : 'Create Sinking Fund'}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>{t('finance.createSinkingFund')}</DialogTitle>
+                  <DialogTitle>{language === 'ar' ? 'إنشاء صندوق ادخار جديد' : 'Create New Sinking Fund'}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 mt-4">
-                  <Input
-                    placeholder={t('finance.fundName')}
-                    value={newFund.name}
-                    onChange={(e) => setNewFund({ ...newFund, name: e.target.value })}
-                  />
-                  <Input
-                    type="number"
-                    placeholder={t('finance.targetAmount')}
-                    value={newFund.target_amount}
-                    onChange={(e) => setNewFund({ ...newFund, target_amount: e.target.value })}
-                  />
-                  <Input
-                    type="date"
-                    placeholder={t('finance.targetDate')}
-                    value={newFund.target_date}
-                    onChange={(e) => setNewFund({ ...newFund, target_date: e.target.value })}
-                  />
-                  <Input
-                    type="number"
-                    placeholder={t('finance.monthlyContribution')}
-                    value={newFund.monthly_contribution}
-                    onChange={(e) => setNewFund({ ...newFund, monthly_contribution: e.target.value })}
-                  />
+                  <div>
+                    <Label>{language === 'ar' ? 'الاسم' : 'Name'}</Label>
+                    <Input
+                      placeholder={language === 'ar' ? 'اسم الصندوق' : 'Fund name'}
+                      value={newFund.name}
+                      onChange={(e) => setNewFund({ ...newFund, name: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>{language === 'ar' ? 'المبلغ المستهدف' : 'Target Amount'}</Label>
+                    <Input
+                      type="number"
+                      placeholder="0.00"
+                      value={newFund.target_amount}
+                      onChange={(e) => setNewFund({ ...newFund, target_amount: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>{language === 'ar' ? 'تاريخ الهدف' : 'Target Date'}</Label>
+                    <Input
+                      type="date"
+                      value={newFund.target_date}
+                      onChange={(e) => setNewFund({ ...newFund, target_date: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>{language === 'ar' ? 'المساهمة الشهرية' : 'Monthly Contribution'}</Label>
+                    <Input
+                      type="number"
+                      placeholder="0.00"
+                      value={newFund.monthly_contribution}
+                      onChange={(e) => setNewFund({ ...newFund, monthly_contribution: e.target.value })}
+                    />
+                  </div>
                   <Button onClick={handleCreateFund} className="w-full" disabled={createSinkingFund.isPending}>
-                    {createSinkingFund.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.create')}
+                    {createSinkingFund.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : (language === 'ar' ? 'إنشاء' : 'Create')}
                   </Button>
                 </div>
               </DialogContent>
@@ -425,34 +660,20 @@ export function BudgetManager() {
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div>
-                        <p className="text-muted-foreground">{t('finance.remaining')}</p>
+                        <p className="text-muted-foreground">{language === 'ar' ? 'المتبقي' : 'Remaining'}</p>
                         <p className="font-medium">{remaining.toLocaleString()} SAR</p>
                       </div>
-                      {fund.target_date && (
-                        <div>
-                          <p className="text-muted-foreground">{t('finance.deadline')}</p>
-                          <p className="font-medium">{format(new Date(fund.target_date), 'MMM yyyy', { locale })}</p>
-                        </div>
-                      )}
-                      {fund.monthly_contribution && (
-                        <div>
-                          <p className="text-muted-foreground">{t('finance.monthlyContribution')}</p>
-                          <p className="font-medium">{fund.monthly_contribution.toLocaleString()} SAR</p>
-                        </div>
-                      )}
                       {monthsLeft !== null && (
                         <div>
-                          <p className="text-muted-foreground">{t('finance.monthsLeft')}</p>
-                          <p className={cn('font-medium', !onTrack && 'text-warning')}>
-                            {monthsLeft} {t('finance.months')}
-                          </p>
+                          <p className="text-muted-foreground">{language === 'ar' ? 'الأشهر المتبقية' : 'Months Left'}</p>
+                          <p className="font-medium">{monthsLeft}</p>
                         </div>
                       )}
                     </div>
                     {!onTrack && (
                       <div className="flex items-center gap-2 text-warning text-sm">
                         <AlertTriangle className="w-4 h-4" />
-                        {t('finance.behindSchedule')}
+                        <span>{language === 'ar' ? 'متأخر عن الجدول' : 'Behind schedule'}</span>
                       </div>
                     )}
                   </div>
@@ -461,9 +682,17 @@ export function BudgetManager() {
                       size="sm" 
                       variant="outline" 
                       className="flex-1"
-                      onClick={() => handleAddToFund(fund.id, fund.monthly_contribution || 100)}
+                      onClick={() => handleAddToFund(fund.id, 100)}
                     >
-                      +{(fund.monthly_contribution || 100).toLocaleString()}
+                      +100
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => handleAddToFund(fund.id, 500)}
+                    >
+                      +500
                     </Button>
                   </div>
                 </div>
@@ -473,7 +702,7 @@ export function BudgetManager() {
             {(!sinkingFunds || sinkingFunds.length === 0) && (
               <div className="col-span-full text-center py-12">
                 <Target className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                <p className="text-muted-foreground">{t('finance.noSinkingFunds')}</p>
+                <p className="text-muted-foreground">{language === 'ar' ? 'لا توجد صناديق ادخار' : 'No sinking funds'}</p>
               </div>
             )}
           </div>
@@ -482,26 +711,25 @@ export function BudgetManager() {
         {/* Forecast */}
         <TabsContent value="forecast" className="space-y-6 mt-6">
           <div className="glass-card p-5">
-            <h3 className="font-semibold mb-4">{t('finance.12MonthForecast')}</h3>
+            <h3 className="font-semibold mb-4">{language === 'ar' ? 'توقعات 12 شهر' : '12-Month Forecast'}</h3>
             <div className="space-y-4">
               {Array.from({ length: 12 }, (_, i) => {
-                const date = new Date();
-                date.setMonth(date.getMonth() + i);
-                const projectedIncome = totalIncome * (1 + (Math.random() * 0.1 - 0.05)); // ±5% variation
-                const projectedExpenses = monthlyExpenses * (1 + (Math.random() * 0.15 - 0.05)); // -5% to +10%
+                const forecastDate = new Date(selectedYear, selectedMonth - 1 + i, 1);
+                const projectedIncome = totalIncome;
+                const projectedExpenses = monthlyExpenses;
                 const projectedNet = projectedIncome - projectedExpenses;
 
                 return (
-                  <div key={i} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                    <span className="font-medium">{format(date, 'MMMM yyyy', { locale })}</span>
-                    <div className="flex items-center gap-8">
-                      <span className="text-success">+{projectedIncome.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-                      <span className="text-destructive">-{projectedExpenses.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                  <div key={i} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                    <span className="font-medium">{format(forecastDate, 'MMMM yyyy', { locale })}</span>
+                    <div className="flex items-center gap-6 text-sm">
+                      <span className="text-success">+{projectedIncome.toLocaleString()}</span>
+                      <span className="text-destructive">-{projectedExpenses.toLocaleString()}</span>
                       <span className={cn(
                         'font-bold',
                         projectedNet >= 0 ? 'text-success' : 'text-destructive'
                       )}>
-                        {projectedNet >= 0 ? '+' : ''}{projectedNet.toLocaleString(undefined, { maximumFractionDigits: 0 })} SAR
+                        {projectedNet >= 0 ? '+' : ''}{projectedNet.toLocaleString()} SAR
                       </span>
                     </div>
                   </div>
@@ -511,6 +739,42 @@ export function BudgetManager() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Edit Budget Dialog */}
+      <Dialog open={isEditBudgetDialogOpen} onOpenChange={setIsEditBudgetDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{language === 'ar' ? 'تعديل الميزانية' : 'Edit Budget'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label>{language === 'ar' ? 'الفئة' : 'Category'}</Label>
+              <Input
+                value={newBudget.category}
+                onChange={(e) => setNewBudget({ ...newBudget, category: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>{language === 'ar' ? 'الحد الأقصى' : 'Limit Amount'}</Label>
+              <Input
+                type="number"
+                value={newBudget.limit_amount}
+                onChange={(e) => setNewBudget({ ...newBudget, limit_amount: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>{language === 'ar' ? 'ملاحظات' : 'Notes'}</Label>
+              <Textarea
+                value={newBudget.notes}
+                onChange={(e) => setNewBudget({ ...newBudget, notes: e.target.value })}
+              />
+            </div>
+            <Button onClick={handleUpdateBudget} className="w-full" disabled={updateBudget.isPending}>
+              {updateBudget.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : (language === 'ar' ? 'حفظ' : 'Save')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
