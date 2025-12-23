@@ -35,7 +35,7 @@ export function Sidebar() {
   const isMobile = useIsMobile();
 
   const navItems = [
-    { path: '/', icon: LayoutDashboard, labelKey: 'common.dashboard' },
+    { path: '/dashboard', icon: LayoutDashboard, labelKey: 'common.dashboard' },
     { path: '/projects', icon: FolderKanban, labelKey: 'common.projects' },
     { path: '/tasks', icon: CheckSquare, labelKey: 'common.tasks' },
     { path: '/goals', icon: Target, labelKey: 'common.goals' },
@@ -49,7 +49,7 @@ export function Sidebar() {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/auth');
+    navigate('/');
   };
 
   const handleNavClick = () => {
