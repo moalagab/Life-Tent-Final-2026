@@ -146,7 +146,9 @@
     "uncategorized": "بدون تصنيف",
     "exportData": "تصدير البيانات",
     "exportTransactions": "تصدير المعاملات",
-    "exportAccounts": "تصدير الحسابات"
+    "exportAccounts": "تصدير الحسابات",
+    "incomeVsExpenses": "الدخل مقابل المصروفات",
+    "categoryBreakdown": "توزيع الفئات"
   },
   "habits": {
     "title": "العادات والمزاج",
@@ -321,5 +323,18 @@
     "habitReminder": "تذكير بالعادة",
     "markAllRead": "تحديد الكل كمقروء",
     "clearAll": "مسح الكل"
+  },
+  "profile": {
+    "title": "الملف الشخصي",
+    "subtitle": "إدارة معلومات حسابك",
+    "profileUpdated": "تم تحديث الملف الشخصي",
+    "avatarUpdated": "تم تحديث الصورة",
+    "fileTooLarge": "حجم الملف كبير جداً (الحد الأقصى 2MB)",
+    "clickToChange": "انقر لتغيير الصورة",
+    "emailCannotChange": "لا يمكن تغيير البريد الإلكتروني",
+    "timezone": "المنطقة الزمنية",
+    "accountInfo": "معلومات الحساب",
+    "memberSince": "عضو منذ",
+    "lastSignIn": "آخر تسجيل دخول"
   }
 }

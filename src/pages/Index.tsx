@@ -7,8 +7,12 @@ import { HabitStreaks } from '@/components/dashboard/HabitStreaks';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { ProjectsOverview } from '@/components/dashboard/ProjectsOverview';
 import { UpcomingEvents } from '@/components/dashboard/UpcomingEvents';
+import { useAutoReminders } from '@/hooks/useAutoReminders';
 
 const Index = () => {
+  // Initialize automatic reminders
+  useAutoReminders();
+
   return (
     <MainLayout>
       <GreetingHeader />
