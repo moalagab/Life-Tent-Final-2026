@@ -627,6 +627,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           perspective: Database["public"]["Enums"]["goal_perspective"] | null
+          project_id: string | null
           start_date: string | null
           target_value: number | null
           title: string
@@ -642,6 +643,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           perspective?: Database["public"]["Enums"]["goal_perspective"] | null
+          project_id?: string | null
           start_date?: string | null
           target_value?: number | null
           title: string
@@ -657,6 +659,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           perspective?: Database["public"]["Enums"]["goal_perspective"] | null
+          project_id?: string | null
           start_date?: string | null
           target_value?: number | null
           title?: string
@@ -664,7 +667,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "goals_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       habit_logs: {
         Row: {

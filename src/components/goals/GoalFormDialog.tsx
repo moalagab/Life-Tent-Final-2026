@@ -39,6 +39,7 @@ interface GoalFormDialogProps {
   onSubmit: (data: GoalFormData) => Promise<void>;
   isLoading?: boolean;
   initialData?: Partial<GoalFormData>;
+  isEditing?: boolean;
 }
 
 export function GoalFormDialog({ 
@@ -46,7 +47,8 @@ export function GoalFormDialog({
   onOpenChange, 
   onSubmit, 
   isLoading = false,
-  initialData
+  initialData,
+  isEditing = false
 }: GoalFormDialogProps) {
   const { t, currentLanguage } = useLanguage();
   const { data: projects } = useProjects();
@@ -110,7 +112,7 @@ export function GoalFormDialog({
               <Target className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <span className="block">{t('goals.newObjective')}</span>
+              <span className="block">{isEditing ? t('goals.editGoal') : t('goals.newObjective')}</span>
               <span className="text-xs font-normal text-muted-foreground">
                 {currentLanguage === 'ar' ? 'حدد هدفك وتتبع تقدمك' : 'Define your goal and track progress'}
               </span>
@@ -335,7 +337,9 @@ export function GoalFormDialog({
             ) : (
               <>
                 <Target className="w-5 h-5 me-2" />
-                {currentLanguage === 'ar' ? 'إنشاء الهدف' : 'Create Goal'}
+                {isEditing 
+                  ? (currentLanguage === 'ar' ? 'تحديث الهدف' : 'Update Goal')
+                  : (currentLanguage === 'ar' ? 'إنشاء الهدف' : 'Create Goal')}
               </>
             )}
           </Button>

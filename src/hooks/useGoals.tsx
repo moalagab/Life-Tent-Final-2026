@@ -141,6 +141,75 @@ export function useUpdateKeyResult() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['goals-with-kr'] });
+      queryClient.invalidateQueries({ queryKey: ['key-results'] });
+    },
+  });
+}
+
+export function useUpdateGoal() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: TablesUpdate<'goals'> & { id: string }) => {
+      const { data, error } = await supabase
+        .from('goals')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['goals'] });
+      queryClient.invalidateQueries({ queryKey: ['goals-with-kr'] });
+    },
+  });
+}
+
+export function useDeleteGoal() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      // First delete all key results for this goal
+      await supabase
+        .from('key_results')
+        .delete()
+        .eq('goal_id', id);
+
+      // Then delete the goal
+      const { error } = await supabase
+        .from('goals')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['goals'] });
+      queryClient.invalidateQueries({ queryKey: ['goals-with-kr'] });
+      queryClient.invalidateQueries({ queryKey: ['key-results'] });
+    },
+  });
+}
+
+export function useDeleteKeyResult() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('key_results')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['goals-with-kr'] });
+      queryClient.invalidateQueries({ queryKey: ['key-results'] });
     },
   });
 }
