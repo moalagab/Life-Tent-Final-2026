@@ -15,29 +15,34 @@ const Index = () => {
 
   return (
     <MainLayout>
-      <GreetingHeader />
-      
-      <QuickActions />
+      <div className="space-y-6">
+        {/* Greeting Section */}
+        <GreetingHeader />
+        
+        {/* Quick Actions */}
+        <QuickActions />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
-        {/* Left Column - Prayer & Finance */}
-        <div className="lg:col-span-3 space-y-6">
-          <PrayerWidget />
-          <FinanceSnapshot />
-        </div>
-
-        {/* Center Column - Tasks & Projects */}
-        <div className="lg:col-span-6 space-y-6">
-          <ProjectsOverview />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FocusTasks />
-            <HabitStreaks />
+        {/* Main Dashboard Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Column - Prayer & Finance */}
+          <div className="lg:col-span-3 space-y-6">
+            <PrayerWidget />
+            <FinanceSnapshot />
           </div>
-        </div>
 
-        {/* Right Column - Events */}
-        <div className="lg:col-span-3">
-          <UpcomingEvents />
+          {/* Center Column - Projects, Tasks & Habits */}
+          <div className="lg:col-span-6 space-y-6">
+            <ProjectsOverview />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FocusTasks />
+              <HabitStreaks />
+            </div>
+          </div>
+
+          {/* Right Column - Events */}
+          <div className="lg:col-span-3">
+            <UpcomingEvents />
+          </div>
         </div>
       </div>
     </MainLayout>

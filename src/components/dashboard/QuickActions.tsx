@@ -1,4 +1,4 @@
-import { Plus, FileText, Target, Wallet, Calendar, Timer } from 'lucide-react';
+import { Plus, FileText, Target, Wallet, Calendar, Timer, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -12,11 +12,13 @@ import { useCreateGoal } from '@/hooks/useGoals';
 import { useCreateTransaction, useAccounts } from '@/hooks/useFinance';
 import { useCreateEvent } from '@/hooks/useEvents';
 import { useNavigate } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
 export function QuickActions() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [activeDialog, setActiveDialog] = useState<string | null>(null);
+  const [hoveredAction, setHoveredAction] = useState<string | null>(null);
   
   const createTask = useCreateTask();
   const createGoal = useCreateGoal();
@@ -30,12 +32,61 @@ export function QuickActions() {
   const [eventForm, setEventForm] = useState({ title: '', start_time: '', end_time: '' });
 
   const actions = [
-    { id: 'task', icon: Plus, label: t('quickActions.newTask'), color: 'bg-primary/10 text-primary hover:bg-primary/20' },
-    { id: 'note', icon: FileText, label: t('quickActions.quickNote'), color: 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20' },
-    { id: 'goal', icon: Target, label: t('quickActions.addGoal'), color: 'bg-success/10 text-success hover:bg-success/20' },
-    { id: 'expense', icon: Wallet, label: t('quickActions.logExpense'), color: 'bg-destructive/10 text-destructive hover:bg-destructive/20' },
-    { id: 'schedule', icon: Calendar, label: t('quickActions.schedule'), color: 'bg-purple-500/10 text-purple-500 hover:bg-purple-500/20' },
-    { id: 'pomodoro', icon: Timer, label: t('quickActions.pomodoro'), color: 'bg-gradient-gold text-primary-foreground hover:shadow-gold-glow' },
+    { 
+      id: 'task', 
+      icon: Plus, 
+      label: t('quickActions.newTask'),
+      description: t('quickActions.newTaskDesc') || 'Create a new task',
+      gradient: 'from-primary/20 to-primary/5',
+      iconBg: 'bg-primary/20',
+      iconColor: 'text-primary'
+    },
+    { 
+      id: 'note', 
+      icon: FileText, 
+      label: t('quickActions.quickNote'),
+      description: t('quickActions.quickNoteDesc') || 'Write a quick note',
+      gradient: 'from-blue-500/20 to-blue-500/5',
+      iconBg: 'bg-blue-500/20',
+      iconColor: 'text-blue-500'
+    },
+    { 
+      id: 'goal', 
+      icon: Target, 
+      label: t('quickActions.addGoal'),
+      description: t('quickActions.addGoalDesc') || 'Set a new goal',
+      gradient: 'from-success/20 to-success/5',
+      iconBg: 'bg-success/20',
+      iconColor: 'text-success'
+    },
+    { 
+      id: 'expense', 
+      icon: Wallet, 
+      label: t('quickActions.logExpense'),
+      description: t('quickActions.logExpenseDesc') || 'Log an expense',
+      gradient: 'from-destructive/20 to-destructive/5',
+      iconBg: 'bg-destructive/20',
+      iconColor: 'text-destructive'
+    },
+    { 
+      id: 'schedule', 
+      icon: Calendar, 
+      label: t('quickActions.schedule'),
+      description: t('quickActions.scheduleDesc') || 'Schedule an event',
+      gradient: 'from-purple-500/20 to-purple-500/5',
+      iconBg: 'bg-purple-500/20',
+      iconColor: 'text-purple-500'
+    },
+    { 
+      id: 'pomodoro', 
+      icon: Timer, 
+      label: t('quickActions.pomodoro'),
+      description: t('quickActions.pomodoroDesc') || 'Start focus timer',
+      gradient: 'from-primary to-gold-600',
+      iconBg: 'bg-primary-foreground/20',
+      iconColor: 'text-primary-foreground',
+      special: true
+    },
   ];
 
   const handleAction = (actionId: string) => {
@@ -130,41 +181,92 @@ export function QuickActions() {
 
   return (
     <>
-      <div className="glass-card p-5">
-        <h3 className="text-lg font-semibold text-foreground mb-4">{t('quickActions.title')}</h3>
-        <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
-          {actions.map((action) => (
-            <button
-              key={action.id}
-              onClick={() => handleAction(action.id)}
-              className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200 ${action.color}`}
-            >
-              <action.icon className="w-5 h-5" />
-              <span className="text-xs font-medium">{action.label}</span>
-            </button>
-          ))}
-        </div>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        {actions.map((action, index) => (
+          <button
+            key={action.id}
+            onClick={() => handleAction(action.id)}
+            onMouseEnter={() => setHoveredAction(action.id)}
+            onMouseLeave={() => setHoveredAction(null)}
+            className={cn(
+              "group relative overflow-hidden rounded-2xl p-4 transition-all duration-300",
+              "border border-border/50 hover:border-primary/30",
+              "hover:shadow-lg hover:-translate-y-1",
+              action.special 
+                ? "bg-gradient-to-br from-primary to-gold-600 text-primary-foreground" 
+                : "bg-card/50 backdrop-blur-sm hover:bg-card/80"
+            )}
+            style={{ animationDelay: `${index * 50}ms` }}
+          >
+            {/* Background Gradient on Hover */}
+            {!action.special && (
+              <div className={cn(
+                "absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-300",
+                action.gradient
+              )} />
+            )}
+            
+            {/* Shine Effect */}
+            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            
+            <div className="relative flex flex-col items-center gap-3 text-center">
+              {/* Icon Container */}
+              <div className={cn(
+                "w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110",
+                action.special ? "bg-primary-foreground/20" : action.iconBg
+              )}>
+                <action.icon className={cn(
+                  "w-6 h-6 transition-transform duration-300",
+                  action.special ? "text-primary-foreground" : action.iconColor,
+                  hoveredAction === action.id && "scale-110"
+                )} />
+              </div>
+              
+              {/* Label */}
+              <span className={cn(
+                "text-sm font-medium transition-colors",
+                action.special ? "text-primary-foreground" : "text-foreground"
+              )}>
+                {action.label}
+              </span>
+              
+              {/* Arrow on Hover */}
+              <ArrowRight className={cn(
+                "w-4 h-4 absolute bottom-2 right-2 opacity-0 translate-x-2 transition-all duration-300",
+                "group-hover:opacity-100 group-hover:translate-x-0",
+                action.special ? "text-primary-foreground/70" : "text-muted-foreground"
+              )} />
+            </div>
+          </button>
+        ))}
       </div>
 
       {/* Task Dialog */}
       <Dialog open={activeDialog === 'task'} onOpenChange={(open) => !open && setActiveDialog(null)}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('quickActions.newTask')}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Plus className="w-4 h-4 text-primary" />
+              </div>
+              {t('quickActions.newTask')}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <Input
               placeholder={t('tasks.title')}
               value={taskForm.title}
               onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })}
+              className="bg-muted/50"
             />
             <Textarea
               placeholder={t('finance.description')}
               value={taskForm.description}
               onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })}
+              className="bg-muted/50 min-h-[100px]"
             />
             <Select value={taskForm.priority} onValueChange={(v) => setTaskForm({ ...taskForm, priority: v })}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-muted/50">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -182,23 +284,30 @@ export function QuickActions() {
 
       {/* Goal Dialog */}
       <Dialog open={activeDialog === 'goal'} onOpenChange={(open) => !open && setActiveDialog(null)}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('quickActions.addGoal')}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center">
+                <Target className="w-4 h-4 text-success" />
+              </div>
+              {t('quickActions.addGoal')}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <Input
               placeholder={t('goals.title')}
               value={goalForm.title}
               onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })}
+              className="bg-muted/50"
             />
             <Textarea
               placeholder={t('finance.description')}
               value={goalForm.description}
               onChange={(e) => setGoalForm({ ...goalForm, description: e.target.value })}
+              className="bg-muted/50 min-h-[100px]"
             />
             <Select value={goalForm.perspective} onValueChange={(v) => setGoalForm({ ...goalForm, perspective: v })}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-muted/50">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -208,7 +317,7 @@ export function QuickActions() {
                 <SelectItem value="learning">{t('goals.category.learning')}</SelectItem>
               </SelectContent>
             </Select>
-            <Button onClick={handleCreateGoal} className="w-full" disabled={createGoal.isPending}>
+            <Button onClick={handleCreateGoal} className="w-full bg-success hover:bg-success/90" disabled={createGoal.isPending}>
               {t('common.add')}
             </Button>
           </div>
@@ -217,24 +326,31 @@ export function QuickActions() {
 
       {/* Expense Dialog */}
       <Dialog open={activeDialog === 'expense'} onOpenChange={(open) => !open && setActiveDialog(null)}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('quickActions.logExpense')}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center">
+                <Wallet className="w-4 h-4 text-destructive" />
+              </div>
+              {t('quickActions.logExpense')}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <Input
               placeholder={t('finance.description')}
               value={expenseForm.description}
               onChange={(e) => setExpenseForm({ ...expenseForm, description: e.target.value })}
+              className="bg-muted/50"
             />
             <Input
               type="number"
               placeholder={t('finance.amount')}
               value={expenseForm.amount}
               onChange={(e) => setExpenseForm({ ...expenseForm, amount: e.target.value })}
+              className="bg-muted/50"
             />
             <Select value={expenseForm.account_id} onValueChange={(v) => setExpenseForm({ ...expenseForm, account_id: v })}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-muted/50">
                 <SelectValue placeholder={t('finance.selectAccount')} />
               </SelectTrigger>
               <SelectContent>
@@ -247,8 +363,9 @@ export function QuickActions() {
               placeholder={t('finance.category')}
               value={expenseForm.category}
               onChange={(e) => setExpenseForm({ ...expenseForm, category: e.target.value })}
+              className="bg-muted/50"
             />
-            <Button onClick={handleCreateExpense} className="w-full" disabled={createTransaction.isPending}>
+            <Button onClick={handleCreateExpense} className="w-full bg-destructive hover:bg-destructive/90" disabled={createTransaction.isPending}>
               {t('common.add')}
             </Button>
           </div>
@@ -257,27 +374,35 @@ export function QuickActions() {
 
       {/* Schedule Dialog */}
       <Dialog open={activeDialog === 'schedule'} onOpenChange={(open) => !open && setActiveDialog(null)}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('quickActions.schedule')}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                <Calendar className="w-4 h-4 text-purple-500" />
+              </div>
+              {t('quickActions.schedule')}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <Input
               placeholder={t('calendar.title')}
               value={eventForm.title}
               onChange={(e) => setEventForm({ ...eventForm, title: e.target.value })}
+              className="bg-muted/50"
             />
             <Input
               type="datetime-local"
               value={eventForm.start_time}
               onChange={(e) => setEventForm({ ...eventForm, start_time: e.target.value })}
+              className="bg-muted/50"
             />
             <Input
               type="datetime-local"
               value={eventForm.end_time}
               onChange={(e) => setEventForm({ ...eventForm, end_time: e.target.value })}
+              className="bg-muted/50"
             />
-            <Button onClick={handleCreateEvent} className="w-full" disabled={createEvent.isPending}>
+            <Button onClick={handleCreateEvent} className="w-full bg-purple-500 hover:bg-purple-600" disabled={createEvent.isPending}>
               {t('common.add')}
             </Button>
           </div>
