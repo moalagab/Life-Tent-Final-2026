@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Tent,
   LogOut,
+  Timer,
 } from 'lucide-react';
 
 export function Sidebar() {
@@ -37,6 +38,7 @@ export function Sidebar() {
     { path: '/habits', icon: Repeat, labelKey: 'common.habits' },
     { path: '/calendar', icon: Calendar, labelKey: 'common.calendar' },
     { path: '/studio', icon: Film, labelKey: 'common.studio' },
+    { path: '/pomodoro', icon: Timer, labelKey: 'common.pomodoro' },
   ];
 
   const handleSignOut = async () => {
