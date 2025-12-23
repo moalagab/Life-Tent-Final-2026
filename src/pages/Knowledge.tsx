@@ -250,12 +250,12 @@ export default function Knowledge() {
                         <Briefcase className="w-4 h-4" />
                         {currentLanguage === 'ar' ? 'ربط بمشروع' : 'Link to Project'}
                       </Label>
-                      <Select value={newNote.project_id} onValueChange={(v) => setNewNote({ ...newNote, project_id: v })}>
+                      <Select value={newNote.project_id || 'none'} onValueChange={(v) => setNewNote({ ...newNote, project_id: v === 'none' ? '' : v })}>
                         <SelectTrigger>
                           <SelectValue placeholder={currentLanguage === 'ar' ? 'اختر مشروع' : 'Select Project'} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">{currentLanguage === 'ar' ? 'بدون' : 'None'}</SelectItem>
+                          <SelectItem value="none">{currentLanguage === 'ar' ? 'بدون' : 'None'}</SelectItem>
                           {projects?.map(p => (
                             <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
                           ))}
@@ -269,12 +269,12 @@ export default function Knowledge() {
                         <Target className="w-4 h-4" />
                         {currentLanguage === 'ar' ? 'ربط بهدف' : 'Link to Goal'}
                       </Label>
-                      <Select value={newNote.goal_id} onValueChange={(v) => setNewNote({ ...newNote, goal_id: v })}>
+                      <Select value={newNote.goal_id || 'none'} onValueChange={(v) => setNewNote({ ...newNote, goal_id: v === 'none' ? '' : v })}>
                         <SelectTrigger>
                           <SelectValue placeholder={currentLanguage === 'ar' ? 'اختر هدف' : 'Select Goal'} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">{currentLanguage === 'ar' ? 'بدون' : 'None'}</SelectItem>
+                          <SelectItem value="none">{currentLanguage === 'ar' ? 'بدون' : 'None'}</SelectItem>
                           {goals?.map(g => (
                             <SelectItem key={g.id} value={g.id}>{g.title}</SelectItem>
                           ))}
