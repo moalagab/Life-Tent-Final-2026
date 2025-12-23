@@ -1,5 +1,6 @@
 import { Flame, BookOpen, Dumbbell, Droplets, Brain, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface Habit {
   id: string;
@@ -19,13 +20,14 @@ const mockHabits: Habit[] = [
 ];
 
 export function HabitStreaks() {
+  const { t, currentLanguage } = useLanguage();
   const totalStreak = mockHabits.reduce((acc, h) => acc + h.streak, 0);
   const completedToday = mockHabits.filter(h => h.todayCompleted).length;
 
   return (
     <div className="glass-card p-5 h-full">
       <div className="flex items-center justify-between mb-5">
-        <h3 className="text-lg font-semibold text-foreground">Habit Streaks</h3>
+        <h3 className="text-lg font-semibold text-foreground">{t('dashboard.habitStreaks')}</h3>
         <div className="flex items-center gap-1 text-primary">
           <Flame className="w-5 h-5" />
           <span className="font-bold">{totalStreak}</span>
@@ -55,10 +57,14 @@ export function HabitStreaks() {
               </div>
             </div>
             
-            <p className="text-sm font-medium text-foreground">{habit.name}</p>
+            <p className="text-sm font-medium text-foreground">
+              {currentLanguage === 'ar' ? habit.nameAr : habit.name}
+            </p>
             <div className="flex items-center gap-1 mt-1">
               <Flame className="w-3 h-3 text-destructive" />
-              <span className="text-xs text-muted-foreground">{habit.streak} day streak</span>
+              <span className="text-xs text-muted-foreground">
+                {habit.streak} {t('habits.dayStreak')}
+              </span>
             </div>
           </div>
         ))}
@@ -67,7 +73,9 @@ export function HabitStreaks() {
       {/* Today's Progress */}
       <div className="mt-4 pt-4 border-t border-border">
         <div className="flex justify-between items-center">
-          <span className="text-sm text-muted-foreground">Today's Habits</span>
+          <span className="text-sm text-muted-foreground">
+            {currentLanguage === 'ar' ? 'عادات اليوم' : "Today's Habits"}
+          </span>
           <span className="text-sm font-medium gold-text">{completedToday}/{mockHabits.length}</span>
         </div>
         <div className="flex gap-1 mt-2">

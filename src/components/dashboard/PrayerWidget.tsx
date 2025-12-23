@@ -3,6 +3,7 @@ import { getTodayPrayerTimes, getNextPrayer, PrayerTimes } from '@/lib/prayer-ti
 import { isRamadan } from '@/lib/hijri';
 import { cn } from '@/lib/utils';
 import { Moon, Sun, Sunrise, Sunset } from 'lucide-react';
+import { useLanguage } from '@/hooks/useLanguage';
 
 const prayerIcons: Record<string, React.ReactNode> = {
   Fajr: <Sunrise className="w-4 h-4" />,
@@ -14,6 +15,7 @@ const prayerIcons: Record<string, React.ReactNode> = {
 };
 
 export function PrayerWidget() {
+  const { t, currentLanguage } = useLanguage();
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
   const [nextPrayer, setNextPrayer] = useState<{ prayer: any; remaining: string } | null>(null);
   const [isRamadanPeriod] = useState(isRamadan());
@@ -45,7 +47,7 @@ export function PrayerWidget() {
   return (
     <div className="glass-card p-5 h-full">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-foreground">Prayer Times</h3>
+        <h3 className="text-lg font-semibold text-foreground">{t('dashboard.prayerTimes')}</h3>
         {isRamadanPeriod && (
           <span className="px-2 py-1 rounded-full bg-primary/20 text-primary text-xs font-medium">
             رمضان كريم 🌙
@@ -57,27 +59,26 @@ export function PrayerWidget() {
       <div className="bg-gradient-gold rounded-xl p-4 mb-4 shadow-gold-glow">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-primary-foreground/80 text-sm">Next Prayer</p>
+            <p className="text-primary-foreground/80 text-sm">{t('dashboard.nextPrayer')}</p>
             <p className="text-xl font-bold text-primary-foreground">
-              {nextPrayer.prayer.name}
-            </p>
-            <p className="text-primary-foreground/80 text-sm" dir="rtl">
-              {nextPrayer.prayer.nameAr}
+              {currentLanguage === 'ar' ? nextPrayer.prayer.nameAr : nextPrayer.prayer.name}
             </p>
           </div>
-          <div className="text-right">
+          <div className="text-end">
             <p className="text-2xl font-bold text-primary-foreground">
               {nextPrayer.prayer.time}
             </p>
             <p className="text-primary-foreground/80 text-sm">
-              in {nextPrayer.remaining}
+              {currentLanguage === 'ar' ? `خلال ${nextPrayer.remaining}` : `in ${nextPrayer.remaining}`}
             </p>
           </div>
         </div>
         
         {isRamadanPeriod && nextPrayer.prayer.name === 'Maghrib' && (
           <div className="mt-3 pt-3 border-t border-primary-foreground/20 text-center">
-            <p className="text-primary-foreground font-medium">🌙 Iftar Time</p>
+            <p className="text-primary-foreground font-medium">
+              {currentLanguage === 'ar' ? '🌙 وقت الإفطار' : '🌙 Iftar Time'}
+            </p>
           </div>
         )}
       </div>
@@ -108,7 +109,7 @@ export function PrayerWidget() {
                   'text-sm',
                   isNext ? 'font-medium text-foreground' : 'text-muted-foreground'
                 )}>
-                  {prayer.name}
+                  {currentLanguage === 'ar' ? prayer.nameAr : prayer.name}
                 </span>
               </div>
               <span className={cn(

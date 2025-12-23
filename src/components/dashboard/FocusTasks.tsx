@@ -1,12 +1,15 @@
 import { useState } from 'react';
-import { Check, Circle, ArrowUpRight, Flag } from 'lucide-react';
+import { Check, ArrowUpRight, Flag } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface Task {
   id: string;
   title: string;
+  titleAr: string;
   priority: 'high' | 'medium' | 'low';
   project?: string;
+  projectAr?: string;
   completed: boolean;
 }
 
@@ -17,13 +20,14 @@ const priorityColors = {
 };
 
 const mockTasks: Task[] = [
-  { id: '1', title: 'Finalize Q4 budget proposal', priority: 'high', project: 'Finance', completed: false },
-  { id: '2', title: 'Review team performance reports', priority: 'medium', project: 'HR', completed: false },
-  { id: '3', title: 'Prepare presentation for board meeting', priority: 'high', project: 'Strategy', completed: false },
+  { id: '1', title: 'Finalize Q4 budget proposal', titleAr: 'إنهاء اقتراح ميزانية الربع الرابع', priority: 'high', project: 'Finance', projectAr: 'المالية', completed: false },
+  { id: '2', title: 'Review team performance reports', titleAr: 'مراجعة تقارير أداء الفريق', priority: 'medium', project: 'HR', projectAr: 'الموارد البشرية', completed: false },
+  { id: '3', title: 'Prepare presentation for board meeting', titleAr: 'إعداد العرض التقديمي لاجتماع مجلس الإدارة', priority: 'high', project: 'Strategy', projectAr: 'الاستراتيجية', completed: false },
 ];
 
 export function FocusTasks() {
   const [tasks, setTasks] = useState(mockTasks);
+  const { t, currentLanguage } = useLanguage();
 
   const toggleTask = (id: string) => {
     setTasks(prev => prev.map(task => 
@@ -37,11 +41,11 @@ export function FocusTasks() {
     <div className="glass-card p-5 h-full">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-lg font-semibold text-foreground">Today's Focus</h3>
-          <p className="text-sm text-muted-foreground">{completedCount}/{tasks.length} completed</p>
+          <h3 className="text-lg font-semibold text-foreground">{t('dashboard.focusTasks')}</h3>
+          <p className="text-sm text-muted-foreground">{completedCount}/{tasks.length} {currentLanguage === 'ar' ? 'مكتمل' : 'completed'}</p>
         </div>
         <button className="text-primary text-sm font-medium hover:underline flex items-center gap-1">
-          All Tasks <ArrowUpRight className="w-3 h-3" />
+          {t('common.viewAll')} <ArrowUpRight className="w-3 h-3" />
         </button>
       </div>
 
@@ -73,11 +77,11 @@ export function FocusTasks() {
                 'text-sm font-medium text-foreground transition-all',
                 task.completed && 'line-through text-muted-foreground'
               )}>
-                {task.title}
+                {currentLanguage === 'ar' ? task.titleAr : task.title}
               </p>
               {task.project && (
                 <span className="text-xs text-muted-foreground">
-                  {task.project}
+                  {currentLanguage === 'ar' ? task.projectAr : task.project}
                 </span>
               )}
             </div>

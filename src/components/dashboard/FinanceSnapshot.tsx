@@ -1,5 +1,6 @@
 import { TrendingUp, TrendingDown, Wallet, CreditCard, PiggyBank, ArrowUpRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface StatCardProps {
   label: string;
@@ -33,18 +34,20 @@ function StatCard({ label, value, change, trend, icon }: StatCardProps) {
 }
 
 export function FinanceSnapshot() {
+  const { t, currentLanguage } = useLanguage();
+
   return (
     <div className="glass-card p-5 h-full">
       <div className="flex items-center justify-between mb-5">
-        <h3 className="text-lg font-semibold text-foreground">Finance Overview</h3>
+        <h3 className="text-lg font-semibold text-foreground">{t('dashboard.financeSnapshot')}</h3>
         <button className="text-primary text-sm font-medium hover:underline flex items-center gap-1">
-          View All <ArrowUpRight className="w-3 h-3" />
+          {t('common.viewAll')} <ArrowUpRight className="w-3 h-3" />
         </button>
       </div>
 
       <div className="space-y-4">
         <StatCard
-          label="Net Worth"
+          label={t('finance.netWorth')}
           value="SAR 245,780"
           change="+12.5%"
           trend="up"
@@ -54,7 +57,7 @@ export function FinanceSnapshot() {
         <div className="h-px bg-border" />
         
         <StatCard
-          label="Monthly Expenses"
+          label={t('finance.monthlyExpenses')}
           value="SAR 18,420"
           change="-5.2%"
           trend="down"
@@ -64,7 +67,7 @@ export function FinanceSnapshot() {
         <div className="h-px bg-border" />
         
         <StatCard
-          label="Savings This Month"
+          label={currentLanguage === 'ar' ? 'المدخرات هذا الشهر' : 'Savings This Month'}
           value="SAR 8,500"
           change="+22%"
           trend="up"
@@ -75,8 +78,12 @@ export function FinanceSnapshot() {
       {/* Quick Budget Progress */}
       <div className="mt-5 pt-4 border-t border-border">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-sm text-muted-foreground">Monthly Budget</span>
-          <span className="text-sm font-medium text-foreground">68% used</span>
+          <span className="text-sm text-muted-foreground">
+            {currentLanguage === 'ar' ? 'الميزانية الشهرية' : 'Monthly Budget'}
+          </span>
+          <span className="text-sm font-medium text-foreground">
+            {currentLanguage === 'ar' ? '٦٨٪ مستخدم' : '68% used'}
+          </span>
         </div>
         <div className="h-2 bg-muted rounded-full overflow-hidden">
           <div 
@@ -85,7 +92,7 @@ export function FinanceSnapshot() {
           />
         </div>
         <p className="text-xs text-muted-foreground mt-2">
-          SAR 6,400 remaining until Dec 31
+          {currentLanguage === 'ar' ? 'متبقي ٦,٤٠٠ ر.س حتى ٣١ ديسمبر' : 'SAR 6,400 remaining until Dec 31'}
         </p>
       </div>
     </div>
