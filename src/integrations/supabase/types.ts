@@ -2013,7 +2013,12 @@ export type Database = {
       category_type: "income" | "expense" | "transfer"
       course_status: "not_started" | "in_progress" | "completed" | "abandoned"
       debt_status: "active" | "closed" | "paused"
-      goal_perspective: "financial" | "customer" | "processes" | "learning"
+      goal_perspective:
+        | "financial"
+        | "customer"
+        | "processes"
+        | "learning"
+        | "personal"
       investment_tx_type:
         | "buy"
         | "sell"
@@ -2187,7 +2192,13 @@ export const Constants = {
       category_type: ["income", "expense", "transfer"],
       course_status: ["not_started", "in_progress", "completed", "abandoned"],
       debt_status: ["active", "closed", "paused"],
-      goal_perspective: ["financial", "customer", "processes", "learning"],
+      goal_perspective: [
+        "financial",
+        "customer",
+        "processes",
+        "learning",
+        "personal",
+      ],
       investment_tx_type: [
         "buy",
         "sell",
