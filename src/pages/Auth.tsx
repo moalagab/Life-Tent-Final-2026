@@ -1,30 +1,45 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, Mail, Lock, User, Tent, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Tent, ArrowLeft, Shield, AlertTriangle, CheckCircle } from 'lucide-react';
 import { z } from 'zod';
 import { useLanguage } from '@/hooks/useLanguage';
+import { Progress } from '@/components/ui/progress';
 
 type AuthMode = 'login' | 'signup' | 'forgot';
 
+// Rate limiting for login attempts
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 minutes
+
 export default function Auth() {
-  const { t } = useLanguage();
+  const { t, currentLanguage: language } = useLanguage();
+  
+  // Strong password validation for signup
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
   
   const loginSchema = z.object({
-    email: z.string().trim().email({ message: t('validation.invalidEmail') }),
+    email: z.string().trim().toLowerCase().email({ message: t('validation.invalidEmail') }),
     password: z.string().min(6, { message: t('validation.passwordMinLength') })
   });
 
-  const signupSchema = loginSchema.extend({
+  const signupSchema = z.object({
+    email: z.string().trim().toLowerCase().email({ message: t('validation.invalidEmail') }),
+    password: z.string()
+      .min(8, { message: language === 'ar' ? 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' : 'Password must be at least 8 characters' })
+      .regex(/[a-z]/, { message: language === 'ar' ? 'يجب أن تحتوي على حرف صغير' : 'Must contain a lowercase letter' })
+      .regex(/[A-Z]/, { message: language === 'ar' ? 'يجب أن تحتوي على حرف كبير' : 'Must contain an uppercase letter' })
+      .regex(/\d/, { message: language === 'ar' ? 'يجب أن تحتوي على رقم' : 'Must contain a number' })
+      .regex(/[@$!%*?&]/, { message: language === 'ar' ? 'يجب أن تحتوي على رمز خاص (@$!%*?&)' : 'Must contain a special character (@$!%*?&)' }),
     fullName: z.string().trim().min(2, { message: t('validation.nameMinLength') }).max(100)
   });
 
   const resetSchema = z.object({
-    email: z.string().trim().email({ message: t('validation.invalidEmail') })
+    email: z.string().trim().toLowerCase().email({ message: t('validation.invalidEmail') })
   });
 
   const [mode, setMode] = useState<AuthMode>('login');
@@ -35,10 +50,53 @@ export default function Auth() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [resetSent, setResetSent] = useState(false);
+  
+  // Security: Rate limiting state
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [lockoutUntil, setLockoutUntil] = useState<number | null>(null);
+  const [lockoutRemaining, setLockoutRemaining] = useState(0);
+  
+  // Password strength indicator
+  const [passwordStrength, setPasswordStrength] = useState(0);
 
   const { signIn, signUp, resetPassword, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Calculate password strength
+  const calculatePasswordStrength = useCallback((pwd: string) => {
+    let strength = 0;
+    if (pwd.length >= 8) strength += 25;
+    if (/[a-z]/.test(pwd)) strength += 25;
+    if (/[A-Z]/.test(pwd)) strength += 25;
+    if (/\d/.test(pwd)) strength += 12.5;
+    if (/[@$!%*?&]/.test(pwd)) strength += 12.5;
+    return Math.min(100, strength);
+  }, []);
+  
+  // Update password strength on change
+  useEffect(() => {
+    if (mode === 'signup') {
+      setPasswordStrength(calculatePasswordStrength(password));
+    }
+  }, [password, mode, calculatePasswordStrength]);
+  
+  // Lockout timer
+  useEffect(() => {
+    if (lockoutUntil) {
+      const interval = setInterval(() => {
+        const remaining = lockoutUntil - Date.now();
+        if (remaining <= 0) {
+          setLockoutUntil(null);
+          setLoginAttempts(0);
+          setLockoutRemaining(0);
+        } else {
+          setLockoutRemaining(Math.ceil(remaining / 1000));
+        }
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [lockoutUntil]);
 
   useEffect(() => {
     if (user) {
@@ -76,15 +134,31 @@ export default function Auth() {
     return true;
   };
 
+  // Check if locked out
+  const isLockedOut = lockoutUntil && Date.now() < lockoutUntil;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check lockout for login attempts
+    if (mode === 'login' && isLockedOut) {
+      toast({
+        title: language === 'ar' ? 'تم إيقاف الحساب مؤقتاً' : 'Account Temporarily Locked',
+        description: language === 'ar' 
+          ? `يرجى الانتظار ${lockoutRemaining} ثانية قبل المحاولة مرة أخرى`
+          : `Please wait ${lockoutRemaining} seconds before trying again`,
+        variant: "destructive"
+      });
+      return;
+    }
+    
     if (!validateForm()) return;
 
     setIsSubmitting(true);
 
     try {
       if (mode === 'forgot') {
-        const { error } = await resetPassword(email.trim());
+        const { error } = await resetPassword(email.trim().toLowerCase());
         if (error) {
           toast({
             title: t('auth.error'),
@@ -99,12 +173,25 @@ export default function Auth() {
           });
         }
       } else if (mode === 'login') {
-        const { error } = await signIn(email.trim(), password);
+        const { error } = await signIn(email.trim().toLowerCase(), password);
         if (error) {
-          if (error.message.includes('Invalid login credentials')) {
+          // Increment login attempts on failure
+          const newAttempts = loginAttempts + 1;
+          setLoginAttempts(newAttempts);
+          
+          if (newAttempts >= MAX_LOGIN_ATTEMPTS) {
+            setLockoutUntil(Date.now() + LOCKOUT_DURATION);
+            toast({
+              title: language === 'ar' ? 'تم إيقاف الحساب مؤقتاً' : 'Account Temporarily Locked',
+              description: language === 'ar' 
+                ? 'تم تجاوز عدد المحاولات المسموح. يرجى الانتظار 5 دقائق.'
+                : 'Too many failed attempts. Please wait 5 minutes.',
+              variant: "destructive"
+            });
+          } else if (error.message.includes('Invalid login credentials')) {
             toast({
               title: t('auth.loginError'),
-              description: t('auth.invalidCredentials'),
+              description: `${t('auth.invalidCredentials')} (${MAX_LOGIN_ATTEMPTS - newAttempts} ${language === 'ar' ? 'محاولات متبقية' : 'attempts remaining'})`,
               variant: "destructive"
             });
           } else {
@@ -115,13 +202,16 @@ export default function Auth() {
             });
           }
         } else {
+          // Reset attempts on successful login
+          setLoginAttempts(0);
+          setLockoutUntil(null);
           toast({
             title: t('auth.welcome'),
             description: t('auth.loginSuccess')
           });
         }
       } else {
-        const { error } = await signUp(email.trim(), password, fullName.trim());
+        const { error } = await signUp(email.trim().toLowerCase(), password, fullName.trim());
         if (error) {
           if (error.message.includes('User already registered')) {
             toast({
@@ -334,6 +424,7 @@ export default function Auth() {
                       placeholder="••••••••"
                       className="pr-10 pl-10 bg-secondary/50 border-border focus:border-primary"
                       dir="ltr"
+                      autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                     />
                     <button
                       type="button"
@@ -345,6 +436,74 @@ export default function Auth() {
                   </div>
                   {errors.password && (
                     <p className="text-destructive text-sm">{errors.password}</p>
+                  )}
+                  
+                  {/* Password Strength Indicator for Signup */}
+                  {mode === 'signup' && password && (
+                    <div className="space-y-2 mt-2">
+                      <div className="flex items-center gap-2">
+                        <Progress value={passwordStrength} className="h-2 flex-1" />
+                        <span className={`text-xs font-medium ${
+                          passwordStrength < 50 ? 'text-destructive' : 
+                          passwordStrength < 75 ? 'text-yellow-500' : 'text-green-500'
+                        }`}>
+                          {passwordStrength < 50 
+                            ? (language === 'ar' ? 'ضعيفة' : 'Weak')
+                            : passwordStrength < 75 
+                              ? (language === 'ar' ? 'متوسطة' : 'Medium')
+                              : (language === 'ar' ? 'قوية' : 'Strong')
+                          }
+                        </span>
+                      </div>
+                      <div className="text-xs text-muted-foreground space-y-1">
+                        <div className="flex items-center gap-1">
+                          {password.length >= 8 ? <CheckCircle className="w-3 h-3 text-green-500" /> : <AlertTriangle className="w-3 h-3 text-muted-foreground" />}
+                          <span>{language === 'ar' ? '8 أحرف على الأقل' : 'At least 8 characters'}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {/[A-Z]/.test(password) ? <CheckCircle className="w-3 h-3 text-green-500" /> : <AlertTriangle className="w-3 h-3 text-muted-foreground" />}
+                          <span>{language === 'ar' ? 'حرف كبير' : 'Uppercase letter'}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {/[a-z]/.test(password) ? <CheckCircle className="w-3 h-3 text-green-500" /> : <AlertTriangle className="w-3 h-3 text-muted-foreground" />}
+                          <span>{language === 'ar' ? 'حرف صغير' : 'Lowercase letter'}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {/\d/.test(password) ? <CheckCircle className="w-3 h-3 text-green-500" /> : <AlertTriangle className="w-3 h-3 text-muted-foreground" />}
+                          <span>{language === 'ar' ? 'رقم' : 'Number'}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {/[@$!%*?&]/.test(password) ? <CheckCircle className="w-3 h-3 text-green-500" /> : <AlertTriangle className="w-3 h-3 text-muted-foreground" />}
+                          <span>{language === 'ar' ? 'رمز خاص (@$!%*?&)' : 'Special character (@$!%*?&)'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Lockout Warning */}
+                  {mode === 'login' && loginAttempts > 0 && loginAttempts < MAX_LOGIN_ATTEMPTS && (
+                    <div className="flex items-center gap-2 text-yellow-500 text-xs mt-1">
+                      <Shield className="w-4 h-4" />
+                      <span>
+                        {language === 'ar' 
+                          ? `${MAX_LOGIN_ATTEMPTS - loginAttempts} محاولات متبقية قبل الإيقاف المؤقت`
+                          : `${MAX_LOGIN_ATTEMPTS - loginAttempts} attempts remaining before lockout`
+                        }
+                      </span>
+                    </div>
+                  )}
+                  
+                  {/* Lockout Active */}
+                  {mode === 'login' && isLockedOut && (
+                    <div className="flex items-center gap-2 text-destructive text-xs mt-1">
+                      <AlertTriangle className="w-4 h-4" />
+                      <span>
+                        {language === 'ar' 
+                          ? `الحساب موقوف مؤقتاً. يرجى الانتظار ${lockoutRemaining} ثانية`
+                          : `Account locked. Please wait ${lockoutRemaining} seconds`
+                        }
+                      </span>
+                    </div>
                   )}
                 </div>
 
