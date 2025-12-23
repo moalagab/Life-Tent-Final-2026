@@ -8,6 +8,7 @@ import { QuickActions } from '@/components/dashboard/QuickActions';
 import { ProjectsOverview } from '@/components/dashboard/ProjectsOverview';
 import { UpcomingEvents } from '@/components/dashboard/UpcomingEvents';
 import { GoalProgress } from '@/components/dashboard/GoalProgress';
+import { KnowledgeWidget } from '@/components/dashboard/KnowledgeWidget';
 import { useAutoReminders } from '@/hooks/useAutoReminders';
 
 const Index = () => {
@@ -37,7 +38,7 @@ const Index = () => {
             </section>
           </div>
 
-          {/* Center Column - Projects, Tasks & Habits */}
+          {/* Center Column - Projects, Tasks, Habits & Goals */}
           <div className="lg:col-span-6 space-y-6">
             <section className="slide-up" style={{ animationDelay: '250ms' }}>
               <ProjectsOverview />
@@ -50,14 +51,19 @@ const Index = () => {
                 <HabitStreaks />
               </section>
             </div>
-            <section className="slide-up" style={{ animationDelay: '400ms' }}>
-              <GoalProgress />
-            </section>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <section className="slide-up" style={{ animationDelay: '400ms' }}>
+                <GoalProgress />
+              </section>
+              <section className="slide-up" style={{ animationDelay: '450ms' }}>
+                <KnowledgeWidget />
+              </section>
+            </div>
           </div>
 
           {/* Right Column - Events */}
           <div className="lg:col-span-3">
-            <section className="slide-up" style={{ animationDelay: '450ms' }}>
+            <section className="slide-up" style={{ animationDelay: '500ms' }}>
               <UpcomingEvents />
             </section>
           </div>
