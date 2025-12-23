@@ -6,17 +6,41 @@ import { useAuth } from './useAuth';
 export type Goal = Tables<'goals'>;
 export type KeyResult = Tables<'key_results'>;
 
-export function useGoals() {
+export function useGoals(includeArchived = false) {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ['goals', user?.id],
+    queryKey: ['goals', user?.id, includeArchived],
+    queryFn: async () => {
+      let query = supabase
+        .from('goals')
+        .select('*, projects(id, title, color)')
+        .order('created_at', { ascending: false });
+      
+      if (!includeArchived) {
+        query = query.eq('is_active', true);
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+}
+
+export function useArchivedGoals() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['goals-archived', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('goals')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
+        .select('*, projects(id, title, color)')
+        .eq('is_active', false)
+        .order('updated_at', { ascending: false });
       
       if (error) throw error;
       return data;
@@ -210,6 +234,52 @@ export function useDeleteKeyResult() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['goals-with-kr'] });
       queryClient.invalidateQueries({ queryKey: ['key-results'] });
+    },
+  });
+}
+
+export function useArchiveGoal() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase
+        .from('goals')
+        .update({ is_active: false })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['goals'] });
+      queryClient.invalidateQueries({ queryKey: ['goals-archived'] });
+      queryClient.invalidateQueries({ queryKey: ['goals-with-kr'] });
+    },
+  });
+}
+
+export function useRestoreGoal() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase
+        .from('goals')
+        .update({ is_active: true })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['goals'] });
+      queryClient.invalidateQueries({ queryKey: ['goals-archived'] });
+      queryClient.invalidateQueries({ queryKey: ['goals-with-kr'] });
     },
   });
 }

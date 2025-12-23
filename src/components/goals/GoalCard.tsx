@@ -2,17 +2,19 @@ import { useState } from 'react';
 import { 
   Target, MoreHorizontal, TrendingUp, AlertTriangle, CheckCircle2,
   Calendar, FolderKanban, Plus, Trash2, Edit3, ChevronDown, ChevronUp,
-  User, Users, Cog, GraduationCap, Sparkles
+  User, Users, Cog, GraduationCap, Sparkles, Archive, RotateCcw, Minus, PlusCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -30,6 +32,12 @@ interface KeyResult {
   unit: string | null;
 }
 
+interface Project {
+  id: string;
+  title: string;
+  color: string | null;
+}
+
 interface GoalCardProps {
   goal: {
     id: string;
@@ -41,6 +49,9 @@ interface GoalCardProps {
     unit: string | null;
     start_date: string | null;
     end_date: string | null;
+    project_id?: string | null;
+    projects?: Project | null;
+    is_active?: boolean;
   };
   keyResults: KeyResult[];
   progress: number;
@@ -48,6 +59,9 @@ interface GoalCardProps {
   onDelete?: () => void;
   onAddKeyResult?: () => void;
   onUpdateKeyResult?: (krId: string, value: number) => void;
+  onArchive?: () => void;
+  onRestore?: () => void;
+  isArchived?: boolean;
 }
 
 const perspectiveConfig: Record<string, { icon: any; color: string; bg: string }> = {
@@ -59,6 +73,7 @@ const perspectiveConfig: Record<string, { icon: any; color: string; bg: string }
 };
 
 function getProgressStatus(progress: number) {
+  if (progress >= 100) return { label: 'completed', color: 'text-success', icon: CheckCircle2, bg: 'bg-success/10' };
   if (progress >= 80) return { label: 'onTrack', color: 'text-success', icon: CheckCircle2, bg: 'bg-success/10' };
   if (progress >= 50) return { label: 'atRisk', color: 'text-primary', icon: TrendingUp, bg: 'bg-primary/10' };
   return { label: 'behind', color: 'text-destructive', icon: AlertTriangle, bg: 'bg-destructive/10' };
@@ -71,20 +86,53 @@ export function GoalCard({
   onEdit,
   onDelete,
   onAddKeyResult,
-  onUpdateKeyResult
+  onUpdateKeyResult,
+  onArchive,
+  onRestore,
+  isArchived = false
 }: GoalCardProps) {
   const { t, currentLanguage } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [editingKrId, setEditingKrId] = useState<string | null>(null);
+  const [editingValue, setEditingValue] = useState<string>('');
 
   const perspective = perspectiveConfig[goal.perspective || 'personal'] || perspectiveConfig.personal;
   const PerspectiveIcon = perspective.icon;
   const status = getProgressStatus(progress);
   const StatusIcon = status.icon;
 
+  const handleStartEdit = (kr: KeyResult) => {
+    setEditingKrId(kr.id);
+    setEditingValue((kr.current_value || 0).toString());
+  };
+
+  const handleSaveEdit = (krId: string) => {
+    if (onUpdateKeyResult) {
+      onUpdateKeyResult(krId, parseFloat(editingValue) || 0);
+    }
+    setEditingKrId(null);
+    setEditingValue('');
+  };
+
+  const handleQuickUpdate = (kr: KeyResult, delta: number) => {
+    if (onUpdateKeyResult) {
+      const newValue = Math.max(0, (kr.current_value || 0) + delta);
+      onUpdateKeyResult(kr.id, newValue);
+    }
+  };
+
   return (
-    <div className="group relative overflow-hidden rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20">
+    <div className={cn(
+      "group relative overflow-hidden rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20",
+      isArchived && "opacity-75"
+    )}>
       {/* Gradient Accent */}
-      <div className="absolute top-0 start-0 end-0 h-1 bg-gradient-to-r from-primary via-primary/50 to-transparent" />
+      <div className={cn(
+        "absolute top-0 start-0 end-0 h-1 bg-gradient-to-r",
+        isArchived 
+          ? "from-muted-foreground/50 via-muted-foreground/25 to-transparent"
+          : "from-primary via-primary/50 to-transparent"
+      )} />
       
       <div className="p-5">
         {/* Header */}
@@ -110,6 +158,12 @@ export function GoalCard({
                   <StatusIcon className="w-3 h-3" />
                   {t(`goals.status.${status.label}`)}
                 </Badge>
+                {isArchived && (
+                  <Badge variant="secondary" className="text-xs gap-1">
+                    <Archive className="w-3 h-3" />
+                    {t('goals.archive')}
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
@@ -122,10 +176,27 @@ export function GoalCard({
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={onEdit} className="gap-2">
-                <Edit3 className="w-4 h-4" />
-                {t('common.edit')}
-              </DropdownMenuItem>
+              {!isArchived && (
+                <>
+                  <DropdownMenuItem onClick={onEdit} className="gap-2">
+                    <Edit3 className="w-4 h-4" />
+                    {t('common.edit')}
+                  </DropdownMenuItem>
+                  {progress >= 100 && onArchive && (
+                    <DropdownMenuItem onClick={onArchive} className="gap-2">
+                      <Archive className="w-4 h-4" />
+                      {t('goals.archiveGoal')}
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                </>
+              )}
+              {isArchived && onRestore && (
+                <DropdownMenuItem onClick={onRestore} className="gap-2">
+                  <RotateCcw className="w-4 h-4" />
+                  {t('goals.restoreGoal')}
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={onDelete} className="gap-2 text-destructive focus:text-destructive">
                 <Trash2 className="w-4 h-4" />
                 {t('common.delete')}
@@ -133,6 +204,21 @@ export function GoalCard({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+
+        {/* Linked Project */}
+        {goal.projects && (
+          <div className="flex items-center gap-2 mb-3 p-2 rounded-lg bg-muted/30">
+            <FolderKanban className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">{t('goals.linkedProject')}:</span>
+            <div className="flex items-center gap-1.5">
+              <div 
+                className="w-2.5 h-2.5 rounded-full" 
+                style={{ backgroundColor: goal.projects.color || '#6366f1' }} 
+              />
+              <span className="text-sm font-medium text-foreground">{goal.projects.title}</span>
+            </div>
+          </div>
+        )}
 
         {/* Description */}
         {goal.description && (
@@ -146,7 +232,10 @@ export function GoalCard({
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-muted-foreground">{t('goals.progress')}</span>
             <div className="flex items-center gap-2">
-              <span className="text-lg font-bold text-foreground">{progress}%</span>
+              <span className={cn(
+                "text-lg font-bold",
+                progress >= 100 ? "text-success" : "text-foreground"
+              )}>{progress}%</span>
             </div>
           </div>
           <Progress value={progress} className="h-2" />
@@ -184,13 +273,66 @@ export function GoalCard({
             <CollapsibleContent className="mt-3 space-y-2">
               {keyResults.map((kr) => {
                 const krProgress = Math.min((kr.current_value || 0) / kr.target_value * 100, 100);
+                const isEditing = editingKrId === kr.id;
+                
                 return (
                   <div key={kr.id} className="p-3 rounded-xl bg-muted/30 border border-border/50">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm text-foreground font-medium">{kr.title}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {(kr.current_value || 0).toLocaleString()} / {kr.target_value.toLocaleString()} {kr.unit}
-                      </span>
+                      {!isArchived && onUpdateKeyResult && (
+                        <div className="flex items-center gap-1">
+                          {isEditing ? (
+                            <div className="flex items-center gap-1">
+                              <Input
+                                type="number"
+                                value={editingValue}
+                                onChange={(e) => setEditingValue(e.target.value)}
+                                className="w-20 h-7 text-xs"
+                                onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit(kr.id)}
+                                autoFocus
+                              />
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                className="h-7 px-2"
+                                onClick={() => handleSaveEdit(kr.id)}
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5 text-success" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <>
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                className="h-6 w-6 p-0"
+                                onClick={() => handleQuickUpdate(kr, -1)}
+                              >
+                                <Minus className="w-3 h-3" />
+                              </Button>
+                              <button 
+                                className="text-xs text-muted-foreground hover:text-foreground px-1.5 py-0.5 rounded hover:bg-muted transition-colors"
+                                onClick={() => handleStartEdit(kr)}
+                              >
+                                {(kr.current_value || 0).toLocaleString()} / {kr.target_value.toLocaleString()} {kr.unit}
+                              </button>
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                className="h-6 w-6 p-0"
+                                onClick={() => handleQuickUpdate(kr, 1)}
+                              >
+                                <PlusCircle className="w-3 h-3" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      )}
+                      {(isArchived || !onUpdateKeyResult) && (
+                        <span className="text-xs text-muted-foreground">
+                          {(kr.current_value || 0).toLocaleString()} / {kr.target_value.toLocaleString()} {kr.unit}
+                        </span>
+                      )}
                     </div>
                     <Progress value={krProgress} className="h-1.5" />
                   </div>
@@ -201,7 +343,7 @@ export function GoalCard({
         )}
 
         {/* Add Key Result Button */}
-        {onAddKeyResult && (
+        {onAddKeyResult && !isArchived && (
           <Button 
             variant="ghost" 
             size="sm" 

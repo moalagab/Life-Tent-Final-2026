@@ -202,7 +202,17 @@
     "overallProgress": "Overall Progress",
     "activeGoals": "active goals",
     "completedGoals": "completed goals",
-    "dueThisMonth": "Due this month"
+    "archivedGoals": "archived goals",
+    "dueThisMonth": "Due this month",
+    "archiveGoal": "Archive Goal",
+    "goalArchived": "Goal archived",
+    "restoreGoal": "Restore Goal",
+    "goalRestored": "Goal restored",
+    "updateProgress": "Update Progress",
+    "linkedProject": "Linked Project",
+    "noProject": "Not linked",
+    "viewArchive": "View Archive",
+    "archive": "Archive"
   },
   "finance": {
     "title": "Finance",
