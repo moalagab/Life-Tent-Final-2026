@@ -36,7 +36,8 @@
     "close": "إغلاق",
     "export": "تصدير",
     "exportSuccess": "تم التصدير بنجاح",
-    "exportError": "فشل التصدير"
+    "exportError": "فشل التصدير",
+    "update": "تحديث"
   },
   "dashboard": {
     "greeting": "مرحباً",
@@ -431,7 +432,10 @@
     "taskDeadlines": "مواعيد المهام",
     "courseSchedule": "جدول الدورات",
     "subscriptionBills": "فواتير الاشتراكات",
-    "debtPayments": "دفعات الديون"
+    "debtPayments": "دفعات الديون",
+    "events": "الأحداث",
+    "quickLinks": "روابط سريعة",
+    "color": "اللون"
   },
   "knowledge": {
     "title": "قاعدة المعرفة",
