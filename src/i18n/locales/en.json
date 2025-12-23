@@ -399,6 +399,22 @@
     "longBreakTime": "Time for a long break!",
     "workTime": "Time to work!",
     "takeBreak": "Take a break",
-    "backToWork": "Back to work"
+    "backToWork": "Back to work",
+    "timer": "Timer",
+    "statistics": "Statistics",
+    "linkToTask": "Link to Task",
+    "selectTask": "Select a task...",
+    "focusingOn": "Focusing on",
+    "todaySessions": "Today's Sessions",
+    "todayFocusTime": "Today's Focus Time",
+    "totalSessions": "Total Sessions",
+    "totalHours": "Total Hours",
+    "thisWeek": "This Week",
+    "avgSession": "Avg Session",
+    "weeklyActivity": "Weekly Activity",
+    "focusTime": "Focus Time",
+    "sessionsTrend": "Sessions Trend",
+    "sessions": "sessions",
+    "recentSessions": "Recent Sessions"
   }
 }
