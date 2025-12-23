@@ -3,7 +3,8 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   LayoutDashboard, Wallet, Receipt, PiggyBank, 
-  CreditCard, RefreshCw, TrendingUp, FileText, Briefcase, Upload
+  CreditCard, RefreshCw, TrendingUp, FileText, Briefcase, Upload,
+  Globe, Lock
 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { FinanceHome } from '@/components/finance/FinanceHome';
@@ -16,6 +17,8 @@ import { InvestmentsManager } from '@/components/finance/InvestmentsManager';
 import { ProjectFinanceManager } from '@/components/finance/ProjectFinanceManager';
 import { FinanceReports } from '@/components/finance/FinanceReports';
 import { DataImport } from '@/components/finance/DataImport';
+import { CurrencyManager } from '@/components/finance/CurrencyManager';
+import { MonthlyClose } from '@/components/finance/MonthlyClose';
 
 export default function Finance() {
   const { currentLanguage } = useLanguage();
@@ -31,6 +34,8 @@ export default function Finance() {
     { id: 'subscriptions', label: language === 'ar' ? 'الاشتراكات' : 'Subscriptions', icon: RefreshCw },
     { id: 'investments', label: language === 'ar' ? 'الاستثمارات' : 'Investments', icon: TrendingUp },
     { id: 'projects', label: language === 'ar' ? 'المشاريع' : 'Projects', icon: Briefcase },
+    { id: 'currencies', label: language === 'ar' ? 'العملات' : 'Currencies', icon: Globe },
+    { id: 'close', label: language === 'ar' ? 'الإقفال' : 'Close', icon: Lock },
     { id: 'reports', label: language === 'ar' ? 'التقارير' : 'Reports', icon: FileText },
     { id: 'import', label: language === 'ar' ? 'استيراد' : 'Import', icon: Upload },
   ];
@@ -70,6 +75,8 @@ export default function Finance() {
         <TabsContent value="subscriptions"><SubscriptionsManager /></TabsContent>
         <TabsContent value="investments"><InvestmentsManager /></TabsContent>
         <TabsContent value="projects"><ProjectFinanceManager /></TabsContent>
+        <TabsContent value="currencies"><CurrencyManager /></TabsContent>
+        <TabsContent value="close"><MonthlyClose /></TabsContent>
         <TabsContent value="reports"><FinanceReports /></TabsContent>
         <TabsContent value="import"><DataImport /></TabsContent>
       </Tabs>
