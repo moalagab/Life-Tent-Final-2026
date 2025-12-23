@@ -8,6 +8,7 @@ import { QuickActions } from '@/components/dashboard/QuickActions';
 import { ProjectsOverview } from '@/components/dashboard/ProjectsOverview';
 import { UpcomingEvents } from '@/components/dashboard/UpcomingEvents';
 import { useAutoReminders } from '@/hooks/useAutoReminders';
+import { cn } from '@/lib/utils';
 
 const Index = () => {
   // Initialize automatic reminders
@@ -15,33 +16,47 @@ const Index = () => {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <div className="space-y-8 animate-fade-in">
         {/* Greeting Section */}
         <GreetingHeader />
         
-        {/* Quick Actions */}
-        <QuickActions />
+        {/* Quick Actions - Horizontal Scroll on Mobile */}
+        <section className="slide-up" style={{ animationDelay: '100ms' }}>
+          <QuickActions />
+        </section>
 
         {/* Main Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column - Prayer & Finance */}
           <div className="lg:col-span-3 space-y-6">
-            <PrayerWidget />
-            <FinanceSnapshot />
+            <section className="slide-up" style={{ animationDelay: '150ms' }}>
+              <PrayerWidget />
+            </section>
+            <section className="slide-up" style={{ animationDelay: '200ms' }}>
+              <FinanceSnapshot />
+            </section>
           </div>
 
           {/* Center Column - Projects, Tasks & Habits */}
           <div className="lg:col-span-6 space-y-6">
-            <ProjectsOverview />
+            <section className="slide-up" style={{ animationDelay: '250ms' }}>
+              <ProjectsOverview />
+            </section>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FocusTasks />
-              <HabitStreaks />
+              <section className="slide-up" style={{ animationDelay: '300ms' }}>
+                <FocusTasks />
+              </section>
+              <section className="slide-up" style={{ animationDelay: '350ms' }}>
+                <HabitStreaks />
+              </section>
             </div>
           </div>
 
           {/* Right Column - Events */}
           <div className="lg:col-span-3">
-            <UpcomingEvents />
+            <section className="slide-up" style={{ animationDelay: '400ms' }}>
+              <UpcomingEvents />
+            </section>
           </div>
         </div>
       </div>

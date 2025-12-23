@@ -53,7 +53,29 @@
     "netWorth": "صافي الثروة",
     "monthlyBalance": "الرصيد الشهري",
     "prayerTimes": "مواقيت الصلاة",
-    "nextPrayer": "الصلاة القادمة"
+    "nextPrayer": "الصلاة القادمة",
+    "welcomeBack": "أهلاً بعودتك",
+    "todayProgress": "تقدم اليوم",
+    "completed": "مكتمل",
+    "remaining": "متبقي",
+    "noTasks": "لا توجد مهام",
+    "noHabits": "لا توجد عادات",
+    "noProjects": "لا توجد مشاريع",
+    "noEvents": "لا توجد أحداث"
+  },
+  "quickActions": {
+    "newTask": "مهمة جديدة",
+    "newTaskDesc": "إنشاء مهمة جديدة",
+    "quickNote": "ملاحظة سريعة",
+    "quickNoteDesc": "كتابة ملاحظة سريعة",
+    "addGoal": "إضافة هدف",
+    "addGoalDesc": "تحديد هدف جديد",
+    "logExpense": "تسجيل مصروف",
+    "logExpenseDesc": "تسجيل معاملة مالية",
+    "schedule": "جدولة حدث",
+    "scheduleDesc": "إضافة حدث للتقويم",
+    "pomodoro": "بومودورو",
+    "pomodoroDesc": "بدء مؤقت التركيز"
   },
   "tasks": {
     "title": "المهام",
