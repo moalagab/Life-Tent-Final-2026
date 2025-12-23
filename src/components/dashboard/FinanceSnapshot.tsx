@@ -1,6 +1,8 @@
-import { TrendingUp, TrendingDown, Wallet, CreditCard, PiggyBank, ArrowUpRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, CreditCard, PiggyBank, ArrowUpRight, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useMonthlyStats } from '@/hooks/useFinance';
+import { Link } from 'react-router-dom';
 
 interface StatCardProps {
   label: string;
@@ -35,21 +37,36 @@ function StatCard({ label, value, change, trend, icon }: StatCardProps) {
 
 export function FinanceSnapshot() {
   const { t, currentLanguage } = useLanguage();
+  const { data: stats, isLoading } = useMonthlyStats();
+
+  if (isLoading) {
+    return (
+      <div className="glass-card p-5 h-full flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const netWorth = stats?.netWorth || 0;
+  const monthlyExpenses = stats?.monthlyExpenses || 0;
+  const monthlyIncome = stats?.monthlyIncome || 0;
+  const savings = monthlyIncome - monthlyExpenses;
+  const budgetUsed = monthlyIncome > 0 ? Math.round((monthlyExpenses / monthlyIncome) * 100) : 0;
 
   return (
     <div className="glass-card p-5 h-full">
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-lg font-semibold text-foreground">{t('dashboard.financeSnapshot')}</h3>
-        <button className="text-primary text-sm font-medium hover:underline flex items-center gap-1">
+        <Link to="/finance" className="text-primary text-sm font-medium hover:underline flex items-center gap-1">
           {t('common.viewAll')} <ArrowUpRight className="w-3 h-3" />
-        </button>
+        </Link>
       </div>
 
       <div className="space-y-4">
         <StatCard
           label={t('finance.netWorth')}
-          value="SAR 245,780"
-          change="+12.5%"
+          value={`SAR ${netWorth.toLocaleString()}`}
+          change={netWorth > 0 ? '+12.5%' : undefined}
           trend="up"
           icon={<Wallet className="w-5 h-5 text-primary" />}
         />
@@ -58,8 +75,8 @@ export function FinanceSnapshot() {
         
         <StatCard
           label={t('finance.monthlyExpenses')}
-          value="SAR 18,420"
-          change="-5.2%"
+          value={`SAR ${monthlyExpenses.toLocaleString()}`}
+          change={monthlyExpenses > 0 ? '-5.2%' : undefined}
           trend="down"
           icon={<CreditCard className="w-5 h-5 text-destructive" />}
         />
@@ -68,9 +85,9 @@ export function FinanceSnapshot() {
         
         <StatCard
           label={currentLanguage === 'ar' ? 'المدخرات هذا الشهر' : 'Savings This Month'}
-          value="SAR 8,500"
-          change="+22%"
-          trend="up"
+          value={`SAR ${savings.toLocaleString()}`}
+          change={savings > 0 ? '+22%' : undefined}
+          trend={savings > 0 ? 'up' : 'down'}
           icon={<PiggyBank className="w-5 h-5 text-success" />}
         />
       </div>
@@ -82,17 +99,23 @@ export function FinanceSnapshot() {
             {currentLanguage === 'ar' ? 'الميزانية الشهرية' : 'Monthly Budget'}
           </span>
           <span className="text-sm font-medium text-foreground">
-            {currentLanguage === 'ar' ? '٦٨٪ مستخدم' : '68% used'}
+            {budgetUsed}% {currentLanguage === 'ar' ? 'مستخدم' : 'used'}
           </span>
         </div>
         <div className="h-2 bg-muted rounded-full overflow-hidden">
           <div 
-            className="h-full bg-gradient-gold rounded-full transition-all duration-500"
-            style={{ width: '68%' }}
+            className={cn(
+              'h-full rounded-full transition-all duration-500',
+              budgetUsed > 80 ? 'bg-destructive' : 'bg-gradient-gold'
+            )}
+            style={{ width: `${Math.min(budgetUsed, 100)}%` }}
           />
         </div>
         <p className="text-xs text-muted-foreground mt-2">
-          {currentLanguage === 'ar' ? 'متبقي ٦,٤٠٠ ر.س حتى ٣١ ديسمبر' : 'SAR 6,400 remaining until Dec 31'}
+          {currentLanguage === 'ar' 
+            ? `متبقي ${(monthlyIncome - monthlyExpenses).toLocaleString()} ر.س` 
+            : `SAR ${(monthlyIncome - monthlyExpenses).toLocaleString()} remaining`
+          }
         </p>
       </div>
     </div>

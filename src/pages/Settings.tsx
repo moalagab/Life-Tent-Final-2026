@@ -1,24 +1,31 @@
 import { MainLayout } from '@/components/layout/MainLayout';
-import { User, Bell, Globe, Shield, Palette, Database, ArrowUpRight, Check } from 'lucide-react';
+import { User, Bell, Globe, Shield, Palette, Database, ArrowUpRight, Check, Sun, Moon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useTheme } from '@/hooks/useTheme';
 import { toast } from 'sonner';
 
 export default function Settings() {
   const { t, currentLanguage, changeLanguage } = useLanguage();
+  const { theme, setTheme } = useTheme();
 
   const settingsSections = [
     { id: 'profile', label: t('settings.profile'), icon: User, description: t('settings.profileDesc') },
     { id: 'notifications', label: t('settings.notifications'), icon: Bell, description: t('settings.notificationsDesc') },
     { id: 'language', label: t('settings.language'), icon: Globe, description: t('settings.languageDesc') },
-    { id: 'privacy', label: t('settings.privacy'), icon: Shield, description: t('settings.privacyDesc') },
     { id: 'appearance', label: t('settings.appearance'), icon: Palette, description: t('settings.appearanceDesc') },
+    { id: 'privacy', label: t('settings.privacy'), icon: Shield, description: t('settings.privacyDesc') },
     { id: 'data', label: t('settings.dataSync'), icon: Database, description: t('settings.dataSyncDesc') },
   ];
 
   const handleLanguageChange = (lang: 'ar' | 'en') => {
     changeLanguage(lang);
     toast.success(t('settings.languageChanged'));
+  };
+
+  const handleThemeChange = (newTheme: 'light' | 'dark') => {
+    setTheme(newTheme);
+    toast.success(t('settings.themeChanged'));
   };
 
   return (
@@ -32,9 +39,7 @@ export default function Settings() {
         <div className="space-y-4">
           {settingsSections.map((section) => (
             <div key={section.id}>
-              <div
-                className="glass-card p-5 hover:border-primary/30 transition-all cursor-pointer group"
-              >
+              <div className="glass-card p-5 hover:border-primary/30 transition-all cursor-pointer group">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
                     <section.icon className="w-6 h-6 text-primary" />
@@ -49,7 +54,7 @@ export default function Settings() {
                 </div>
               </div>
 
-              {/* Language Selection Panel */}
+              {/* Language Selection */}
               {section.id === 'language' && (
                 <div className="glass-card p-5 mt-2 ms-12 border-primary/20">
                   <h4 className="text-sm font-medium text-foreground mb-4">{t('settings.selectLanguage')}</h4>
@@ -83,11 +88,45 @@ export default function Settings() {
                   </div>
                 </div>
               )}
+
+              {/* Theme Selection */}
+              {section.id === 'appearance' && (
+                <div className="glass-card p-5 mt-2 ms-12 border-primary/20">
+                  <h4 className="text-sm font-medium text-foreground mb-4">{t('settings.selectTheme')}</h4>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => handleThemeChange('light')}
+                      className={cn(
+                        'flex-1 flex items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all',
+                        theme === 'light'
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-border hover:border-primary/50 text-muted-foreground hover:text-foreground'
+                      )}
+                    >
+                      {theme === 'light' && <Check className="w-5 h-5" />}
+                      <Sun className="w-5 h-5" />
+                      <span className="font-medium">{t('settings.lightMode')}</span>
+                    </button>
+                    <button
+                      onClick={() => handleThemeChange('dark')}
+                      className={cn(
+                        'flex-1 flex items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all',
+                        theme === 'dark'
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-border hover:border-primary/50 text-muted-foreground hover:text-foreground'
+                      )}
+                    >
+                      {theme === 'dark' && <Check className="w-5 h-5" />}
+                      <Moon className="w-5 h-5" />
+                      <span className="font-medium">{t('settings.darkMode')}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
 
-        {/* Version Info */}
         <div className="mt-8 text-center">
           <p className="text-sm text-muted-foreground">LIFE TENT v1.0.0</p>
           <p className="text-xs text-muted-foreground mt-1">Built with ❤️ for the Middle East</p>

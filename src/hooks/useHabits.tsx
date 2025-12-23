@@ -28,6 +28,24 @@ export function useHabits() {
   });
 }
 
+export function useHabitLogs() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['habit-logs', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('habit_logs')
+        .select('*')
+        .order('completed_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+}
+
 export function useHabitsWithLogs() {
   const { user } = useAuth();
   const today = new Date();
@@ -36,7 +54,6 @@ export function useHabitsWithLogs() {
   return useQuery({
     queryKey: ['habits-with-logs', user?.id],
     queryFn: async () => {
-      // Get habits
       const { data: habits, error: habitsError } = await supabase
         .from('habits')
         .select('*')
@@ -45,7 +62,6 @@ export function useHabitsWithLogs() {
       
       if (habitsError) throw habitsError;
 
-      // Get logs for the past week
       const { data: logs, error: logsError } = await supabase
         .from('habit_logs')
         .select('*')
@@ -54,7 +70,6 @@ export function useHabitsWithLogs() {
       
       if (logsError) throw logsError;
 
-      // Combine habits with their logs
       return habits.map(habit => ({
         ...habit,
         logs: logs.filter(log => log.habit_id === habit.id),
@@ -91,17 +106,17 @@ export function useLogHabit() {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ habit_id, completed_at }: { habit_id: string; completed_at: string }) => {
-      // Check if already logged
+    mutationFn: async ({ habit_id, completed_at }: { habit_id: string; completed_at?: string }) => {
+      const date = completed_at || format(new Date(), 'yyyy-MM-dd');
+      
       const { data: existing } = await supabase
         .from('habit_logs')
         .select('id')
         .eq('habit_id', habit_id)
-        .eq('completed_at', completed_at)
+        .eq('completed_at', date)
         .maybeSingle();
 
       if (existing) {
-        // Remove log if exists
         const { error } = await supabase
           .from('habit_logs')
           .delete()
@@ -109,15 +124,37 @@ export function useLogHabit() {
         if (error) throw error;
         return { action: 'removed' };
       } else {
-        // Add log
         const { error } = await supabase
           .from('habit_logs')
-          .insert({ habit_id, user_id: user!.id, completed_at });
+          .insert({ habit_id, user_id: user!.id, completed_at: date });
         if (error) throw error;
         return { action: 'added' };
       }
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['habits-with-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['habit-logs'] });
+    },
+  });
+}
+
+export function useUpdateHabit() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: HabitUpdate & { id: string }) => {
+      const { data, error } = await supabase
+        .from('habits')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['habits'] });
       queryClient.invalidateQueries({ queryKey: ['habits-with-logs'] });
     },
   });

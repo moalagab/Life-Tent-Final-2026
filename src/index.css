@@ -6,6 +6,64 @@
 
 @layer base {
   :root {
+    /* Light Mode - Clean & Professional */
+    --background: 210 20% 98%;
+    --foreground: 213 30% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 213 30% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 213 30% 15%;
+
+    --primary: 43 100% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 15% 92%;
+    --secondary-foreground: 213 30% 20%;
+
+    --muted: 210 15% 94%;
+    --muted-foreground: 215 15% 45%;
+
+    --accent: 210 15% 90%;
+    --accent-foreground: 213 30% 15%;
+
+    --destructive: 14 80% 54%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 70% 40%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 43 100% 45%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 210 15% 88%;
+    --input: 210 15% 92%;
+    --ring: 43 100% 45%;
+
+    --radius: 1rem;
+
+    /* Glass Effect Variables - Light */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --glass-blur: 20px;
+
+    /* Gold Gradient */
+    --gradient-gold: linear-gradient(135deg, hsl(43, 100%, 45%) 0%, hsl(35, 100%, 40%) 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 100%);
+
+    /* Sidebar - Light */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 213 30% 15%;
+    --sidebar-primary: 43 100% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 15% 95%;
+    --sidebar-accent-foreground: 213 30% 15%;
+    --sidebar-border: 210 15% 90%;
+    --sidebar-ring: 43 100% 45%;
+  }
+
+  .dark {
     /* Midnight Glass Design System */
     --background: 213 58% 11%;
     --foreground: 210 40% 96%;
@@ -41,18 +99,12 @@
     --input: 213 30% 20%;
     --ring: 43 100% 50%;
 
-    --radius: 1rem;
-
-    /* Glass Effect Variables */
+    /* Glass Effect Variables - Dark */
     --glass-bg: rgba(255, 255, 255, 0.05);
     --glass-border: rgba(255, 255, 255, 0.1);
     --glass-blur: 20px;
 
-    /* Gold Gradient */
-    --gradient-gold: linear-gradient(135deg, hsl(43, 100%, 50%) 0%, hsl(35, 100%, 45%) 100%);
-    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
-
-    /* Sidebar */
+    /* Sidebar - Dark */
     --sidebar-background: 213 50% 10%;
     --sidebar-foreground: 210 40% 96%;
     --sidebar-primary: 43 100% 50%;
@@ -61,11 +113,6 @@
     --sidebar-accent-foreground: 210 40% 96%;
     --sidebar-border: 213 30% 20%;
     --sidebar-ring: 43 100% 50%;
-  }
-
-  .dark {
-    --background: 213 58% 11%;
-    --foreground: 210 40% 96%;
   }
 }
 
@@ -80,11 +127,14 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    min-height: 100vh;
+  }
+
+  .dark body {
     background: 
       radial-gradient(ellipse at top right, hsla(213, 58%, 18%, 0.4) 0%, transparent 50%),
       radial-gradient(ellipse at bottom left, hsla(43, 100%, 50%, 0.05) 0%, transparent 40%),
       hsl(var(--background));
-    min-height: 100vh;
   }
 }
 
@@ -95,6 +145,10 @@
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--glass-border);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .dark .glass-card {
     box-shadow: 
       0 8px 32px rgba(0, 0, 0, 0.3),
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
