@@ -1,13 +1,30 @@
 import { MainLayout } from '@/components/layout/MainLayout';
-import { User, Bell, Globe, Shield, Palette, Database, ArrowUpRight, Check, Sun, Moon } from 'lucide-react';
+import { User, Bell, Globe, Shield, Palette, Database, ArrowUpRight, Check, Sun, Moon, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useTheme } from '@/hooks/useTheme';
+import { useNotifications } from '@/hooks/useNotifications';
 import { toast } from 'sonner';
+import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { useTasks } from '@/hooks/useTasks';
+import { useProjects } from '@/hooks/useProjects';
+import { useHabits } from '@/hooks/useHabits';
+import { useGoals } from '@/hooks/useGoals';
+import { useTransactions, useAccounts } from '@/hooks/useFinance';
+import { exportTasks, exportProjects, exportHabits, exportGoals, exportTransactions, exportAccounts } from '@/lib/export-utils';
 
 export default function Settings() {
   const { t, currentLanguage, changeLanguage } = useLanguage();
   const { theme, setTheme } = useTheme();
+  const { enabled, enableNotifications, disableNotifications, permission } = useNotifications();
+  
+  const { data: tasks } = useTasks();
+  const { data: projects } = useProjects();
+  const { data: habits } = useHabits();
+  const { data: goals } = useGoals();
+  const { data: transactions } = useTransactions();
+  const { data: accounts } = useAccounts();
 
   const settingsSections = [
     { id: 'profile', label: t('settings.profile'), icon: User, description: t('settings.profileDesc') },
@@ -26,6 +43,48 @@ export default function Settings() {
   const handleThemeChange = (newTheme: 'light' | 'dark') => {
     setTheme(newTheme);
     toast.success(t('settings.themeChanged'));
+  };
+
+  const handleNotificationToggle = async () => {
+    if (enabled) {
+      disableNotifications();
+      toast.success(t('settings.notificationsDisabled'));
+    } else {
+      const success = await enableNotifications();
+      if (success) {
+        toast.success(t('settings.notificationsEnabled'));
+      } else {
+        toast.error(t('settings.notificationPermissionDenied'));
+      }
+    }
+  };
+
+  const handleExport = (type: string) => {
+    try {
+      switch (type) {
+        case 'tasks':
+          if (tasks) exportTasks(tasks);
+          break;
+        case 'projects':
+          if (projects) exportProjects(projects);
+          break;
+        case 'habits':
+          if (habits) exportHabits(habits);
+          break;
+        case 'goals':
+          if (goals) exportGoals(goals);
+          break;
+        case 'transactions':
+          if (transactions) exportTransactions(transactions);
+          break;
+        case 'accounts':
+          if (accounts) exportAccounts(accounts);
+          break;
+      }
+      toast.success(t('common.exportSuccess'));
+    } catch (error) {
+      toast.error(t('common.exportError'));
+    }
   };
 
   return (
@@ -53,6 +112,20 @@ export default function Settings() {
                   <ArrowUpRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                 </div>
               </div>
+
+              {/* Notifications Settings */}
+              {section.id === 'notifications' && (
+                <div className="glass-card p-5 mt-2 ms-12 border-primary/20">
+                  <h4 className="text-sm font-medium text-foreground mb-4">{t('settings.notificationSettings')}</h4>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">{t('settings.enableNotifications')}</span>
+                    <Switch checked={enabled} onCheckedChange={handleNotificationToggle} />
+                  </div>
+                  {permission === 'denied' && (
+                    <p className="text-xs text-destructive mt-2">{t('settings.notificationPermissionDenied')}</p>
+                  )}
+                </div>
+              )}
 
               {/* Language Selection */}
               {section.id === 'language' && (
@@ -120,6 +193,39 @@ export default function Settings() {
                       <Moon className="w-5 h-5" />
                       <span className="font-medium">{t('settings.darkMode')}</span>
                     </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Data Export */}
+              {section.id === 'data' && (
+                <div className="glass-card p-5 mt-2 ms-12 border-primary/20">
+                  <h4 className="text-sm font-medium text-foreground mb-4">{t('common.export')}</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button variant="outline" onClick={() => handleExport('tasks')} className="justify-start">
+                      <Download className="w-4 h-4 me-2" />
+                      {t('common.tasks')}
+                    </Button>
+                    <Button variant="outline" onClick={() => handleExport('projects')} className="justify-start">
+                      <Download className="w-4 h-4 me-2" />
+                      {t('common.projects')}
+                    </Button>
+                    <Button variant="outline" onClick={() => handleExport('habits')} className="justify-start">
+                      <Download className="w-4 h-4 me-2" />
+                      {t('common.habits')}
+                    </Button>
+                    <Button variant="outline" onClick={() => handleExport('goals')} className="justify-start">
+                      <Download className="w-4 h-4 me-2" />
+                      {t('common.goals')}
+                    </Button>
+                    <Button variant="outline" onClick={() => handleExport('transactions')} className="justify-start">
+                      <Download className="w-4 h-4 me-2" />
+                      {t('finance.recentTransactions')}
+                    </Button>
+                    <Button variant="outline" onClick={() => handleExport('accounts')} className="justify-start">
+                      <Download className="w-4 h-4 me-2" />
+                      {t('finance.addAccount')}
+                    </Button>
                   </div>
                 </div>
               )}

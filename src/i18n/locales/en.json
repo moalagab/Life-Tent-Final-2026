@@ -27,7 +27,15 @@
     "today": "Today",
     "progress": "Progress",
     "due": "Due",
-    "all": "All"
+    "all": "All",
+    "fillAllFields": "Please fill all required fields",
+    "error": "An error occurred",
+    "success": "Success",
+    "confirm": "Confirm",
+    "close": "Close",
+    "export": "Export",
+    "exportSuccess": "Export successful",
+    "exportError": "Export failed"
   },
   "dashboard": {
     "greeting": "Hello",
@@ -60,7 +68,10 @@
       "high": "High",
       "medium": "Medium",
       "low": "Low"
-    }
+    },
+    "taskAdded": "Task added",
+    "taskUpdated": "Task updated",
+    "taskDeleted": "Task deleted"
   },
   "projects": {
     "title": "Projects",
@@ -82,7 +93,10 @@
       "onHold": "On Hold",
       "completed": "Completed"
     },
-    "tasksCount": "tasks"
+    "tasksCount": "tasks",
+    "projectAdded": "Project added",
+    "projectUpdated": "Project updated",
+    "projectDeleted": "Project deleted"
   },
   "goals": {
     "title": "Goals & OKRs",
@@ -95,12 +109,16 @@
       "customer": "Customer",
       "processes": "Processes",
       "learning": "Learning"
-    }
+    },
+    "goalAdded": "Goal added",
+    "goalUpdated": "Goal updated",
+    "goalDeleted": "Goal deleted"
   },
   "finance": {
     "title": "Finance",
     "subtitle": "Advanced wealth management dashboard",
     "addTransaction": "Add Transaction",
+    "addAccount": "Add Account",
     "netWorth": "Net Worth",
     "monthlyIncome": "Monthly Income",
     "monthlyExpenses": "Monthly Expenses",
@@ -108,7 +126,27 @@
     "recentTransactions": "Recent Transactions",
     "subscriptions": "Subscriptions",
     "monthlyTotal": "Monthly Total",
-    "next": "Next"
+    "next": "Next",
+    "accountName": "Account Name",
+    "checking": "Checking",
+    "savings": "Savings",
+    "credit": "Credit",
+    "investment": "Investment",
+    "balance": "Balance",
+    "description": "Description",
+    "amount": "Amount",
+    "income": "Income",
+    "expense": "Expense",
+    "selectAccount": "Select Account",
+    "category": "Category",
+    "transactionAdded": "Transaction added",
+    "accountAdded": "Account added",
+    "noTransactions": "No transactions",
+    "noSubscriptions": "No subscriptions",
+    "uncategorized": "Uncategorized",
+    "exportData": "Export Data",
+    "exportTransactions": "Export Transactions",
+    "exportAccounts": "Export Accounts"
   },
   "habits": {
     "title": "Habits & Mood",
@@ -127,7 +165,10 @@
     "aiInsight": "AI Insight",
     "yearlyActivity": "Yearly Activity",
     "less": "Less",
-    "more": "More"
+    "more": "More",
+    "habitAdded": "Habit added",
+    "habitUpdated": "Habit updated",
+    "habitDeleted": "Habit deleted"
   },
   "calendar": {
     "title": "Calendar",
@@ -137,7 +178,10 @@
     "addEvent": "Add Event",
     "quickTimeBlock": "Quick Time Block",
     "dropTask": "Drop a task here",
-    "dragTasks": "Drag tasks here to schedule them"
+    "dragTasks": "Drag tasks here to schedule them",
+    "eventAdded": "Event added",
+    "eventUpdated": "Event updated",
+    "eventDeleted": "Event deleted"
   },
   "knowledge": {
     "title": "Knowledge Base",
@@ -149,7 +193,10 @@
     "recentNotes": "Recent Notes",
     "searchNotes": "Search notes...",
     "activeCourses": "Active Courses",
-    "lessons": "lessons"
+    "lessons": "lessons",
+    "noteAdded": "Note added",
+    "noteUpdated": "Note updated",
+    "noteDeleted": "Note deleted"
   },
   "studio": {
     "title": "Studio",
@@ -167,7 +214,10 @@
       "watching": "watching",
       "wantToWatch": "want to watch",
       "watched": "watched"
-    }
+    },
+    "itemAdded": "Item added",
+    "itemUpdated": "Item updated",
+    "itemDeleted": "Item deleted"
   },
   "settings": {
     "title": "Settings",
@@ -187,7 +237,19 @@
     "selectLanguage": "Select Language",
     "arabic": "Arabic",
     "english": "English",
-    "languageChanged": "Language changed"
+    "languageChanged": "Language changed",
+    "selectTheme": "Select Theme",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
+    "themeChanged": "Theme changed",
+    "notificationSettings": "Notification Settings",
+    "enableNotifications": "Enable Notifications",
+    "taskReminders": "Task Reminders",
+    "eventReminders": "Event Reminders",
+    "habitReminders": "Habit Reminders",
+    "notificationsEnabled": "Notifications enabled",
+    "notificationsDisabled": "Notifications disabled",
+    "notificationPermissionDenied": "Notification permission denied"
   },
   "auth": {
     "signIn": "Sign In",
@@ -250,5 +312,14 @@
     "invalidEmail": "Invalid email address",
     "passwordMinLength": "Password must be at least 6 characters",
     "nameMinLength": "Name must be at least 2 characters"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "noNotifications": "No notifications",
+    "taskDue": "Task due",
+    "eventSoon": "Event coming up",
+    "habitReminder": "Habit reminder",
+    "markAllRead": "Mark all as read",
+    "clearAll": "Clear all"
   }
 }
