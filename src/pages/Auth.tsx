@@ -253,25 +253,44 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse-slow" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary/5 rounded-full blur-3xl animate-float" />
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-background via-background to-secondary/20">
+      {/* Animated Background Effects */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Gradient orbs */}
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-primary/8 to-primary/[0.02] rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-gradient-to-tl from-primary/5 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s', animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-radial from-primary/[0.03] to-transparent rounded-full" />
+        
+        {/* Floating particles */}
+        {[...Array(12)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-primary/15 rounded-full"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animation: `float ${5 + Math.random() * 5}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 5}s`
+            }}
+          />
+        ))}
+        
+        {/* Subtle grid */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,180,0,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,180,0,0.01)_1px,transparent_1px)] bg-[size:60px_60px]" />
       </div>
 
       <div className="w-full max-w-md relative z-10">
         {/* Logo Section */}
-        <div className="text-center mb-8 slide-up">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl glass-card gold-glow mb-4">
-            <Tent className="w-10 h-10 text-primary" />
+        <div className="text-center mb-8 animate-fade-in">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-primary/70 shadow-2xl shadow-primary/20 mb-4 hover:scale-105 transition-transform duration-300">
+            <Tent className="w-10 h-10 text-primary-foreground" />
           </div>
           <h1 className="text-3xl font-bold gold-text mb-2">LIFE TENT</h1>
-          <p className="text-muted-foreground">{t('auth.tagline')}</p>
+          <p className="text-muted-foreground text-sm">{t('auth.tagline')}</p>
         </div>
 
         {/* Auth Card */}
-        <div className="glass-card p-8 slide-up" style={{ animationDelay: '0.1s' }}>
+        <div className="glass-card p-8 animate-fade-in backdrop-blur-xl border border-border/50" style={{ animationDelay: '0.1s' }}>
           {mode === 'forgot' ? (
             <>
               {/* Forgot Password Header */}
@@ -389,11 +408,11 @@ export default function Auth() {
           ) : (
             <>
               {/* Login/Signup Tabs */}
-              <div className="flex gap-2 mb-6">
+              <div className="flex gap-2 mb-6 p-1 bg-secondary/50 rounded-xl">
                 <Button
                   type="button"
                   variant={mode === 'login' ? "gold" : "ghost"}
-                  className="flex-1"
+                  className={`flex-1 transition-all duration-300 ${mode === 'login' ? 'shadow-md' : 'hover:bg-secondary'}`}
                   onClick={() => switchMode('login')}
                 >
                   {t('auth.signIn')}
@@ -401,7 +420,7 @@ export default function Auth() {
                 <Button
                   type="button"
                   variant={mode === 'signup' ? "gold" : "ghost"}
-                  className="flex-1"
+                  className={`flex-1 transition-all duration-300 ${mode === 'signup' ? 'shadow-md' : 'hover:bg-secondary'}`}
                   onClick={() => switchMode('signup')}
                 >
                   {t('auth.signUp')}
@@ -565,8 +584,8 @@ export default function Auth() {
                 <Button
                   type="submit"
                   variant="gold"
-                  className="w-full h-12 text-lg font-semibold"
-                  disabled={isSubmitting}
+                  className="w-full h-12 text-lg font-semibold shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                  disabled={isSubmitting || (mode === 'login' && isLockedOut)}
                 >
                   {isSubmitting ? (
                     <span className="flex items-center gap-2">
@@ -587,7 +606,7 @@ export default function Auth() {
                   <button
                     type="button"
                     onClick={() => switchMode(mode === 'login' ? 'signup' : 'login')}
-                    className="text-primary hover:underline mr-2 font-medium"
+                    className="text-primary hover:underline mr-2 font-medium transition-colors duration-200"
                   >
                     {mode === 'login' ? t('auth.createAccount') : t('auth.signIn')}
                   </button>
@@ -598,7 +617,7 @@ export default function Auth() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-muted-foreground text-sm mt-6 slide-up" style={{ animationDelay: '0.2s' }}>
+        <p className="text-center text-muted-foreground text-xs mt-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
           {t('auth.copyright')}
         </p>
       </div>

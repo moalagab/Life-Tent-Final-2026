@@ -406,10 +406,10 @@ export default function LandingPage() {
                     </div>
                     <div className="glass-card p-6 text-center group hover:scale-105 transition-all duration-300">
                       <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform shadow-lg">
-                        <Rocket className="w-7 h-7 text-white" />
+                        <Globe className="w-7 h-7 text-white" />
                       </div>
-                      <div className="text-3xl font-bold gold-text mb-1">3</div>
-                      <div className="text-sm text-muted-foreground">{t('landing.freeTrialBadge')}</div>
+                      <div className="text-3xl font-bold gold-text mb-1">100%</div>
+                      <div className="text-sm text-muted-foreground">{t('landing.cloudBased')}</div>
                     </div>
                     <div className="glass-card p-6 text-center group hover:scale-105 transition-all duration-300">
                       <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform shadow-lg">
