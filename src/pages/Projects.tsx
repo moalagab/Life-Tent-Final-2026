@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Plus, Filter, Search, Loader2, FolderKanban, BarChart3, LayoutDashboard } from 'lucide-react';
+import { Plus, Filter, Search, Loader2, FolderKanban, BarChart3, LayoutDashboard, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useProjects, useUpdateProject, useDeleteProject, Project } from '@/hooks/useProjects';
@@ -14,6 +14,7 @@ import { PlanningPipelineView } from '@/components/projects/PlanningPipelineView
 import { ProjectReports } from '@/components/projects/ProjectReports';
 import { ProjectNotifications } from '@/components/projects/ProjectNotifications';
 import { AdvancedDashboard } from '@/components/projects/AdvancedDashboard';
+import { CRMView } from '@/components/crm/CRMView';
 
 export default function Projects() {
   const { t, currentLanguage } = useLanguage();
@@ -27,6 +28,7 @@ export default function Projects() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showReports, setShowReports] = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
+  const [showCRM, setShowCRM] = useState(false);
 
   const handleProjectFromNotification = (projectId: string) => {
     const project = projects?.find(p => p.id === projectId);
@@ -127,9 +129,17 @@ export default function Projects() {
             />
           </div>
           <Button 
+            variant={showCRM ? 'default' : 'outline'} 
+            size="default"
+            onClick={() => { setShowCRM(!showCRM); setShowDashboard(false); setShowReports(false); }}
+          >
+            <Users className="w-4 h-4 me-2" />
+            {currentLanguage === 'ar' ? 'CRM' : 'CRM'}
+          </Button>
+          <Button 
             variant={showDashboard ? 'default' : 'outline'} 
             size="default"
-            onClick={() => { setShowDashboard(!showDashboard); setShowReports(false); }}
+            onClick={() => { setShowDashboard(!showDashboard); setShowReports(false); setShowCRM(false); }}
           >
             <LayoutDashboard className="w-4 h-4 me-2" />
             {currentLanguage === 'ar' ? 'لوحة التحكم' : 'Dashboard'}
@@ -137,7 +147,7 @@ export default function Projects() {
           <Button 
             variant={showReports ? 'default' : 'outline'} 
             size="default"
-            onClick={() => { setShowReports(!showReports); setShowDashboard(false); }}
+            onClick={() => { setShowReports(!showReports); setShowDashboard(false); setShowCRM(false); }}
           >
             <BarChart3 className="w-4 h-4 me-2" />
             {currentLanguage === 'ar' ? 'التقارير' : 'Reports'}
@@ -149,20 +159,25 @@ export default function Projects() {
         </div>
       </div>
 
-      {/* Notifications */}
-      <ProjectNotifications onProjectClick={handleProjectFromNotification} />
+      {/* CRM View */}
+      {showCRM ? (
+        <CRMView />
+      ) : (
+        <>
+          {/* Notifications */}
+          <ProjectNotifications onProjectClick={handleProjectFromNotification} />
 
-      {/* Advanced Dashboard */}
-      {showDashboard && (
-        <div className="mb-6">
-          <AdvancedDashboard />
-        </div>
-      )}
+          {/* Advanced Dashboard */}
+          {showDashboard && (
+            <div className="mb-6">
+              <AdvancedDashboard />
+            </div>
+          )}
 
-      {/* Reports */}
-      {showReports && (
-        <div className="mb-6">
-          <ProjectReports />
+          {/* Reports */}
+          {showReports && (
+            <div className="mb-6">
+              <ProjectReports />
         </div>
       )}
 
@@ -194,15 +209,17 @@ export default function Projects() {
             {t('projects.newProject')}
           </Button>
         </div>
-      )}
+          )}
 
-      {/* Dialogs */}
-      <CreateProjectDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
-      <ProjectDetailDialog 
-        project={selectedProject} 
-        open={!!selectedProject} 
-        onOpenChange={(open) => !open && setSelectedProject(null)} 
-      />
+          {/* Dialogs */}
+          <CreateProjectDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
+          <ProjectDetailDialog 
+            project={selectedProject} 
+            open={!!selectedProject} 
+            onOpenChange={(open) => !open && setSelectedProject(null)} 
+          />
+        </>
+      )}
     </MainLayout>
   );
 }
