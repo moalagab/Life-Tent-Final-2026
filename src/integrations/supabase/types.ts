@@ -485,6 +485,163 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_cases: {
+        Row: {
+          created_at: string
+          customer_id: string
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: Database["public"]["Enums"]["case_priority"] | null
+          resolved_at: string | null
+          status: Database["public"]["Enums"]["case_status"] | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["case_priority"] | null
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["case_status"] | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["case_priority"] | null
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["case_status"] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_cases_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_communications: {
+        Row: {
+          case_id: string | null
+          contact_date: string | null
+          content: string | null
+          created_at: string
+          customer_id: string
+          id: string
+          subject: string | null
+          type: Database["public"]["Enums"]["communication_type"]
+          user_id: string
+        }
+        Insert: {
+          case_id?: string | null
+          contact_date?: string | null
+          content?: string | null
+          created_at?: string
+          customer_id: string
+          id?: string
+          subject?: string | null
+          type?: Database["public"]["Enums"]["communication_type"]
+          user_id: string
+        }
+        Update: {
+          case_id?: string | null
+          contact_date?: string | null
+          content?: string | null
+          created_at?: string
+          customer_id?: string
+          id?: string
+          subject?: string | null
+          type?: Database["public"]["Enums"]["communication_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_communications_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "customer_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_communications_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customers: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          pipeline_stage: string | null
+          project_id: string | null
+          status: Database["public"]["Enums"]["customer_status"] | null
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          pipeline_stage?: string | null
+          project_id?: string | null
+          status?: Database["public"]["Enums"]["customer_status"] | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          pipeline_stage?: string | null
+          project_id?: string | null
+          status?: Database["public"]["Enums"]["customer_status"] | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       debt_schedules: {
         Row: {
           amount: number
@@ -2227,8 +2384,12 @@ export type Database = {
       accounting_basis: "cash" | "accrual"
       billing_cycle: "monthly" | "quarterly" | "yearly"
       budget_status: "draft" | "active" | "closed"
+      case_priority: "low" | "medium" | "high" | "urgent"
+      case_status: "open" | "in_progress" | "pending" | "resolved" | "closed"
       category_type: "income" | "expense" | "transfer"
+      communication_type: "call" | "email" | "meeting" | "note" | "message"
       course_status: "not_started" | "in_progress" | "completed" | "abandoned"
+      customer_status: "lead" | "prospect" | "active" | "inactive" | "churned"
       debt_status: "active" | "closed" | "paused"
       goal_perspective:
         | "financial"
@@ -2406,8 +2567,12 @@ export const Constants = {
       accounting_basis: ["cash", "accrual"],
       billing_cycle: ["monthly", "quarterly", "yearly"],
       budget_status: ["draft", "active", "closed"],
+      case_priority: ["low", "medium", "high", "urgent"],
+      case_status: ["open", "in_progress", "pending", "resolved", "closed"],
       category_type: ["income", "expense", "transfer"],
+      communication_type: ["call", "email", "meeting", "note", "message"],
       course_status: ["not_started", "in_progress", "completed", "abandoned"],
+      customer_status: ["lead", "prospect", "active", "inactive", "churned"],
       debt_status: ["active", "closed", "paused"],
       goal_perspective: [
         "financial",
