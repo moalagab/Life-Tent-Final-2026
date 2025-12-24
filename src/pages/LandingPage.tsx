@@ -29,12 +29,13 @@ import {
   MousePointerClick,
   Rocket,
   Award,
-  LineChart
+  LineChart,
+  Languages
 } from 'lucide-react';
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const { currentLanguage: language, t } = useLanguage();
+  const { currentLanguage: language, t, toggleLanguage } = useLanguage();
   const { user } = useAuth();
   const isRTL = language === 'ar';
   const [scrolled, setScrolled] = useState(false);
@@ -187,6 +188,16 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
+            {/* Language Switcher */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleLanguage}
+              className="hover:bg-primary/10 transition-colors"
+              title={language === 'ar' ? 'Switch to English' : 'التبديل للعربية'}
+            >
+              <Languages className="w-5 h-5" />
+            </Button>
             <Button 
               variant="ghost" 
               onClick={() => navigate('/auth')}
