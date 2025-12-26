@@ -352,34 +352,46 @@ export function DebtsManager() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-card p-4">
+        <div className="glass-card p-4 border-l-4 border-l-destructive">
           <div className="flex items-center gap-2 mb-2">
-            <ArrowDownRight className="w-4 h-4 text-destructive" />
-            <span className="text-sm text-muted-foreground">{t('finance.debtFromMe')}</span>
+            <ArrowDownRight className="w-5 h-5 text-destructive" />
+            <span className="text-sm font-medium text-muted-foreground">{t('finance.debtFromMe')}</span>
           </div>
           <p className="text-2xl font-bold text-destructive">{totalDebt.toLocaleString()} SAR</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {debtsFromMe.length} {language === 'ar' ? 'ديون نشطة' : 'active debts'}
+          </p>
         </div>
-        <div className="glass-card p-4">
+        <div className="glass-card p-4 border-l-4 border-l-success">
           <div className="flex items-center gap-2 mb-2">
-            <ArrowUpRight className="w-4 h-4 text-success" />
-            <span className="text-sm text-muted-foreground">{t('finance.debtToMe')}</span>
+            <ArrowUpRight className="w-5 h-5 text-success" />
+            <span className="text-sm font-medium text-muted-foreground">{t('finance.debtToMe')}</span>
           </div>
           <p className="text-2xl font-bold text-success">{totalOwedToMe.toLocaleString()} SAR</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {debtsToMe.length} {language === 'ar' ? 'مستحقات' : 'receivables'}
+          </p>
         </div>
-        <div className="glass-card p-4">
+        <div className="glass-card p-4 border-l-4 border-l-primary">
           <div className="flex items-center gap-2 mb-2">
-            <Calendar className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">{t('finance.monthlyPayments')}</span>
+            <Calendar className="w-5 h-5 text-primary" />
+            <span className="text-sm font-medium text-muted-foreground">{t('finance.monthlyPayments')}</span>
           </div>
           <p className="text-2xl font-bold">{totalMinPayment.toLocaleString()} SAR</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {language === 'ar' ? 'الحد الأدنى الشهري' : 'minimum monthly'}
+          </p>
         </div>
-        <div className="glass-card p-4">
+        <div className="glass-card p-4 border-l-4 border-l-green-500">
           <div className="flex items-center gap-2 mb-2">
-            <Target className="w-4 h-4 text-success" />
-            <span className="text-sm text-muted-foreground">{t('finance.paidOff')}</span>
+            <Target className="w-5 h-5 text-green-500" />
+            <span className="text-sm font-medium text-muted-foreground">{t('finance.paidOff')}</span>
           </div>
-          <p className="text-2xl font-bold text-success">
+          <p className="text-2xl font-bold text-green-500">
             {debts?.filter(d => d.status === 'closed').length || 0}
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {language === 'ar' ? 'ديون مسددة' : 'debts cleared'}
           </p>
         </div>
       </div>
@@ -401,18 +413,28 @@ export function DebtsManager() {
               : null;
             const isDebtToMe = (debt as any).notes === 'to_me' || debt.notes === 'to_me';
 
+            // Calculate next payment date from schedules
+            const nextPayment = schedules?.find(s => s.debt_id === debt.id && !s.is_paid);
+            const daysUntilDue = debt.end_date ? Math.ceil((new Date(debt.end_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : null;
+            const isNearDue = daysUntilDue !== null && daysUntilDue <= 30 && daysUntilDue > 0;
+            const isOverdue = daysUntilDue !== null && daysUntilDue < 0;
+
             return (
-              <div key={debt.id} className="glass-card p-5">
+              <div key={debt.id} className={cn(
+                "glass-card p-5 transition-all duration-300 hover:shadow-lg",
+                isOverdue && "border-destructive/50 bg-destructive/5",
+                isNearDue && !isOverdue && "border-orange-500/50 bg-orange-500/5"
+              )}>
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className={cn(
-                      'w-10 h-10 rounded-xl flex items-center justify-center',
+                      'w-12 h-12 rounded-xl flex items-center justify-center shadow-sm',
                       isDebtToMe ? 'bg-success/10' : 'bg-destructive/10'
                     )}>
                       {isDebtToMe ? (
-                        <ArrowUpRight className="w-5 h-5 text-success" />
+                        <ArrowUpRight className="w-6 h-6 text-success" />
                       ) : (
-                        <ArrowDownRight className="w-5 h-5 text-destructive" />
+                        <ArrowDownRight className="w-6 h-6 text-destructive" />
                       )}
                     </div>
                     <div>
@@ -423,6 +445,18 @@ export function DebtsManager() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    {isOverdue && (
+                      <Badge variant="destructive" className="animate-pulse">
+                        <AlertTriangle className="w-3 h-3 me-1" />
+                        {language === 'ar' ? 'متأخر' : 'Overdue'}
+                      </Badge>
+                    )}
+                    {isNearDue && !isOverdue && (
+                      <Badge variant="outline" className="border-orange-500 text-orange-500">
+                        <Calendar className="w-3 h-3 me-1" />
+                        {daysUntilDue} {language === 'ar' ? 'يوم' : 'days'}
+                      </Badge>
+                    )}
                     <Badge variant={isDebtToMe ? 'default' : 'destructive'}>
                       {isDebtToMe ? t('finance.debtToMe') : t('finance.debtFromMe')}
                     </Badge>
@@ -457,47 +491,69 @@ export function DebtsManager() {
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">{t('finance.remaining')}</span>
-                    <span className={cn('font-bold', isDebtToMe ? 'text-success' : 'text-destructive')}>
-                      {debt.remaining_amount.toLocaleString()} {debt.currency || 'SAR'}
-                    </span>
-                  </div>
-                  <Progress value={paidPercent} className="h-2" />
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {paidPercent.toFixed(0)}% {t('finance.paid')}
-                    </span>
-                    <span className="text-muted-foreground">
-                      {t('finance.of')} {debt.total_amount.toLocaleString()}
-                    </span>
+                <div className="space-y-4">
+                  {/* Amount Progress */}
+                  <div className="p-3 rounded-lg bg-muted/30">
+                    <div className="flex items-center justify-between text-sm mb-2">
+                      <span className="text-muted-foreground">{t('finance.remaining')}</span>
+                      <span className={cn('font-bold text-lg', isDebtToMe ? 'text-success' : 'text-destructive')}>
+                        {debt.remaining_amount.toLocaleString()} {debt.currency || 'SAR'}
+                      </span>
+                    </div>
+                    <Progress value={paidPercent} className="h-2.5" />
+                    <div className="flex items-center justify-between text-xs mt-2">
+                      <span className="text-muted-foreground">
+                        {paidPercent.toFixed(0)}% {t('finance.paid')}
+                      </span>
+                      <span className="text-muted-foreground">
+                        {t('finance.of')} {debt.total_amount.toLocaleString()} {debt.currency || 'SAR'}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-3 border-t border-border">
-                    <div>
-                      <p className="text-xs text-muted-foreground">{t('finance.minimumPayment')}</p>
-                      <p className="font-medium">{debt.minimum_payment?.toLocaleString() || '-'} SAR</p>
+                  {/* Payment Info Grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="p-3 rounded-lg bg-muted/20 text-center">
+                      <p className="text-xs text-muted-foreground mb-1">{t('finance.minimumPayment')}</p>
+                      <p className="font-semibold text-sm">
+                        {debt.minimum_payment?.toLocaleString() || '-'} {debt.currency || 'SAR'}
+                      </p>
                     </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">{t('finance.estimatedPayoff')}</p>
-                      <p className="font-medium">
+                    <div className="p-3 rounded-lg bg-muted/20 text-center">
+                      <p className="text-xs text-muted-foreground mb-1">
+                        {language === 'ar' ? 'السداد القادم' : 'Next Payment'}
+                      </p>
+                      <p className="font-semibold text-sm">
+                        {nextPayment ? format(new Date(nextPayment.due_date), 'MMM d', { locale }) : '-'}
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-muted/20 text-center">
+                      <p className="text-xs text-muted-foreground mb-1">
+                        {language === 'ar' ? 'السداد النهائي' : 'Final Due'}
+                      </p>
+                      <p className={cn(
+                        "font-semibold text-sm",
+                        isOverdue && "text-destructive",
+                        isNearDue && !isOverdue && "text-orange-500"
+                      )}>
+                        {debt.end_date ? format(new Date(debt.end_date), 'MMM d, yyyy', { locale }) : '-'}
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-muted/20 text-center">
+                      <p className="text-xs text-muted-foreground mb-1">{t('finance.estimatedPayoff')}</p>
+                      <p className="font-semibold text-sm">
                         {payoffDate ? format(payoffDate, 'MMM yyyy', { locale }) : '-'}
                       </p>
                     </div>
-                    {debt.start_date && (
-                      <div>
-                        <p className="text-xs text-muted-foreground">{t('finance.startDate')}</p>
-                        <p className="font-medium">{format(new Date(debt.start_date), 'MMM d, yyyy', { locale })}</p>
-                      </div>
-                    )}
-                    {debt.end_date && (
-                      <div>
-                        <p className="text-xs text-muted-foreground">{t('finance.dueDate')}</p>
-                        <p className="font-medium">{format(new Date(debt.end_date), 'MMM d, yyyy', { locale })}</p>
-                      </div>
-                    )}
                   </div>
+
+                  {/* Start Date */}
+                  {debt.start_date && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Calendar className="w-3 h-3" />
+                      <span>{language === 'ar' ? 'تاريخ البداية:' : 'Started:'} {format(new Date(debt.start_date), 'PPP', { locale })}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             );

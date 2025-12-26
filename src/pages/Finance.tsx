@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   LayoutDashboard, Wallet, Receipt, PiggyBank, 
   CreditCard, RefreshCw, TrendingUp, FileText, Briefcase, Upload,
-  Globe, Lock, Gauge
+  Globe, Lock, Gauge, ShoppingBag
 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { FinanceDashboard } from '@/components/finance/FinanceDashboard';
@@ -19,17 +19,19 @@ import { FinanceReports } from '@/components/finance/FinanceReports';
 import { DataImport } from '@/components/finance/DataImport';
 import { CurrencyManager } from '@/components/finance/CurrencyManager';
 import { MonthlyClose } from '@/components/finance/MonthlyClose';
+import { WishlistManager } from '@/components/finance/WishlistManager';
 
 export default function Finance() {
   const { currentLanguage } = useLanguage();
   const language = currentLanguage;
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   const tabs = [
     { id: 'dashboard', label: language === 'ar' ? 'لوحة التحكم' : 'Dashboard', icon: Gauge },
     { id: 'accounts', label: language === 'ar' ? 'الحسابات' : 'Accounts', icon: Wallet },
     { id: 'transactions', label: language === 'ar' ? 'العمليات' : 'Transactions', icon: Receipt },
     { id: 'budget', label: language === 'ar' ? 'الميزانية' : 'Budget', icon: PiggyBank },
+    { id: 'wishlist', label: language === 'ar' ? 'قائمة الأمنيات' : 'Wishlist', icon: ShoppingBag },
     { id: 'debts', label: language === 'ar' ? 'الديون' : 'Debts', icon: CreditCard },
     { id: 'subscriptions', label: language === 'ar' ? 'الاشتراكات' : 'Subscriptions', icon: RefreshCw },
     { id: 'investments', label: language === 'ar' ? 'الاستثمارات' : 'Investments', icon: TrendingUp },
@@ -71,6 +73,7 @@ export default function Finance() {
         <TabsContent value="accounts"><AccountsManager /></TabsContent>
         <TabsContent value="transactions"><TransactionsManager /></TabsContent>
         <TabsContent value="budget"><BudgetManager /></TabsContent>
+        <TabsContent value="wishlist"><WishlistManager /></TabsContent>
         <TabsContent value="debts"><DebtsManager /></TabsContent>
         <TabsContent value="subscriptions"><SubscriptionsManager /></TabsContent>
         <TabsContent value="investments"><InvestmentsManager /></TabsContent>
