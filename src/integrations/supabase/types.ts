@@ -2372,6 +2372,84 @@ export type Database = {
           },
         ]
       }
+      wishlist_items: {
+        Row: {
+          category: string | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          estimated_price: number | null
+          id: string
+          image_url: string | null
+          linked_envelope_id: string | null
+          linked_sinking_fund_id: string | null
+          name: string
+          notes: string | null
+          priority: string | null
+          saved_amount: number | null
+          status: string | null
+          target_date: string | null
+          updated_at: string
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          estimated_price?: number | null
+          id?: string
+          image_url?: string | null
+          linked_envelope_id?: string | null
+          linked_sinking_fund_id?: string | null
+          name: string
+          notes?: string | null
+          priority?: string | null
+          saved_amount?: number | null
+          status?: string | null
+          target_date?: string | null
+          updated_at?: string
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          estimated_price?: number | null
+          id?: string
+          image_url?: string | null
+          linked_envelope_id?: string | null
+          linked_sinking_fund_id?: string | null
+          name?: string
+          notes?: string | null
+          priority?: string | null
+          saved_amount?: number | null
+          status?: string | null
+          target_date?: string | null
+          updated_at?: string
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlist_items_linked_envelope_id_fkey"
+            columns: ["linked_envelope_id"]
+            isOneToOne: false
+            referencedRelation: "envelopes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wishlist_items_linked_sinking_fund_id_fkey"
+            columns: ["linked_sinking_fund_id"]
+            isOneToOne: false
+            referencedRelation: "sinking_funds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
