@@ -286,14 +286,14 @@ export function TransactionsManager() {
                 </Select>
 
                 <Select 
-                  value={newTransaction.project_id} 
-                  onValueChange={(value) => setNewTransaction({ ...newTransaction, project_id: value })}
+                  value={newTransaction.project_id || 'none'} 
+                  onValueChange={(value) => setNewTransaction({ ...newTransaction, project_id: value === 'none' ? '' : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder={t('finance.linkToProject')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">{t('common.none')}</SelectItem>
+                    <SelectItem value="none">{t('common.none')}</SelectItem>
                     {projects?.map((proj) => (
                       <SelectItem key={proj.id} value={proj.id}>{proj.title}</SelectItem>
                     ))}
