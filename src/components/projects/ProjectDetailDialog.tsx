@@ -12,11 +12,12 @@ import { toast } from 'sonner';
 import { 
   Target, ListTodo, LayoutGrid, Eye, DollarSign,
   FolderKanban, Calendar, Loader2, ArrowRight, Archive,
-  Play, Pause, CheckCircle, TrendingUp
+  Play, Pause, CheckCircle, TrendingUp, StickyNote
 } from 'lucide-react';
 
 import { ProjectOkrsView } from './ProjectOkrsView';
 import { KanbanBoard } from './KanbanBoard';
+import { ProjectNotesTab } from './ProjectNotesTab';
 
 interface ProjectDetailDialogProps {
   project: Project | null;
@@ -115,10 +116,14 @@ export function ProjectDetailDialog({ project, open, onOpenChange }: ProjectDeta
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
-          <TabsList className="grid w-full grid-cols-5 shrink-0">
+          <TabsList className="grid w-full grid-cols-6 shrink-0">
             <TabsTrigger value="overview" className="flex items-center gap-1">
               <Eye className="w-4 h-4" />
               <span className="hidden sm:inline">نظرة عامة</span>
+            </TabsTrigger>
+            <TabsTrigger value="notes" className="flex items-center gap-1">
+              <StickyNote className="w-4 h-4" />
+              <span className="hidden sm:inline">ملاحظات</span>
             </TabsTrigger>
             <TabsTrigger value="okrs" className="flex items-center gap-1">
               <Target className="w-4 h-4" />
@@ -203,6 +208,10 @@ export function ProjectDetailDialog({ project, open, onOpenChange }: ProjectDeta
                   {currentLanguage === 'ar' ? 'نقل للأرشيف' : 'Move to Archive'}
                 </Button>
               )}
+            </TabsContent>
+
+            <TabsContent value="notes" className="m-0">
+              <ProjectNotesTab projectId={project.id} />
             </TabsContent>
 
             <TabsContent value="okrs" className="m-0">
