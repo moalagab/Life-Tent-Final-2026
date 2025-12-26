@@ -25,6 +25,26 @@ export function useNotes() {
   });
 }
 
+export function useProjectNotes(projectId: string | null) {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['notes', 'project', projectId, user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('notes')
+        .select('*')
+        .eq('project_id', projectId!)
+        .eq('is_archived', false)
+        .order('updated_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user && !!projectId,
+  });
+}
+
 export function useArchivedNotes() {
   const { user } = useAuth();
 
