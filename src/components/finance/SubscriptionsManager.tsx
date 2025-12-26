@@ -282,14 +282,14 @@ export function SubscriptionsManager() {
                   onChange={(e) => setNewSub({ ...newSub, category: e.target.value })}
                 />
                 <Select 
-                  value={newSub.payment_account_id} 
-                  onValueChange={(value) => setNewSub({ ...newSub, payment_account_id: value })}
+                  value={newSub.payment_account_id || 'none'} 
+                  onValueChange={(value) => setNewSub({ ...newSub, payment_account_id: value === 'none' ? '' : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder={t('finance.selectAccount')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">{t('common.none')}</SelectItem>
+                    <SelectItem value="none">{t('common.none')}</SelectItem>
                     {accounts?.map((acc) => (
                       <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
                     ))}
