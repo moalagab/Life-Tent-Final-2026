@@ -39,6 +39,11 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
     expected_roi: '',
     risk_level: 'medium',
     due_date: '',
+    start_date: '',
+    scope: '',
+    outputs: '',
+    owner: '',
+    risks: '',
   });
 
   const handleSubmit = async () => {
@@ -59,6 +64,11 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
         expected_roi: formData.expected_roi || null,
         risk_level: formData.risk_level,
         due_date: formData.due_date || null,
+        start_date: formData.start_date || null,
+        scope: formData.scope || null,
+        outputs: formData.outputs || null,
+        owner: formData.owner || null,
+        risks: formData.risks || null,
       });
       toast.success(t('projects.projectAdded'));
       onOpenChange(false);
@@ -73,6 +83,11 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
         expected_roi: '',
         risk_level: 'medium',
         due_date: '',
+        start_date: '',
+        scope: '',
+        outputs: '',
+        owner: '',
+        risks: '',
       });
     } catch (error) {
       toast.error(t('common.error'));
@@ -93,8 +108,9 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
         </DialogHeader>
         
         <Tabs defaultValue="basic" className="mt-4">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="basic">الأساسيات</TabsTrigger>
+            <TabsTrigger value="scope">النطاق</TabsTrigger>
             <TabsTrigger value="vision">الرؤية</TabsTrigger>
             <TabsTrigger value="investment">الاستثمار</TabsTrigger>
           </TabsList>
@@ -158,12 +174,31 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
               </div>
             </div>
             
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>تاريخ البدء</Label>
+                <Input
+                  type="date"
+                  value={formData.start_date}
+                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>تاريخ الاستحقاق</Label>
+                <Input
+                  type="date"
+                  value={formData.due_date}
+                  onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                />
+              </div>
+            </div>
+            
             <div>
-              <Label>تاريخ الاستحقاق</Label>
+              <Label>المالك</Label>
               <Input
-                type="date"
-                value={formData.due_date}
-                onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                value={formData.owner}
+                onChange={(e) => setFormData({ ...formData, owner: e.target.value })}
+                placeholder="اسم مالك المشروع"
               />
             </div>
             
@@ -185,6 +220,43 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
             </div>
           </TabsContent>
           
+          <TabsContent value="scope" className="space-y-4 mt-4">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+              <Target className="w-4 h-4" />
+              <span>حدد نطاق المشروع ومخرجاته والمخاطر المحتملة</span>
+            </div>
+            
+            <div>
+              <Label>نطاق المشروع</Label>
+              <Textarea
+                value={formData.scope}
+                onChange={(e) => setFormData({ ...formData, scope: e.target.value })}
+                placeholder="ما هو نطاق هذا المشروع؟ ما الذي يشمله وما الذي لا يشمله؟"
+                rows={3}
+              />
+            </div>
+            
+            <div>
+              <Label>المخرجات المتوقعة</Label>
+              <Textarea
+                value={formData.outputs}
+                onChange={(e) => setFormData({ ...formData, outputs: e.target.value })}
+                placeholder="ما هي المخرجات والتسليمات المتوقعة؟"
+                rows={3}
+              />
+            </div>
+            
+            <div>
+              <Label>المخاطر المحتملة</Label>
+              <Textarea
+                value={formData.risks}
+                onChange={(e) => setFormData({ ...formData, risks: e.target.value })}
+                placeholder="ما هي المخاطر المحتملة وكيف يمكن التعامل معها؟"
+                rows={3}
+              />
+            </div>
+          </TabsContent>
+
           <TabsContent value="vision" className="space-y-4 mt-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
               <Eye className="w-4 h-4" />
