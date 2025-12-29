@@ -34,6 +34,16 @@ export default function Tasks() {
   const [dialogStatus, setDialogStatus] = useState<TaskStatus>('todo');
   const [searchQuery, setSearchQuery] = useState('');
   const [draggedTask, setDraggedTask] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<'all' | 'work' | 'personal'>('all');
+
+  // WIP limits per column
+  const WIP_LIMITS: Record<TaskStatus, number> = {
+    backlog: 999,
+    todo: 10,
+    in_progress: 3,
+    review: 5,
+    done: 999,
+  };
 
   const columns = [
     { id: 'backlog' as const, title: t('tasks.backlog'), color: 'bg-muted-foreground', gradient: 'from-muted-foreground/20 to-muted-foreground/5' },
@@ -57,7 +67,18 @@ export default function Tasks() {
         task.title.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
+    if (categoryFilter !== 'all') {
+      filtered = filtered.filter(task => 
+        (task as any).category === categoryFilter || 
+        (categoryFilter === 'personal' && !(task as any).category)
+      );
+    }
     return filtered;
+  };
+
+  const isWipLimitReached = (status: TaskStatus) => {
+    const count = getTasksByStatus(status).length;
+    return count >= WIP_LIMITS[status];
   };
 
   const getProjectById = (projectId: string | null) => {
@@ -170,6 +191,44 @@ export default function Tasks() {
               className="w-full ps-10 pe-4 py-2.5 rounded-xl bg-muted/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
             />
           </div>
+          
+          {/* Category Filter */}
+          <div className="flex gap-1 bg-muted/50 rounded-xl p-1">
+            <button
+              onClick={() => setCategoryFilter('all')}
+              className={cn(
+                'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
+                categoryFilter === 'all' 
+                  ? 'bg-background text-foreground shadow-sm' 
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              {currentLanguage === 'ar' ? 'الكل' : 'All'}
+            </button>
+            <button
+              onClick={() => setCategoryFilter('work')}
+              className={cn(
+                'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
+                categoryFilter === 'work' 
+                  ? 'bg-primary text-primary-foreground shadow-sm' 
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              {currentLanguage === 'ar' ? 'عمل' : 'Work'}
+            </button>
+            <button
+              onClick={() => setCategoryFilter('personal')}
+              className={cn(
+                'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
+                categoryFilter === 'personal' 
+                  ? 'bg-success text-success-foreground shadow-sm' 
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              {currentLanguage === 'ar' ? 'شخصي' : 'Personal'}
+            </button>
+          </div>
+          
           <Button variant="outline" className="gap-2 rounded-xl">
             <Filter className="w-4 h-4" />
             {t('common.filter')}
@@ -193,18 +252,27 @@ export default function Tasks() {
               {/* Column Header */}
               <div className={cn(
                 'flex items-center justify-between mb-4 p-3 rounded-xl bg-gradient-to-r',
-                column.gradient
+                column.gradient,
+                isWipLimitReached(column.id) && column.id !== 'backlog' && column.id !== 'done' && 'ring-2 ring-destructive/50'
               )}>
                 <div className="flex items-center gap-3">
                   <div className={cn('w-3 h-3 rounded-full shadow-lg', column.color)} />
                   <span className="font-semibold text-foreground">{column.title}</span>
-                  <Badge variant="secondary" className="text-xs px-2 py-0.5 rounded-full">
+                  <Badge 
+                    variant={isWipLimitReached(column.id) && column.id !== 'backlog' && column.id !== 'done' ? 'destructive' : 'secondary'} 
+                    className="text-xs px-2 py-0.5 rounded-full"
+                  >
                     {columnTasks.length}
+                    {WIP_LIMITS[column.id] < 999 && `/${WIP_LIMITS[column.id]}`}
                   </Badge>
                 </div>
                 <button 
-                  className="p-1.5 rounded-lg hover:bg-background/50 transition-colors"
-                  onClick={() => openDialogForStatus(column.id)}
+                  className={cn(
+                    'p-1.5 rounded-lg hover:bg-background/50 transition-colors',
+                    isWipLimitReached(column.id) && column.id !== 'backlog' && column.id !== 'done' && 'opacity-50 cursor-not-allowed'
+                  )}
+                  onClick={() => !isWipLimitReached(column.id) && openDialogForStatus(column.id)}
+                  disabled={isWipLimitReached(column.id) && column.id !== 'backlog' && column.id !== 'done'}
                 >
                   <Plus className="w-4 h-4 text-muted-foreground hover:text-foreground transition-colors" />
                 </button>

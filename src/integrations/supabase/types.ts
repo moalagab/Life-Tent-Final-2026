@@ -706,6 +706,7 @@ export type Database = {
           lender: string | null
           minimum_payment: number | null
           monthly_payment: number | null
+          monthly_payment_date: number | null
           name: string
           notes: string | null
           payoff_strategy: Database["public"]["Enums"]["payoff_strategy"] | null
@@ -725,6 +726,7 @@ export type Database = {
           lender?: string | null
           minimum_payment?: number | null
           monthly_payment?: number | null
+          monthly_payment_date?: number | null
           name: string
           notes?: string | null
           payoff_strategy?:
@@ -746,6 +748,7 @@ export type Database = {
           lender?: string | null
           minimum_payment?: number | null
           monthly_payment?: number | null
+          monthly_payment_date?: number | null
           name?: string
           notes?: string | null
           payoff_strategy?:
@@ -878,6 +881,42 @@ export type Database = {
           entity_id?: string
           entity_type?: string
           id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      finance_audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          new_values: Json | null
+          old_values: Json | null
+          source: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          source?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          source?: string | null
           user_id?: string
         }
         Relationships: []
@@ -1139,11 +1178,17 @@ export type Database = {
           cost_currency: string | null
           created_at: string
           current_price: number | null
+          entry_target_price: number | null
           id: string
+          investment_journal: string | null
+          is_zakatable: boolean | null
           last_price_update: string | null
           portfolio_id: string
           quantity: number
+          stop_loss_price: number | null
+          take_profit_price: number | null
           target_allocation: number | null
+          target_allocation_percent: number | null
           updated_at: string
         }
         Insert: {
@@ -1152,11 +1197,17 @@ export type Database = {
           cost_currency?: string | null
           created_at?: string
           current_price?: number | null
+          entry_target_price?: number | null
           id?: string
+          investment_journal?: string | null
+          is_zakatable?: boolean | null
           last_price_update?: string | null
           portfolio_id: string
           quantity?: number
+          stop_loss_price?: number | null
+          take_profit_price?: number | null
           target_allocation?: number | null
+          target_allocation_percent?: number | null
           updated_at?: string
         }
         Update: {
@@ -1165,11 +1216,17 @@ export type Database = {
           cost_currency?: string | null
           created_at?: string
           current_price?: number | null
+          entry_target_price?: number | null
           id?: string
+          investment_journal?: string | null
+          is_zakatable?: boolean | null
           last_price_update?: string | null
           portfolio_id?: string
           quantity?: number
+          stop_loss_price?: number | null
+          take_profit_price?: number | null
           target_allocation?: number | null
+          target_allocation_percent?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -1770,6 +1827,47 @@ export type Database = {
         }
         Relationships: []
       }
+      project_attachments: {
+        Row: {
+          created_at: string
+          file_type: string | null
+          id: string
+          name: string
+          project_id: string
+          size_bytes: number | null
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_type?: string | null
+          id?: string
+          name: string
+          project_id: string
+          size_bytes?: number | null
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_type?: string | null
+          id?: string
+          name?: string
+          project_id?: string
+          size_bytes?: number | null
+          url?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_attachments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_budget_lines: {
         Row: {
           actual_amount: number | null
@@ -1973,10 +2071,14 @@ export type Database = {
           expected_roi: string | null
           id: string
           investment_notes: string | null
+          outputs: string | null
+          owner: string | null
           para_category: Database["public"]["Enums"]["para_category"] | null
           phase: Database["public"]["Enums"]["project_phase"] | null
           progress: number | null
           risk_level: string | null
+          risks: string | null
+          scope: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["project_status"] | null
           title: string
@@ -1994,10 +2096,14 @@ export type Database = {
           expected_roi?: string | null
           id?: string
           investment_notes?: string | null
+          outputs?: string | null
+          owner?: string | null
           para_category?: Database["public"]["Enums"]["para_category"] | null
           phase?: Database["public"]["Enums"]["project_phase"] | null
           progress?: number | null
           risk_level?: string | null
+          risks?: string | null
+          scope?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"] | null
           title: string
@@ -2015,10 +2121,14 @@ export type Database = {
           expected_roi?: string | null
           id?: string
           investment_notes?: string | null
+          outputs?: string | null
+          owner?: string | null
           para_category?: Database["public"]["Enums"]["para_category"] | null
           phase?: Database["public"]["Enums"]["project_phase"] | null
           progress?: number | null
           risk_level?: string | null
+          risks?: string | null
+          scope?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"] | null
           title?: string
@@ -2159,6 +2269,7 @@ export type Database = {
       tasks: {
         Row: {
           blocked_by: string | null
+          category: string | null
           completed_at: string | null
           created_at: string
           description: string | null
@@ -2177,6 +2288,7 @@ export type Database = {
         }
         Insert: {
           blocked_by?: string | null
+          category?: string | null
           completed_at?: string | null
           created_at?: string
           description?: string | null
@@ -2195,6 +2307,7 @@ export type Database = {
         }
         Update: {
           blocked_by?: string | null
+          category?: string | null
           completed_at?: string | null
           created_at?: string
           description?: string | null
@@ -2297,6 +2410,7 @@ export type Database = {
           project_id: string | null
           receipt_url: string | null
           reconciled_at: string | null
+          source: string | null
           tags: string[] | null
           type: Database["public"]["Enums"]["transaction_type"]
           user_id: string
@@ -2317,6 +2431,7 @@ export type Database = {
           project_id?: string | null
           receipt_url?: string | null
           reconciled_at?: string | null
+          source?: string | null
           tags?: string[] | null
           type: Database["public"]["Enums"]["transaction_type"]
           user_id: string
@@ -2337,6 +2452,7 @@ export type Database = {
           project_id?: string | null
           receipt_url?: string | null
           reconciled_at?: string | null
+          source?: string | null
           tags?: string[] | null
           type?: Database["public"]["Enums"]["transaction_type"]
           user_id?: string
