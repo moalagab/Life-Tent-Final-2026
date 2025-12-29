@@ -429,7 +429,13 @@
     "more": "More",
     "habitAdded": "Habit added",
     "habitUpdated": "Habit updated",
-    "habitDeleted": "Habit deleted"
+    "habitDeleted": "Habit deleted",
+    "correlationInsight": "Correlation Insight",
+    "correlationNote": "Your mood is 20% higher on days you complete morning reading. Keep it up!",
+    "correlationDisclaimer": "This is correlation, not causation - habits may relate to mood without being the direct cause",
+    "streakBronze": "Bronze Badge",
+    "streakSilver": "Silver Badge",
+    "streakGold": "Gold Badge"
   },
   "calendar": {
     "title": "Calendar",
@@ -834,6 +840,8 @@
     "priceComingSoon": "Price to be announced",
     "projectsTasks": "Projects & Tasks",
     "fullControl": "Full Control",
-    "premiumExperience": "Premium Experience"
+    "premiumExperience": "Premium Experience",
+    "contactUs": "For Inquiries",
+    "allRightsReserved": "All Rights Reserved"
   }
 }

@@ -515,32 +515,43 @@ export default function LandingPage() {
                 <Tent className="w-7 h-7 text-primary-foreground" />
               </div>
               <div>
-                <span className="text-2xl font-bold gold-text block">LIFE TENT</span>
+                <span className="text-2xl font-bold gold-text block font-tajawal">LIFE TENT</span>
                 <span className="text-xs text-muted-foreground">{t('landing.yourLifeSystem')}</span>
               </div>
             </div>
             
-            <p className="text-sm text-muted-foreground text-center">
-              {t('landing.copyright')}
-            </p>
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-sm text-muted-foreground">{t('landing.contactUs')}</p>
+              <a 
+                href="mailto:info@lifetent.online" 
+                className="text-primary hover:text-primary/80 transition-colors font-medium text-lg"
+              >
+                info@lifetent.online
+              </a>
+            </div>
             
-            <div className="flex items-center gap-3">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => navigate('/auth')}
-                className="hover:bg-primary/10"
-              >
-                {t('landing.signIn')}
-              </Button>
-              <Button 
-                variant="gold" 
-                size="sm" 
-                onClick={() => navigate('/auth')}
-                className="shadow-lg"
-              >
-                {t('landing.startFree')}
-              </Button>
+            <div className="flex flex-col items-center md:items-end gap-3">
+              <div className="flex items-center gap-3">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => navigate('/auth')}
+                  className="hover:bg-primary/10"
+                >
+                  {t('landing.signIn')}
+                </Button>
+                <Button 
+                  variant="gold" 
+                  size="sm" 
+                  onClick={() => navigate('/auth')}
+                  className="shadow-lg"
+                >
+                  {t('landing.startFree')}
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground text-center">
+                {t('landing.copyright')}
+              </p>
             </div>
           </div>
         </div>

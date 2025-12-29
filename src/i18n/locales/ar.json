@@ -429,7 +429,13 @@
     "more": "أكثر",
     "habitAdded": "تمت إضافة العادة",
     "habitUpdated": "تم تحديث العادة",
-    "habitDeleted": "تم حذف العادة"
+    "habitDeleted": "تم حذف العادة",
+    "correlationInsight": "ملاحظة ارتباط",
+    "correlationNote": "مزاجك يرتفع بنسبة 20% في الأيام التي تكمل فيها القراءة الصباحية. استمر!",
+    "correlationDisclaimer": "هذا ارتباط وليس سببية - العادات قد ترتبط بالمزاج دون أن تكون سبباً مباشراً",
+    "streakBronze": "وسام برونزي",
+    "streakSilver": "وسام فضي",
+    "streakGold": "وسام ذهبي"
   },
   "calendar": {
     "title": "التقويم",
@@ -834,6 +840,8 @@
     "priceComingSoon": "السعر يُحدد لاحقاً",
     "projectsTasks": "مشاريع ومهام",
     "fullControl": "تحكم كامل",
-    "premiumExperience": "تجربة مميزة"
+    "premiumExperience": "تجربة مميزة",
+    "contactUs": "للاستفسارات",
+    "allRightsReserved": "جميع الحقوق محفوظة"
   }
 }
