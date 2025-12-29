@@ -50,6 +50,8 @@ export interface Debt {
   remaining_amount: number;
   interest_rate: number;
   minimum_payment?: number;
+  monthly_payment?: number;
+  monthly_payment_date?: number;
   start_date?: string;
   end_date?: string;
   status: 'active' | 'closed' | 'paused';

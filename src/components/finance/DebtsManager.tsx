@@ -42,10 +42,13 @@ export function DebtsManager() {
     remaining_amount: '',
     interest_rate: '',
     minimum_payment: '',
+    monthly_payment: '',
+    monthly_payment_date: '1',
     start_date: '',
     end_date: '',
     currency: 'SAR',
     debt_type: 'from_me' as 'to_me' | 'from_me',
+    notes: '',
   });
 
   const activeDebts = debts?.filter(d => d.status === 'active') || [];
@@ -114,11 +117,13 @@ export function DebtsManager() {
         remaining_amount: parseFloat(newDebt.remaining_amount) || parseFloat(newDebt.total_amount),
         interest_rate: parseFloat(newDebt.interest_rate) || 0,
         minimum_payment: parseFloat(newDebt.minimum_payment) || null,
+        monthly_payment: parseFloat(newDebt.monthly_payment) || parseFloat(newDebt.minimum_payment) || null,
+        monthly_payment_date: parseInt(newDebt.monthly_payment_date) || 1,
         start_date: newDebt.start_date || null,
         end_date: newDebt.end_date || null,
         currency: newDebt.currency,
         status: 'active',
-        notes: newDebt.debt_type,
+        notes: `${newDebt.debt_type}|${newDebt.notes}`,
       });
       toast.success(t('finance.debtAdded'));
       setIsDialogOpen(false);
@@ -136,13 +141,16 @@ export function DebtsManager() {
         id: editingDebt.id,
         name: newDebt.name || editingDebt.name,
         lender: newDebt.lender || editingDebt.lender,
-        total_amount: parseFloat(newDebt.total_amount) || editingDebt.total_amount,
-        remaining_amount: parseFloat(newDebt.remaining_amount) || editingDebt.remaining_amount,
-        interest_rate: parseFloat(newDebt.interest_rate) || editingDebt.interest_rate,
-        minimum_payment: parseFloat(newDebt.minimum_payment) || editingDebt.minimum_payment,
+        total_amount: newDebt.total_amount ? parseFloat(newDebt.total_amount) : editingDebt.total_amount,
+        remaining_amount: newDebt.remaining_amount ? parseFloat(newDebt.remaining_amount) : editingDebt.remaining_amount,
+        interest_rate: newDebt.interest_rate ? parseFloat(newDebt.interest_rate) : editingDebt.interest_rate,
+        minimum_payment: newDebt.minimum_payment ? parseFloat(newDebt.minimum_payment) : editingDebt.minimum_payment,
+        monthly_payment: newDebt.monthly_payment ? parseFloat(newDebt.monthly_payment) : editingDebt.monthly_payment,
+        monthly_payment_date: newDebt.monthly_payment_date ? parseInt(newDebt.monthly_payment_date) : editingDebt.monthly_payment_date,
         start_date: newDebt.start_date || editingDebt.start_date,
         end_date: newDebt.end_date || editingDebt.end_date,
-        notes: newDebt.debt_type,
+        currency: newDebt.currency || editingDebt.currency,
+        notes: `${newDebt.debt_type}|${newDebt.notes}`,
       });
       toast.success(t('finance.debtUpdated'));
       setIsEditDialogOpen(false);
@@ -180,6 +188,7 @@ export function DebtsManager() {
 
   const openEditDialog = (debt: Debt) => {
     setEditingDebt(debt);
+    const debtNotes = debt.notes?.split('|') || ['from_me', ''];
     setNewDebt({
       name: debt.name,
       lender: debt.lender || '',
@@ -187,10 +196,13 @@ export function DebtsManager() {
       remaining_amount: debt.remaining_amount.toString(),
       interest_rate: debt.interest_rate?.toString() || '',
       minimum_payment: debt.minimum_payment?.toString() || '',
+      monthly_payment: debt.monthly_payment?.toString() || '',
+      monthly_payment_date: debt.monthly_payment_date?.toString() || '1',
       start_date: debt.start_date || '',
       end_date: debt.end_date || '',
       currency: debt.currency || 'SAR',
-      debt_type: (debt.notes as any) || 'from_me',
+      debt_type: (debtNotes[0] as 'to_me' | 'from_me') || 'from_me',
+      notes: debtNotes[1] || '',
     });
     setIsEditDialogOpen(true);
   };
@@ -203,10 +215,13 @@ export function DebtsManager() {
       remaining_amount: '',
       interest_rate: '',
       minimum_payment: '',
+      monthly_payment: '',
+      monthly_payment_date: '1',
       start_date: '',
       end_date: '',
       currency: 'SAR',
       debt_type: 'from_me',
+      notes: '',
     });
   };
 
@@ -219,7 +234,7 @@ export function DebtsManager() {
   }
 
   const DebtForm = ({ isEdit = false }: { isEdit?: boolean }) => (
-    <div className="space-y-4 mt-4 max-h-[60vh] overflow-y-auto">
+    <div className="space-y-4 mt-4 max-h-[60vh] overflow-y-auto pe-2">
       <div className="grid grid-cols-2 gap-2">
         <Button
           type="button"
@@ -241,44 +256,111 @@ export function DebtsManager() {
         </Button>
       </div>
 
-      <Input
-        placeholder={t('finance.debtName')}
-        value={newDebt.name}
-        onChange={(e) => setNewDebt({ ...newDebt, name: e.target.value })}
-      />
-      <Input
-        placeholder={newDebt.debt_type === 'to_me' ? t('finance.borrower') : t('finance.lender')}
-        value={newDebt.lender}
-        onChange={(e) => setNewDebt({ ...newDebt, lender: e.target.value })}
-      />
-      <div className="grid grid-cols-2 gap-3">
+      <div>
+        <label className="text-sm text-muted-foreground mb-1 block">{t('finance.debtName')} *</label>
         <Input
-          type="number"
-          placeholder={t('finance.totalAmount')}
-          value={newDebt.total_amount}
-          onChange={(e) => setNewDebt({ ...newDebt, total_amount: e.target.value })}
-        />
-        <Input
-          type="number"
-          placeholder={t('finance.remainingAmount')}
-          value={newDebt.remaining_amount}
-          onChange={(e) => setNewDebt({ ...newDebt, remaining_amount: e.target.value })}
+          placeholder={language === 'ar' ? 'مثال: قرض السيارة' : 'e.g. Car Loan'}
+          value={newDebt.name}
+          onChange={(e) => setNewDebt({ ...newDebt, name: e.target.value })}
         />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      
+      <div>
+        <label className="text-sm text-muted-foreground mb-1 block">
+          {newDebt.debt_type === 'to_me' ? t('finance.borrower') : t('finance.lender')}
+        </label>
         <Input
-          type="number"
-          placeholder={t('finance.interestRate')}
-          value={newDebt.interest_rate}
-          onChange={(e) => setNewDebt({ ...newDebt, interest_rate: e.target.value })}
-        />
-        <Input
-          type="number"
-          placeholder={t('finance.minimumPayment')}
-          value={newDebt.minimum_payment}
-          onChange={(e) => setNewDebt({ ...newDebt, minimum_payment: e.target.value })}
+          placeholder={language === 'ar' ? 'اسم الجهة أو الشخص' : 'Person or institution name'}
+          value={newDebt.lender}
+          onChange={(e) => setNewDebt({ ...newDebt, lender: e.target.value })}
         />
       </div>
+
+      {/* Amount Section */}
+      <div className="p-3 rounded-lg bg-muted/30 space-y-3">
+        <h4 className="font-medium text-sm">{language === 'ar' ? 'المبالغ' : 'Amounts'}</h4>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">{t('finance.totalAmount')} *</label>
+            <Input
+              type="number"
+              placeholder="0.00"
+              value={newDebt.total_amount}
+              onChange={(e) => setNewDebt({ ...newDebt, total_amount: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">{t('finance.remainingAmount')}</label>
+            <Input
+              type="number"
+              placeholder={newDebt.total_amount || '0.00'}
+              value={newDebt.remaining_amount}
+              onChange={(e) => setNewDebt({ ...newDebt, remaining_amount: e.target.value })}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Monthly Payment Section */}
+      <div className="p-3 rounded-lg bg-muted/30 space-y-3">
+        <h4 className="font-medium text-sm">{language === 'ar' ? 'الدفعات الشهرية' : 'Monthly Payments'}</h4>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">
+              {language === 'ar' ? 'القسط الشهري' : 'Monthly Payment'}
+            </label>
+            <Input
+              type="number"
+              placeholder="0.00"
+              value={newDebt.monthly_payment}
+              onChange={(e) => setNewDebt({ ...newDebt, monthly_payment: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">
+              {language === 'ar' ? 'يوم السداد' : 'Payment Day'}
+            </label>
+            <Select 
+              value={newDebt.monthly_payment_date} 
+              onValueChange={(value) => setNewDebt({ ...newDebt, monthly_payment_date: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={language === 'ar' ? 'اختر اليوم' : 'Select day'} />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 28 }, (_, i) => (
+                  <SelectItem key={i + 1} value={(i + 1).toString()}>
+                    {language === 'ar' ? `يوم ${i + 1}` : `Day ${i + 1}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">{t('finance.minimumPayment')}</label>
+            <Input
+              type="number"
+              placeholder="0.00"
+              value={newDebt.minimum_payment}
+              onChange={(e) => setNewDebt({ ...newDebt, minimum_payment: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">{t('finance.interestRate')} %</label>
+            <Input
+              type="number"
+              step="0.01"
+              placeholder="0.00"
+              value={newDebt.interest_rate}
+              onChange={(e) => setNewDebt({ ...newDebt, interest_rate: e.target.value })}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Dates Section */}
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="text-sm text-muted-foreground mb-1 block">{t('finance.startDate')}</label>
@@ -297,21 +379,41 @@ export function DebtsManager() {
           />
         </div>
       </div>
-      <Select 
-        value={newDebt.currency} 
-        onValueChange={(value) => setNewDebt({ ...newDebt, currency: value })}
-      >
-        <SelectTrigger>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="SAR">SAR - {language === 'ar' ? 'ريال سعودي' : 'Saudi Riyal'}</SelectItem>
-          <SelectItem value="USD">USD - {language === 'ar' ? 'دولار أمريكي' : 'US Dollar'}</SelectItem>
-          <SelectItem value="AED">AED - {language === 'ar' ? 'درهم إماراتي' : 'UAE Dirham'}</SelectItem>
-          <SelectItem value="SDG">SDG - {language === 'ar' ? 'جنيه سوداني' : 'Sudanese Pound'}</SelectItem>
-          <SelectItem value="EGP">EGP - {language === 'ar' ? 'جنيه مصري' : 'Egyptian Pound'}</SelectItem>
-        </SelectContent>
-      </Select>
+
+      {/* Currency */}
+      <div>
+        <label className="text-sm text-muted-foreground mb-1 block">{language === 'ar' ? 'العملة' : 'Currency'}</label>
+        <Select 
+          value={newDebt.currency} 
+          onValueChange={(value) => setNewDebt({ ...newDebt, currency: value })}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="SAR">SAR - {language === 'ar' ? 'ريال سعودي' : 'Saudi Riyal'}</SelectItem>
+            <SelectItem value="USD">USD - {language === 'ar' ? 'دولار أمريكي' : 'US Dollar'}</SelectItem>
+            <SelectItem value="AED">AED - {language === 'ar' ? 'درهم إماراتي' : 'UAE Dirham'}</SelectItem>
+            <SelectItem value="SDG">SDG - {language === 'ar' ? 'جنيه سوداني' : 'Sudanese Pound'}</SelectItem>
+            <SelectItem value="EGP">EGP - {language === 'ar' ? 'جنيه مصري' : 'Egyptian Pound'}</SelectItem>
+            <SelectItem value="KWD">KWD - {language === 'ar' ? 'دينار كويتي' : 'Kuwaiti Dinar'}</SelectItem>
+            <SelectItem value="BHD">BHD - {language === 'ar' ? 'دينار بحريني' : 'Bahraini Dinar'}</SelectItem>
+            <SelectItem value="QAR">QAR - {language === 'ar' ? 'ريال قطري' : 'Qatari Riyal'}</SelectItem>
+            <SelectItem value="OMR">OMR - {language === 'ar' ? 'ريال عماني' : 'Omani Rial'}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Notes */}
+      <div>
+        <label className="text-sm text-muted-foreground mb-1 block">{language === 'ar' ? 'ملاحظات' : 'Notes'}</label>
+        <Input
+          placeholder={language === 'ar' ? 'ملاحظات إضافية...' : 'Additional notes...'}
+          value={newDebt.notes}
+          onChange={(e) => setNewDebt({ ...newDebt, notes: e.target.value })}
+        />
+      </div>
+
       <Button 
         onClick={isEdit ? handleUpdateDebt : handleCreateDebt} 
         className="w-full" 
