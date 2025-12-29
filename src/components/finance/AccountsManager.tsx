@@ -1,19 +1,21 @@
 import { useState } from 'react';
 import { 
   Wallet, Plus, CreditCard, Building, Smartphone, 
-  MoreVertical, Check, X, RefreshCw, Loader2
+  MoreVertical, Check, X, RefreshCw, Loader2, Pencil, Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useAccounts, useCreateAccount, useTransactions } from '@/hooks/useFinance';
+import { useAccounts, useCreateAccount, useUpdateAccount, useDeleteAccount, useTransactions } from '@/hooks/useFinance';
 import { useReconcileAccount, useReconcileTransactions } from '@/hooks/useAdvancedFinance';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import type { Account } from '@/hooks/useFinance';
 
 const accountIcons: Record<string, React.ElementType> = {
   bank: Building,
@@ -40,11 +42,17 @@ export function AccountsManager() {
   const { data: accounts, isLoading } = useAccounts();
   const { data: transactions } = useTransactions();
   const createAccount = useCreateAccount();
+  const updateAccount = useUpdateAccount();
+  const deleteAccount = useDeleteAccount();
   const reconcileAccount = useReconcileAccount();
   const reconcileTransactions = useReconcileTransactions();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingAccountId, setEditingAccountId] = useState<string | null>(null);
   const [isReconcileOpen, setIsReconcileOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [accountToDelete, setAccountToDelete] = useState<Account | null>(null);
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const [reconcileBalance, setReconcileBalance] = useState('');
   const [selectedTxIds, setSelectedTxIds] = useState<string[]>([]);
@@ -57,6 +65,26 @@ export function AccountsManager() {
     icon: '',
     color: '',
   });
+
+  const resetForm = () => {
+    setNewAccount({ name: '', type: 'bank', balance: '', currency: 'SAR', icon: '', color: '' });
+    setIsEditMode(false);
+    setEditingAccountId(null);
+  };
+
+  const openEditDialog = (account: Account) => {
+    setNewAccount({
+      name: account.name,
+      type: account.type,
+      balance: String(account.balance || 0),
+      currency: account.currency || 'SAR',
+      icon: account.icon || '',
+      color: account.color || '',
+    });
+    setEditingAccountId(account.id);
+    setIsEditMode(true);
+    setIsDialogOpen(true);
+  };
 
   const handleCreateAccount = async () => {
     if (!newAccount.name) {
@@ -75,7 +103,44 @@ export function AccountsManager() {
       });
       toast.success(t('finance.accountAdded'));
       setIsDialogOpen(false);
-      setNewAccount({ name: '', type: 'bank', balance: '', currency: 'SAR', icon: '', color: '' });
+      resetForm();
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleUpdateAccount = async () => {
+    if (!newAccount.name || !editingAccountId) {
+      toast.error(t('common.fillAllFields'));
+      return;
+    }
+
+    try {
+      await updateAccount.mutateAsync({
+        id: editingAccountId,
+        name: newAccount.name,
+        type: newAccount.type,
+        balance: parseFloat(newAccount.balance) || 0,
+        currency: newAccount.currency,
+        icon: newAccount.icon || undefined,
+        color: newAccount.color || accountColors[newAccount.type],
+      });
+      toast.success(t('common.updated'));
+      setIsDialogOpen(false);
+      resetForm();
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!accountToDelete) return;
+
+    try {
+      await deleteAccount.mutateAsync(accountToDelete.id);
+      toast.success(t('common.deleted'));
+      setIsDeleteOpen(false);
+      setAccountToDelete(null);
     } catch (error) {
       toast.error(t('common.error'));
     }
@@ -129,16 +194,19 @@ export function AccountsManager() {
             {t('finance.totalBalance')}: <span className="font-bold text-foreground">{totalBalance.toLocaleString()} SAR</span>
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) resetForm();
+        }}>
           <DialogTrigger asChild>
-            <Button variant="gold">
+            <Button variant="gold" onClick={() => { resetForm(); setIsDialogOpen(true); }}>
               <Plus className="w-4 h-4 me-2" />
               {t('finance.addAccount')}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{t('finance.addAccount')}</DialogTitle>
+              <DialogTitle>{isEditMode ? t('common.edit') : t('finance.addAccount')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <Input
@@ -186,8 +254,16 @@ export function AccountsManager() {
                 value={newAccount.balance}
                 onChange={(e) => setNewAccount({ ...newAccount, balance: e.target.value })}
               />
-              <Button onClick={handleCreateAccount} className="w-full" disabled={createAccount.isPending}>
-                {createAccount.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.add')}
+              <Button 
+                onClick={isEditMode ? handleUpdateAccount : handleCreateAccount} 
+                className="w-full" 
+                disabled={createAccount.isPending || updateAccount.isPending}
+              >
+                {(createAccount.isPending || updateAccount.isPending) ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  isEditMode ? t('common.save') : t('common.add')
+                )}
               </Button>
             </div>
           </DialogContent>
@@ -228,12 +304,27 @@ export function AccountsManager() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => openEditDialog(account)}>
+                      <Pencil className="w-4 h-4 me-2" />
+                      {t('common.edit')}
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => {
                       setSelectedAccountId(account.id);
                       setIsReconcileOpen(true);
                     }}>
                       <RefreshCw className="w-4 h-4 me-2" />
                       {t('finance.reconcile')}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={() => {
+                        setAccountToDelete(account);
+                        setIsDeleteOpen(true);
+                      }}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="w-4 h-4 me-2" />
+                      {t('common.delete')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -334,6 +425,33 @@ export function AccountsManager() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('common.confirmDelete')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('finance.deleteAccountWarning', { name: accountToDelete?.name || '' })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setAccountToDelete(null)}>
+              {t('common.cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteAccount}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteAccount.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                t('common.delete')
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
