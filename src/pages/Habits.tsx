@@ -323,9 +323,20 @@ export default function Habits() {
         <div className="lg:col-span-2 glass-card p-5">
           <div className="flex items-center justify-between mb-5">
             <h3 className="text-lg font-semibold text-foreground">{t('habits.dailyHabits')}</h3>
-            <div className="flex items-center gap-1 text-primary">
-              <Flame className="w-5 h-5" />
-              <span className="font-bold">{getTotalStreak()} {t('habits.totalDays')}</span>
+            <div className="flex items-center gap-3">
+              {/* Streak Badges */}
+              {getTotalStreak() >= 7 && (
+                <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30">
+                  <span className="text-xs">🔥</span>
+                  <span className="text-xs font-medium text-amber-500">
+                    {getTotalStreak() >= 30 ? '🏆' : getTotalStreak() >= 14 ? '⭐' : '🎯'}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center gap-1 text-primary">
+                <Flame className="w-5 h-5" />
+                <span className="font-bold">{getTotalStreak()} {t('habits.totalDays')}</span>
+              </div>
             </div>
           </div>
 
@@ -475,14 +486,17 @@ export default function Habits() {
               </div>
             </div>
 
-            {/* AI Insight */}
+            {/* Correlation Insight - Note: Shows correlation, not causation */}
             <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-foreground">{t('habits.aiInsight')}</span>
+                <span className="text-sm font-medium text-foreground">{t('habits.correlationInsight')}</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Your mood is 20% higher on days you complete morning reading. Keep it up!
+                {t('habits.correlationNote')}
+              </p>
+              <p className="text-xs text-muted-foreground/70 mt-2 italic">
+                * {t('habits.correlationDisclaimer')}
               </p>
             </div>
           </div>
