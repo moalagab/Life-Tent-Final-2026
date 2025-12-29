@@ -38,6 +38,7 @@ const CURRENCIES = [
   { code: 'BHD', name: 'Bahraini Dinar', symbol: 'د.ب', nameAr: 'دينار بحريني' },
   { code: 'OMR', name: 'Omani Rial', symbol: 'ر.ع', nameAr: 'ريال عماني' },
   { code: 'EGP', name: 'Egyptian Pound', symbol: 'ج.م', nameAr: 'جنيه مصري' },
+  { code: 'SDG', name: 'Sudanese Pound', symbol: 'ج.س', nameAr: 'جنيه سوداني' },
 ];
 
 // Default rates to SAR
@@ -51,6 +52,7 @@ const DEFAULT_RATES: Record<string, number> = {
   'BHD': 9.95,
   'OMR': 9.74,
   'EGP': 0.077,
+  'SDG': 0.0062,
 };
 
 export function CurrencyManager() {
