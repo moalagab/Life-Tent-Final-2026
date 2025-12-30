@@ -2,22 +2,30 @@ import { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Project, useUpdateProject } from '@/hooks/useProjects';
 import { useTasks } from '@/hooks/useTasks';
+import { useGoals } from '@/hooks/useGoals';
+import { useResources } from '@/hooks/useResources';
+import { useCustomers } from '@/hooks/useCRM';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { 
   Target, ListTodo, LayoutGrid, Eye, DollarSign,
   FolderKanban, Calendar, Loader2, ArrowRight, Archive,
-  Play, Pause, CheckCircle, TrendingUp, StickyNote
+  Play, Pause, CheckCircle, TrendingUp, StickyNote, Users, Database
 } from 'lucide-react';
 
 import { ProjectOkrsView } from './ProjectOkrsView';
 import { KanbanBoard } from './KanbanBoard';
 import { ProjectNotesTab } from './ProjectNotesTab';
+import { ProjectTasksTab } from './ProjectTasksTab';
+import { ProjectGoalsTab } from './ProjectGoalsTab';
+import { ProjectResourcesTab } from './ProjectResourcesTab';
+import { ProjectCRMTab } from './ProjectCRMTab';
 
 interface ProjectDetailDialogProps {
   project: Project | null;

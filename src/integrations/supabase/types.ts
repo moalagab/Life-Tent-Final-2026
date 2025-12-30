@@ -2074,6 +2074,56 @@ export type Database = {
           },
         ]
       }
+      project_milestones: {
+        Row: {
+          color: string | null
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string
+          id: string
+          project_id: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date: string
+          id?: string
+          project_id: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string
+          id?: string
+          project_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_milestones_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_okrs: {
         Row: {
           created_at: string
@@ -2432,6 +2482,7 @@ export type Database = {
           due_time: string | null
           id: string
           is_focus: boolean | null
+          kr_id: string | null
           position: number | null
           priority: Database["public"]["Enums"]["task_priority"] | null
           project_id: string | null
@@ -2454,6 +2505,7 @@ export type Database = {
           due_time?: string | null
           id?: string
           is_focus?: boolean | null
+          kr_id?: string | null
           position?: number | null
           priority?: Database["public"]["Enums"]["task_priority"] | null
           project_id?: string | null
@@ -2476,6 +2528,7 @@ export type Database = {
           due_time?: string | null
           id?: string
           is_focus?: boolean | null
+          kr_id?: string | null
           position?: number | null
           priority?: Database["public"]["Enums"]["task_priority"] | null
           project_id?: string | null
@@ -2499,6 +2552,13 @@ export type Database = {
             columns: ["blocked_by"]
             isOneToOne: false
             referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_kr_id_fkey"
+            columns: ["kr_id"]
+            isOneToOne: false
+            referencedRelation: "key_results"
             referencedColumns: ["id"]
           },
           {
