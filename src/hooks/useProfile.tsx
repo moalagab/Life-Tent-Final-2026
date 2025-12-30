@@ -9,6 +9,7 @@ export interface Profile {
   avatar_url: string | null;
   preferred_language: string | null;
   timezone: string | null;
+  reading_goal_yearly: number | null;
   created_at: string;
   updated_at: string;
 }

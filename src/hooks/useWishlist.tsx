@@ -17,6 +17,7 @@ export interface WishlistItem {
   saved_amount?: number;
   linked_envelope_id?: string;
   linked_sinking_fund_id?: string;
+  linked_media_id?: string;
   notes?: string;
   created_at: string;
   updated_at: string;

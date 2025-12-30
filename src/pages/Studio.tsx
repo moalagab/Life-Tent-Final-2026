@@ -1,29 +1,35 @@
+import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { 
-  BookOpen, Film, Plus, Search, Star, Target, Loader2, 
-  MoreVertical, Edit3, Trash2, Archive, RotateCcw, Headphones, FileText
+  BookOpen, Film, Plus, Search, Loader2, Archive, Headphones, 
+  Target, ShoppingCart, Grid3X3, List
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useNavigate } from 'react-router-dom';
 import { 
   useMediaItems, useCreateMediaItem, useUpdateMediaItem, 
   useDeleteMediaItem, useArchiveMediaItem, useRestoreMediaItem,
   useArchivedMediaItems, MediaItem
 } from '@/hooks/useMedia';
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Slider } from '@/components/ui/slider';
+import { useGoals } from '@/hooks/useGoals';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+
+// Components
+import { ReadingGoalCard } from '@/components/studio/ReadingGoalCard';
+import { MediaItemCard } from '@/components/studio/MediaItemCard';
+import { MediaFormDialog } from '@/components/studio/MediaFormDialog';
+import { AddToWishlistDialog } from '@/components/studio/AddToWishlistDialog';
 
 type MediaType = 'book' | 'movie' | 'series' | 'podcast' | 'article';
 type MediaStatus = 'want' | 'in_progress' | 'completed' | 'abandoned';
+type ViewMode = 'grid' | 'list';
 
 interface MediaFormData {
   title: string;
@@ -34,158 +40,93 @@ interface MediaFormData {
   progress: number;
   rating: number;
   notes: string;
+  goal_id: string;
+  project_id: string;
 }
-
-const emptyFormData: MediaFormData = {
-  title: '',
-  author: '',
-  type: 'book',
-  status: 'want',
-  total_pages: '',
-  progress: 0,
-  rating: 0,
-  notes: '',
-};
 
 export default function Studio() {
   const { t, currentLanguage } = useLanguage();
+  const navigate = useNavigate();
   const { data: mediaItems, isLoading } = useMediaItems();
   const { data: archivedItems } = useArchivedMediaItems();
+  const { data: goals } = useGoals();
   const createMediaItem = useCreateMediaItem();
   const updateMediaItem = useUpdateMediaItem();
   const deleteMediaItem = useDeleteMediaItem();
   const archiveMediaItem = useArchiveMediaItem();
   const restoreMediaItem = useRestoreMediaItem();
 
+  // State
   const [activeTab, setActiveTab] = useState<'books' | 'movies' | 'podcasts' | 'archived'>('books');
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MediaItem | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [formData, setFormData] = useState<MediaFormData>(emptyFormData);
-  const [selectedShelf, setSelectedShelf] = useState<string | null>(null);
+  const [selectedShelf, setSelectedShelf] = useState<string>('all');
+  const [wishlistDialogOpen, setWishlistDialogOpen] = useState(false);
+  const [wishlistItem, setWishlistItem] = useState<MediaItem | null>(null);
+  const [linkGoalDialogOpen, setLinkGoalDialogOpen] = useState(false);
+  const [linkGoalItem, setLinkGoalItem] = useState<MediaItem | null>(null);
+  const [selectedGoalId, setSelectedGoalId] = useState<string>('');
 
+  // Filtered data
   const books = mediaItems?.filter(item => item.type === 'book') || [];
   const movies = mediaItems?.filter(item => ['movie', 'series'].includes(item.type)) || [];
   const podcasts = mediaItems?.filter(item => ['podcast', 'article'].includes(item.type)) || [];
 
-  const filteredBooks = books.filter(book =>
-    book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    book.author?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filterItems = (items: MediaItem[]) => {
+    let filtered = items.filter(item =>
+      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.author?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
-  const filteredMovies = movies.filter(movie =>
-    movie.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    if (selectedShelf !== 'all') {
+      filtered = filtered.filter(b => b.status === selectedShelf);
+    }
 
-  const filteredPodcasts = podcasts.filter(item =>
-    item.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    return filtered;
+  };
+
+  const displayedBooks = filterItems(books);
+  const displayedMovies = filterItems(movies);
+  const displayedPodcasts = filterItems(podcasts);
 
   const booksRead = books.filter(b => b.status === 'completed').length;
-  const booksGoal = 24;
 
-  const statusColors: Record<string, string> = {
-    in_progress: 'bg-primary/10 text-primary border-primary/20',
-    want: 'bg-muted text-muted-foreground border-muted',
-    completed: 'bg-green-500/10 text-green-600 border-green-500/20',
-    abandoned: 'bg-destructive/10 text-destructive border-destructive/20',
+  // Handlers
+  const handleOpenForm = (item?: MediaItem) => {
+    setEditingItem(item || null);
+    setIsFormDialogOpen(true);
   };
 
-  const getStatusLabel = (status: string, type: string) => {
-    if (['movie', 'series'].includes(type)) {
-      if (status === 'in_progress') return t('studio.status.watching');
-      if (status === 'want') return t('studio.status.wantToWatch');
-      if (status === 'completed') return t('studio.status.watched');
-    }
-    if (status === 'in_progress') return t('studio.status.reading');
-    if (status === 'want') return t('studio.status.wantToRead');
-    if (status === 'completed') return t('studio.status.read');
-    if (status === 'abandoned') return t('studio.status.abandoned');
-    return status;
-  };
-
-  const tabs = [
-    { id: 'books' as const, label: t('studio.books'), icon: BookOpen },
-    { id: 'movies' as const, label: t('studio.moviesShows'), icon: Film },
-    { id: 'podcasts' as const, label: t('studio.podcasts'), icon: Headphones },
-    { id: 'archived' as const, label: t('studio.archived'), icon: Archive },
-  ];
-
-  const shelfFilters = [
-    { id: null, label: t('common.all') },
-    { id: 'in_progress', label: t('studio.status.reading') },
-    { id: 'want', label: t('studio.status.wantToRead') },
-    { id: 'completed', label: t('studio.status.read') },
-  ];
-
-  const displayedBooks = selectedShelf 
-    ? filteredBooks.filter(b => b.status === selectedShelf)
-    : filteredBooks;
-
-  const handleOpenDialog = (item?: MediaItem) => {
-    if (item) {
-      setIsEditMode(true);
-      setEditingItem(item);
-      setFormData({
-        title: item.title,
-        author: item.author || '',
-        type: item.type as MediaType,
-        status: item.status as MediaStatus,
-        total_pages: item.total_pages?.toString() || '',
-        progress: item.progress || 0,
-        rating: item.rating || 0,
-        notes: item.notes || '',
-      });
-    } else {
-      setIsEditMode(false);
-      setEditingItem(null);
-      setFormData(emptyFormData);
-    }
-    setIsDialogOpen(true);
-  };
-
-  const handleSubmit = async () => {
-    if (!formData.title) {
-      toast.error(t('common.fillAllFields'));
-      return;
-    }
-
+  const handleFormSubmit = async (data: MediaFormData) => {
     try {
-      if (isEditMode && editingItem) {
-        await updateMediaItem.mutateAsync({
-          id: editingItem.id,
-          title: formData.title,
-          author: formData.author || null,
-          type: formData.type,
-          status: formData.status,
-          total_pages: formData.total_pages ? parseInt(formData.total_pages) : null,
-          progress: formData.progress,
-          rating: formData.rating || null,
-          notes: formData.notes || null,
-        });
-        toast.success(t('studio.itemUpdated'));
+      const payload = {
+        title: data.title,
+        author: data.author || null,
+        type: data.type,
+        status: data.status,
+        total_pages: data.total_pages ? parseInt(data.total_pages) : null,
+        progress: data.progress,
+        rating: data.rating || null,
+        notes: data.notes || null,
+        goal_id: data.goal_id || null,
+        project_id: data.project_id || null,
+      };
+
+      if (editingItem) {
+        await updateMediaItem.mutateAsync({ id: editingItem.id, ...payload });
+        toast.success(currentLanguage === 'ar' ? 'تم تحديث العنصر' : 'Item updated');
       } else {
-        await createMediaItem.mutateAsync({
-          title: formData.title,
-          author: formData.author || null,
-          type: formData.type,
-          status: formData.status,
-          total_pages: formData.total_pages ? parseInt(formData.total_pages) : null,
-          progress: formData.progress,
-          rating: formData.rating || null,
-          notes: formData.notes || null,
-        });
-        toast.success(t('studio.itemAdded'));
+        await createMediaItem.mutateAsync(payload);
+        toast.success(currentLanguage === 'ar' ? 'تمت إضافة العنصر' : 'Item added');
       }
-      setIsDialogOpen(false);
-      setFormData(emptyFormData);
-      setIsEditMode(false);
+      setIsFormDialogOpen(false);
       setEditingItem(null);
     } catch (error) {
-      toast.error(t('common.error'));
+      toast.error(currentLanguage === 'ar' ? 'حدث خطأ' : 'Error occurred');
     }
   };
 
@@ -193,9 +134,9 @@ export default function Studio() {
     if (!itemToDelete) return;
     try {
       await deleteMediaItem.mutateAsync(itemToDelete);
-      toast.success(t('studio.itemDeleted'));
+      toast.success(currentLanguage === 'ar' ? 'تم الحذف' : 'Item deleted');
     } catch (error) {
-      toast.error(t('common.error'));
+      toast.error(currentLanguage === 'ar' ? 'حدث خطأ' : 'Error occurred');
     }
     setDeleteConfirmOpen(false);
     setItemToDelete(null);
@@ -204,130 +145,117 @@ export default function Studio() {
   const handleArchive = async (id: string) => {
     try {
       await archiveMediaItem.mutateAsync(id);
-      toast.success(t('studio.itemArchived'));
+      toast.success(currentLanguage === 'ar' ? 'تمت الأرشفة' : 'Item archived');
     } catch (error) {
-      toast.error(t('common.error'));
+      toast.error(currentLanguage === 'ar' ? 'حدث خطأ' : 'Error occurred');
     }
   };
 
   const handleRestore = async (id: string) => {
     try {
       await restoreMediaItem.mutateAsync(id);
-      toast.success(t('studio.itemRestored'));
+      toast.success(currentLanguage === 'ar' ? 'تمت الاستعادة' : 'Item restored');
     } catch (error) {
-      toast.error(t('common.error'));
+      toast.error(currentLanguage === 'ar' ? 'حدث خطأ' : 'Error occurred');
     }
   };
 
   const handleUpdateProgress = async (item: MediaItem, newProgress: number) => {
     try {
+      const newStatus = newProgress >= 100 ? 'completed' : newProgress > 0 ? 'in_progress' : item.status;
       await updateMediaItem.mutateAsync({
         id: item.id,
         progress: newProgress,
-        status: newProgress >= 100 ? 'completed' : newProgress > 0 ? 'in_progress' : item.status,
+        status: newStatus as MediaStatus,
+        end_date: newProgress >= 100 ? new Date().toISOString().split('T')[0] : item.end_date,
       });
-      toast.success(t('studio.progressUpdated'));
+      if (newProgress >= 100) {
+        toast.success(currentLanguage === 'ar' ? '🎉 تهانينا! أكملت هذا العنصر' : '🎉 Congratulations! You completed this item');
+      }
     } catch (error) {
-      toast.error(t('common.error'));
+      toast.error(currentLanguage === 'ar' ? 'حدث خطأ' : 'Error occurred');
     }
   };
 
-  const MediaCard = ({ item, showRestore = false }: { item: MediaItem; showRestore?: boolean }) => (
-    <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 border border-border hover:border-primary/30 transition-all group">
-      <span className="text-3xl">
-        {item.type === 'book' ? '📘' : 
-         item.type === 'movie' ? '🎬' : 
-         item.type === 'series' ? '📺' :
-         item.type === 'podcast' ? '🎧' : '📄'}
-      </span>
-      <div className="flex-1 min-w-0">
-        <h4 className="font-medium text-foreground text-sm truncate group-hover:text-primary transition-colors">
-          {item.title}
-        </h4>
-        {item.author && (
-          <p className="text-xs text-muted-foreground">{item.author}</p>
-        )}
-        {item.progress !== null && item.progress > 0 && item.status !== 'completed' && (
-          <div className="flex items-center gap-2 mt-1">
-            <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary rounded-full"
-                style={{ width: `${item.progress}%` }}
-              />
-            </div>
-            <span className="text-xs text-muted-foreground">{item.progress}%</span>
-          </div>
-        )}
-      </div>
-      <div className="flex flex-col items-end gap-1">
-        {item.rating && item.rating > 0 && (
-          <div className="flex items-center gap-0.5">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={cn(
-                  'w-3 h-3',
-                  i < item.rating! ? 'text-primary fill-primary' : 'text-muted'
-                )}
-              />
-            ))}
-          </div>
-        )}
-        {item.status && (
-          <span className={cn(
-            'px-2 py-0.5 rounded-full text-xs font-medium border',
-            statusColors[item.status]
-          )}>
-            {getStatusLabel(item.status, item.type)}
-          </span>
-        )}
-      </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
-            <MoreVertical className="w-4 h-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          {!showRestore ? (
-            <>
-              <DropdownMenuItem onClick={() => handleOpenDialog(item)}>
-                <Edit3 className="w-4 h-4 me-2" />
-                {t('common.edit')}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleArchive(item.id)}>
-                <Archive className="w-4 h-4 me-2" />
-                {t('studio.archiveItem')}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                onClick={() => { setItemToDelete(item.id); setDeleteConfirmOpen(true); }}
-                className="text-destructive"
-              >
-                <Trash2 className="w-4 h-4 me-2" />
-                {t('common.delete')}
-              </DropdownMenuItem>
-            </>
-          ) : (
-            <>
-              <DropdownMenuItem onClick={() => handleRestore(item.id)}>
-                <RotateCcw className="w-4 h-4 me-2" />
-                {t('studio.restoreItem')}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                onClick={() => { setItemToDelete(item.id); setDeleteConfirmOpen(true); }}
-                className="text-destructive"
-              >
-                <Trash2 className="w-4 h-4 me-2" />
-                {t('common.delete')}
-              </DropdownMenuItem>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+  const handleAddToWishlist = (item: MediaItem) => {
+    setWishlistItem(item);
+    setWishlistDialogOpen(true);
+  };
+
+  const handleLinkToGoal = (item: MediaItem) => {
+    setLinkGoalItem(item);
+    setSelectedGoalId(item.goal_id || '');
+    setLinkGoalDialogOpen(true);
+  };
+
+  const handleSaveLinkGoal = async () => {
+    if (!linkGoalItem) return;
+    try {
+      await updateMediaItem.mutateAsync({
+        id: linkGoalItem.id,
+        goal_id: selectedGoalId || null,
+      });
+      toast.success(currentLanguage === 'ar' ? 'تم ربط العنصر بالهدف' : 'Item linked to goal');
+      setLinkGoalDialogOpen(false);
+      setLinkGoalItem(null);
+    } catch (error) {
+      toast.error(currentLanguage === 'ar' ? 'حدث خطأ' : 'Error occurred');
+    }
+  };
+
+  const tabs = [
+    { id: 'books' as const, label: currentLanguage === 'ar' ? 'الكتب' : 'Books', icon: BookOpen, count: books.length },
+    { id: 'movies' as const, label: currentLanguage === 'ar' ? 'الأفلام' : 'Movies', icon: Film, count: movies.length },
+    { id: 'podcasts' as const, label: currentLanguage === 'ar' ? 'البودكاست' : 'Podcasts', icon: Headphones, count: podcasts.length },
+    { id: 'archived' as const, label: currentLanguage === 'ar' ? 'الأرشيف' : 'Archived', icon: Archive, count: archivedItems?.length || 0 },
+  ];
+
+  const shelfFilters = [
+    { id: 'all', label: currentLanguage === 'ar' ? 'الكل' : 'All' },
+    { id: 'in_progress', label: currentLanguage === 'ar' ? 'قيد القراءة' : 'Reading' },
+    { id: 'want', label: currentLanguage === 'ar' ? 'أريد القراءة' : 'Want to Read' },
+    { id: 'completed', label: currentLanguage === 'ar' ? 'مكتمل' : 'Completed' },
+  ];
+
+  const renderItemsGrid = (items: MediaItem[], isArchived = false) => (
+    <div className={cn(
+      'gap-4',
+      viewMode === 'grid' 
+        ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
+        : 'flex flex-col'
+    )}>
+      {items.map((item) => (
+        <MediaItemCard
+          key={item.id}
+          item={item}
+          onEdit={handleOpenForm}
+          onDelete={(id) => { setItemToDelete(id); setDeleteConfirmOpen(true); }}
+          onArchive={handleArchive}
+          onRestore={handleRestore}
+          onAddToWishlist={handleAddToWishlist}
+          onLinkToGoal={handleLinkToGoal}
+          onUpdateProgress={handleUpdateProgress}
+          isArchived={isArchived}
+        />
+      ))}
     </div>
   );
+
+  const renderEmptyState = (icon: React.ElementType, message: string) => {
+    const Icon = icon;
+    return (
+      <div className="text-center py-16">
+        <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-muted/50 flex items-center justify-center">
+          <Icon className="w-10 h-10 text-muted-foreground" />
+        </div>
+        <p className="text-muted-foreground mb-4">{message}</p>
+        <Button variant="gold" onClick={() => handleOpenForm()}>
+          <Plus className="w-4 h-4 me-2" />
+          {currentLanguage === 'ar' ? 'أضف عنصرًا' : 'Add Item'}
+        </Button>
+      </div>
+    );
+  };
 
   if (isLoading) {
     return (
@@ -341,79 +269,102 @@ export default function Studio() {
 
   return (
     <MainLayout>
+      {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">{t('studio.title')}</h1>
-            <p className="text-muted-foreground mt-1">{t('studio.subtitle')}</p>
+            <h1 className="text-3xl font-bold text-foreground">
+              {currentLanguage === 'ar' ? 'الاستديو' : 'Studio'}
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              {currentLanguage === 'ar' ? 'مكتبتك الشخصية للكتب والأفلام والمحتوى' : 'Your personal library for books, movies, and content'}
+            </p>
           </div>
-          <Button variant="gold" size="lg" onClick={() => handleOpenDialog()}>
-            <Plus className="w-5 h-5 me-2" />
-            {t('studio.addItem')}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={() => navigate('/finance')}
+              title={currentLanguage === 'ar' ? 'قائمة الأمنيات' : 'Wishlist'}
+            >
+              <ShoppingCart className="w-4 h-4" />
+            </Button>
+            <Button variant="gold" size="lg" onClick={() => handleOpenForm()}>
+              <Plus className="w-5 h-5 me-2" />
+              {currentLanguage === 'ar' ? 'إضافة عنصر' : 'Add Item'}
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Reading Goal */}
-      <div className="glass-card p-5 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold-glow-sm">
-              <Target className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-foreground">{new Date().getFullYear()} {t('studio.readingGoal')}</h3>
-              <p className="text-sm text-muted-foreground">{booksRead} {t('studio.booksOf')} {booksGoal} {t('studio.books').toLowerCase()}</p>
-            </div>
-          </div>
-          <span className="text-2xl font-bold gold-text">{Math.round((booksRead / booksGoal) * 100)}%</span>
-        </div>
-        <div className="h-3 bg-muted rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-gold rounded-full transition-all duration-500"
-            style={{ width: `${Math.min((booksRead / booksGoal) * 100, 100)}%` }}
-          />
-        </div>
-      </div>
+      {/* Reading Goal Card */}
+      <ReadingGoalCard 
+        booksRead={booksRead} 
+        onNavigateToGoals={() => navigate('/goals')}
+      />
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-        <TabsList className="mb-6">
-          {tabs.map((tab) => (
-            <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-2">
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <TabsList className="h-auto p-1 flex-wrap">
+            {tabs.map((tab) => (
+              <TabsTrigger 
+                key={tab.id} 
+                value={tab.id} 
+                className="flex items-center gap-2 px-4"
+              >
+                <tab.icon className="w-4 h-4" />
+                <span>{tab.label}</span>
+                {tab.count > 0 && (
+                  <span className="px-1.5 py-0.5 text-xs rounded-full bg-muted text-muted-foreground">
+                    {tab.count}
+                  </span>
+                )}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-        {/* Books Tab */}
-        <TabsContent value="books">
-          <div className="glass-card p-5">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold text-foreground">{t('studio.books')}</h3>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder={t('studio.searchBooks')}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 w-48"
-                />
-              </div>
+          {/* View Mode Toggle */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'outline'}
+              size="icon"
+              onClick={() => setViewMode('grid')}
+            >
+              <Grid3X3 className="w-4 h-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'outline'}
+              size="icon"
+              onClick={() => setViewMode('list')}
+            >
+              <List className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Search & Filters */}
+        <div className="glass-card p-4 mb-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder={currentLanguage === 'ar' ? 'ابحث...' : 'Search...'}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="ps-10"
+                dir="auto"
+              />
             </div>
-
-            {/* Shelf Filters */}
-            <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+            <div className="flex gap-2 overflow-x-auto pb-1">
               {shelfFilters.map((shelf) => (
                 <button
-                  key={shelf.id || 'all'}
+                  key={shelf.id}
                   onClick={() => setSelectedShelf(shelf.id)}
                   className={cn(
-                    'px-3 py-1 rounded-full text-xs font-medium transition-all whitespace-nowrap',
-                    selectedShelf === shelf.id 
-                      ? 'bg-primary/10 text-primary' 
+                    'px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap',
+                    selectedShelf === shelf.id
+                      ? 'bg-primary text-primary-foreground'
                       : 'bg-muted/50 text-muted-foreground hover:bg-muted'
                   )}
                 >
@@ -421,212 +372,124 @@ export default function Studio() {
                 </button>
               ))}
             </div>
-
-            {displayedBooks.length > 0 ? (
-              <div className="space-y-3">
-                {displayedBooks.map((book) => (
-                  <MediaCard key={book.id} item={book} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                <p className="text-muted-foreground">{t('studio.noBooks')}</p>
-              </div>
-            )}
           </div>
+        </div>
+
+        {/* Books Tab */}
+        <TabsContent value="books" className="mt-0">
+          {displayedBooks.length > 0 
+            ? renderItemsGrid(displayedBooks)
+            : renderEmptyState(BookOpen, currentLanguage === 'ar' ? 'لا توجد كتب' : 'No books found')
+          }
         </TabsContent>
 
         {/* Movies Tab */}
-        <TabsContent value="movies">
-          <div className="glass-card p-5">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold text-foreground">{t('studio.moviesShows')}</h3>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder={t('studio.searchMovies')}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 w-48"
-                />
-              </div>
-            </div>
-
-            {filteredMovies.length > 0 ? (
-              <div className="space-y-3">
-                {filteredMovies.map((movie) => (
-                  <MediaCard key={movie.id} item={movie} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Film className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                <p className="text-muted-foreground">{t('studio.noMovies')}</p>
-              </div>
-            )}
-          </div>
+        <TabsContent value="movies" className="mt-0">
+          {displayedMovies.length > 0 
+            ? renderItemsGrid(displayedMovies)
+            : renderEmptyState(Film, currentLanguage === 'ar' ? 'لا توجد أفلام' : 'No movies found')
+          }
         </TabsContent>
 
         {/* Podcasts Tab */}
-        <TabsContent value="podcasts">
-          <div className="glass-card p-5">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold text-foreground">{t('studio.podcasts')} & {t('studio.articles')}</h3>
-            </div>
-
-            {filteredPodcasts.length > 0 ? (
-              <div className="space-y-3">
-                {filteredPodcasts.map((item) => (
-                  <MediaCard key={item.id} item={item} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Headphones className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                <p className="text-muted-foreground">{t('common.noData')}</p>
-              </div>
-            )}
-          </div>
+        <TabsContent value="podcasts" className="mt-0">
+          {displayedPodcasts.length > 0 
+            ? renderItemsGrid(displayedPodcasts)
+            : renderEmptyState(Headphones, currentLanguage === 'ar' ? 'لا يوجد محتوى' : 'No content found')
+          }
         </TabsContent>
 
         {/* Archived Tab */}
-        <TabsContent value="archived">
-          <div className="glass-card p-5">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold text-foreground">{t('studio.archived')}</h3>
-            </div>
-
-            {archivedItems && archivedItems.length > 0 ? (
-              <div className="space-y-3">
-                {archivedItems.map((item) => (
-                  <MediaCard key={item.id} item={item} showRestore />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Archive className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                <p className="text-muted-foreground">{t('studio.noArchivedItems')}</p>
-              </div>
-            )}
-          </div>
+        <TabsContent value="archived" className="mt-0">
+          {archivedItems && archivedItems.length > 0 
+            ? renderItemsGrid(archivedItems, true)
+            : renderEmptyState(Archive, currentLanguage === 'ar' ? 'لا توجد عناصر مؤرشفة' : 'No archived items')
+          }
         </TabsContent>
       </Tabs>
 
-      {/* Add/Edit Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-md">
+      {/* Form Dialog */}
+      <MediaFormDialog
+        open={isFormDialogOpen}
+        onOpenChange={setIsFormDialogOpen}
+        onSubmit={handleFormSubmit}
+        initialData={editingItem}
+        isLoading={createMediaItem.isPending || updateMediaItem.isPending}
+      />
+
+      {/* Add to Wishlist Dialog */}
+      <AddToWishlistDialog
+        open={wishlistDialogOpen}
+        onOpenChange={setWishlistDialogOpen}
+        mediaItem={wishlistItem}
+      />
+
+      {/* Link to Goal Dialog */}
+      <Dialog open={linkGoalDialogOpen} onOpenChange={setLinkGoalDialogOpen}>
+        <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>{isEditMode ? t('studio.editItem') : t('studio.addItem')}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Target className="w-5 h-5 text-primary" />
+              {currentLanguage === 'ar' ? 'ربط بهدف' : 'Link to Goal'}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
-            <Input
-              placeholder={t('studio.itemTitle')}
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            />
-            <Input
-              placeholder={t('studio.author')}
-              value={formData.author}
-              onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-            />
             <Select 
-              value={formData.type} 
-              onValueChange={(value: MediaType) => setFormData({ ...formData, type: value })}
+              value={selectedGoalId || 'none'} 
+              onValueChange={(v) => setSelectedGoalId(v === 'none' ? '' : v)}
             >
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue placeholder={currentLanguage === 'ar' ? 'اختر هدفًا' : 'Select a goal'} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="book">{t('studio.book')}</SelectItem>
-                <SelectItem value="movie">{t('studio.movie')}</SelectItem>
-                <SelectItem value="series">{t('studio.series')}</SelectItem>
-                <SelectItem value="podcast">{t('studio.podcast')}</SelectItem>
-                <SelectItem value="article">{t('studio.article')}</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select 
-              value={formData.status} 
-              onValueChange={(value: MediaStatus) => setFormData({ ...formData, status: value })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="want">{t('studio.status.wantToRead')}</SelectItem>
-                <SelectItem value="in_progress">{t('studio.status.reading')}</SelectItem>
-                <SelectItem value="completed">{t('studio.status.read')}</SelectItem>
-              </SelectContent>
-            </Select>
-            {formData.type === 'book' && (
-              <Input
-                type="number"
-                placeholder={t('studio.totalPages')}
-                value={formData.total_pages}
-                onChange={(e) => setFormData({ ...formData, total_pages: e.target.value })}
-              />
-            )}
-            
-            {/* Progress Slider */}
-            <div className="space-y-2">
-              <label className="text-sm text-muted-foreground">{t('common.progress')}: {formData.progress}%</label>
-              <Slider
-                value={[formData.progress]}
-                onValueChange={(v) => setFormData({ ...formData, progress: v[0] })}
-                max={100}
-                step={5}
-              />
-            </div>
-
-            {/* Rating */}
-            <div className="space-y-2">
-              <label className="text-sm text-muted-foreground">{t('studio.rating')}</label>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, rating: star })}
-                    className="p-1"
-                  >
-                    <Star className={cn(
-                      'w-6 h-6 transition-colors',
-                      star <= formData.rating ? 'text-primary fill-primary' : 'text-muted'
-                    )} />
-                  </button>
+                <SelectItem value="none">
+                  {currentLanguage === 'ar' ? 'بدون هدف' : 'No Goal'}
+                </SelectItem>
+                {goals?.filter(g => !g.archived_at).map((goal) => (
+                  <SelectItem key={goal.id} value={goal.id}>
+                    {goal.title}
+                  </SelectItem>
                 ))}
-              </div>
-            </div>
-
-            {/* Notes */}
-            <Textarea
-              placeholder={t('studio.notes')}
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              rows={3}
-            />
-
-            <Button onClick={handleSubmit} className="w-full" disabled={createMediaItem.isPending || updateMediaItem.isPending}>
-              {(createMediaItem.isPending || updateMediaItem.isPending) 
-                ? <Loader2 className="w-4 h-4 animate-spin" /> 
-                : isEditMode ? t('common.save') : t('common.add')}
+              </SelectContent>
+            </Select>
+            <Button 
+              onClick={handleSaveLinkGoal} 
+              className="w-full" 
+              variant="gold"
+              disabled={updateMediaItem.isPending}
+            >
+              {updateMediaItem.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                currentLanguage === 'ar' ? 'حفظ' : 'Save'
+              )}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Confirmation */}
       <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('studio.deleteItem')}</AlertDialogTitle>
-            <AlertDialogDescription>{t('studio.confirmDelete')}</AlertDialogDescription>
+            <AlertDialogTitle>
+              {currentLanguage === 'ar' ? 'تأكيد الحذف' : 'Confirm Delete'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {currentLanguage === 'ar' 
+                ? 'هل أنت متأكد من حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء.'
+                : 'Are you sure you want to delete this item? This action cannot be undone.'}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              {t('common.delete')}
+            <AlertDialogCancel>
+              {currentLanguage === 'ar' ? 'إلغاء' : 'Cancel'}
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete} 
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {currentLanguage === 'ar' ? 'حذف' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
