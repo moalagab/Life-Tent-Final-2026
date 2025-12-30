@@ -551,17 +551,15 @@ export function DebtsManager() {
             {activeDebts.length} {t('finance.activeDebts')}
           </p>
         </div>
+        <Button variant="gold" onClick={() => setIsDialogOpen(true)}>
+          <Plus className="w-4 h-4 me-2" />
+          {language === 'ar' ? 'إضافة دين' : 'Add Debt'}
+        </Button>
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (!open) resetForm();
         }}>
-          <DialogTrigger asChild>
-            <Button variant="gold">
-              <Plus className="w-4 h-4 me-2" />
-              {language === 'ar' ? 'إضافة دين' : 'Add Debt'}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-lg" onOpenAutoFocus={(e) => e.preventDefault()}>
             <DialogHeader>
               <DialogTitle>{language === 'ar' ? 'إضافة دين جديد' : 'Add New Debt'}</DialogTitle>
               <DialogDescription>
