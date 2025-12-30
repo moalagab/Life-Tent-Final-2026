@@ -1550,6 +1550,7 @@ export type Database = {
           cover_url: string | null
           created_at: string
           end_date: string | null
+          genre: string | null
           goal_id: string | null
           id: string
           note_id: string | null
@@ -1570,6 +1571,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           end_date?: string | null
+          genre?: string | null
           goal_id?: string | null
           id?: string
           note_id?: string | null
@@ -1590,6 +1592,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           end_date?: string | null
+          genre?: string | null
           goal_id?: string | null
           id?: string
           note_id?: string | null
@@ -1907,6 +1910,8 @@ export type Database = {
           id: string
           preferred_language: string | null
           reading_goal_yearly: number | null
+          reading_reminder_enabled: boolean | null
+          reading_reminder_time: string | null
           timezone: string | null
           updated_at: string
           user_id: string
@@ -1918,6 +1923,8 @@ export type Database = {
           id?: string
           preferred_language?: string | null
           reading_goal_yearly?: number | null
+          reading_reminder_enabled?: boolean | null
+          reading_reminder_time?: string | null
           timezone?: string | null
           updated_at?: string
           user_id: string
@@ -1929,6 +1936,8 @@ export type Database = {
           id?: string
           preferred_language?: string | null
           reading_goal_yearly?: number | null
+          reading_reminder_enabled?: boolean | null
+          reading_reminder_time?: string | null
           timezone?: string | null
           updated_at?: string
           user_id?: string

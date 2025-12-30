@@ -10,6 +10,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useGoals } from '@/hooks/useGoals';
 import { useProjects } from '@/hooks/useProjects';
 import { MediaItem } from '@/hooks/useMedia';
+import { GenreSelector } from './GenreFilter';
 import { cn } from '@/lib/utils';
 
 type MediaType = 'book' | 'movie' | 'series' | 'podcast' | 'article';
@@ -26,6 +27,7 @@ interface MediaFormData {
   notes: string;
   goal_id: string;
   project_id: string;
+  genre: string;
 }
 
 const emptyFormData: MediaFormData = {
@@ -39,6 +41,7 @@ const emptyFormData: MediaFormData = {
   notes: '',
   goal_id: '',
   project_id: '',
+  genre: '',
 };
 
 interface MediaFormDialogProps {
@@ -76,6 +79,7 @@ export function MediaFormDialog({
         notes: initialData.notes || '',
         goal_id: initialData.goal_id || '',
         project_id: initialData.project_id || '',
+        genre: initialData.genre || '',
       });
     } else {
       setFormData(emptyFormData);
@@ -169,7 +173,16 @@ export function MediaFormDialog({
             />
           </div>
 
-          {/* Status */}
+          {/* Genre */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">
+              {currentLanguage === 'ar' ? 'التصنيف' : 'Genre'}
+            </label>
+            <GenreSelector
+              value={formData.genre}
+              onChange={(genre) => setFormData({ ...formData, genre })}
+            />
+          </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">
               {currentLanguage === 'ar' ? 'الحالة' : 'Status'}
