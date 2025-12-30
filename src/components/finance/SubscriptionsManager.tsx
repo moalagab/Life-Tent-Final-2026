@@ -1,18 +1,21 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { 
   RefreshCw, Plus, Calendar, AlertTriangle, Star,
-  Pause, Play, Trash2, Loader2, MoreVertical, Bell
+  Pause, Play, Trash2, Loader2, MoreVertical, Bell, Edit
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useSubscriptions, useAccounts } from '@/hooks/useFinance';
 import { useCreateSubscription, useUpdateSubscription, useDeleteSubscription } from '@/hooks/useAdvancedFinance';
+import { useNotifications } from '@/hooks/useNotifications';
 import { toast } from 'sonner';
 import { format, addDays, addMonths, addYears, isAfter, isBefore, differenceInDays } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
@@ -22,13 +25,6 @@ const cycleLabels: Record<string, string> = {
   monthly: 'Monthly',
   quarterly: 'Quarterly',
   annual: 'Annual',
-};
-
-const cycleDays: Record<string, number> = {
-  weekly: 7,
-  monthly: 30,
-  quarterly: 90,
-  annual: 365,
 };
 
 export function SubscriptionsManager() {
@@ -41,11 +37,14 @@ export function SubscriptionsManager() {
   const createSubscription = useCreateSubscription();
   const updateSubscription = useUpdateSubscription();
   const deleteSubscription = useDeleteSubscription();
+  const { scheduleSubscriptionReminder, enabled: notificationsEnabled } = useNotifications();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingSub, setEditingSub] = useState<any>(null);
   const [view, setView] = useState<'list' | 'calendar'>('list');
 
-  const [newSub, setNewSub] = useState({
+  const [formData, setFormData] = useState({
     name: '',
     provider: '',
     amount: '',
@@ -57,10 +56,43 @@ export function SubscriptionsManager() {
     notes: '',
   });
 
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      provider: '',
+      amount: '',
+      currency: 'SAR',
+      billing_cycle: 'monthly',
+      next_billing_date: '',
+      category: '',
+      payment_account_id: '',
+      notes: '',
+    });
+  };
+
+  // Schedule notifications for upcoming renewals
+  useEffect(() => {
+    if (notificationsEnabled && subscriptions) {
+      subscriptions.forEach(sub => {
+        if (sub.is_active && sub.next_billing_date) {
+          const billingDate = new Date(sub.next_billing_date);
+          const now = new Date();
+          const daysUntil = differenceInDays(billingDate, now);
+          
+          // Only schedule for subscriptions due in the next 7 days
+          if (daysUntil > 0 && daysUntil <= 7) {
+            scheduleSubscriptionReminder(sub.name, sub.amount, billingDate, sub.id);
+          }
+        }
+      });
+    }
+  }, [subscriptions, notificationsEnabled, scheduleSubscriptionReminder]);
+
   // Calculate totals
   const monthlyTotal = useMemo(() => {
     if (!subscriptions) return 0;
     return subscriptions.reduce((sum, sub) => {
+      if (!sub.is_active) return sum;
       const cycle = sub.billing_cycle as string;
       const multiplier = cycle === 'yearly' || cycle === 'annual' ? 1/12 
         : cycle === 'quarterly' ? 1/3 
@@ -78,6 +110,7 @@ export function SubscriptionsManager() {
     const in7Days = addDays(new Date(), 7);
     return subscriptions
       .filter(sub => {
+        if (!sub.is_active) return false;
         const nextDate = new Date(sub.next_billing_date);
         return isAfter(nextDate, new Date()) && isBefore(nextDate, in7Days);
       })
@@ -92,7 +125,7 @@ export function SubscriptionsManager() {
     for (let i = 0; i < 12; i++) {
       const monthDate = addMonths(new Date(), i);
       const monthSubs = subscriptions.filter(sub => {
-        // Simulate recurring dates
+        if (!sub.is_active) return false;
         let nextDate = new Date(sub.next_billing_date);
         const cycle = sub.billing_cycle as string;
         while (nextDate < monthDate) {
@@ -111,40 +144,85 @@ export function SubscriptionsManager() {
   }, [subscriptions]);
 
   const handleCreateSubscription = async () => {
-    if (!newSub.name || !newSub.amount || !newSub.next_billing_date) {
+    if (!formData.name || !formData.amount || !formData.next_billing_date) {
       toast.error(t('common.fillAllFields'));
       return;
     }
 
     try {
-      await createSubscription.mutateAsync({
-        name: newSub.name,
-        provider: newSub.provider || null,
-        amount: parseFloat(newSub.amount),
-        currency: newSub.currency,
-        billing_cycle: newSub.billing_cycle,
-        next_billing_date: newSub.next_billing_date,
-        category: newSub.category || null,
-        payment_account_id: newSub.payment_account_id || null,
-        notes: newSub.notes || null,
+      const result = await createSubscription.mutateAsync({
+        name: formData.name,
+        provider: formData.provider || null,
+        amount: parseFloat(formData.amount),
+        currency: formData.currency,
+        billing_cycle: formData.billing_cycle,
+        next_billing_date: formData.next_billing_date,
+        category: formData.category || null,
+        payment_account_id: formData.payment_account_id || null,
+        notes: formData.notes || null,
         is_active: true,
       });
+      
+      // Schedule notification
+      if (notificationsEnabled && result) {
+        scheduleSubscriptionReminder(
+          formData.name,
+          parseFloat(formData.amount),
+          new Date(formData.next_billing_date),
+          result.id
+        );
+      }
+      
       toast.success(t('finance.subscriptionAdded'));
       setIsDialogOpen(false);
-      setNewSub({
-        name: '',
-        provider: '',
-        amount: '',
-        currency: 'SAR',
-        billing_cycle: 'monthly',
-        next_billing_date: '',
-        category: '',
-        payment_account_id: '',
-        notes: '',
-      });
+      resetForm();
     } catch (error) {
       toast.error(t('common.error'));
     }
+  };
+
+  const handleUpdateSubscription = async () => {
+    if (!editingSub || !formData.name || !formData.amount) {
+      toast.error(t('common.fillAllFields'));
+      return;
+    }
+
+    try {
+      await updateSubscription.mutateAsync({
+        id: editingSub.id,
+        name: formData.name,
+        provider: formData.provider || null,
+        amount: parseFloat(formData.amount),
+        currency: formData.currency,
+        billing_cycle: formData.billing_cycle,
+        next_billing_date: formData.next_billing_date || editingSub.next_billing_date,
+        category: formData.category || null,
+        payment_account_id: formData.payment_account_id || null,
+        notes: formData.notes || null,
+      });
+      toast.success(language === 'ar' ? 'تم تحديث الاشتراك' : 'Subscription updated');
+      setIsEditDialogOpen(false);
+      setEditingSub(null);
+      resetForm();
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const openEditDialog = (sub: any) => {
+    setEditingSub(sub);
+    setFormData({
+      name: sub.name,
+      provider: sub.provider || '',
+      amount: sub.amount.toString(),
+      currency: sub.currency || 'SAR',
+      billing_cycle: sub.billing_cycle || 'monthly',
+      next_billing_date: sub.next_billing_date || '',
+      category: sub.category || '',
+      payment_account_id: sub.payment_account_id || '',
+      notes: sub.notes || '',
+    });
+    setIsEditDialogOpen(true);
   };
 
   const handlePauseSubscription = async (id: string, currentStatus: boolean) => {
@@ -185,6 +263,133 @@ export function SubscriptionsManager() {
     );
   }
 
+  const SubscriptionForm = ({ isEdit = false }: { isEdit?: boolean }) => (
+    <div className="space-y-4 mt-4 max-h-[60vh] overflow-y-auto pe-2">
+      <div>
+        <Label>{language === 'ar' ? 'اسم الاشتراك' : 'Subscription Name'} *</Label>
+        <Input
+          dir="auto"
+          placeholder={t('finance.subscriptionName')}
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          className="mt-1"
+        />
+      </div>
+      <div>
+        <Label>{language === 'ar' ? 'المزود' : 'Provider'}</Label>
+        <Input
+          dir="auto"
+          placeholder={t('finance.provider')}
+          value={formData.provider}
+          onChange={(e) => setFormData({ ...formData, provider: e.target.value })}
+          className="mt-1"
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label>{language === 'ar' ? 'المبلغ' : 'Amount'} *</Label>
+          <Input
+            type="number"
+            placeholder={t('finance.amount')}
+            value={formData.amount}
+            onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>{language === 'ar' ? 'العملة' : 'Currency'}</Label>
+          <Select 
+            value={formData.currency} 
+            onValueChange={(value) => setFormData({ ...formData, currency: value })}
+          >
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="SAR">SAR</SelectItem>
+              <SelectItem value="USD">USD</SelectItem>
+              <SelectItem value="AED">AED</SelectItem>
+              <SelectItem value="SDG">SDG</SelectItem>
+              <SelectItem value="EGP">EGP</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div>
+        <Label>{language === 'ar' ? 'دورة الفوترة' : 'Billing Cycle'}</Label>
+        <Select 
+          value={formData.billing_cycle} 
+          onValueChange={(value) => setFormData({ ...formData, billing_cycle: value })}
+        >
+          <SelectTrigger className="mt-1">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="weekly">{t('finance.weekly')}</SelectItem>
+            <SelectItem value="monthly">{t('finance.monthly')}</SelectItem>
+            <SelectItem value="quarterly">{t('finance.quarterly')}</SelectItem>
+            <SelectItem value="annual">{t('finance.annual')}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div>
+        <Label>{language === 'ar' ? 'تاريخ الفوترة القادم' : 'Next Billing Date'} *</Label>
+        <Input
+          type="date"
+          value={formData.next_billing_date}
+          onChange={(e) => setFormData({ ...formData, next_billing_date: e.target.value })}
+          className="mt-1"
+        />
+      </div>
+      <div>
+        <Label>{language === 'ar' ? 'التصنيف' : 'Category'}</Label>
+        <Input
+          dir="auto"
+          placeholder={t('finance.category')}
+          value={formData.category}
+          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+          className="mt-1"
+        />
+      </div>
+      <div>
+        <Label>{language === 'ar' ? 'حساب الدفع' : 'Payment Account'}</Label>
+        <Select 
+          value={formData.payment_account_id || 'none'} 
+          onValueChange={(value) => setFormData({ ...formData, payment_account_id: value === 'none' ? '' : value })}
+        >
+          <SelectTrigger className="mt-1">
+            <SelectValue placeholder={t('finance.selectAccount')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">{t('common.none')}</SelectItem>
+            {accounts?.map((acc) => (
+              <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div>
+        <Label>{language === 'ar' ? 'ملاحظات' : 'Notes'}</Label>
+        <Textarea
+          dir="auto"
+          placeholder={t('finance.notes')}
+          value={formData.notes}
+          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+          className="mt-1"
+        />
+      </div>
+      <Button 
+        onClick={isEdit ? handleUpdateSubscription : handleCreateSubscription} 
+        className="w-full" 
+        disabled={createSubscription.isPending || updateSubscription.isPending}
+      >
+        {(createSubscription.isPending || updateSubscription.isPending) ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : isEdit ? t('common.update') : t('common.add')}
+      </Button>
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -192,7 +397,7 @@ export function SubscriptionsManager() {
         <div>
           <h2 className="text-2xl font-bold">{t('finance.subscriptions')}</h2>
           <p className="text-muted-foreground">
-            {subscriptions?.length || 0} {t('finance.activeSubscriptions')}
+            {subscriptions?.filter(s => s.is_active).length || 0} {t('finance.activeSubscriptions')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -211,101 +416,10 @@ export function SubscriptionsManager() {
             <Calendar className="w-4 h-4 me-1" />
             {t('finance.calendar')}
           </Button>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="gold">
-                <Plus className="w-4 h-4 me-2" />
-                {t('finance.addSubscription')}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader>
-                <DialogTitle>{t('finance.addSubscription')}</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 mt-4 max-h-[60vh] overflow-y-auto">
-                <Input
-                  placeholder={t('finance.subscriptionName')}
-                  value={newSub.name}
-                  onChange={(e) => setNewSub({ ...newSub, name: e.target.value })}
-                />
-                <Input
-                  placeholder={t('finance.provider')}
-                  value={newSub.provider}
-                  onChange={(e) => setNewSub({ ...newSub, provider: e.target.value })}
-                />
-                <div className="grid grid-cols-2 gap-3">
-                  <Input
-                    type="number"
-                    placeholder={t('finance.amount')}
-                    value={newSub.amount}
-                    onChange={(e) => setNewSub({ ...newSub, amount: e.target.value })}
-                  />
-                  <Select 
-                    value={newSub.currency} 
-                    onValueChange={(value) => setNewSub({ ...newSub, currency: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="SAR">SAR</SelectItem>
-                      <SelectItem value="USD">USD</SelectItem>
-                      <SelectItem value="AED">AED</SelectItem>
-                      <SelectItem value="SDG">SDG</SelectItem>
-                      <SelectItem value="EGP">EGP</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Select 
-                  value={newSub.billing_cycle} 
-                  onValueChange={(value) => setNewSub({ ...newSub, billing_cycle: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="weekly">{t('finance.weekly')}</SelectItem>
-                    <SelectItem value="monthly">{t('finance.monthly')}</SelectItem>
-                    <SelectItem value="quarterly">{t('finance.quarterly')}</SelectItem>
-                    <SelectItem value="annual">{t('finance.annual')}</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Input
-                  type="date"
-                  placeholder={t('finance.nextBillingDate')}
-                  value={newSub.next_billing_date}
-                  onChange={(e) => setNewSub({ ...newSub, next_billing_date: e.target.value })}
-                />
-                <Input
-                  placeholder={t('finance.category')}
-                  value={newSub.category}
-                  onChange={(e) => setNewSub({ ...newSub, category: e.target.value })}
-                />
-                <Select 
-                  value={newSub.payment_account_id || 'none'} 
-                  onValueChange={(value) => setNewSub({ ...newSub, payment_account_id: value === 'none' ? '' : value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('finance.selectAccount')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">{t('common.none')}</SelectItem>
-                    {accounts?.map((acc) => (
-                      <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Input
-                  placeholder={t('finance.notes')}
-                  value={newSub.notes}
-                  onChange={(e) => setNewSub({ ...newSub, notes: e.target.value })}
-                />
-                <Button onClick={handleCreateSubscription} className="w-full" disabled={createSubscription.isPending}>
-                  {createSubscription.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.add')}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <Button variant="gold" onClick={() => setIsDialogOpen(true)}>
+            <Plus className="w-4 h-4 me-2" />
+            {t('finance.addSubscription')}
+          </Button>
         </div>
       </div>
 
@@ -330,15 +444,15 @@ export function SubscriptionsManager() {
 
       {/* Upcoming Alerts */}
       {upcomingRenewals.length > 0 && (
-        <div className="glass-card p-4 border-warning/50">
+        <div className="glass-card p-4 border-warning/50 border">
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="w-4 h-4 text-warning" />
             <h3 className="font-semibold">{t('finance.upcomingRenewals')}</h3>
           </div>
           <div className="flex flex-wrap gap-2">
             {upcomingRenewals.map((sub) => (
-              <Badge key={sub.id} variant="secondary">
-                {sub.name} - {format(new Date(sub.next_billing_date), 'MMM d', { locale })} ({sub.amount} SAR)
+              <Badge key={sub.id} variant="secondary" className="py-1.5">
+                {sub.name} - {format(new Date(sub.next_billing_date), 'MMM d', { locale })} ({sub.amount} {sub.currency})
               </Badge>
             ))}
           </div>
@@ -419,7 +533,11 @@ export function SubscriptionsManager() {
                         <MoreVertical className="w-4 h-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent align="end" className="bg-popover">
+                      <DropdownMenuItem onClick={() => openEditDialog(sub)}>
+                        <Edit className="w-4 h-4 me-2" />
+                        {t('common.edit')}
+                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handlePauseSubscription(sub.id, sub.is_active)}>
                         {sub.is_active ? (
                           <>
@@ -488,6 +606,41 @@ export function SubscriptionsManager() {
           })}
         </div>
       )}
+
+      {/* Add Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={(open) => {
+        setIsDialogOpen(open);
+        if (!open) resetForm();
+      }}>
+        <DialogContent className="max-w-lg" onOpenAutoFocus={(e) => e.preventDefault()}>
+          <DialogHeader>
+            <DialogTitle>{t('finance.addSubscription')}</DialogTitle>
+            <DialogDescription>
+              {language === 'ar' ? 'أضف اشتراكًا جديدًا لتتبعه' : 'Add a new subscription to track'}
+            </DialogDescription>
+          </DialogHeader>
+          <SubscriptionForm />
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
+        setIsEditDialogOpen(open);
+        if (!open) {
+          setEditingSub(null);
+          resetForm();
+        }
+      }}>
+        <DialogContent className="max-w-lg" onOpenAutoFocus={(e) => e.preventDefault()}>
+          <DialogHeader>
+            <DialogTitle>{language === 'ar' ? 'تعديل الاشتراك' : 'Edit Subscription'}</DialogTitle>
+            <DialogDescription>
+              {language === 'ar' ? 'عدّل تفاصيل الاشتراك' : 'Update subscription details'}
+            </DialogDescription>
+          </DialogHeader>
+          <SubscriptionForm isEdit />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
