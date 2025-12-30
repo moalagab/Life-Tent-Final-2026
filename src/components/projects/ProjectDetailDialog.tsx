@@ -124,30 +124,34 @@ export function ProjectDetailDialog({ project, open, onOpenChange }: ProjectDeta
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
-          <TabsList className="grid w-full grid-cols-6 shrink-0">
+          <TabsList className="grid w-full grid-cols-7 shrink-0">
             <TabsTrigger value="overview" className="flex items-center gap-1">
               <Eye className="w-4 h-4" />
-              <span className="hidden sm:inline">نظرة عامة</span>
+              <span className="hidden sm:inline">نظرة</span>
             </TabsTrigger>
-            <TabsTrigger value="notes" className="flex items-center gap-1">
-              <StickyNote className="w-4 h-4" />
-              <span className="hidden sm:inline">ملاحظات</span>
+            <TabsTrigger value="tasks" className="flex items-center gap-1">
+              <ListTodo className="w-4 h-4" />
+              <span className="hidden sm:inline">مهام</span>
+            </TabsTrigger>
+            <TabsTrigger value="goals" className="flex items-center gap-1">
+              <Target className="w-4 h-4" />
+              <span className="hidden sm:inline">أهداف</span>
+            </TabsTrigger>
+            <TabsTrigger value="resources" className="flex items-center gap-1">
+              <Database className="w-4 h-4" />
+              <span className="hidden sm:inline">موارد</span>
+            </TabsTrigger>
+            <TabsTrigger value="crm" className="flex items-center gap-1">
+              <Users className="w-4 h-4" />
+              <span className="hidden sm:inline">CRM</span>
             </TabsTrigger>
             <TabsTrigger value="okrs" className="flex items-center gap-1">
-              <Target className="w-4 h-4" />
+              <TrendingUp className="w-4 h-4" />
               <span className="hidden sm:inline">OKRs</span>
             </TabsTrigger>
             <TabsTrigger value="kanban" className="flex items-center gap-1">
               <LayoutGrid className="w-4 h-4" />
-              <span className="hidden sm:inline">Kanban</span>
-            </TabsTrigger>
-            <TabsTrigger value="tasks" className="flex items-center gap-1">
-              <ListTodo className="w-4 h-4" />
-              <span className="hidden sm:inline">GTD</span>
-            </TabsTrigger>
-            <TabsTrigger value="vision" className="flex items-center gap-1">
-              <TrendingUp className="w-4 h-4" />
-              <span className="hidden sm:inline">الرؤية</span>
+              <span className="hidden sm:inline">كانبان</span>
             </TabsTrigger>
           </TabsList>
 
@@ -218,8 +222,20 @@ export function ProjectDetailDialog({ project, open, onOpenChange }: ProjectDeta
               )}
             </TabsContent>
 
-            <TabsContent value="notes" className="m-0">
-              <ProjectNotesTab projectId={project.id} />
+            <TabsContent value="tasks" className="m-0">
+              <ProjectTasksTab projectId={project.id} />
+            </TabsContent>
+
+            <TabsContent value="goals" className="m-0">
+              <ProjectGoalsTab projectId={project.id} />
+            </TabsContent>
+
+            <TabsContent value="resources" className="m-0">
+              <ProjectResourcesTab projectId={project.id} />
+            </TabsContent>
+
+            <TabsContent value="crm" className="m-0">
+              <ProjectCRMTab projectId={project.id} />
             </TabsContent>
 
             <TabsContent value="okrs" className="m-0">
@@ -228,112 +244,6 @@ export function ProjectDetailDialog({ project, open, onOpenChange }: ProjectDeta
 
             <TabsContent value="kanban" className="m-0">
               <KanbanBoard projectId={project.id} tasks={projectTasks} />
-            </TabsContent>
-
-            <TabsContent value="tasks" className="m-0">
-              <div className="space-y-4">
-                <h3 className="font-semibold text-foreground flex items-center gap-2">
-                  <ListTodo className="w-5 h-5 text-primary" />
-                  {currentLanguage === 'ar' ? 'قائمة المهام (GTD)' : 'Task List (GTD)'}
-                </h3>
-                
-                {projectTasks.length > 0 ? (
-                  <div className="space-y-2">
-                    {projectTasks.map((task) => (
-                      <div 
-                        key={task.id}
-                        className={cn(
-                          'flex items-center gap-3 p-3 rounded-lg border',
-                          task.status === 'done' 
-                            ? 'bg-muted/30 border-muted' 
-                            : 'bg-card border-border'
-                        )}
-                      >
-                        <CheckCircle className={cn(
-                          'w-5 h-5 shrink-0',
-                          task.status === 'done' ? 'text-success' : 'text-muted-foreground'
-                        )} />
-                        <div className="flex-1">
-                          <span className={cn(
-                            'text-sm',
-                            task.status === 'done' && 'line-through text-muted-foreground'
-                          )}>
-                            {task.title}
-                          </span>
-                        </div>
-                        {task.due_date && (
-                          <span className="text-xs text-muted-foreground">
-                            {format(new Date(task.due_date), 'MMM d')}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 bg-muted/20 rounded-xl">
-                    <ListTodo className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                    <p className="text-muted-foreground">
-                      {currentLanguage === 'ar' ? 'لا توجد مهام لهذا المشروع' : 'No tasks for this project'}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="vision" className="m-0">
-              <div className="space-y-4">
-                <h3 className="font-semibold text-foreground flex items-center gap-2">
-                  <Eye className="w-5 h-5 text-primary" />
-                  {currentLanguage === 'ar' ? 'الرؤية والاستثمار' : 'Vision & Investment'}
-                </h3>
-                
-                {project.vision ? (
-                  <div className="glass-card p-4">
-                    <h4 className="text-sm font-medium text-foreground mb-2">الرؤية</h4>
-                    <p className="text-sm text-muted-foreground">{project.vision}</p>
-                  </div>
-                ) : (
-                  <div className="glass-card p-4 text-center">
-                    <Eye className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-50" />
-                    <p className="text-sm text-muted-foreground">
-                      {currentLanguage === 'ar' ? 'لم يتم تحديد الرؤية بعد' : 'Vision not defined yet'}
-                    </p>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="glass-card p-4">
-                    <h4 className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
-                      <DollarSign className="w-4 h-4 text-success" />
-                      العائد المتوقع
-                    </h4>
-                    <p className="text-lg font-bold text-foreground">
-                      {project.expected_roi || '-'}
-                    </p>
-                  </div>
-                  <div className="glass-card p-4">
-                    <h4 className="text-sm font-medium text-foreground mb-2">مستوى المخاطرة</h4>
-                    <span className={cn(
-                      'px-2 py-1 rounded text-xs font-medium',
-                      project.risk_level === 'low' && 'bg-success/10 text-success',
-                      project.risk_level === 'medium' && 'bg-warning/10 text-warning',
-                      project.risk_level === 'high' && 'bg-destructive/10 text-destructive'
-                    )}>
-                      {project.risk_level === 'low' && 'منخفض'}
-                      {project.risk_level === 'medium' && 'متوسط'}
-                      {project.risk_level === 'high' && 'عالي'}
-                      {!project.risk_level && '-'}
-                    </span>
-                  </div>
-                </div>
-
-                {project.investment_notes && (
-                  <div className="glass-card p-4">
-                    <h4 className="text-sm font-medium text-foreground mb-2">ملاحظات الاستثمار</h4>
-                    <p className="text-sm text-muted-foreground">{project.investment_notes}</p>
-                  </div>
-                )}
-              </div>
             </TabsContent>
           </div>
         </Tabs>
