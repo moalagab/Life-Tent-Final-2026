@@ -1,5 +1,5 @@
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Clock, Loader2, Target, FolderKanban, CheckSquare, Edit, Trash2 } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Clock, Loader2, Target, FolderKanban, CheckSquare, Edit, Trash2, DollarSign, Milestone, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, addMonths, subMonths, parseISO } from 'date-fns';
@@ -7,15 +7,13 @@ import { useState } from 'react';
 import { formatHijriDate } from '@/lib/hijri';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useEvents, useCreateEvent, useUpdateEvent, useDeleteEvent } from '@/hooks/useEvents';
-import { useTasks } from '@/hooks/useTasks';
-import { useProjects } from '@/hooks/useProjects';
-import { useGoals } from '@/hooks/useGoals';
+import { useUnifiedCalendarEvents, UnifiedCalendarEvent } from '@/hooks/useUnifiedCalendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useNavigate } from 'react-router-dom';
 
 // Helper to format time in 12-hour format
 const formatTime12h = (dateStr: string) => {
@@ -39,12 +37,16 @@ export default function CalendarPage() {
   });
 
   const { data: events, isLoading } = useEvents();
-  const { data: tasks } = useTasks();
-  const { data: projects } = useProjects();
-  const { data: goals } = useGoals();
+  
+  // Get unified events for the current month (with padding)
+  const calendarStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+  const calendarEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+  const { events: unifiedEvents } = useUnifiedCalendarEvents(calendarStart, calendarEnd);
+  
   const createEvent = useCreateEvent();
   const updateEvent = useUpdateEvent();
   const deleteEvent = useDeleteEvent();
+  const navigate = useNavigate();
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -60,11 +62,11 @@ export default function CalendarPage() {
     return eventDate === selectedDateStr;
   }) || [];
 
-  // Get tasks for selected date
-  const selectedTasks = tasks?.filter(task => {
-    if (!task.due_date) return false;
-    return task.due_date === selectedDateStr;
-  }) || [];
+  // Get unified items for selected date
+  const selectedUnifiedItems = unifiedEvents.filter(item => {
+    const itemDate = format(new Date(item.date), 'yyyy-MM-dd');
+    return itemDate === selectedDateStr;
+  });
 
   const getEventsByDate = (date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
@@ -74,9 +76,12 @@ export default function CalendarPage() {
     }) || [];
   };
 
-  const getTasksByDate = (date: Date) => {
+  const getUnifiedItemsByDate = (date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
-    return tasks?.filter(task => task.due_date === dateStr) || [];
+    return unifiedEvents.filter(item => {
+      const itemDate = format(new Date(item.date), 'yyyy-MM-dd');
+      return itemDate === dateStr;
+    });
   };
 
   const weekDays = [
@@ -297,10 +302,10 @@ export default function CalendarPage() {
               }
 
               const dayEvents = getEventsByDate(day);
-              const dayTasks = getTasksByDate(day);
+              const dayUnifiedItems = getUnifiedItemsByDate(day);
               const isSelected = isSameDay(day, selectedDate);
               const isTodayDate = isToday(day);
-              const hasItems = dayEvents.length > 0 || dayTasks.length > 0;
+              const hasItems = dayEvents.length > 0 || dayUnifiedItems.length > 0;
 
               return (
                 <button
@@ -331,10 +336,11 @@ export default function CalendarPage() {
                           style={{ backgroundColor: event.color || '#FFB400' }}
                         />
                       ))}
-                      {dayTasks.slice(0, 1).map((task) => (
+                      {dayUnifiedItems.slice(0, 2).map((item) => (
                         <div
-                          key={task.id}
-                          className="w-1.5 h-1.5 rounded-full bg-blue-500"
+                          key={item.id}
+                          className="w-1.5 h-1.5 rounded-full"
+                          style={{ backgroundColor: item.color }}
                         />
                       ))}
                     </div>
@@ -359,7 +365,7 @@ export default function CalendarPage() {
           <Tabs defaultValue="events" className="w-full">
             <TabsList className="w-full mb-4">
               <TabsTrigger value="events" className="flex-1">{t('calendar.events')}</TabsTrigger>
-              <TabsTrigger value="tasks" className="flex-1">{t('nav.tasks')}</TabsTrigger>
+              <TabsTrigger value="unified" className="flex-1">الكل</TabsTrigger>
             </TabsList>
 
             <TabsContent value="events">
@@ -409,53 +415,52 @@ export default function CalendarPage() {
               )}
             </TabsContent>
 
-            <TabsContent value="tasks">
-              {selectedTasks.length === 0 ? (
+            <TabsContent value="unified">
+              {selectedUnifiedItems.length === 0 ? (
                 <div className="text-center py-8">
                   <CheckSquare className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                  <p className="text-muted-foreground">{t('tasks.noTasks')}</p>
+                  <p className="text-muted-foreground">لا توجد عناصر لهذا اليوم</p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {selectedTasks.map((task) => (
-                    <div
-                      key={task.id}
-                      className={cn(
-                        "p-3 rounded-xl bg-muted/30 border-l-4",
-                        task.status === 'done' ? 'border-green-500' : 'border-blue-500'
-                      )}
+                  {selectedUnifiedItems.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        if (item.sourceType === 'tasks') navigate('/tasks');
+                        else if (item.sourceType === 'project_milestones') navigate('/projects');
+                        else if (item.sourceType === 'debts' || item.sourceType === 'subscriptions') navigate('/finance');
+                      }}
+                      className="w-full p-3 rounded-xl bg-muted/30 border-l-4 text-start hover:bg-muted/50 transition-colors group"
+                      style={{ borderLeftColor: item.color }}
                     >
-                      <h4 className={cn(
-                        "font-medium",
-                        task.status === 'done' && 'line-through text-muted-foreground'
-                      )}>{task.title}</h4>
-                      {task.due_time && (
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                          <Clock className="w-3 h-3" />
-                          <span>{task.due_time}</span>
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-foreground">{item.title}</h4>
+                          {item.description && (
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{item.description}</p>
+                          )}
+                          {item.metadata?.project && (
+                            <span className="text-xs text-primary mt-1 block">{item.metadata.project}</span>
+                          )}
                         </div>
-                      )}
-                    </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground capitalize px-2 py-0.5 rounded bg-muted">
+                            {item.type === 'task' && 'مهمة'}
+                            {item.type === 'milestone' && 'معلم'}
+                            {item.type === 'debt' && 'دين'}
+                            {item.type === 'subscription' && 'اشتراك'}
+                            {item.type === 'event' && 'حدث'}
+                          </span>
+                          <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </div>
+                    </button>
                   ))}
                 </div>
               )}
             </TabsContent>
           </Tabs>
-
-          {/* Quick Links */}
-          <div className="mt-6 pt-6 border-t border-border">
-            <h4 className="text-sm font-medium text-foreground mb-3">{t('calendar.quickLinks')}</h4>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="p-3 rounded-xl bg-muted/30 text-center">
-                <FolderKanban className="w-5 h-5 text-primary mx-auto mb-1" />
-                <span className="text-xs text-muted-foreground">{projects?.length || 0} {t('nav.projects')}</span>
-              </div>
-              <div className="p-3 rounded-xl bg-muted/30 text-center">
-                <Target className="w-5 h-5 text-green-500 mx-auto mb-1" />
-                <span className="text-xs text-muted-foreground">{goals?.length || 0} {t('nav.goals')}</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </MainLayout>
