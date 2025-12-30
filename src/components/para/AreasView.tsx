@@ -12,8 +12,10 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Plus, MoreVertical, Pencil, Archive, RotateCcw, Trash2, Layers, Calendar } from 'lucide-react';
+import { Plus, MoreVertical, Pencil, Archive, RotateCcw, Trash2, Layers, Calendar, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
+import { AreasDashboard } from './AreasDashboard';
+import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 
 const colorOptions = [
   '#6366f1', '#8b5cf6', '#ec4899', '#ef4444', '#f97316', 
@@ -30,6 +32,7 @@ const cadenceOptions = [
 export function AreasView() {
   const { t } = useLanguage();
   const [showArchived, setShowArchived] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingArea, setEditingArea] = useState<Area | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -39,6 +42,9 @@ export function AreasView() {
     color: '#6366f1',
     review_cadence: 'monthly' as string,
   });
+
+  // Realtime subscription
+  useRealtimeSubscription({ table: 'areas', queryKey: ['areas'] });
 
   const { data: areas, isLoading } = useAreas(showArchived);
   const createArea = useCreateArea();
@@ -138,12 +144,24 @@ export function AreasView() {
             />
             <Label htmlFor="show-archived">إظهار المؤرشف</Label>
           </div>
+          <Button 
+            variant={showDashboard ? 'default' : 'outline'}
+            onClick={() => setShowDashboard(!showDashboard)}
+          >
+            <BarChart3 className="w-4 h-4 ml-2" />
+            لوحة التحكم
+          </Button>
           <Button onClick={() => handleOpenDialog()} className="bg-gradient-gold text-primary-foreground">
             <Plus className="w-4 h-4 ml-2" />
             مجال جديد
           </Button>
         </div>
       </div>
+
+      {/* Areas Dashboard */}
+      {showDashboard && (
+        <AreasDashboard />
+      )}
 
       {/* Areas Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
