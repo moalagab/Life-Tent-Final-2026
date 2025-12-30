@@ -310,6 +310,7 @@ export function DebtsManager() {
             {language === 'ar' ? 'اسم الدين' : 'Debt Name'} <span className="text-destructive">*</span>
           </Label>
           <Input
+            dir="auto"
             placeholder={language === 'ar' ? 'مثال: قرض السيارة، بطاقة ائتمان...' : 'e.g. Car Loan, Credit Card...'}
             value={newDebt.name}
             onChange={(e) => setNewDebt({ ...newDebt, name: e.target.value })}
@@ -325,6 +326,7 @@ export function DebtsManager() {
             }
           </Label>
           <Input
+            dir="auto"
             placeholder={language === 'ar' ? 'الجهة أو الشخص' : 'Person or institution'}
             value={newDebt.lender}
             onChange={(e) => setNewDebt({ ...newDebt, lender: e.target.value })}
@@ -501,6 +503,7 @@ export function DebtsManager() {
           {language === 'ar' ? 'ملاحظات' : 'Notes'}
         </Label>
         <Textarea
+          dir="auto"
           placeholder={language === 'ar' ? 'أي ملاحظات إضافية...' : 'Any additional notes...'}
           value={newDebt.notes}
           onChange={(e) => setNewDebt({ ...newDebt, notes: e.target.value })}

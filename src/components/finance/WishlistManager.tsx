@@ -228,12 +228,14 @@ export function WishlistManager() {
   const ItemForm = ({ isEdit = false }: { isEdit?: boolean }) => (
     <div className="space-y-4 mt-4 max-h-[65vh] overflow-y-auto pe-2">
       <Input
+        dir="auto"
         placeholder={language === 'ar' ? 'اسم المنتج/الخدمة' : 'Item name'}
         value={formData.name}
         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
       />
       
       <Textarea
+        dir="auto"
         placeholder={language === 'ar' ? 'الوصف (اختياري)' : 'Description (optional)'}
         value={formData.description}
         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -385,6 +387,7 @@ export function WishlistManager() {
       )}
 
       <Textarea
+        dir="auto"
         placeholder={language === 'ar' ? 'ملاحظات إضافية' : 'Additional notes'}
         value={formData.notes}
         onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
