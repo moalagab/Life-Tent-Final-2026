@@ -1,13 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from './useLanguage';
 
+export type NotificationType = 'task' | 'event' | 'habit' | 'subscription' | 'debt' | 'project';
+
 export interface Notification {
   id: string;
   title: string;
   body: string;
-  type: 'task' | 'event' | 'habit';
+  type: NotificationType;
   timestamp: Date;
   read: boolean;
+  sourceId?: string;
+  sourceType?: string;
 }
 
 export function useNotifications() {
@@ -50,7 +54,13 @@ export function useNotifications() {
     localStorage.setItem('notifications-enabled', 'false');
   }, []);
 
-  const sendNotification = useCallback((title: string, body: string, type: 'task' | 'event' | 'habit') => {
+  const sendNotification = useCallback((
+    title: string, 
+    body: string, 
+    type: NotificationType,
+    sourceId?: string,
+    sourceType?: string
+  ) => {
     if (!enabled || permission !== 'granted') return;
 
     // Browser notification
@@ -68,6 +78,8 @@ export function useNotifications() {
       type,
       timestamp: new Date(),
       read: false,
+      sourceId,
+      sourceType,
     };
 
     setNotifications(prev => [newNotification, ...prev].slice(0, 50));
@@ -142,6 +154,47 @@ export function useNotifications() {
     );
   }, [enabled, sendNotification, t]);
 
+  const scheduleSubscriptionReminder = useCallback((
+    subscriptionName: string, 
+    amount: number, 
+    billingDate: Date,
+    subscriptionId: string
+  ) => {
+    if (!enabled) return;
+
+    const now = new Date();
+    const timeDiff = billingDate.getTime() - now.getTime();
+    const threeDaysBefore = timeDiff - (3 * 24 * 60 * 60 * 1000); // 3 days before
+
+    if (threeDaysBefore > 0) {
+      setTimeout(() => {
+        sendNotification(
+          t('notifications.subscriptionRenewal') || 'تجديد اشتراك قادم',
+          `${subscriptionName} - ${amount}`,
+          'subscription',
+          subscriptionId,
+          'subscriptions'
+        );
+      }, threeDaysBefore);
+    }
+  }, [enabled, sendNotification, t]);
+
+  const sendDebtReminder = useCallback((
+    debtName: string, 
+    amount: number,
+    debtId: string
+  ) => {
+    if (!enabled) return;
+    
+    sendNotification(
+      t('notifications.debtPayment') || 'موعد سداد دين',
+      `${debtName} - ${amount}`,
+      'debt',
+      debtId,
+      'debts'
+    );
+  }, [enabled, sendNotification, t]);
+
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return {
@@ -159,5 +212,7 @@ export function useNotifications() {
     scheduleTaskReminder,
     scheduleEventReminder,
     sendHabitReminder,
+    scheduleSubscriptionReminder,
+    sendDebtReminder,
   };
 }
