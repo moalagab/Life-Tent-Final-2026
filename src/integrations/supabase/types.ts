@@ -1550,6 +1550,7 @@ export type Database = {
           cover_url: string | null
           created_at: string
           end_date: string | null
+          goal_id: string | null
           id: string
           note_id: string | null
           notes: string | null
@@ -1569,6 +1570,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           end_date?: string | null
+          goal_id?: string | null
           id?: string
           note_id?: string | null
           notes?: string | null
@@ -1588,6 +1590,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           end_date?: string | null
+          goal_id?: string | null
           id?: string
           note_id?: string | null
           notes?: string | null
@@ -1603,6 +1606,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "media_items_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "media_items_note_id_fkey"
             columns: ["note_id"]
@@ -1896,6 +1906,7 @@ export type Database = {
           full_name: string | null
           id: string
           preferred_language: string | null
+          reading_goal_yearly: number | null
           timezone: string | null
           updated_at: string
           user_id: string
@@ -1906,6 +1917,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           preferred_language?: string | null
+          reading_goal_yearly?: number | null
           timezone?: string | null
           updated_at?: string
           user_id: string
@@ -1916,6 +1928,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           preferred_language?: string | null
+          reading_goal_yearly?: number | null
           timezone?: string | null
           updated_at?: string
           user_id?: string
@@ -2758,6 +2771,7 @@ export type Database = {
           id: string
           image_url: string | null
           linked_envelope_id: string | null
+          linked_media_id: string | null
           linked_sinking_fund_id: string | null
           name: string
           notes: string | null
@@ -2778,6 +2792,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           linked_envelope_id?: string | null
+          linked_media_id?: string | null
           linked_sinking_fund_id?: string | null
           name: string
           notes?: string | null
@@ -2798,6 +2813,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           linked_envelope_id?: string | null
+          linked_media_id?: string | null
           linked_sinking_fund_id?: string | null
           name?: string
           notes?: string | null
@@ -2815,6 +2831,13 @@ export type Database = {
             columns: ["linked_envelope_id"]
             isOneToOne: false
             referencedRelation: "envelopes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wishlist_items_linked_media_id_fkey"
+            columns: ["linked_media_id"]
+            isOneToOne: false
+            referencedRelation: "media_items"
             referencedColumns: ["id"]
           },
           {
