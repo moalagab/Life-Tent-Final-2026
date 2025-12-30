@@ -68,6 +68,54 @@ export type Database = {
         }
         Relationships: []
       }
+      areas: {
+        Row: {
+          archived_at: string | null
+          color: string | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          kpi_json: Json | null
+          name: string
+          owner_id: string | null
+          review_cadence: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          kpi_json?: Json | null
+          name: string
+          owner_id?: string | null
+          review_cadence?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          kpi_json?: Json | null
+          name?: string
+          owner_id?: string | null
+          review_cadence?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       budget_category_lines: {
         Row: {
           actual_amount: number | null
@@ -588,6 +636,7 @@ export type Database = {
       }
       customers: {
         Row: {
+          archived_at: string | null
           company: string | null
           created_at: string
           email: string | null
@@ -603,6 +652,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          archived_at?: string | null
           company?: string | null
           created_at?: string
           email?: string | null
@@ -618,6 +668,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          archived_at?: string | null
           company?: string | null
           created_at?: string
           email?: string | null
@@ -998,6 +1049,8 @@ export type Database = {
       }
       goals: {
         Row: {
+          archived_at: string | null
+          area_id: string | null
           created_at: string
           current_value: number | null
           description: string | null
@@ -1014,6 +1067,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          archived_at?: string | null
+          area_id?: string | null
           created_at?: string
           current_value?: number | null
           description?: string | null
@@ -1030,6 +1085,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          archived_at?: string | null
+          area_id?: string | null
           created_at?: string
           current_value?: number | null
           description?: string | null
@@ -1046,6 +1103,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "goals_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "goals_project_id_fkey"
             columns: ["project_id"]
@@ -2063,6 +2127,8 @@ export type Database = {
       projects: {
         Row: {
           actual_budget: number | null
+          archived_at: string | null
+          area_id: string | null
           color: string | null
           created_at: string
           description: string | null
@@ -2088,6 +2154,8 @@ export type Database = {
         }
         Insert: {
           actual_budget?: number | null
+          archived_at?: string | null
+          area_id?: string | null
           color?: string | null
           created_at?: string
           description?: string | null
@@ -2113,6 +2181,8 @@ export type Database = {
         }
         Update: {
           actual_budget?: number | null
+          archived_at?: string | null
+          area_id?: string | null
           color?: string | null
           created_at?: string
           description?: string | null
@@ -2136,7 +2206,90 @@ export type Database = {
           user_id?: string
           vision?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "projects_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resources: {
+        Row: {
+          archived_at: string | null
+          area_id: string | null
+          content: string | null
+          content_ref: string | null
+          created_at: string
+          description: string | null
+          id: string
+          last_used_at: string | null
+          metadata: Json | null
+          project_id: string | null
+          source_url: string | null
+          status: string
+          tags: string[] | null
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          area_id?: string | null
+          content?: string | null
+          content_ref?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          last_used_at?: string | null
+          metadata?: Json | null
+          project_id?: string | null
+          source_url?: string | null
+          status?: string
+          tags?: string[] | null
+          title: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          area_id?: string | null
+          content?: string | null
+          content_ref?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          last_used_at?: string | null
+          metadata?: Json | null
+          project_id?: string | null
+          source_url?: string | null
+          status?: string
+          tags?: string[] | null
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resources_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resources_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sinking_funds: {
         Row: {
@@ -2268,6 +2421,8 @@ export type Database = {
       }
       tasks: {
         Row: {
+          archived_at: string | null
+          area_id: string | null
           blocked_by: string | null
           category: string | null
           completed_at: string | null
@@ -2281,12 +2436,15 @@ export type Database = {
           priority: Database["public"]["Enums"]["task_priority"] | null
           project_id: string | null
           recurrence: Database["public"]["Enums"]["recurrence_type"] | null
+          scheduled_at: string | null
           status: Database["public"]["Enums"]["task_status"] | null
           title: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          archived_at?: string | null
+          area_id?: string | null
           blocked_by?: string | null
           category?: string | null
           completed_at?: string | null
@@ -2300,12 +2458,15 @@ export type Database = {
           priority?: Database["public"]["Enums"]["task_priority"] | null
           project_id?: string | null
           recurrence?: Database["public"]["Enums"]["recurrence_type"] | null
+          scheduled_at?: string | null
           status?: Database["public"]["Enums"]["task_status"] | null
           title: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          archived_at?: string | null
+          area_id?: string | null
           blocked_by?: string | null
           category?: string | null
           completed_at?: string | null
@@ -2319,12 +2480,20 @@ export type Database = {
           priority?: Database["public"]["Enums"]["task_priority"] | null
           project_id?: string | null
           recurrence?: Database["public"]["Enums"]["recurrence_type"] | null
+          scheduled_at?: string | null
           status?: Database["public"]["Enums"]["task_status"] | null
           title?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tasks_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tasks_blocked_by_fkey"
             columns: ["blocked_by"]

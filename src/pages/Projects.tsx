@@ -10,11 +10,13 @@ import { ProjectTabs } from '@/components/projects/ProjectTabs';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog';
 import { ProjectDetailDialog } from '@/components/projects/ProjectDetailDialog';
-import { PlanningPipelineView } from '@/components/projects/PlanningPipelineView';
 import { ProjectReports } from '@/components/projects/ProjectReports';
 import { ProjectNotifications } from '@/components/projects/ProjectNotifications';
 import { AdvancedDashboard } from '@/components/projects/AdvancedDashboard';
 import { CRMView } from '@/components/crm/CRMView';
+import { AreasView } from '@/components/para/AreasView';
+import { ResourcesView } from '@/components/para/ResourcesView';
+import { ArchiveView } from '@/components/para/ArchiveView';
 
 export default function Projects() {
   const { t, currentLanguage } = useLanguage();
@@ -184,9 +186,13 @@ export default function Projects() {
       {/* PARA Tabs */}
       <ProjectTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {/* Content */}
-      {activeTab === 'pipeline' ? (
-        <PlanningPipelineView />
+      {/* Content based on active tab */}
+      {activeTab === 'areas' ? (
+        <AreasView />
+      ) : activeTab === 'resources' ? (
+        <ResourcesView />
+      ) : activeTab === 'archives' ? (
+        <ArchiveView />
       ) : filteredProjects.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2">
           {filteredProjects.map((project) => (

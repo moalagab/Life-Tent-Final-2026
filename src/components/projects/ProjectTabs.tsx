@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
-import { FolderKanban, Layers, Database, Archive, Lightbulb } from 'lucide-react';
+import { FolderKanban, Layers, Database, Archive } from 'lucide-react';
 
 interface ProjectTabsProps {
   activeTab: string;
@@ -11,11 +11,10 @@ export function ProjectTabs({ activeTab, onTabChange }: ProjectTabsProps) {
   const { t } = useLanguage();
 
   const tabs = [
-    { id: 'projects', label: t('common.projects'), icon: FolderKanban },
-    { id: 'areas', label: t('projects.areas'), icon: Layers },
-    { id: 'resources', label: t('projects.resources'), icon: Database },
-    { id: 'pipeline', label: t('projects.pipeline') || 'Pipeline', icon: Lightbulb },
-    { id: 'archives', label: t('projects.archives'), icon: Archive },
+    { id: 'projects', label: 'المشاريع', icon: FolderKanban },
+    { id: 'areas', label: 'المجالات', icon: Layers },
+    { id: 'resources', label: 'الموارد', icon: Database },
+    { id: 'archives', label: 'الأرشيف', icon: Archive },
   ];
 
   return (
