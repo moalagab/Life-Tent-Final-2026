@@ -1,5 +1,5 @@
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Flame, Plus, TrendingUp, Smile, Frown, Meh, Zap, Moon, Loader2, Edit3, Trash2, MoreVertical } from 'lucide-react';
+import { Flame, Plus, TrendingUp, Smile, Frown, Meh, Zap, Moon, Loader2, Edit3, Trash2, MoreVertical, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -13,6 +13,8 @@ import { toast } from 'sonner';
 import { format, subDays, isSameDay } from 'date-fns';
 import { Slider } from '@/components/ui/slider';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { MoodHabitCorrelation } from '@/components/habits/MoodHabitCorrelation';
+import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 
 // Generate mock contribution data for the year (will be replaced with real data later)
 const generateContributionData = () => {
@@ -51,6 +53,12 @@ export default function Habits() {
   const updateHabit = useUpdateHabit();
   const deleteHabit = useDeleteHabit();
   const upsertMoodLog = useUpsertMoodLog();
+  const [showCorrelation, setShowCorrelation] = useState(false);
+
+  // Realtime subscriptions
+  useRealtimeSubscription({ table: 'habits', queryKey: ['habits'] });
+  useRealtimeSubscription({ table: 'habit_logs', queryKey: ['habits-with-logs'] });
+  useRealtimeSubscription({ table: 'mood_logs', queryKey: ['mood-logs'] });
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -231,13 +239,21 @@ export default function Habits() {
             <h1 className="text-3xl font-bold text-foreground">{t('habits.title')}</h1>
             <p className="text-muted-foreground mt-1">{t('habits.subtitle')}</p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="gold" size="lg">
-                <Plus className="w-5 h-5 me-2" />
-                {t('habits.newHabit')}
-              </Button>
-            </DialogTrigger>
+          <div className="flex gap-2">
+            <Button 
+              variant={showCorrelation ? 'default' : 'outline'} 
+              onClick={() => setShowCorrelation(!showCorrelation)}
+            >
+              <BarChart3 className="w-5 h-5 me-2" />
+              {t('habits.correlationInsight')}
+            </Button>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="gold" size="lg">
+                  <Plus className="w-5 h-5 me-2" />
+                  {t('habits.newHabit')}
+                </Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>{t('habits.newHabit')}</DialogTitle>
@@ -275,8 +291,16 @@ export default function Habits() {
               </div>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
       </div>
+
+      {/* Mood-Habit Correlation Section */}
+      {showCorrelation && (
+        <div className="mb-6">
+          <MoodHabitCorrelation />
+        </div>
+      )}
 
       {/* Edit Habit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>

@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   LayoutDashboard, Wallet, Receipt, PiggyBank, 
   CreditCard, RefreshCw, TrendingUp, FileText, Briefcase, Upload,
-  Globe, Lock, Gauge, ShoppingBag
+  Globe, Lock, Gauge, ShoppingBag, History
 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { FinanceDashboard } from '@/components/finance/FinanceDashboard';
@@ -21,11 +21,17 @@ import { CurrencyManager } from '@/components/finance/CurrencyManager';
 import { MonthlyClose } from '@/components/finance/MonthlyClose';
 import { WishlistManager } from '@/components/finance/WishlistManager';
 import { FinanceAIAssistant } from '@/components/finance/FinanceAIAssistant';
+import { FinanceAuditLogView } from '@/components/finance/FinanceAuditLogView';
+import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 
 export default function Finance() {
   const { currentLanguage } = useLanguage();
   const language = currentLanguage;
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  // Realtime subscriptions
+  useRealtimeSubscription({ table: 'transactions', queryKey: ['transactions'] });
+  useRealtimeSubscription({ table: 'accounts', queryKey: ['accounts'] });
 
   const tabs = [
     { id: 'dashboard', label: language === 'ar' ? 'لوحة التحكم' : 'Dashboard', icon: Gauge },
@@ -40,6 +46,7 @@ export default function Finance() {
     { id: 'currencies', label: language === 'ar' ? 'العملات' : 'Currencies', icon: Globe },
     { id: 'close', label: language === 'ar' ? 'الإقفال' : 'Close', icon: Lock },
     { id: 'reports', label: language === 'ar' ? 'التقارير' : 'Reports', icon: FileText },
+    { id: 'audit', label: language === 'ar' ? 'سجل التدقيق' : 'Audit Log', icon: History },
     { id: 'import', label: language === 'ar' ? 'استيراد' : 'Import', icon: Upload },
   ];
 
@@ -82,6 +89,7 @@ export default function Finance() {
         <TabsContent value="currencies"><CurrencyManager /></TabsContent>
         <TabsContent value="close"><MonthlyClose /></TabsContent>
         <TabsContent value="reports"><FinanceReports /></TabsContent>
+        <TabsContent value="audit"><FinanceAuditLogView /></TabsContent>
         <TabsContent value="import"><DataImport /></TabsContent>
       </Tabs>
 

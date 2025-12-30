@@ -15,10 +15,12 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, MoreVertical, Pencil, Archive, RotateCcw, Trash2, FileText, Link2, Film, BookOpen, File, ExternalLink, Search, Database } from 'lucide-react';
+import { Plus, MoreVertical, Pencil, Archive, RotateCcw, Trash2, FileText, Link2, Film, BookOpen, File, ExternalLink, Search, Database, LayoutGrid } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { UnifiedResourcesView } from './UnifiedResourcesView';
+import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 
 const resourceTypes: { value: ResourceType; label: string; icon: any }[] = [
   { value: 'note', label: 'ملاحظة', icon: FileText },
@@ -32,6 +34,7 @@ const resourceTypes: { value: ResourceType; label: string; icon: any }[] = [
 export function ResourcesView() {
   const { t } = useLanguage();
   const [showArchived, setShowArchived] = useState(false);
+  const [showUnified, setShowUnified] = useState(false);
   const [activeType, setActiveType] = useState<ResourceType | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterAreaId, setFilterAreaId] = useState<string>('');
@@ -50,6 +53,24 @@ export function ResourcesView() {
     tags: [] as string[],
   });
   const [tagInput, setTagInput] = useState('');
+
+  // Realtime subscription
+  useRealtimeSubscription({ table: 'resources', queryKey: ['resources'] });
+
+  // If showing unified view
+  if (showUnified) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-foreground">الموارد الموحدة</h2>
+          <Button variant="outline" onClick={() => setShowUnified(false)}>
+            العودة للعرض العادي
+          </Button>
+        </div>
+        <UnifiedResourcesView />
+      </div>
+    );
+  }
 
   const { data: areas } = useActiveAreas();
   const { data: projects } = useProjects();
@@ -189,10 +210,16 @@ export function ResourcesView() {
           <h2 className="text-2xl font-bold text-foreground">الموارد (Resources)</h2>
           <p className="text-muted-foreground">ملاحظات، ملفات، روابط، دورات، ووسائط</p>
         </div>
-        <Button onClick={() => handleOpenDialog()} className="bg-gradient-gold text-primary-foreground">
-          <Plus className="w-4 h-4 ml-2" />
-          مورد جديد
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowUnified(true)}>
+            <LayoutGrid className="w-4 h-4 ml-2" />
+            عرض موحد
+          </Button>
+          <Button onClick={() => handleOpenDialog()} className="bg-gradient-gold text-primary-foreground">
+            <Plus className="w-4 h-4 ml-2" />
+            مورد جديد
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
