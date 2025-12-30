@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { 
   BookOpen, Film, Plus, Search, Loader2, Archive, Headphones, 
-  Target, ShoppingCart, Grid3X3, List
+  Target, ShoppingCart, Grid3X3, List, BarChart3
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,9 @@ import { ReadingGoalCard } from '@/components/studio/ReadingGoalCard';
 import { MediaItemCard } from '@/components/studio/MediaItemCard';
 import { MediaFormDialog } from '@/components/studio/MediaFormDialog';
 import { AddToWishlistDialog } from '@/components/studio/AddToWishlistDialog';
+import { StudioStats } from '@/components/studio/StudioStats';
+import { GenreFilter } from '@/components/studio/GenreFilter';
+import { ReadingReminder } from '@/components/studio/ReadingReminder';
 
 type MediaType = 'book' | 'movie' | 'series' | 'podcast' | 'article';
 type MediaStatus = 'want' | 'in_progress' | 'completed' | 'abandoned';
@@ -57,7 +60,7 @@ export default function Studio() {
   const restoreMediaItem = useRestoreMediaItem();
 
   // State
-  const [activeTab, setActiveTab] = useState<'books' | 'movies' | 'podcasts' | 'archived'>('books');
+  const [activeTab, setActiveTab] = useState<'books' | 'movies' | 'podcasts' | 'stats' | 'archived'>('books');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MediaItem | null>(null);
@@ -65,6 +68,7 @@ export default function Studio() {
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedShelf, setSelectedShelf] = useState<string>('all');
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [wishlistDialogOpen, setWishlistDialogOpen] = useState(false);
   const [wishlistItem, setWishlistItem] = useState<MediaItem | null>(null);
   const [linkGoalDialogOpen, setLinkGoalDialogOpen] = useState(false);
@@ -76,6 +80,9 @@ export default function Studio() {
   const movies = mediaItems?.filter(item => ['movie', 'series'].includes(item.type)) || [];
   const podcasts = mediaItems?.filter(item => ['podcast', 'article'].includes(item.type)) || [];
 
+  // Get all available genres
+  const availableGenres = [...new Set(mediaItems?.map(item => item.genre).filter(Boolean) as string[])];
+
   const filterItems = (items: MediaItem[]) => {
     let filtered = items.filter(item =>
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -84,6 +91,10 @@ export default function Studio() {
 
     if (selectedShelf !== 'all') {
       filtered = filtered.filter(b => b.status === selectedShelf);
+    }
+
+    if (selectedGenres.length > 0) {
+      filtered = filtered.filter(b => b.genre && selectedGenres.includes(b.genre));
     }
 
     return filtered;
@@ -207,6 +218,7 @@ export default function Studio() {
     { id: 'books' as const, label: currentLanguage === 'ar' ? 'الكتب' : 'Books', icon: BookOpen, count: books.length },
     { id: 'movies' as const, label: currentLanguage === 'ar' ? 'الأفلام' : 'Movies', icon: Film, count: movies.length },
     { id: 'podcasts' as const, label: currentLanguage === 'ar' ? 'البودكاست' : 'Podcasts', icon: Headphones, count: podcasts.length },
+    { id: 'stats' as const, label: currentLanguage === 'ar' ? 'الإحصائيات' : 'Stats', icon: BarChart3, count: 0 },
     { id: 'archived' as const, label: currentLanguage === 'ar' ? 'الأرشيف' : 'Archived', icon: Archive, count: archivedItems?.length || 0 },
   ];
 
@@ -281,6 +293,7 @@ export default function Studio() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <ReadingReminder />
             <Button 
               variant="outline" 
               size="icon"
@@ -356,7 +369,12 @@ export default function Studio() {
                 dir="auto"
               />
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-1">
+            <div className="flex gap-2 overflow-x-auto pb-1 flex-wrap">
+              <GenreFilter
+                selectedGenres={selectedGenres}
+                onGenresChange={setSelectedGenres}
+                availableGenres={availableGenres}
+              />
               {shelfFilters.map((shelf) => (
                 <button
                   key={shelf.id}
@@ -397,6 +415,11 @@ export default function Studio() {
             ? renderItemsGrid(displayedPodcasts)
             : renderEmptyState(Headphones, currentLanguage === 'ar' ? 'لا يوجد محتوى' : 'No content found')
           }
+        </TabsContent>
+
+        {/* Stats Tab */}
+        <TabsContent value="stats" className="mt-0">
+          <StudioStats />
         </TabsContent>
 
         {/* Archived Tab */}

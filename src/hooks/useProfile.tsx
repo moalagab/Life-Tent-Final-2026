@@ -10,6 +10,8 @@ export interface Profile {
   preferred_language: string | null;
   timezone: string | null;
   reading_goal_yearly: number | null;
+  reading_reminder_enabled: boolean | null;
+  reading_reminder_time: string | null;
   created_at: string;
   updated_at: string;
 }
