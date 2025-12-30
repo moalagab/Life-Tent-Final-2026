@@ -1,8 +1,10 @@
 import { useState, useMemo } from 'react';
 import { 
   Plus, Wallet, Target, TrendingUp, AlertTriangle,
-  ChevronRight, Loader2, Edit, Trash2, Calculator
+  ChevronRight, Loader2, Edit, Trash2, Calculator, MoreVertical
 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
@@ -14,8 +16,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useMonthlyStats, useTransactions } from '@/hooks/useFinance';
-import { useEnvelopes, useCreateEnvelope, useUpdateEnvelope, useSinkingFunds, useCreateSinkingFund, useUpdateSinkingFund, useCategories } from '@/hooks/useAdvancedFinance';
+import { useEnvelopes, useCreateEnvelope, useUpdateEnvelope, useSinkingFunds, useCreateSinkingFund, useUpdateSinkingFund, useCategories, Envelope, SinkingFund } from '@/hooks/useAdvancedFinance';
 import { useBudgets, useCreateBudget, useUpdateBudget, useDeleteBudget, useBudgetLines, useCreateBudgetLine, useUpdateBudgetLine, useDeleteBudgetLine, Budget } from '@/hooks/useBudgets';
+import { useDeleteEnvelope, useDeleteSinkingFund } from '@/hooks/useBudgetMutations';
 import { toast } from 'sonner';
 import { format, differenceInMonths } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
@@ -38,8 +41,10 @@ export function BudgetManager() {
   
   const createEnvelope = useCreateEnvelope();
   const updateEnvelope = useUpdateEnvelope();
+  const deleteEnvelope = useDeleteEnvelope();
   const createSinkingFund = useCreateSinkingFund();
   const updateSinkingFund = useUpdateSinkingFund();
+  const deleteSinkingFund = useDeleteSinkingFund();
   const createBudget = useCreateBudget();
   const updateBudget = useUpdateBudget();
   const deleteBudget = useDeleteBudget();
@@ -52,7 +57,12 @@ export function BudgetManager() {
   const [isFundDialogOpen, setIsFundDialogOpen] = useState(false);
   const [isBudgetDialogOpen, setIsBudgetDialogOpen] = useState(false);
   const [isEditBudgetDialogOpen, setIsEditBudgetDialogOpen] = useState(false);
+  const [isEditEnvelopeDialogOpen, setIsEditEnvelopeDialogOpen] = useState(false);
+  const [isEditFundDialogOpen, setIsEditFundDialogOpen] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
+  const [selectedEnvelope, setSelectedEnvelope] = useState<Envelope | null>(null);
+  const [selectedFund, setSelectedFund] = useState<SinkingFund | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'envelope' | 'fund' | 'budget'; id: string } | null>(null);
 
   const { data: budgetLines } = useBudgetLines(selectedBudget?.id || null);
 
@@ -204,9 +214,88 @@ export function BudgetManager() {
     try {
       await deleteBudget.mutateAsync(budgetId);
       toast.success(language === 'ar' ? 'تم حذف الميزانية' : 'Budget deleted');
+      setDeleteConfirm(null);
     } catch (error) {
       toast.error(t('common.error'));
     }
+  };
+
+  const handleDeleteEnvelope = async (id: string) => {
+    try {
+      await deleteEnvelope.mutateAsync(id);
+      toast.success(language === 'ar' ? 'تم حذف المظروف' : 'Envelope deleted');
+      setDeleteConfirm(null);
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleDeleteFund = async (id: string) => {
+    try {
+      await deleteSinkingFund.mutateAsync(id);
+      toast.success(language === 'ar' ? 'تم حذف صندوق الادخار' : 'Sinking fund deleted');
+      setDeleteConfirm(null);
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleUpdateEnvelope = async () => {
+    if (!selectedEnvelope) return;
+    try {
+      await updateEnvelope.mutateAsync({
+        id: selectedEnvelope.id,
+        name: newEnvelope.name,
+        target_amount: parseFloat(newEnvelope.target_amount) || 0,
+        color: newEnvelope.color,
+      });
+      toast.success(language === 'ar' ? 'تم تحديث المظروف' : 'Envelope updated');
+      setIsEditEnvelopeDialogOpen(false);
+      setSelectedEnvelope(null);
+      setNewEnvelope({ name: '', target_amount: '', color: '#10b981' });
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleUpdateFund = async () => {
+    if (!selectedFund) return;
+    try {
+      await updateSinkingFund.mutateAsync({
+        id: selectedFund.id,
+        name: newFund.name,
+        target_amount: parseFloat(newFund.target_amount),
+        target_date: newFund.target_date || null,
+        monthly_contribution: parseFloat(newFund.monthly_contribution) || 0,
+      });
+      toast.success(language === 'ar' ? 'تم تحديث صندوق الادخار' : 'Sinking fund updated');
+      setIsEditFundDialogOpen(false);
+      setSelectedFund(null);
+      setNewFund({ name: '', target_amount: '', target_date: '', monthly_contribution: '' });
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const openEditEnvelope = (envelope: Envelope) => {
+    setSelectedEnvelope(envelope);
+    setNewEnvelope({
+      name: envelope.name,
+      target_amount: (envelope.target_amount || 0).toString(),
+      color: envelope.color || '#10b981',
+    });
+    setIsEditEnvelopeDialogOpen(true);
+  };
+
+  const openEditFund = (fund: SinkingFund) => {
+    setSelectedFund(fund);
+    setNewFund({
+      name: fund.name,
+      target_amount: fund.target_amount.toString(),
+      target_date: fund.target_date || '',
+      monthly_contribution: (fund.monthly_contribution || 0).toString(),
+    });
+    setIsEditFundDialogOpen(true);
   };
 
   const handleAddToEnvelope = async (id: string, amount: number) => {
@@ -522,12 +611,32 @@ export function BudgetManager() {
               return (
                 <div 
                   key={envelope.id} 
-                  className="glass-card p-5"
+                  className="glass-card p-5 group"
                   style={{ borderTopColor: envelope.color || '#10b981', borderTopWidth: '3px' }}
                 >
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-semibold">{envelope.name}</h4>
-                    <Wallet className="w-4 h-4 text-muted-foreground" />
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => openEditEnvelope(envelope)}>
+                          <Edit className="w-4 h-4 me-2" />
+                          {language === 'ar' ? 'تعديل' : 'Edit'}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          className="text-destructive"
+                          onClick={() => setDeleteConfirm({ type: 'envelope', id: envelope.id })}
+                        >
+                          <Trash2 className="w-4 h-4 me-2" />
+                          {language === 'ar' ? 'حذف' : 'Delete'}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                   <div className="space-y-2">
                     <Progress value={Math.min(percentage, 100)} className="h-2" />
@@ -644,10 +753,30 @@ export function BudgetManager() {
                 : true;
 
               return (
-                <div key={fund.id} className="glass-card p-5">
+                <div key={fund.id} className="glass-card p-5 group">
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-semibold">{fund.name}</h4>
-                    <Target className="w-4 h-4 text-muted-foreground" />
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => openEditFund(fund)}>
+                          <Edit className="w-4 h-4 me-2" />
+                          {language === 'ar' ? 'تعديل' : 'Edit'}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          className="text-destructive"
+                          onClick={() => setDeleteConfirm({ type: 'fund', id: fund.id })}
+                        >
+                          <Trash2 className="w-4 h-4 me-2" />
+                          {language === 'ar' ? 'حذف' : 'Delete'}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                   <div className="space-y-3">
                     <Progress 
@@ -775,6 +904,119 @@ export function BudgetManager() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Envelope Dialog */}
+      <Dialog open={isEditEnvelopeDialogOpen} onOpenChange={setIsEditEnvelopeDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{language === 'ar' ? 'تعديل المظروف' : 'Edit Envelope'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label>{language === 'ar' ? 'الاسم' : 'Name'}</Label>
+              <Input
+                value={newEnvelope.name}
+                onChange={(e) => setNewEnvelope({ ...newEnvelope, name: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>{language === 'ar' ? 'المبلغ المستهدف' : 'Target Amount'}</Label>
+              <Input
+                type="number"
+                value={newEnvelope.target_amount}
+                onChange={(e) => setNewEnvelope({ ...newEnvelope, target_amount: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>{language === 'ar' ? 'اللون' : 'Color'}</Label>
+              <Input
+                type="color"
+                value={newEnvelope.color}
+                onChange={(e) => setNewEnvelope({ ...newEnvelope, color: e.target.value })}
+              />
+            </div>
+            <Button onClick={handleUpdateEnvelope} className="w-full" disabled={updateEnvelope.isPending}>
+              {updateEnvelope.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : (language === 'ar' ? 'حفظ' : 'Save')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Sinking Fund Dialog */}
+      <Dialog open={isEditFundDialogOpen} onOpenChange={setIsEditFundDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{language === 'ar' ? 'تعديل صندوق الادخار' : 'Edit Sinking Fund'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label>{language === 'ar' ? 'الاسم' : 'Name'}</Label>
+              <Input
+                value={newFund.name}
+                onChange={(e) => setNewFund({ ...newFund, name: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>{language === 'ar' ? 'المبلغ المستهدف' : 'Target Amount'}</Label>
+              <Input
+                type="number"
+                value={newFund.target_amount}
+                onChange={(e) => setNewFund({ ...newFund, target_amount: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>{language === 'ar' ? 'تاريخ الهدف' : 'Target Date'}</Label>
+              <Input
+                type="date"
+                value={newFund.target_date}
+                onChange={(e) => setNewFund({ ...newFund, target_date: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>{language === 'ar' ? 'المساهمة الشهرية' : 'Monthly Contribution'}</Label>
+              <Input
+                type="number"
+                value={newFund.monthly_contribution}
+                onChange={(e) => setNewFund({ ...newFund, monthly_contribution: e.target.value })}
+              />
+            </div>
+            <Button onClick={handleUpdateFund} className="w-full" disabled={updateSinkingFund.isPending}>
+              {updateSinkingFund.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : (language === 'ar' ? 'حفظ' : 'Save')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteConfirm} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{language === 'ar' ? 'تأكيد الحذف' : 'Confirm Deletion'}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {language === 'ar' 
+                ? 'هل أنت متأكد من حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء.'
+                : 'Are you sure you want to delete this item? This action cannot be undone.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{language === 'ar' ? 'إلغاء' : 'Cancel'}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteConfirm?.type === 'envelope') {
+                  handleDeleteEnvelope(deleteConfirm.id);
+                } else if (deleteConfirm?.type === 'fund') {
+                  handleDeleteFund(deleteConfirm.id);
+                } else if (deleteConfirm?.type === 'budget') {
+                  handleDeleteBudget(deleteConfirm.id);
+                }
+              }}
+            >
+              {language === 'ar' ? 'حذف' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

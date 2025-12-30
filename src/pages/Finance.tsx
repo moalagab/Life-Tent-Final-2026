@@ -20,6 +20,7 @@ import { DataImport } from '@/components/finance/DataImport';
 import { CurrencyManager } from '@/components/finance/CurrencyManager';
 import { MonthlyClose } from '@/components/finance/MonthlyClose';
 import { WishlistManager } from '@/components/finance/WishlistManager';
+import { FinanceAIAssistant } from '@/components/finance/FinanceAIAssistant';
 
 export default function Finance() {
   const { currentLanguage } = useLanguage();
@@ -83,6 +84,9 @@ export default function Finance() {
         <TabsContent value="reports"><FinanceReports /></TabsContent>
         <TabsContent value="import"><DataImport /></TabsContent>
       </Tabs>
+
+      {/* AI Assistant */}
+      <FinanceAIAssistant />
     </MainLayout>
   );
 }
