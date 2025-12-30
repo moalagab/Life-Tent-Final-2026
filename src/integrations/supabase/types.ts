@@ -1055,6 +1055,7 @@ export type Database = {
           current_value: number | null
           description: string | null
           end_date: string | null
+          habit_id: string | null
           id: string
           is_active: boolean | null
           perspective: Database["public"]["Enums"]["goal_perspective"] | null
@@ -1073,6 +1074,7 @@ export type Database = {
           current_value?: number | null
           description?: string | null
           end_date?: string | null
+          habit_id?: string | null
           id?: string
           is_active?: boolean | null
           perspective?: Database["public"]["Enums"]["goal_perspective"] | null
@@ -1091,6 +1093,7 @@ export type Database = {
           current_value?: number | null
           description?: string | null
           end_date?: string | null
+          habit_id?: string | null
           id?: string
           is_active?: boolean | null
           perspective?: Database["public"]["Enums"]["goal_perspective"] | null
@@ -1108,6 +1111,13 @@ export type Database = {
             columns: ["area_id"]
             isOneToOne: false
             referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goals_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
             referencedColumns: ["id"]
           },
           {
@@ -1541,8 +1551,10 @@ export type Database = {
           created_at: string
           end_date: string | null
           id: string
+          note_id: string | null
           notes: string | null
           progress: number | null
+          project_id: string | null
           rating: number | null
           start_date: string | null
           status: Database["public"]["Enums"]["media_status"] | null
@@ -1558,8 +1570,10 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           id?: string
+          note_id?: string | null
           notes?: string | null
           progress?: number | null
+          project_id?: string | null
           rating?: number | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["media_status"] | null
@@ -1575,8 +1589,10 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           id?: string
+          note_id?: string | null
           notes?: string | null
           progress?: number | null
+          project_id?: string | null
           rating?: number | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["media_status"] | null
@@ -1586,7 +1602,22 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "media_items_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mood_logs: {
         Row: {

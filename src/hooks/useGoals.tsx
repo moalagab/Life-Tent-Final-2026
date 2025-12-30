@@ -14,7 +14,7 @@ export function useGoals(includeArchived = false) {
     queryFn: async () => {
       let query = supabase
         .from('goals')
-        .select('*, projects(id, title, color)')
+        .select('*, projects(id, title, color), habits(id, name, icon)')
         .order('created_at', { ascending: false });
       
       if (!includeArchived) {
@@ -38,7 +38,7 @@ export function useArchivedGoals() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('goals')
-        .select('*, projects(id, title, color)')
+        .select('*, projects(id, title, color), habits(id, name, icon)')
         .eq('is_active', false)
         .order('updated_at', { ascending: false });
       

@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useMemo } from 'react';
 
-export type CalendarEventType = 'task' | 'event' | 'milestone' | 'debt' | 'subscription' | 'bill';
+export type CalendarEventType = 'task' | 'event' | 'milestone' | 'debt' | 'subscription';
 
 export interface UnifiedCalendarEvent {
   id: string;
