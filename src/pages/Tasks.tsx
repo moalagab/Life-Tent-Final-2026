@@ -265,6 +265,7 @@ export default function Tasks() {
           <Button variant="outline" className="gap-2 rounded-xl">
             <Filter className="w-4 h-4" />
             {t('common.filter')}
+          </Button>
         </div>
 
         {/* Active deep-link filter banner */}
