@@ -28,7 +28,22 @@ import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 export default function Finance() {
   const { currentLanguage } = useLanguage();
   const language = currentLanguage;
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'dashboard');
+
+  // Deep-link support: ?tab=transactions, ?new=1 opens transactions tab
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    const isNew = searchParams.get('new') === '1';
+    if (isNew) {
+      setActiveTab('transactions');
+      const next = new URLSearchParams(searchParams);
+      next.delete('new');
+      setSearchParams(next, { replace: true });
+    } else if (tab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams, setSearchParams]);
 
   // Realtime subscriptions
   useRealtimeSubscription({ table: 'transactions', queryKey: ['transactions'] });
