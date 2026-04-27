@@ -168,9 +168,9 @@ const Index = () => {
 
   return (
     <MainLayout>
-      <div className="space-y-8 lg:space-y-10 pb-12 animate-fade-in">
+      <div className="space-y-6 lg:space-y-8 pb-12 animate-fade-in">
         {/* 1. Greeting + preset switcher on one calm row */}
-        <div className="flex items-end justify-between gap-4 flex-wrap">
+        <div className="flex items-end justify-between gap-3 lg:gap-4 flex-wrap">
           <GreetingSlim />
           <div className="flex items-center gap-2">
             <span className="hidden lg:inline-flex items-center gap-1 text-[10px] font-mono text-muted-foreground/60">
@@ -184,8 +184,8 @@ const Index = () => {
         {/* 2. Attention ribbon */}
         <AttentionStrip />
 
-        {/* 3. Sections per preset, separated by generous breathing room */}
-        <div className="space-y-8 lg:space-y-10">
+        {/* 3. Sections per preset, separated by uniform breathing room */}
+        <div className="space-y-6 lg:space-y-8">
           {arrangements[preset]}
         </div>
       </div>
