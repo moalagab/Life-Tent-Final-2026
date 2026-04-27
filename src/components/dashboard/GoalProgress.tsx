@@ -106,11 +106,11 @@ export function GoalProgress() {
             <div className="space-y-2">
               {topGoals.map((goal) => (
                 <div key={goal.id} className="p-2.5 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <p className="text-xs font-medium text-foreground truncate flex-1 pr-2">
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <p className="text-xs font-medium text-foreground truncate flex-1" dir="auto">
                       {goal.title}
                     </p>
-                    <span className="text-[10px] font-bold text-accent">{goal.progress}%</span>
+                    <span className="text-[11px] font-semibold text-accent tabular-nums shrink-0">{goal.progress}%</span>
                   </div>
                   <Progress value={goal.progress} className="h-1" />
                 </div>

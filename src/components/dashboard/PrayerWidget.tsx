@@ -4,18 +4,20 @@ import { isRamadan } from '@/lib/hijri';
 import { cn } from '@/lib/utils';
 import { Moon, Sun, Sunrise, Sunset, Clock } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
+import { DashboardWidgetShell } from './DashboardWidgetShell';
 
 const prayerIcons: Record<string, React.ReactNode> = {
-  Fajr: <Sunrise className="w-4 h-4" />,
-  Sunrise: <Sun className="w-4 h-4" />,
-  Dhuhr: <Sun className="w-4 h-4" />,
-  Asr: <Sun className="w-4 h-4" />,
-  Maghrib: <Sunset className="w-4 h-4" />,
-  Isha: <Moon className="w-4 h-4" />,
+  Fajr: <Sunrise className="w-3.5 h-3.5" />,
+  Sunrise: <Sun className="w-3.5 h-3.5" />,
+  Dhuhr: <Sun className="w-3.5 h-3.5" />,
+  Asr: <Sun className="w-3.5 h-3.5" />,
+  Maghrib: <Sunset className="w-3.5 h-3.5" />,
+  Isha: <Moon className="w-3.5 h-3.5" />,
 };
 
 export function PrayerWidget() {
   const { t, currentLanguage } = useLanguage();
+  const isAr = currentLanguage === 'ar';
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
   const [nextPrayer, setNextPrayer] = useState<{ prayer: any; remaining: string } | null>(null);
   const [isRamadanPeriod] = useState(isRamadan());
@@ -24,11 +26,7 @@ export function PrayerWidget() {
     const times = getTodayPrayerTimes();
     setPrayerTimes(times);
 
-    const updateNext = () => {
-      const next = getNextPrayer(times);
-      setNextPrayer(next);
-    };
-
+    const updateNext = () => setNextPrayer(getNextPrayer(times));
     updateNext();
     const interval = setInterval(updateNext, 60000);
     return () => clearInterval(interval);
@@ -45,104 +43,94 @@ export function PrayerWidget() {
   ];
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-card/50 backdrop-blur-xl border border-border/50 p-4 h-auto">
-      {/* Decorative Elements */}
-      <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-16 h-16 bg-gold-500/10 rounded-full blur-xl pointer-events-none" />
-      
-      <div className="relative">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Moon className="w-3.5 h-3.5 text-primary" />
+    <DashboardWidgetShell
+      title={t('dashboard.prayerTimes')}
+      icon={Moon}
+      headerAction={
+        isRamadanPeriod ? (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[11px] font-medium">
+            🌙 {isAr ? 'رمضان' : 'Ramadan'}
+          </span>
+        ) : undefined
+      }
+    >
+      {/* Next Prayer — quiet highlight strip */}
+      <div className="rounded-xl bg-primary/5 border border-primary/15 p-3 mb-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mb-0.5">
+              <Clock className="w-3 h-3" />
+              <span>{t('dashboard.nextPrayer')}</span>
             </div>
-            <h3 className="text-sm font-semibold text-foreground">{t('dashboard.prayerTimes')}</h3>
+            <p className="text-sm font-semibold text-foreground truncate">
+              {isAr ? nextPrayer.prayer.nameAr : nextPrayer.prayer.name}
+            </p>
           </div>
-          {isRamadanPeriod && (
-            <span className="px-2 py-1 rounded-full bg-gradient-to-r from-primary/20 to-gold-500/20 text-primary text-[10px] font-medium border border-primary/20">
-              رمضان 🌙
-            </span>
-          )}
+          <div className="text-end shrink-0">
+            <p className="text-lg font-semibold text-primary tabular-nums leading-none">
+              {nextPrayer.prayer.time}
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              {isAr ? `بعد ${nextPrayer.remaining}` : `in ${nextPrayer.remaining}`}
+            </p>
+          </div>
         </div>
 
-        {/* Next Prayer Highlight - Compact */}
-        <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary to-gold-600 p-3 mb-3">
-          <div className="absolute inset-0 opacity-10 pointer-events-none">
-            <div className="absolute top-1 right-1 w-10 h-10 border border-primary-foreground rounded-full" />
+        {isRamadanPeriod && nextPrayer.prayer.name === 'Maghrib' && (
+          <div className="mt-2.5 pt-2.5 border-t border-primary/15 text-center">
+            <p className="text-xs font-medium text-primary">
+              🌙 {isAr ? 'وقت الإفطار' : 'Iftar Time'}
+            </p>
           </div>
-          
-          <div className="relative flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-1.5 text-primary-foreground/70 text-[10px] mb-0.5">
-                <Clock className="w-3 h-3" />
-                <span>{t('dashboard.nextPrayer')}</span>
-              </div>
-              <p className="text-base font-bold text-primary-foreground">
-                {currentLanguage === 'ar' ? nextPrayer.prayer.nameAr : nextPrayer.prayer.name}
-              </p>
-            </div>
-            <div className="text-end">
-              <p className="text-xl font-bold text-primary-foreground tabular-nums">
-                {nextPrayer.prayer.time}
-              </p>
-              <p className="text-primary-foreground/70 text-[10px]">
-                {currentLanguage === 'ar' ? `خلال ${nextPrayer.remaining}` : `in ${nextPrayer.remaining}`}
-              </p>
-            </div>
-          </div>
-          
-          {isRamadanPeriod && nextPrayer.prayer.name === 'Maghrib' && (
-            <div className="mt-2 pt-2 border-t border-primary-foreground/20 text-center">
-              <p className="text-primary-foreground text-xs font-medium flex items-center justify-center gap-1">
-                <span>🌙</span>
-                {currentLanguage === 'ar' ? 'وقت الإفطار' : 'Iftar Time'}
-              </p>
-            </div>
-          )}
-        </div>
+        )}
+      </div>
 
-        {/* All Prayers List - Compact */}
-        <div className="space-y-0.5">
-          {allPrayers.map((prayer, index) => {
-            const isNext = prayer.name === nextPrayer.prayer.name;
-            const isPast = prayer.timestamp < new Date();
-            
-            return (
-              <div
-                key={prayer.name}
-                className={cn(
-                  'flex items-center justify-between px-2.5 py-2 rounded-lg transition-all duration-300',
-                  isNext && 'bg-primary/10 border border-primary/20',
-                  isPast && !isNext && 'opacity-40',
-                  !isNext && !isPast && 'hover:bg-muted/50'
-                )}
-              >
-                <div className="flex items-center gap-2">
-                  <div className={cn(
-                    'w-6 h-6 rounded-md flex items-center justify-center',
+      {/* All Prayers — uniform rows */}
+      <div className="space-y-0.5">
+        {allPrayers.map((prayer) => {
+          const isNext = prayer.name === nextPrayer.prayer.name;
+          const isPast = prayer.timestamp < new Date();
+
+          return (
+            <div
+              key={prayer.name}
+              className={cn(
+                'flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors',
+                isNext && 'bg-primary/10',
+                isPast && !isNext && 'opacity-40',
+                !isNext && !isPast && 'hover:bg-muted/40'
+              )}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <div
+                  className={cn(
+                    'w-6 h-6 rounded-md flex items-center justify-center shrink-0',
                     isNext ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                  )}>
-                    {prayerIcons[prayer.name]}
-                  </div>
-                  <span className={cn(
-                    'text-xs font-medium',
-                    isNext ? 'text-foreground' : 'text-muted-foreground'
-                  )}>
-                    {currentLanguage === 'ar' ? prayer.nameAr : prayer.name}
-                  </span>
+                  )}
+                >
+                  {prayerIcons[prayer.name]}
                 </div>
-                <span className={cn(
-                  'text-xs font-semibold tabular-nums',
-                  isNext ? 'text-primary' : 'text-foreground'
-                )}>
-                  {prayer.time}
+                <span
+                  className={cn(
+                    'text-xs font-medium truncate',
+                    isNext ? 'text-foreground' : 'text-muted-foreground'
+                  )}
+                >
+                  {isAr ? prayer.nameAr : prayer.name}
                 </span>
               </div>
-            );
-          })}
-        </div>
+              <span
+                className={cn(
+                  'text-xs font-semibold tabular-nums shrink-0',
+                  isNext ? 'text-primary' : 'text-foreground'
+                )}
+              >
+                {prayer.time}
+              </span>
+            </div>
+          );
+        })}
       </div>
-    </div>
+    </DashboardWidgetShell>
   );
 }

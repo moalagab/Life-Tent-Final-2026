@@ -56,45 +56,45 @@ export function StudioWidget() {
       linkTo="/studio"
       linkText={t('common.viewAll')}
     >
-      {/* Stats Row */}
+      {/* Stats Row — unified neutral surface */}
       <div className="grid grid-cols-3 gap-2 mb-3">
-        <div className="text-center p-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
-          <p className="text-lg font-bold text-amber-500">{booksRead}</p>
-          <p className="text-[9px] text-muted-foreground">
-            {currentLanguage === 'ar' ? 'كتب مكتملة' : 'Books Read'}
+        <div className="text-center p-2.5 rounded-lg bg-muted/30 border border-border/40">
+          <p className="text-base font-semibold text-foreground tabular-nums">{booksRead}</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">
+            {currentLanguage === 'ar' ? 'كتب' : 'Books'}
           </p>
         </div>
-        <div className="text-center p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
-          <p className="text-lg font-bold text-blue-500">{moviesWatched}</p>
-          <p className="text-[9px] text-muted-foreground">
+        <div className="text-center p-2.5 rounded-lg bg-muted/30 border border-border/40">
+          <p className="text-base font-semibold text-foreground tabular-nums">{moviesWatched}</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">
             {currentLanguage === 'ar' ? 'أفلام' : 'Movies'}
           </p>
         </div>
-        <div className="text-center p-2 rounded-lg bg-green-500/10 border border-green-500/20">
-          <p className="text-lg font-bold text-green-500">{inProgressCount}</p>
-          <p className="text-[9px] text-muted-foreground">
-            {currentLanguage === 'ar' ? 'قيد القراءة' : 'In Progress'}
+        <div className="text-center p-2.5 rounded-lg bg-muted/30 border border-border/40">
+          <p className="text-base font-semibold text-foreground tabular-nums">{inProgressCount}</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">
+            {currentLanguage === 'ar' ? 'جارية' : 'Active'}
           </p>
         </div>
       </div>
 
       {/* Reading Goal */}
-      <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 border border-amber-500/20 mb-3">
+      <div className="p-3 rounded-xl bg-muted/30 border border-border/40 mb-3">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-muted-foreground flex items-center gap-1">
+          <span className="text-[11px] text-muted-foreground flex items-center gap-1">
             <TrendingUp className="w-3 h-3" />
-            {new Date().getFullYear()} {t('studio.readingGoal')}
+            {new Date().getFullYear()} · {t('studio.readingGoal')}
           </span>
-          <span className="text-xs font-bold text-amber-500">{progress}%</span>
+          <span className="text-[11px] font-semibold text-foreground tabular-nums">{progress}%</span>
         </div>
-        <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
+        <div className="h-1.5 bg-muted/50 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-full transition-all duration-500"
+            className="h-full bg-primary rounded-full transition-all duration-500"
             style={{ width: `${Math.min(progress, 100)}%` }}
           />
         </div>
-        <p className="text-[10px] text-muted-foreground mt-1.5">
-          {booksRead} {t('studio.booksOf')} {booksGoal} {t('studio.books').toLowerCase()}
+        <p className="text-[11px] text-muted-foreground mt-1.5 tabular-nums">
+          {booksRead} {t('studio.booksOf')} {booksGoal}
         </p>
       </div>
 

@@ -7,8 +7,11 @@ interface DashboardWidgetShellProps {
   title: string;
   subtitle?: string;
   icon: LucideIcon;
+  /** @deprecated kept for backward compat — colors are unified now. */
   iconColor?: string;
+  /** @deprecated kept for backward compat — colors are unified now. */
   iconBg?: string;
+  /** @deprecated kept for backward compat — accent blob removed. */
   accentColor?: string;
   linkTo?: string;
   linkText?: string;
@@ -18,13 +21,17 @@ interface DashboardWidgetShellProps {
   compact?: boolean;
 }
 
+/**
+ * Unified widget shell.
+ * — Single neutral surface (no per-widget tint).
+ * — Single icon treatment (muted; primary on hover only).
+ * — Standardized typography (title text-sm, subtitle text-xs).
+ * — RTL-safe (uses logical start/end).
+ */
 export function DashboardWidgetShell({
   title,
   subtitle,
   icon: Icon,
-  iconColor = 'text-primary',
-  iconBg = 'bg-primary/10',
-  accentColor = 'bg-primary/5',
   linkTo,
   linkText,
   headerAction,
@@ -33,61 +40,52 @@ export function DashboardWidgetShell({
   compact = false,
 }: DashboardWidgetShellProps) {
   return (
-    <div 
+    <div
       className={cn(
-        "relative overflow-hidden rounded-2xl",
-        "bg-card/60 backdrop-blur-xl",
-        "border border-border/40",
-        "shadow-sm hover:shadow-md",
-        "transition-all duration-300",
-        "hover:border-primary/20",
-        compact ? "p-4" : "p-5",
+        'group/widget relative rounded-2xl bg-card/50 border border-border/40',
+        'hover:border-border/70 transition-colors duration-200',
+        compact ? 'p-4' : 'p-4 lg:p-5',
+        'flex flex-col h-full',
         className
       )}
     >
-      {/* Decorative Accent */}
-      <div className={cn(
-        "absolute -top-16 -right-16 w-32 h-32 rounded-full blur-3xl opacity-60 pointer-events-none",
-        accentColor
-      )} />
-      
-      <div className="relative">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2.5">
-            <div className={cn(
-              "w-9 h-9 rounded-xl flex items-center justify-center transition-transform duration-300 hover:scale-105",
-              iconBg
-            )}>
-              <Icon className={cn("w-4.5 h-4.5", iconColor)} />
-            </div>
-            <div>
-              <h3 className="text-base font-semibold text-foreground leading-tight">{title}</h3>
-              {subtitle && (
-                <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
-              )}
-            </div>
+      {/* Header */}
+      <header className="flex items-center justify-between gap-3 mb-3.5">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-muted/60 flex items-center justify-center shrink-0">
+            <Icon className="w-4 h-4 text-muted-foreground" strokeWidth={2} />
           </div>
-          
-          {linkTo && linkText ? (
-            <Link 
-              to={linkTo} 
-              className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-primary transition-colors group"
-            >
-              {linkText}
-              <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </Link>
-          ) : headerAction}
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-foreground leading-tight truncate">
+              {title}
+            </h3>
+            {subtitle && (
+              <p className="text-[11px] text-muted-foreground mt-0.5 truncate tabular-nums">
+                {subtitle}
+              </p>
+            )}
+          </div>
         </div>
 
-        {/* Content */}
-        {children}
-      </div>
+        {linkTo && linkText ? (
+          <Link
+            to={linkTo}
+            className="shrink-0 inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <span className="hidden sm:inline">{linkText}</span>
+            <ArrowUpRight className="w-3.5 h-3.5 rtl:-scale-x-100" />
+          </Link>
+        ) : (
+          headerAction && <div className="shrink-0">{headerAction}</div>
+        )}
+      </header>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">{children}</div>
     </div>
   );
 }
 
-// Empty State Component
 interface EmptyStateProps {
   icon: LucideIcon;
   message: string;
@@ -96,9 +94,9 @@ interface EmptyStateProps {
 
 export function DashboardEmptyState({ icon: Icon, message, action }: EmptyStateProps) {
   return (
-    <div className="text-center py-6">
-      <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
-        <Icon className="w-7 h-7 text-muted-foreground/70" />
+    <div className="flex flex-col items-center justify-center text-center py-8 px-2">
+      <div className="w-11 h-11 rounded-xl bg-muted/50 flex items-center justify-center mb-3">
+        <Icon className="w-5 h-5 text-muted-foreground/70" strokeWidth={2} />
       </div>
       <p className="text-sm text-muted-foreground mb-2">{message}</p>
       {action}
@@ -106,7 +104,6 @@ export function DashboardEmptyState({ icon: Icon, message, action }: EmptyStateP
   );
 }
 
-// Stat Item Component
 interface StatItemProps {
   label: string;
   value: string | number;
@@ -116,31 +113,33 @@ interface StatItemProps {
   trendValue?: string;
 }
 
-export function DashboardStatItem({ 
-  label, 
-  value, 
-  icon: Icon, 
-  iconColor = 'text-primary',
+export function DashboardStatItem({
+  label,
+  value,
+  icon: Icon,
   trend,
-  trendValue 
+  trendValue,
 }: StatItemProps) {
   return (
     <div className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-muted/30 transition-colors">
       {Icon && (
-        <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center">
-          <Icon className={cn("w-5 h-5", iconColor)} />
+        <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
+          <Icon className="w-4 h-4 text-muted-foreground" strokeWidth={2} />
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="text-base font-bold text-foreground truncate">{value}</p>
+        <p className="text-[11px] text-muted-foreground">{label}</p>
+        <p className="text-sm font-semibold text-foreground truncate tabular-nums">{value}</p>
       </div>
       {trend && trendValue && (
-        <span className={cn(
-          "text-xs font-medium px-2 py-1 rounded-full",
-          trend === 'up' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'
-        )}>
-          {trend === 'up' ? '+' : ''}{trendValue}
+        <span
+          className={cn(
+            'text-[11px] font-medium px-2 py-0.5 rounded-md tabular-nums',
+            trend === 'up' ? 'text-success' : 'text-destructive'
+          )}
+        >
+          {trend === 'up' ? '+' : ''}
+          {trendValue}
         </span>
       )}
     </div>

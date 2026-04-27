@@ -150,13 +150,13 @@ export function HabitStreaks() {
                 >
                   {/* Completed Check */}
                   {completed && (
-                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-background rounded-full flex items-center justify-center shadow-sm ring-2 ring-background">
+                    <div className="absolute -top-1.5 -end-1.5 w-5 h-5 bg-background rounded-full flex items-center justify-center shadow-sm ring-2 ring-background">
                       <Check className="w-3 h-3 text-success" />
                     </div>
                   )}
 
                   {/* Action Buttons */}
-                  <div className="absolute top-1.5 left-1.5 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute top-1.5 start-1.5 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={(e) => { e.stopPropagation(); setEditingHabit({ id: habit.id, name: habit.name }); }}
                       className="p-1 rounded bg-background/80 hover:bg-background transition-colors"

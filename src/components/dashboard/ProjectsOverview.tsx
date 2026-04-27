@@ -90,10 +90,10 @@ export function ProjectsOverview() {
             return (
               <div
                 key={project.id}
-                className="group relative p-4 rounded-xl bg-muted/30 border border-border/40 hover:border-primary/30 transition-all duration-200 hover:shadow-sm"
+                className="group relative p-3.5 rounded-xl bg-muted/30 border border-border/40 hover:border-border hover:bg-muted/50 transition-all"
               >
                 {/* Action Menu */}
-                <div className="absolute top-2.5 right-2.5 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute top-2 end-2 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => setEditingProject({ id: project.id, title: project.title })}
                     className="p-1.5 rounded-lg bg-background/80 hover:bg-muted transition-colors"
@@ -110,7 +110,7 @@ export function ProjectsOverview() {
 
                 {/* Status Badge */}
                 <div className={cn(
-                  'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border mb-3',
+                  'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium border mb-2.5',
                   statusConfig[status]?.badge
                 )}>
                   <StatusIcon className="w-2.5 h-2.5" />
@@ -118,34 +118,31 @@ export function ProjectsOverview() {
                 </div>
 
                 {/* Project Title */}
-                <h4 className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors mb-0.5 truncate pr-12">
+                <h4 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors mb-0.5 truncate pe-12" dir="auto">
                   {project.title}
                 </h4>
-                
+
                 {/* Phase Label */}
-                <span className="text-[10px] text-muted-foreground">
+                <span className="text-[11px] text-muted-foreground">
                   {phaseLabels[project.phase || 'initiation']}
                 </span>
 
                 {/* Progress Bar */}
                 <div className="mt-3">
                   <div className="flex justify-between items-center mb-1.5">
-                    <span className="text-[10px] text-muted-foreground">{t('common.progress')}</span>
-                    <span className="text-[10px] font-bold text-foreground">{progress}%</span>
+                    <span className="text-[11px] text-muted-foreground">{t('common.progress')}</span>
+                    <span className="text-[11px] font-semibold text-foreground tabular-nums">{progress}%</span>
                   </div>
                   <div className="relative h-1.5 bg-muted/50 rounded-full overflow-hidden">
                     <div
                       className={cn(
-                        'absolute inset-y-0 left-0 rounded-full transition-all duration-500',
+                        'absolute inset-y-0 start-0 rounded-full transition-all duration-500',
                         status === 'active' ? 'bg-primary' : 'bg-muted-foreground/50'
                       )}
                       style={{ width: `${progress}%` }}
                     />
                   </div>
                 </div>
-
-                {/* Hover Arrow */}
-                <ArrowUpRight className="absolute bottom-3 right-3 w-4 h-4 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
             );
           })}
