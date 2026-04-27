@@ -115,11 +115,27 @@ export function DashboardTopBar() {
     { id: 'jump-attention', group: 'jump', label: isAr ? 'بنود تحتاج انتباه' : 'Items needing attention', keywords: ['attention', 'urgent', 'انتباه'], icon: AlertTriangle, run: () => go('/dashboard#attention') },
   ], [isAr]);
 
+  // When the user picks a filter/jump, remember it so it appears as a "Recent" entry next time.
+  const runWithMemory = useCallback(
+    (item: CommandEntry) => {
+      if (item.group === 'filters' || item.group === 'jump') {
+        setLastFilterId(item.id);
+      }
+      item.run();
+    },
+    [setLastFilterId]
+  );
+
   const grouped = useMemo(() => {
     const g: Record<CommandGroupKey, CommandEntry[]> = { navigate: [], create: [], filters: [], jump: [] };
     commands.forEach((c) => g[c.group].push(c));
     return g;
   }, [commands]);
+
+  const lastFilter = useMemo(
+    () => (lastFilterId ? commands.find((c) => c.id === lastFilterId) ?? null : null),
+    [commands, lastFilterId]
+  );
 
   const groupHeadings: Record<CommandGroupKey, string> = {
     navigate: isAr ? 'الانتقال' : 'Navigate',
