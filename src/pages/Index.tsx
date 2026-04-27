@@ -177,8 +177,16 @@ const Index = () => {
 
         {/* 3. Layout preset switcher */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <p className="text-xs text-muted-foreground">
-            {isAr ? 'بدّل ترتيب لوحة التحكم بحسب تركيز يومك' : 'Switch dashboard arrangement to match your focus'}
+          <p className="text-xs text-muted-foreground flex items-center gap-2 flex-wrap">
+            <span>
+              {isAr ? 'بدّل ترتيب لوحة التحكم بحسب تركيز يومك' : 'Switch dashboard arrangement to match your focus'}
+            </span>
+            <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-mono text-muted-foreground/70">
+              <kbd className="px-1.5 py-0.5 rounded border border-border/60 bg-background">Alt</kbd>+
+              <kbd className="px-1.5 py-0.5 rounded border border-border/60 bg-background">1</kbd>
+              <kbd className="px-1.5 py-0.5 rounded border border-border/60 bg-background">2</kbd>
+              <kbd className="px-1.5 py-0.5 rounded border border-border/60 bg-background">3</kbd>
+            </span>
           </p>
           <LayoutPresetSwitcher value={preset} onChange={setPreset} />
         </div>
