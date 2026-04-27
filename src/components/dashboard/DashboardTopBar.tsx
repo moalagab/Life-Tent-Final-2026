@@ -193,6 +193,22 @@ export function DashboardTopBar() {
         <CommandInput placeholder={isAr ? 'ابحث في الأقسام، الفلاتر والإجراءات…' : 'Search sections, filters and actions…'} />
         <CommandList>
           <CommandEmpty>{isAr ? 'لا توجد نتائج' : 'No results.'}</CommandEmpty>
+          {lastFilter && (
+            <>
+              <CommandGroup heading={isAr ? 'الأخير' : 'Recent'}>
+                <CommandItem
+                  key={`recent-${lastFilter.id}`}
+                  value={`recent ${lastFilter.label} ${lastFilter.keywords.join(' ')}`}
+                  onSelect={() => runWithMemory(lastFilter)}
+                >
+                  <lastFilter.icon className="w-4 h-4 me-2 text-muted-foreground" />
+                  <span className="flex-1">{lastFilter.label}</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/60 rtl:rotate-180" />
+                </CommandItem>
+              </CommandGroup>
+              <CommandSeparator />
+            </>
+          )}
           {(Object.keys(grouped) as CommandGroupKey[]).map((key, idx) => {
             const items = grouped[key];
             if (items.length === 0) return null;
@@ -204,7 +220,7 @@ export function DashboardTopBar() {
                     <CommandItem
                       key={item.id}
                       value={`${item.label} ${item.keywords.join(' ')}`}
-                      onSelect={item.run}
+                      onSelect={() => runWithMemory(item)}
                     >
                       <item.icon className="w-4 h-4 me-2 text-muted-foreground" />
                       <span className="flex-1">{item.label}</span>
