@@ -62,7 +62,9 @@ export function DashboardTopBar() {
   const { currentLanguage, isRTL } = useLanguage();
   const isAr = currentLanguage === 'ar';
   const navigate = useNavigate();
-  const [searchOpen, setSearchOpen] = useState(false);
+  // Persist palette open state and last-used filter id, per user
+  const [searchOpen, setSearchOpen] = usePersistedState<boolean>('palette.open', false);
+  const [lastFilterId, setLastFilterId] = usePersistedState<string | null>('palette.lastFilter', null);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -73,7 +75,7 @@ export function DashboardTopBar() {
     };
     document.addEventListener('keydown', down);
     return () => document.removeEventListener('keydown', down);
-  }, []);
+  }, [setSearchOpen]);
 
   const go = (path: string) => {
     setSearchOpen(false);
