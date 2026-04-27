@@ -311,9 +311,28 @@ export default function Tasks() {
         )}
       </div>
 
-      {/* Kanban Board */}
-      <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2">
-        {columns.map((column, colIndex) => {
+      {/* Empty state for deep-linked filters with zero results */}
+      {dueFilter && columns.every((c) => getTasksByStatus(c.id).length === 0) && (
+        <div className="mb-6 p-8 rounded-2xl border-2 border-dashed border-border/50 bg-muted/20 text-center animate-fade-in">
+          <div className="w-14 h-14 rounded-2xl bg-success/10 flex items-center justify-center mx-auto mb-3">
+            <Sparkles className="w-7 h-7 text-success" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground mb-1">
+            {dueFilter === 'overdue'
+              ? (currentLanguage === 'ar' ? 'لا توجد مهام متأخرة 🎉' : 'No overdue tasks 🎉')
+              : (currentLanguage === 'ar' ? 'لا توجد مهام مستحقة اليوم' : 'No tasks due today')}
+          </h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            {currentLanguage === 'ar'
+              ? 'أنت على المسار الصحيح. أزل الفلتر لعرض كل المهام.'
+              : 'You\u2019re on track. Clear the filter to see all tasks.'}
+          </p>
+          <Button onClick={clearDueFilter} size="sm" variant="outline" className="gap-2">
+            <Filter className="w-4 h-4" />
+            {currentLanguage === 'ar' ? 'مسح الفلتر' : 'Clear filter'}
+          </Button>
+        </div>
+      )}
           const columnTasks = getTasksByStatus(column.id);
           
           return (
