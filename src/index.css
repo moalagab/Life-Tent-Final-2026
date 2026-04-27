@@ -71,7 +71,7 @@
     --elev-4: 0 4px 8px rgba(15, 23, 42, 0.06), 0 24px 48px -12px rgba(15, 23, 42, 0.14);
 
     /* Focus ring — gold halo, AA-visible on white */
-    --focus-ring: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(38 92% 45% / 0.55);
+    --focus-ring: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(33 95% 38% / 0.65);
 
     /* Brand gold gradient — keep identity, slight warm shift */
     --gradient-gold: linear-gradient(135deg, hsl(43 95% 48%) 0%, hsl(34 95% 42%) 100%);
@@ -80,12 +80,12 @@
     /* Sidebar — slightly cooler than canvas for clear separation */
     --sidebar-background: 220 22% 98%;
     --sidebar-foreground: 215 25% 20%;
-    --sidebar-primary: 38 92% 38%;
+    --sidebar-primary: 33 95% 32%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 14% 94%;
     --sidebar-accent-foreground: 215 28% 14%;
     --sidebar-border: 220 14% 90%;
-    --sidebar-ring: 38 92% 45%;
+    --sidebar-ring: 33 95% 38%;
   }
 
   .dark {
