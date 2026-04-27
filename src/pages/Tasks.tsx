@@ -333,6 +333,10 @@ export default function Tasks() {
           </Button>
         </div>
       )}
+
+      {/* Kanban Board */}
+      <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2">
+        {columns.map((column, colIndex) => {
           const columnTasks = getTasksByStatus(column.id);
           
           return (
