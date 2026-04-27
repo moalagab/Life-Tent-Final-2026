@@ -56,11 +56,11 @@ export function DashboardWidgetShell({
             <Icon className="w-4 h-4 text-muted-foreground" strokeWidth={2} />
           </div>
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-foreground leading-tight truncate">
+            <h3 dir="auto" className="text-sm font-semibold text-foreground leading-tight truncate">
               {title}
             </h3>
             {subtitle && (
-              <p className="text-[11px] text-muted-foreground mt-0.5 truncate tabular-nums">
+              <p dir="auto" className="text-[11px] text-muted-foreground mt-0.5 truncate tabular-nums">
                 {subtitle}
               </p>
             )}

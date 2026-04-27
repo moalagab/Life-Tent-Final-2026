@@ -25,7 +25,7 @@ export function SectionHeader({
   action,
 }: SectionHeaderProps) {
   return (
-    <div className="flex items-center justify-between gap-3 mb-3">
+    <div className="flex items-center justify-between gap-3 mb-3 ps-0.5">
       <button
         type="button"
         onClick={collapsible ? onToggle : undefined}
@@ -35,10 +35,10 @@ export function SectionHeader({
         )}
         disabled={!collapsible}
       >
-        {Icon && <Icon className="w-3.5 h-3.5 text-muted-foreground/70" strokeWidth={2} />}
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground group-hover:text-foreground transition-colors">
+        {Icon && <Icon className="w-3.5 h-3.5 text-muted-foreground/70 shrink-0" strokeWidth={2} />}
+        <h3 dir="auto" className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground group-hover:text-foreground transition-colors">
           {title}
-        </h2>
+        </h3>
         {typeof count === 'number' && count > 0 && (
           <span className="text-[11px] font-medium text-muted-foreground/70 tabular-nums">
             {count}
