@@ -39,6 +39,25 @@ const Index = () => {
     'execution'
   );
 
+  // Keyboard shortcuts: Alt+1 Focus, Alt+2 Finance, Alt+3 Execution
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (!e.altKey || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
+      const map: Record<string, DashboardPreset> = { '1': 'focus', '2': 'finance', '3': 'execution' };
+      const next = map[e.key];
+      if (!next) return;
+      e.preventDefault();
+      setPreset(next);
+      const labelAr = { focus: 'تركيز', finance: 'مالية', execution: 'تنفيذ' }[next];
+      const labelEn = { focus: 'Focus', finance: 'Finance', execution: 'Execution' }[next];
+      toast.success(isAr ? `تم التبديل إلى ${labelAr}` : `Switched to ${labelEn}`);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [setPreset, isAr]);
+
   const overview = useSectionState('overview', true);
   const activeWork = useSectionState('active-work', true);
   const rhythm = useSectionState('rhythm', true);
