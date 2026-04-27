@@ -63,7 +63,7 @@ export function KnowledgeWidget() {
                 {recentNotes.map((note) => (
                   <div key={note.id} className="p-2 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-medium text-foreground truncate flex-1 pr-2">
+                      <p className="text-xs font-medium text-foreground truncate flex-1">
                         {note.title}
                       </p>
                       <span className="text-[9px] text-muted-foreground">
@@ -90,7 +90,7 @@ export function KnowledgeWidget() {
                 {activeCourses.map((course) => (
                   <div key={course.id} className="p-2 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
                     <div className="flex items-center justify-between mb-1">
-                      <p className="text-xs font-medium text-foreground truncate flex-1 pr-2">
+                      <p className="text-xs font-medium text-foreground truncate flex-1">
                         {course.title}
                       </p>
                       <span className="text-[10px] font-bold text-blue-500">{course.progress || 0}%</span>

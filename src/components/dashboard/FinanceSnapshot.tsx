@@ -124,7 +124,7 @@ export function FinanceSnapshot() {
         <div className="relative h-2 bg-muted/50 rounded-full overflow-hidden">
           <div 
             className={cn(
-              'absolute inset-y-0 left-0 rounded-full transition-all duration-500',
+              'absolute inset-y-0 start-0 rounded-full transition-all duration-500',
               budgetUsed > 80 ? 'bg-destructive' : 'bg-gradient-to-r from-primary to-primary/70'
             )}
             style={{ width: `${Math.min(budgetUsed, 100)}%` }}
