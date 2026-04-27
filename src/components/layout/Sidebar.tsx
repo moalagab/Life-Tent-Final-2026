@@ -60,19 +60,19 @@ export function Sidebar() {
 
   const SidebarContent = () => (
     <>
-      {/* Logo */}
-      <div className="flex items-center justify-between h-20 px-4 border-b border-sidebar-border">
-        <div className={cn('flex items-center gap-3', collapsed && !isMobile && 'justify-center w-full')}>
+      {/* Logo — height matches top bar (h-14) for seamless cross-alignment */}
+      <div className="flex items-center justify-between h-14 px-4 border-b border-sidebar-border/60">
+        <div className={cn('flex items-center gap-2.5', collapsed && !isMobile && 'justify-center w-full')}>
           <div className="relative">
-            <div className="w-10 h-10 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold-glow-sm">
-              <Tent className="w-5 h-5 text-primary-foreground" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold-glow-sm">
+              <Tent className="w-4 h-4 text-primary-foreground" />
             </div>
-            <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-success rounded-full border-2 border-sidebar" />
+            <div className="absolute -bottom-0.5 -end-0.5 w-2.5 h-2.5 bg-success rounded-full border-2 border-sidebar" />
           </div>
           {(!collapsed || isMobile) && (
-            <div className="flex flex-col">
-              <span className="text-lg font-bold gold-text">LIFE TENT</span>
-              <span className="text-[10px] text-muted-foreground -mt-1">نظام حياتك</span>
+            <div className="flex flex-col leading-tight">
+              <span className="text-sm font-bold gold-text tracking-wide">LIFE TENT</span>
+              <span className="text-[10px] text-muted-foreground -mt-0.5">نظام حياتك</span>
             </div>
           )}
         </div>
@@ -100,10 +100,7 @@ export function Sidebar() {
               )}
             >
               {isActive && (
-                <div className={cn(
-                  'absolute top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-gold rounded-full',
-                  isRTL ? 'right-0 rounded-l-full rounded-r-none' : 'left-0 rounded-r-full rounded-l-none'
-                )} />
+                <div className="absolute top-1/2 -translate-y-1/2 start-0 w-1 h-8 bg-gradient-gold rounded-e-full" />
               )}
               <item.icon
                 className={cn(
@@ -122,10 +119,7 @@ export function Sidebar() {
                 </span>
               )}
               {collapsed && !isMobile && (
-                <div className={cn(
-                  'absolute px-2 py-1 bg-popover text-popover-foreground text-sm rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-lg border border-border',
-                  isRTL ? 'right-full mr-2' : 'left-full ml-2'
-                )}>
+                <div className="absolute px-2 py-1 bg-popover text-popover-foreground text-sm rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-lg border border-border start-full ms-2">
                   {t(item.labelKey)}
                 </div>
               )}
@@ -178,23 +172,17 @@ export function Sidebar() {
               collapsed && 'justify-center'
             )}
           >
-            {collapsed ? (
-              isRTL ? (
-                <ChevronLeft className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
-              ) : (
-                <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
-              )
-            ) : (
-              <>
-                {isRTL ? (
-                  <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
-                ) : (
-                  <ChevronLeft className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
-                )}
-                <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground">
-                  {t('common.collapse')}
-                </span>
-              </>
+            {/* Single icon, mirrored automatically in RTL */}
+            <ChevronLeft
+              className={cn(
+                'w-5 h-5 text-muted-foreground group-hover:text-foreground transition-transform rtl:-scale-x-100',
+                collapsed && 'rotate-180'
+              )}
+            />
+            {!collapsed && (
+              <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground">
+                {t('common.collapse')}
+              </span>
             )}
           </button>
         )}
@@ -206,13 +194,13 @@ export function Sidebar() {
   if (isMobile) {
     return (
       <>
-        {/* Mobile header bar */}
-        <div className="fixed top-0 left-0 right-0 z-50 h-16 bg-sidebar border-b border-sidebar-border flex items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold-glow-sm">
-              <Tent className="w-5 h-5 text-primary-foreground" />
+        {/* Mobile header bar — matches desktop top-bar height (h-14) */}
+        <div className="fixed top-0 inset-x-0 z-50 h-14 bg-sidebar/95 backdrop-blur-xl border-b border-sidebar-border/60 flex items-center justify-between px-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold-glow-sm">
+              <Tent className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="text-lg font-bold gold-text">LIFE TENT</span>
+            <span className="text-sm font-bold gold-text tracking-wide">LIFE TENT</span>
           </div>
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
@@ -236,8 +224,8 @@ export function Sidebar() {
     <aside
       className={cn(
         'fixed top-0 z-40 h-screen transition-all duration-300 ease-in-out flex flex-col',
-        'bg-sidebar border-sidebar-border',
-        isRTL ? 'right-0 border-l' : 'left-0 border-r',
+        'bg-sidebar',
+        isRTL ? 'right-0 border-s border-sidebar-border/60' : 'left-0 border-e border-sidebar-border/60',
         collapsed ? 'w-20' : 'w-64'
       )}
     >

@@ -203,7 +203,7 @@ export function DashboardTopBar() {
                 >
                   <lastFilter.icon className="w-4 h-4 me-2 text-muted-foreground" />
                   <span className="flex-1">{lastFilter.label}</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/60 rtl:rotate-180" />
+                  <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/60 rtl:-scale-x-100" />
                 </CommandItem>
               </CommandGroup>
               <CommandSeparator />
@@ -224,7 +224,7 @@ export function DashboardTopBar() {
                     >
                       <item.icon className="w-4 h-4 me-2 text-muted-foreground" />
                       <span className="flex-1">{item.label}</span>
-                      <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/60 rtl:rotate-180" />
+                      <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/60 rtl:-scale-x-100" />
                     </CommandItem>
                   ))}
                 </CommandGroup>
