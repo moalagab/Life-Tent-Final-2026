@@ -265,8 +265,25 @@ export default function Tasks() {
           <Button variant="outline" className="gap-2 rounded-xl">
             <Filter className="w-4 h-4" />
             {t('common.filter')}
-          </Button>
         </div>
+
+        {/* Active deep-link filter banner */}
+        {dueFilter && (
+          <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/30 text-sm">
+            <Filter className="w-3.5 h-3.5 text-primary" />
+            <span className="text-foreground">
+              {dueFilter === 'overdue'
+                ? (currentLanguage === 'ar' ? 'يعرض المتأخر فقط' : 'Showing overdue only')
+                : (currentLanguage === 'ar' ? 'يعرض مهام اليوم فقط' : 'Showing today only')}
+            </span>
+            <button
+              onClick={clearDueFilter}
+              className="text-xs text-muted-foreground hover:text-foreground underline-offset-2 hover:underline ms-1"
+            >
+              {currentLanguage === 'ar' ? 'مسح' : 'Clear'}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Kanban Board */}
