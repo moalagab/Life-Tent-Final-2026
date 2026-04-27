@@ -242,6 +242,41 @@
       0 0 20px hsla(43, 100%, 50%, 0.10);
   }
 
+  /* ============================================
+     Elevation scale utilities (light + dark)
+     Use semantically: elev-1 chips, elev-2 cards,
+     elev-3 popovers/menus, elev-4 dialogs/modals.
+     ============================================ */
+  .elev-1 { box-shadow: var(--elev-1); }
+  .elev-2 { box-shadow: var(--elev-2); }
+  .elev-3 { box-shadow: var(--elev-3); }
+  .elev-4 { box-shadow: var(--elev-4); }
+
+  /* ============================================
+     Focus ring — gold halo, AA-visible, RTL-safe
+     (uses box-shadow so it never affects layout
+      and works identically in LTR/RTL).
+     ============================================ */
+  .focus-ring-brand {
+    @apply outline-none;
+  }
+  .focus-ring-brand:focus-visible {
+    box-shadow: var(--focus-ring);
+    border-radius: inherit;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  [role="tab"]:focus-visible,
+  [role="menuitem"]:focus-visible,
+  [role="option"]:focus-visible,
+  summary:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-radius: 0.5rem;
+  }
+
   .glass-card::before {
     content: '';
     position: absolute;
