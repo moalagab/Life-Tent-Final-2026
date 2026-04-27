@@ -65,13 +65,14 @@ export function GreetingHeader() {
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || (currentLanguage === 'ar' ? 'المستخدم' : 'User');
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-xl border border-border/50 p-6 lg:p-8">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse-slow" />
-        <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-gold-500/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-radial from-primary/5 to-transparent rounded-full" />
-      </div>
+    <div className="relative overflow-hidden rounded-3xl mesh-header aurora-bg border border-border/40 p-6 lg:p-10 shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.15)]">
+      {/* Subtle grain overlay for depth */}
+      <div
+        className="absolute inset-0 opacity-[0.015] pointer-events-none mix-blend-overlay"
+        style={{
+          backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")',
+        }}
+      />
 
       <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         {/* Main Greeting Section */}
