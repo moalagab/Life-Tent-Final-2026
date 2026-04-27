@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Search, Plus, Command, type LucideIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
+import { usePersistedState } from '@/hooks/usePersistedState';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
