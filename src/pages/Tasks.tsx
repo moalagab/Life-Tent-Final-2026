@@ -32,11 +32,26 @@ export default function Tasks() {
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
   
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogStatus, setDialogStatus] = useState<TaskStatus>('todo');
   const [searchQuery, setSearchQuery] = useState('');
   const [draggedTask, setDraggedTask] = useState<string | null>(null);
-  const [categoryFilter, setCategoryFilter] = useState<'all' | 'work' | 'personal'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<'all' | 'work' | 'personal'>(
+    (searchParams.get('category') as 'all' | 'work' | 'personal') || 'all'
+  );
+  const dueFilter = (searchParams.get('filter') as 'overdue' | 'today' | null) || null;
+
+  // Open the create-task dialog when ?new=1 is present
+  useEffect(() => {
+    if (searchParams.get('new') === '1') {
+      setIsDialogOpen(true);
+      setDialogStatus('todo');
+      const next = new URLSearchParams(searchParams);
+      next.delete('new');
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // WIP limits per column
   const WIP_LIMITS: Record<TaskStatus, number> = {
