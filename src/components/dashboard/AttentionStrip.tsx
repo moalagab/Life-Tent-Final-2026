@@ -1,4 +1,4 @@
-import { AlertCircle, ArrowRight, Clock, AlertTriangle, CalendarClock, FolderKanban } from 'lucide-react';
+import { ArrowRight, Clock, AlertTriangle, CalendarClock, FolderKanban } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTasks } from '@/hooks/useTasks';
 import { useEvents } from '@/hooks/useEvents';
@@ -12,20 +12,19 @@ type Kind = 'overdue' | 'due_today' | 'event_soon' | 'stalled';
 
 interface AttentionItem {
   id: string;
-  key: string; // dedupe key
+  key: string;
   kind: Kind;
   label: string;
   meta: string;
   to: string;
   severity: Severity;
-  rank: number; // lower is more urgent
-  sortValue: number; // tiebreaker (e.g. minutes overdue / minutes until)
+  rank: number;
+  sortValue: number;
 }
 
 /**
- * AttentionStrip — surfaces only items needing action now.
- * Order (strict): overdue → due today → events ≤ 2h → stalled projects.
- * Deduplicates by stable composite key.
+ * AttentionStrip — quiet alert ribbon.
+ * Horizontal scroll on small screens, dot-coded severity, no loud cards.
  */
 export function AttentionStrip() {
   const { currentLanguage } = useLanguage();
@@ -37,7 +36,6 @@ export function AttentionStrip() {
   const now = new Date();
   const items: AttentionItem[] = [];
 
-  // 1) Overdue tasks (rank 0) and 2) Due today (rank 1)
   tasks?.forEach((t) => {
     if (t.status === 'done' || !t.due_date) return;
     const due = parseISO(t.due_date);
@@ -48,11 +46,11 @@ export function AttentionStrip() {
         key: `task:${t.id}`,
         kind: 'overdue',
         label: t.title,
-        meta: isAr ? 'مهمة متأخرة' : 'Overdue task',
-        to: '/tasks',
+        meta: isAr ? 'متأخرة' : 'Overdue',
+        to: '/tasks?filter=overdue',
         severity: 'critical',
         rank: 0,
-        sortValue: -minutesOverdue, // most overdue first
+        sortValue: -minutesOverdue,
       });
     } else if (isToday(due)) {
       items.push({
@@ -60,8 +58,8 @@ export function AttentionStrip() {
         key: `task:${t.id}`,
         kind: 'due_today',
         label: t.title,
-        meta: isAr ? 'مستحقة اليوم' : 'Due today',
-        to: '/tasks',
+        meta: isAr ? 'اليوم' : 'Today',
+        to: '/tasks?filter=today',
         severity: 'warn',
         rank: 1,
         sortValue: differenceInMinutes(due, now),
@@ -69,7 +67,6 @@ export function AttentionStrip() {
     }
   });
 
-  // 3) Events within next 2h (rank 2)
   events?.forEach((e) => {
     const start = new Date(e.start_time);
     const minutesAway = differenceInMinutes(start, now);
@@ -77,8 +74,8 @@ export function AttentionStrip() {
     if (minutesAway >= 0 && hoursAway <= 2) {
       const metaTime =
         minutesAway < 60
-          ? isAr ? `خلال ${minutesAway}د` : `In ${minutesAway}m`
-          : isAr ? `خلال ${hoursAway}س` : `In ${hoursAway}h`;
+          ? isAr ? `بعد ${minutesAway}د` : `In ${minutesAway}m`
+          : isAr ? `بعد ${hoursAway}س` : `In ${hoursAway}h`;
       items.push({
         id: `event-${e.id}`,
         key: `event:${e.id}`,
@@ -93,7 +90,6 @@ export function AttentionStrip() {
     }
   });
 
-  // 4) Stalled projects (rank 3)
   projects?.forEach((p) => {
     if (p.status === 'on_hold') {
       items.push({
@@ -101,7 +97,7 @@ export function AttentionStrip() {
         key: `project:${p.id}`,
         kind: 'stalled',
         label: p.title,
-        meta: isAr ? 'مشروع متوقف' : 'Project on hold',
+        meta: isAr ? 'متوقف' : 'Stalled',
         to: '/projects',
         severity: 'info',
         rank: 3,
@@ -110,70 +106,72 @@ export function AttentionStrip() {
     }
   });
 
-  // Dedupe — keep the most urgent (lowest rank) per key
   const dedupedMap = new Map<string, AttentionItem>();
   for (const item of items) {
     const existing = dedupedMap.get(item.key);
-    if (!existing || item.rank < existing.rank) {
-      dedupedMap.set(item.key, item);
-    }
+    if (!existing || item.rank < existing.rank) dedupedMap.set(item.key, item);
   }
 
   const sorted = Array.from(dedupedMap.values())
     .sort((a, b) => (a.rank - b.rank) || (a.sortValue - b.sortValue))
-    .slice(0, 4);
+    .slice(0, 6);
 
-  if (sorted.length === 0) return null;
+  if (sorted.length === 0) {
+    return (
+      <section
+        aria-label={isAr ? 'كل شيء على المسار الصحيح' : 'All caught up'}
+        className="flex items-center gap-3 px-4 py-3 rounded-xl bg-success/5 border border-success/20"
+      >
+        <div className="w-2 h-2 rounded-full bg-success" />
+        <p className="text-sm text-foreground/90">
+          {isAr ? 'كل شيء تحت السيطرة. لا بنود عاجلة.' : 'All caught up. Nothing urgent right now.'}
+        </p>
+      </section>
+    );
+  }
 
   return (
     <section aria-label={isAr ? 'يحتاج انتباهك' : 'Needs your attention'}>
-      <div className="flex items-center gap-2 mb-3 px-1">
-        <AlertCircle className="w-4 h-4 text-destructive" />
-        <h2 className="text-sm font-semibold text-foreground">
-          {isAr ? 'يحتاج انتباهك' : 'Needs your attention'}
+      <div className="flex items-center gap-2 mb-2.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-foreground">
+          {isAr ? 'يحتاج انتباهك' : 'Needs attention'}
         </h2>
-        <span className="text-xs text-muted-foreground">· {sorted.length}</span>
+        <span className="text-[11px] text-muted-foreground tabular-nums">{sorted.length}</span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+      <div className="flex gap-2 overflow-x-auto scrollbar-thin pb-1 -mx-1 px-1 snap-x">
         {sorted.map((item) => {
-          const sevStyles =
-            item.severity === 'critical'
-              ? 'border-destructive/40 bg-destructive/5 hover:bg-destructive/10'
-              : item.severity === 'warn'
-              ? 'border-primary/40 bg-primary/5 hover:bg-primary/10'
-              : item.severity === 'soon'
-              ? 'border-primary/30 bg-primary/[0.04] hover:bg-primary/10'
-              : 'border-border bg-muted/30 hover:bg-muted/50';
+          const dotColor =
+            item.severity === 'critical' ? 'bg-destructive'
+            : item.severity === 'warn' ? 'bg-amber-500'
+            : item.severity === 'soon' ? 'bg-primary'
+            : 'bg-muted-foreground';
           const Icon =
             item.kind === 'overdue' ? AlertTriangle
             : item.kind === 'event_soon' ? CalendarClock
             : item.kind === 'stalled' ? FolderKanban
             : Clock;
-          const iconColor =
-            item.severity === 'critical' ? 'text-destructive'
-            : item.severity === 'warn' || item.severity === 'soon' ? 'text-primary'
-            : 'text-muted-foreground';
 
           return (
             <Link
               key={item.id}
               to={item.to}
               className={cn(
-                'group flex items-center gap-3 p-3 rounded-xl border transition-all',
-                sevStyles
+                'group shrink-0 snap-start flex items-center gap-2.5 ps-3 pe-3.5 py-2.5 rounded-xl',
+                'bg-card/60 hover:bg-card border border-border/40 hover:border-border transition-all',
+                'min-w-[200px] max-w-[280px]'
               )}
             >
-              <div className={cn('shrink-0 w-8 h-8 rounded-lg bg-background/60 flex items-center justify-center', iconColor)}>
-                <Icon className="w-4 h-4" />
-              </div>
+              <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', dotColor)} />
+              <Icon className="w-3.5 h-3.5 text-muted-foreground shrink-0" strokeWidth={2} />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate" dir="auto">
+                <p className="text-sm font-medium text-foreground truncate leading-tight" dir="auto">
                   {item.label}
                 </p>
-                <p className="text-xs text-muted-foreground truncate">{item.meta}</p>
+                <p className="text-[11px] text-muted-foreground truncate mt-0.5">{item.meta}</p>
               </div>
-              <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity rtl:rotate-180" />
+              <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors rtl:rotate-180" />
             </Link>
           );
         })}
