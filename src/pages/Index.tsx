@@ -21,6 +21,8 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useSectionState } from '@/hooks/useSectionState';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet } from 'lucide-react';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
 import type { ReactNode } from 'react';
 
 /**
@@ -36,6 +38,25 @@ const Index = () => {
     'dashboard.preset',
     'execution'
   );
+
+  // Keyboard shortcuts: Alt+1 Focus, Alt+2 Finance, Alt+3 Execution
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (!e.altKey || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
+      const map: Record<string, DashboardPreset> = { '1': 'focus', '2': 'finance', '3': 'execution' };
+      const next = map[e.key];
+      if (!next) return;
+      e.preventDefault();
+      setPreset(next);
+      const labelAr = { focus: 'تركيز', finance: 'مالية', execution: 'تنفيذ' }[next];
+      const labelEn = { focus: 'Focus', finance: 'Finance', execution: 'Execution' }[next];
+      toast.success(isAr ? `تم التبديل إلى ${labelAr}` : `Switched to ${labelEn}`);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [setPreset, isAr]);
 
   const overview = useSectionState('overview', true);
   const activeWork = useSectionState('active-work', true);
@@ -156,8 +177,16 @@ const Index = () => {
 
         {/* 3. Layout preset switcher */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <p className="text-xs text-muted-foreground">
-            {isAr ? 'بدّل ترتيب لوحة التحكم بحسب تركيز يومك' : 'Switch dashboard arrangement to match your focus'}
+          <p className="text-xs text-muted-foreground flex items-center gap-2 flex-wrap">
+            <span>
+              {isAr ? 'بدّل ترتيب لوحة التحكم بحسب تركيز يومك' : 'Switch dashboard arrangement to match your focus'}
+            </span>
+            <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-mono text-muted-foreground/70">
+              <kbd className="px-1.5 py-0.5 rounded border border-border/60 bg-background">Alt</kbd>+
+              <kbd className="px-1.5 py-0.5 rounded border border-border/60 bg-background">1</kbd>
+              <kbd className="px-1.5 py-0.5 rounded border border-border/60 bg-background">2</kbd>
+              <kbd className="px-1.5 py-0.5 rounded border border-border/60 bg-background">3</kbd>
+            </span>
           </p>
           <LayoutPresetSwitcher value={preset} onChange={setPreset} />
         </div>
