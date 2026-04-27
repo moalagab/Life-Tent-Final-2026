@@ -193,36 +193,53 @@
 }
 
 @layer components {
+  /* ============================================
+     Unified Glass Card — state machine
+     default → hover → active → disabled
+     One source of truth across all sections.
+     ============================================ */
   .glass-card {
     @apply relative overflow-hidden rounded-2xl transition-all duration-300;
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--glass-border);
-    box-shadow:
-      0 1px 2px rgba(15, 23, 42, 0.04),
-      0 4px 16px -4px rgba(15, 23, 42, 0.06);
+    box-shadow: var(--elev-2);
   }
 
   .glass-card:hover {
     transform: translateY(-2px);
-    box-shadow:
-      0 1px 2px rgba(15, 23, 42, 0.04),
-      0 12px 32px -8px rgba(15, 23, 42, 0.10);
-    border-color: hsla(38, 92%, 45%, 0.25);
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--elev-3);
+  }
+
+  .glass-card:active,
+  .glass-card[data-state="active"],
+  .glass-card.is-active {
+    transform: translateY(-1px);
+    background: var(--glass-bg-active);
+    border-color: var(--glass-border-active);
+    box-shadow: var(--elev-2);
+  }
+
+  .glass-card[aria-disabled="true"],
+  .glass-card.is-disabled,
+  .glass-card:disabled {
+    background: var(--glass-bg-disabled);
+    border-color: var(--glass-border-disabled);
+    box-shadow: var(--elev-1);
+    opacity: 0.6;
+    pointer-events: none;
+    transform: none;
   }
 
   .dark .glass-card {
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: var(--elev-2), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
-
   .dark .glass-card:hover {
-    box-shadow: 
-      0 12px 40px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15),
-      0 0 20px hsla(43, 100%, 50%, 0.1);
+    box-shadow: var(--elev-3), inset 0 1px 0 rgba(255, 255, 255, 0.10),
+      0 0 20px hsla(43, 100%, 50%, 0.10);
   }
 
   .glass-card::before {
