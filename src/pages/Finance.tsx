@@ -94,7 +94,7 @@ export default function Finance() {
         </p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as FinanceTab)} className="space-y-6">
         <div className="overflow-x-auto pb-2">
           <TabsList className="inline-flex min-w-full md:min-w-0 h-auto p-1 bg-muted/50">
             {tabs.map(tab => (
