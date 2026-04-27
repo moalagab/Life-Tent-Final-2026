@@ -69,7 +69,7 @@ export function KpiStrip() {
           ? `+${burnDelta.toLocaleString()} ${isAr ? 'هذا الشهر' : 'this month'}`
           : `${burnDelta.toLocaleString()} ${isAr ? 'هذا الشهر' : 'this month'}`,
       icon: Wallet,
-      to: '/finance',
+      to: '/finance?tab=dashboard',
       emphasis: burnDelta >= 0 ? 'positive' : 'negative',
     },
     {
@@ -79,7 +79,7 @@ export function KpiStrip() {
         ? `${Math.round((monthlyExpenses / monthlyIncome) * 100)}% ${isAr ? 'من الدخل' : 'of income'}`
         : (isAr ? 'لا يوجد دخل مسجّل' : 'no income tracked'),
       icon: TrendingDown,
-      to: '/finance',
+      to: '/finance?tab=transactions',
       emphasis: 'neutral',
     },
     {
@@ -89,7 +89,7 @@ export function KpiStrip() {
         ? `${tasksTodayDone}/${tasksToday.length} ${isAr ? 'اليوم' : 'today'}`
         : (isAr ? 'لا مهام مجدولة اليوم' : 'no tasks scheduled'),
       icon: Flame,
-      to: '/tasks',
+      to: '/tasks?filter=today',
       emphasis: focusPct >= 70 ? 'positive' : 'neutral',
     },
     {
@@ -99,7 +99,7 @@ export function KpiStrip() {
         ? `${overdueCount} ${isAr ? 'متأخرة' : 'overdue'}`
         : (isAr ? 'لا متأخرات' : 'none overdue'),
       icon: CheckSquare,
-      to: '/tasks',
+      to: overdueCount > 0 ? '/tasks?filter=overdue' : '/tasks?filter=today',
       emphasis: overdueCount > 0 ? 'negative' : 'neutral',
     },
   ];
