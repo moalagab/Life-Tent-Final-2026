@@ -132,7 +132,7 @@ export default function Pomodoro() {
   }, [sessionType, completedSessions, settings, playSound, t, createSession, selectedTaskId]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
 
     if (isRunning && timeLeft > 0) {
       interval = setInterval(() => {

@@ -512,10 +512,10 @@ export function useUpdateHolding() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<InvestmentHolding> & { id: string }) => {
+    mutationFn: async ({ id, asset, ...updates }: Partial<InvestmentHolding> & { id: string }) => {
       const { data, error } = await supabase
         .from('investment_holdings')
-        .update(updates)
+        .update(updates as any)
         .eq('id', id)
         .select()
         .single();
@@ -704,7 +704,7 @@ export function useUpdateSubscription() {
     mutationFn: async ({ id, ...updates }: { id: string; [key: string]: any }) => {
       const { data, error } = await supabase
         .from('subscriptions')
-        .update(updates)
+        .update(updates as any)
         .eq('id', id)
         .select()
         .single();

@@ -188,10 +188,10 @@ export function useUpdateCase() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<CustomerCase> & { id: string }) => {
+    mutationFn: async ({ id, customer, ...updates }: Partial<CustomerCase> & { id: string }) => {
       const { data, error } = await supabase
         .from('customer_cases')
-        .update(updates)
+        .update(updates as any)
         .eq('id', id)
         .select()
         .single();
