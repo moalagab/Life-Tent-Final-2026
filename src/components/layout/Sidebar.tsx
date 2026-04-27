@@ -194,13 +194,13 @@ export function Sidebar() {
   if (isMobile) {
     return (
       <>
-        {/* Mobile header bar */}
-        <div className="fixed top-0 left-0 right-0 z-50 h-16 bg-sidebar border-b border-sidebar-border flex items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold-glow-sm">
-              <Tent className="w-5 h-5 text-primary-foreground" />
+        {/* Mobile header bar — matches desktop top-bar height (h-14) */}
+        <div className="fixed top-0 inset-x-0 z-50 h-14 bg-sidebar/95 backdrop-blur-xl border-b border-sidebar-border/60 flex items-center justify-between px-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold-glow-sm">
+              <Tent className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="text-lg font-bold gold-text">LIFE TENT</span>
+            <span className="text-sm font-bold gold-text tracking-wide">LIFE TENT</span>
           </div>
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
@@ -224,8 +224,8 @@ export function Sidebar() {
     <aside
       className={cn(
         'fixed top-0 z-40 h-screen transition-all duration-300 ease-in-out flex flex-col',
-        'bg-sidebar border-sidebar-border',
-        isRTL ? 'right-0 border-l' : 'left-0 border-r',
+        'bg-sidebar',
+        isRTL ? 'right-0 border-s border-sidebar-border/60' : 'left-0 border-e border-sidebar-border/60',
         collapsed ? 'w-20' : 'w-64'
       )}
     >
