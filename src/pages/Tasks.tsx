@@ -90,7 +90,23 @@ export default function Tasks() {
         (categoryFilter === 'personal' && !(task as any).category)
       );
     }
+    if (dueFilter) {
+      const dayStart = startOfDay(new Date());
+      filtered = filtered.filter((task) => {
+        if (!task.due_date) return false;
+        const d = parseISO(task.due_date);
+        if (dueFilter === 'overdue') return isPast(d) && d < dayStart && task.status !== 'done';
+        if (dueFilter === 'today') return isToday(d);
+        return true;
+      });
+    }
     return filtered;
+  };
+
+  const clearDueFilter = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('filter');
+    setSearchParams(next, { replace: true });
   };
 
   const isWipLimitReached = (status: TaskStatus) => {
