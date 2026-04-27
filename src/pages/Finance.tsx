@@ -25,24 +25,41 @@ import { FinanceAIAssistant } from '@/components/finance/FinanceAIAssistant';
 import { FinanceAuditLogView } from '@/components/finance/FinanceAuditLogView';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 
+const ALLOWED_TABS = [
+  'dashboard','accounts','transactions','budget','wishlist','debts',
+  'subscriptions','investments','projects','currencies','close','reports','audit','import',
+] as const;
+type FinanceTab = typeof ALLOWED_TABS[number];
+
 export default function Finance() {
   const { currentLanguage } = useLanguage();
   const language = currentLanguage;
   const [searchParams, setSearchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'dashboard');
+  const rawTab = searchParams.get('tab');
+  const initialTab: FinanceTab = (ALLOWED_TABS as readonly string[]).includes(rawTab ?? '')
+    ? (rawTab as FinanceTab)
+    : 'dashboard';
+  const [activeTab, setActiveTab] = useState<FinanceTab>(initialTab);
 
-  // Deep-link support: ?tab=transactions, ?new=1 opens transactions tab
+  // Deep-link support with validation: ignore unknown tab values; ?new=1 opens transactions
   useEffect(() => {
     const tab = searchParams.get('tab');
     const isNew = searchParams.get('new') === '1';
+    const next = new URLSearchParams(searchParams);
+    let changed = false;
     if (isNew) {
       setActiveTab('transactions');
-      const next = new URLSearchParams(searchParams);
       next.delete('new');
-      setSearchParams(next, { replace: true });
+      changed = true;
     } else if (tab) {
-      setActiveTab(tab);
+      if ((ALLOWED_TABS as readonly string[]).includes(tab)) {
+        setActiveTab(tab as FinanceTab);
+      } else {
+        next.delete('tab');
+        changed = true;
+      }
     }
+    if (changed) setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams]);
 
   // Realtime subscriptions
