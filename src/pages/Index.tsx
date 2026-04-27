@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { GreetingSlim } from '@/components/dashboard/GreetingSlim';
 import { AttentionStrip } from '@/components/dashboard/AttentionStrip';
@@ -14,34 +13,30 @@ import { KnowledgeWidget } from '@/components/dashboard/KnowledgeWidget';
 import { StudioWidget } from '@/components/dashboard/StudioWidget';
 import { useAutoReminders } from '@/hooks/useAutoReminders';
 import { useLanguage } from '@/hooks/useLanguage';
-import { Activity, LayoutGrid, Sparkles } from 'lucide-react';
+import { useSectionState } from '@/hooks/useSectionState';
+import { Activity, LayoutGrid, Sparkles, BookOpen } from 'lucide-react';
 
 /**
- * Dashboard — restructured for scannability.
- *
- * Hierarchy (top → bottom):
- *  1. GreetingSlim   — light context, no decoration
- *  2. AttentionStrip — "what needs me NOW" (auto-derived; hides if empty)
- *  3. KpiStrip       — 4 numbers across; replaces 3 snapshot cards
- *  4. Active Work    — Projects (lead), Tasks, Events  (the operational core)
- *  5. Today's Rhythm — Prayer, Habits, Goals (steady, secondary)
- *  6. Library        — Knowledge + Studio  (collapsible, lowest priority)
- *
- * No new colors. Pure structure / spacing / sizing changes.
+ * Dashboard — restructured for scannability with persisted section state.
+ * RTL-aware grids: spacing tokens unify across LTR/RTL.
  */
 const Index = () => {
   useAutoReminders();
   const { currentLanguage } = useLanguage();
   const isAr = currentLanguage === 'ar';
-  const [libraryOpen, setLibraryOpen] = useState(false);
+
+  const overview = useSectionState('overview', true);
+  const activeWork = useSectionState('active-work', true);
+  const rhythm = useSectionState('rhythm', true);
+  const library = useSectionState('library', false);
 
   return (
     <MainLayout>
-      <div className="space-y-8 pb-10 animate-fade-in">
+      <div className="space-y-6 lg:space-y-8 pb-10 animate-fade-in">
         {/* 1. Greeting */}
         <GreetingSlim />
 
-        {/* 2. Attention — only shows if there is something to act on */}
+        {/* 2. Attention */}
         <AttentionStrip />
 
         {/* 3. KPIs */}
@@ -49,8 +44,11 @@ const Index = () => {
           <SectionHeader
             title={isAr ? 'نظرة عامة' : 'Overview'}
             icon={Sparkles}
+            collapsible
+            open={overview.open}
+            onToggle={overview.toggle}
           />
-          <KpiStrip />
+          {overview.open && <KpiStrip />}
         </section>
 
         {/* 4. Active Work */}
@@ -58,21 +56,25 @@ const Index = () => {
           <SectionHeader
             title={isAr ? 'العمل النشط' : 'Active Work'}
             icon={Activity}
+            collapsible
+            open={activeWork.open}
+            onToggle={activeWork.toggle}
           />
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* Projects — lead, takes 2 cols on desktop */}
-            <div className="lg:col-span-2">
-              <ProjectsOverview />
-            </div>
-            <div className="space-y-4">
-              <FocusTasks />
-            </div>
-          </div>
-
-          {/* Events — full width below */}
-          <div className="mt-4">
-            <UpcomingEvents />
-          </div>
+          {activeWork.open && (
+            <>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4 items-stretch">
+                <div className="lg:col-span-2 min-w-0">
+                  <ProjectsOverview />
+                </div>
+                <div className="min-w-0 space-y-3 lg:space-y-4">
+                  <FocusTasks />
+                </div>
+              </div>
+              <div className="mt-3 lg:mt-4">
+                <UpcomingEvents />
+              </div>
+            </>
+          )}
         </section>
 
         {/* 5. Today's Rhythm */}
@@ -80,26 +82,32 @@ const Index = () => {
           <SectionHeader
             title={isAr ? 'إيقاع يومك' : 'Today\u2019s Rhythm'}
             icon={LayoutGrid}
+            collapsible
+            open={rhythm.open}
+            onToggle={rhythm.toggle}
           />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <PrayerWidget />
-            <HabitStreaks />
-            <GoalProgress />
-          </div>
+          {rhythm.open && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 items-stretch">
+              <div className="min-w-0"><PrayerWidget /></div>
+              <div className="min-w-0"><HabitStreaks /></div>
+              <div className="min-w-0 sm:col-span-2 lg:col-span-1"><GoalProgress /></div>
+            </div>
+          )}
         </section>
 
-        {/* 6. Library — collapsed by default, opt-in */}
+        {/* 6. Library */}
         <section>
           <SectionHeader
             title={isAr ? 'المكتبة والمعرفة' : 'Library & Knowledge'}
+            icon={BookOpen}
             collapsible
-            open={libraryOpen}
-            onToggle={() => setLibraryOpen((v) => !v)}
+            open={library.open}
+            onToggle={library.toggle}
           />
-          {libraryOpen && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
-              <KnowledgeWidget />
-              <StudioWidget />
+          {library.open && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4 animate-fade-in items-stretch">
+              <div className="min-w-0"><KnowledgeWidget /></div>
+              <div className="min-w-0"><StudioWidget /></div>
             </div>
           )}
         </section>
