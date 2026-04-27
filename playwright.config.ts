@@ -30,9 +30,14 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   projects: [
+    // RTL × dark (existing)
     { name: 'mobile-rtl',  use: { ...devices['iPhone 13'],         locale: 'ar-SA' } },
     { name: 'tablet-rtl',  use: { ...devices['iPad (gen 7)'],      locale: 'ar-SA' } },
     { name: 'desktop-rtl', use: { viewport: { width: 1440, height: 900 }, locale: 'ar-SA' } },
+    // RTL × light (new — gates light-theme regressions on Dashboard / Widgets / KPIs)
+    { name: 'mobile-light',  use: { ...devices['iPhone 13'],         locale: 'ar-SA', colorScheme: 'light' } },
+    { name: 'tablet-light',  use: { ...devices['iPad (gen 7)'],      locale: 'ar-SA', colorScheme: 'light' } },
+    { name: 'desktop-light', use: { viewport: { width: 1440, height: 900 }, locale: 'ar-SA', colorScheme: 'light' } },
   ],
   // Uncomment to auto-start dev server locally:
   // webServer: {

@@ -94,6 +94,13 @@ export default {
         glass: "0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
         "gold-glow": "0 0 30px hsla(43, 100%, 50%, 0.3)",
         "gold-glow-sm": "0 0 15px hsla(43, 100%, 50%, 0.2)",
+        // Theme-aware elevation scale (driven by CSS vars in :root / .dark)
+        "elev-1": "var(--elev-1)",
+        "elev-2": "var(--elev-2)",
+        "elev-3": "var(--elev-3)",
+        "elev-4": "var(--elev-4)",
+        // Brand focus ring as a usable shadow (RTL-safe, no layout impact)
+        "focus-brand": "var(--focus-ring)",
       },
       backgroundImage: {
         "gradient-gold": "linear-gradient(135deg, hsl(43, 100%, 50%) 0%, hsl(35, 100%, 45%) 100%)",

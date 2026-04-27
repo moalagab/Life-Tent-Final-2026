@@ -44,12 +44,31 @@ bunx playwright install --with-deps
 If `TEST_STORAGE_STATE` is not set, the suite will skip auth-protected
 tests rather than fail on the login screen.
 
-## Projects (breakpoints)
+## Projects (breakpoints × theme)
 
-| Project       | Viewport            |
-| ------------- | ------------------- |
-| `mobile-rtl`  | iPhone 13           |
-| `tablet-rtl`  | iPad (gen 7)        |
-| `desktop-rtl` | 1440 × 900          |
+| Project          | Viewport            | Scheme |
+| ---------------- | ------------------- | ------ |
+| `mobile-rtl`     | iPhone 13           | dark   |
+| `tablet-rtl`     | iPad (gen 7)        | dark   |
+| `desktop-rtl`    | 1440 × 900          | dark   |
+| `mobile-light`   | iPhone 13           | light  |
+| `tablet-light`   | iPad (gen 7)        | light  |
+| `desktop-light`  | 1440 × 900          | light  |
 
 All projects force `locale=ar-SA` and `dir=rtl` on `<html>` before render.
+
+## Specs
+
+- `dashboard-rtl.spec.ts` — full dashboard, three presets, dark mode (×3 sizes).
+- `dashboard-light.spec.ts` — Dashboard / KPI strip / Today's Rhythm widgets,
+  forced light mode (×3 sizes). Skipped automatically on `*-rtl` projects.
+
+## Updating baselines after intentional theme changes
+
+```bash
+TEST_STORAGE_STATE=tests/visual/.auth.json \
+  bunx playwright test tests/visual/dashboard-light.spec.ts \
+  --project=desktop-light --project=tablet-light --project=mobile-light \
+  --update-snapshots
+```
+
