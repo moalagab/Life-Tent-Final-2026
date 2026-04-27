@@ -12,78 +12,101 @@ import { KnowledgeWidget } from '@/components/dashboard/KnowledgeWidget';
 import { StudioWidget } from '@/components/dashboard/StudioWidget';
 import { useAutoReminders } from '@/hooks/useAutoReminders';
 import { useLanguage } from '@/hooks/useLanguage';
+import { Sparkles, LayoutGrid, Zap } from 'lucide-react';
 
 const Index = () => {
   useAutoReminders();
   const { currentLanguage } = useLanguage();
+  const isAr = currentLanguage === 'ar';
 
   return (
     <MainLayout>
-      <div className="space-y-5 lg:space-y-6 animate-fade-in">
-        {/* Greeting Section */}
-        <GreetingHeader />
-        
-        {/* Quick Actions */}
-        <section className="slide-up" style={{ animationDelay: '50ms' }}>
+      <div className="space-y-8 animate-fade-in pb-8">
+        {/* Hero / Greeting */}
+        <section className="slide-up">
+          <GreetingHeader />
+        </section>
+
+        {/* Quick Actions — Command Bar Style */}
+        <section className="slide-up" style={{ animationDelay: '60ms' }}>
+          <div className="flex items-center gap-2 mb-3">
+            <Zap className="w-4 h-4 text-primary" />
+            <h2 className="text-sm font-semibold tracking-wide text-foreground">
+              {isAr ? 'إجراءات سريعة' : 'Quick Actions'}
+            </h2>
+          </div>
           <QuickActions />
         </section>
 
-        {/* Main Dashboard Grid - Optimized Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-4 lg:gap-5">
-          
-          {/* Left Column - Prayer & Finance */}
-          <div className="md:col-span-1 xl:col-span-3 space-y-4 lg:space-y-5">
-            <section className="slide-up" style={{ animationDelay: '100ms' }}>
+        {/* Section: Today at a Glance */}
+        <section className="slide-up" style={{ animationDelay: '120ms' }}>
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <h2 className="text-sm font-semibold tracking-wide text-foreground">
+              {isAr ? 'يومك في لمحة' : 'Today at a Glance'}
+            </h2>
+          </div>
+
+          {/* Bento Grid — 12-col responsive */}
+          <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-4 lg:gap-5 auto-rows-min">
+            {/* Prayer — tall feature cell */}
+            <div className="md:col-span-3 lg:col-span-4 lg:row-span-2 slide-up" style={{ animationDelay: '160ms' }}>
               <PrayerWidget />
-            </section>
-            <section className="slide-up" style={{ animationDelay: '150ms' }}>
+            </div>
+
+            {/* Finance — wide cell */}
+            <div className="md:col-span-3 lg:col-span-4 slide-up" style={{ animationDelay: '200ms' }}>
               <FinanceSnapshot />
-            </section>
+            </div>
+
+            {/* Upcoming Events */}
+            <div className="md:col-span-3 lg:col-span-4 slide-up" style={{ animationDelay: '240ms' }}>
+              <UpcomingEvents />
+            </div>
+
+            {/* Focus Tasks */}
+            <div className="md:col-span-3 lg:col-span-4 slide-up" style={{ animationDelay: '280ms' }}>
+              <FocusTasks />
+            </div>
+
+            {/* Habits */}
+            <div className="md:col-span-3 lg:col-span-4 slide-up" style={{ animationDelay: '320ms' }}>
+              <HabitStreaks />
+            </div>
+          </div>
+        </section>
+
+        {/* Section: Strategic Pillars */}
+        <section className="slide-up" style={{ animationDelay: '360ms' }}>
+          <div className="flex items-center gap-2 mb-4">
+            <LayoutGrid className="w-4 h-4 text-primary" />
+            <h2 className="text-sm font-semibold tracking-wide text-foreground">
+              {isAr ? 'الركائز الاستراتيجية' : 'Strategic Pillars'}
+            </h2>
           </div>
 
-          {/* Center Column - Main Content */}
-          <div className="md:col-span-1 xl:col-span-6 space-y-4 lg:space-y-5">
-            {/* Projects - Full Width */}
-            <section className="slide-up" style={{ animationDelay: '200ms' }}>
+          <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-4 lg:gap-5">
+            {/* Projects — hero wide */}
+            <div className="md:col-span-6 lg:col-span-8 slide-up" style={{ animationDelay: '400ms' }}>
               <ProjectsOverview />
-            </section>
-            
-            {/* Tasks & Habits Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5">
-              <section className="slide-up" style={{ animationDelay: '250ms' }}>
-                <FocusTasks />
-              </section>
-              <section className="slide-up" style={{ animationDelay: '300ms' }}>
-                <HabitStreaks />
-              </section>
             </div>
-            
-            {/* Goals & Knowledge Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5">
-              <section className="slide-up" style={{ animationDelay: '350ms' }}>
-                <GoalProgress />
-              </section>
-              <section className="slide-up" style={{ animationDelay: '400ms' }}>
-                <KnowledgeWidget />
-              </section>
+
+            {/* Goals */}
+            <div className="md:col-span-3 lg:col-span-4 slide-up" style={{ animationDelay: '440ms' }}>
+              <GoalProgress />
+            </div>
+
+            {/* Knowledge */}
+            <div className="md:col-span-3 lg:col-span-6 slide-up" style={{ animationDelay: '480ms' }}>
+              <KnowledgeWidget />
+            </div>
+
+            {/* Studio */}
+            <div className="md:col-span-6 lg:col-span-6 slide-up" style={{ animationDelay: '520ms' }}>
+              <StudioWidget />
             </div>
           </div>
-
-          {/* Right Column - Events & Studio */}
-          <div className="md:col-span-2 xl:col-span-3 space-y-4 lg:space-y-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 gap-4 lg:gap-5">
-              <section className="slide-up" style={{ animationDelay: '450ms' }}>
-                <UpcomingEvents />
-              </section>
-              <section className="slide-up" style={{ animationDelay: '500ms' }}>
-                <StudioWidget />
-              </section>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer Spacer */}
-        <div className="h-2 lg:h-4" />
+        </section>
       </div>
     </MainLayout>
   );

@@ -292,6 +292,155 @@
   .hover-bounce:hover {
     animation: subtle-bounce 0.5s ease;
   }
+
+  /* ============================================
+     2026 Modern Design Utilities — Bento / Aurora / Spotlight
+     ============================================ */
+
+  /* Bento Cell — modern dashboard tile */
+  .bento-cell {
+    @apply relative overflow-hidden rounded-3xl transition-all duration-500;
+    background: linear-gradient(
+      145deg,
+      hsl(var(--card) / 0.85) 0%,
+      hsl(var(--card) / 0.55) 100%
+    );
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    border: 1px solid hsl(var(--border) / 0.4);
+    box-shadow:
+      0 1px 0 hsl(var(--foreground) / 0.04) inset,
+      0 8px 24px -12px hsl(var(--background) / 0.5);
+  }
+
+  .bento-cell:hover {
+    border-color: hsl(var(--primary) / 0.35);
+    box-shadow:
+      0 1px 0 hsl(var(--primary) / 0.15) inset,
+      0 20px 50px -20px hsl(var(--primary) / 0.25);
+    transform: translateY(-2px);
+  }
+
+  .dark .bento-cell {
+    background: linear-gradient(
+      145deg,
+      hsl(213 45% 16% / 0.7) 0%,
+      hsl(213 50% 12% / 0.5) 100%
+    );
+    box-shadow:
+      0 1px 0 hsl(0 0% 100% / 0.06) inset,
+      0 12px 32px -16px hsl(0 0% 0% / 0.6);
+  }
+
+  /* Spotlight effect — follows hover */
+  .spotlight {
+    position: relative;
+  }
+
+  .spotlight::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: radial-gradient(
+      400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      hsl(var(--primary) / 0.15),
+      transparent 40%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .spotlight:hover::before {
+    opacity: 1;
+  }
+
+  /* Aurora gradient backdrop */
+  .aurora-bg {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .aurora-bg::before {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    background:
+      radial-gradient(circle at 20% 30%, hsl(var(--primary) / 0.18), transparent 40%),
+      radial-gradient(circle at 80% 20%, hsl(43 100% 60% / 0.12), transparent 45%),
+      radial-gradient(circle at 50% 80%, hsl(213 80% 40% / 0.15), transparent 50%);
+    animation: aurora-drift 20s ease-in-out infinite;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Mesh gradient header */
+  .mesh-header {
+    background:
+      radial-gradient(at 20% 0%, hsl(var(--primary) / 0.15) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsl(213 70% 30% / 0.2) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, hsl(43 100% 50% / 0.08) 0px, transparent 50%),
+      hsl(var(--card) / 0.6);
+  }
+
+  /* Glow ring on focus/active */
+  .glow-ring {
+    position: relative;
+  }
+
+  .glow-ring::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary) / 0.6),
+      transparent 40%,
+      hsl(var(--primary) / 0.4)
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+
+  .glow-ring:hover::after {
+    opacity: 1;
+  }
+
+  /* Section heading divider — modern */
+  .section-heading {
+    @apply flex items-center gap-3 text-sm font-semibold uppercase tracking-widest text-muted-foreground;
+  }
+
+  .section-heading::before,
+  .section-heading::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(var(--border)), transparent);
+  }
+
+  /* Number ticker — for stats */
+  .ticker-num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+    letter-spacing: -0.02em;
+  }
+}
+
+@keyframes aurora-drift {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(3%, -2%) rotate(2deg); }
+  66% { transform: translate(-2%, 3%) rotate(-2deg); }
 }
 
 @keyframes subtle-bounce {

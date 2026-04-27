@@ -172,42 +172,48 @@ export function QuickActions() {
 
   return (
     <>
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-2.5">
-        {actions.map((action) => (
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-2 lg:gap-3">
+        {actions.map((action, idx) => (
           <button
             key={action.id}
             onClick={() => handleAction(action.id)}
             onMouseEnter={() => setHoveredAction(action.id)}
             onMouseLeave={() => setHoveredAction(null)}
+            style={{ animationDelay: `${idx * 40}ms` }}
             className={cn(
-              "group relative overflow-hidden rounded-xl p-3 transition-all duration-200",
-              "border hover:shadow-md hover:-translate-y-0.5",
-              action.special 
-                ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-primary/50" 
-                : "bg-card/60 backdrop-blur-sm border-border/40 hover:border-primary/30"
+              "group relative overflow-hidden rounded-2xl p-3.5 transition-all duration-300 slide-up",
+              "border backdrop-blur-xl",
+              "hover:-translate-y-1 active:scale-[0.97]",
+              action.special
+                ? "bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground border-primary/40 shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)] hover:shadow-[0_12px_32px_-8px_hsl(var(--primary)/0.8)]"
+                : "bg-card/50 border-border/40 hover:border-primary/40 hover:shadow-[0_8px_24px_-12px_hsl(var(--primary)/0.3)]"
             )}
           >
-            {/* Background hover effect */}
+            {/* Shine sweep on hover */}
+            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+
+            {/* Background hover tint */}
             {!action.special && (
               <div className={cn(
-                "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200",
+                "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300",
                 action.hoverBg
               )} />
             )}
-            
+
             <div className="relative flex flex-col items-center gap-2 text-center">
               <div className={cn(
-                "w-10 h-10 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-105",
-                action.special ? "bg-white/20" : action.iconBg
+                "w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300",
+                "group-hover:scale-110 group-hover:rotate-3",
+                action.special ? "bg-white/20 backdrop-blur-sm" : action.iconBg
               )}>
                 <action.icon className={cn(
-                  "w-5 h-5",
+                  "w-5 h-5 transition-transform duration-300",
                   action.special ? "text-primary-foreground" : action.iconColor
                 )} />
               </div>
-              
+
               <span className={cn(
-                "text-[11px] font-medium leading-tight",
+                "text-[11px] font-semibold leading-tight",
                 action.special ? "text-primary-foreground" : "text-foreground"
               )}>
                 {action.label}
