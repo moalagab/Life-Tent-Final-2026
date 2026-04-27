@@ -37,10 +37,34 @@ export default function Tasks() {
   const [dialogStatus, setDialogStatus] = useState<TaskStatus>('todo');
   const [searchQuery, setSearchQuery] = useState('');
   const [draggedTask, setDraggedTask] = useState<string | null>(null);
-  const [categoryFilter, setCategoryFilter] = useState<'all' | 'work' | 'personal'>(
-    (searchParams.get('category') as 'all' | 'work' | 'personal') || 'all'
-  );
-  const dueFilter = (searchParams.get('filter') as 'overdue' | 'today' | null) || null;
+  // Validate URL params with safe fallbacks; ignore unknown values.
+  const ALLOWED_CATEGORIES = ['all', 'work', 'personal'] as const;
+  const ALLOWED_DUE_FILTERS = ['overdue', 'today'] as const;
+  const rawCategory = searchParams.get('category');
+  const rawDue = searchParams.get('filter');
+  const initialCategory = (ALLOWED_CATEGORIES as readonly string[]).includes(rawCategory ?? '')
+    ? (rawCategory as 'all' | 'work' | 'personal')
+    : 'all';
+  const [categoryFilter, setCategoryFilter] = useState<'all' | 'work' | 'personal'>(initialCategory);
+  const dueFilter: 'overdue' | 'today' | null = (ALLOWED_DUE_FILTERS as readonly string[]).includes(rawDue ?? '')
+    ? (rawDue as 'overdue' | 'today')
+    : null;
+
+  // Clean unknown params from URL silently
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams);
+    let changed = false;
+    if (rawCategory && !(ALLOWED_CATEGORIES as readonly string[]).includes(rawCategory)) {
+      next.delete('category');
+      changed = true;
+    }
+    if (rawDue && !(ALLOWED_DUE_FILTERS as readonly string[]).includes(rawDue)) {
+      next.delete('filter');
+      changed = true;
+    }
+    if (changed) setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rawCategory, rawDue]);
 
   // Open the create-task dialog when ?new=1 is present
   useEffect(() => {
