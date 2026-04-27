@@ -14,12 +14,9 @@ export function MainLayout({ children }: MainLayoutProps) {
   const isMobile = useIsMobile();
 
   return (
-    <div className="min-h-screen relative">
-      {/* Ambient backdrop — kept subtle */}
-      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
-        <div className="absolute -top-1/4 -right-1/4 w-[60vw] h-[60vw] rounded-full bg-primary/[0.04] blur-3xl" />
-        <div className="absolute -bottom-1/4 -left-1/4 w-[50vw] h-[50vw] rounded-full bg-primary/[0.03] blur-3xl" />
-      </div>
+    <div className="min-h-screen relative bg-background">
+      {/* Single, very subtle ambient wash — no competing blobs */}
+      <div className="fixed inset-0 -z-10 pointer-events-none bg-gradient-to-b from-primary/[0.02] via-transparent to-transparent" />
 
       <Sidebar />
       <main
