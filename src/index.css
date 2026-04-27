@@ -53,10 +53,25 @@
 
     --radius: 1rem;
 
-    /* Glass — clean, low-saturation for light mode */
+    /* Glass — unified state tokens (default / hover / active / disabled) */
     --glass-bg: rgba(255, 255, 255, 0.72);
+    --glass-bg-hover: rgba(255, 255, 255, 0.86);
+    --glass-bg-active: rgba(255, 255, 255, 0.94);
+    --glass-bg-disabled: rgba(255, 255, 255, 0.5);
     --glass-border: rgba(15, 23, 42, 0.06);
+    --glass-border-hover: rgba(15, 23, 42, 0.10);
+    --glass-border-active: hsla(38, 92%, 45%, 0.35);
+    --glass-border-disabled: rgba(15, 23, 42, 0.04);
     --glass-blur: 24px;
+
+    /* Elevation scale — light mode (Stripe/Linear-grade soft shadows) */
+    --elev-1: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px -1px rgba(15, 23, 42, 0.04);
+    --elev-2: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px -2px rgba(15, 23, 42, 0.06);
+    --elev-3: 0 2px 4px rgba(15, 23, 42, 0.05), 0 12px 28px -8px rgba(15, 23, 42, 0.10);
+    --elev-4: 0 4px 8px rgba(15, 23, 42, 0.06), 0 24px 48px -12px rgba(15, 23, 42, 0.14);
+
+    /* Focus ring — gold halo, AA-visible on white */
+    --focus-ring: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(38 92% 45% / 0.55);
 
     /* Brand gold gradient — keep identity, slight warm shift */
     --gradient-gold: linear-gradient(135deg, hsl(43 95% 48%) 0%, hsl(34 95% 42%) 100%);
