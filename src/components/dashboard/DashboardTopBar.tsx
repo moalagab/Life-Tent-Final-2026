@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { Search, Plus, Command, type LucideIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
+import { usePersistedState } from '@/hooks/usePersistedState';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -61,7 +62,9 @@ export function DashboardTopBar() {
   const { currentLanguage, isRTL } = useLanguage();
   const isAr = currentLanguage === 'ar';
   const navigate = useNavigate();
-  const [searchOpen, setSearchOpen] = useState(false);
+  // Persist palette open state and last-used filter id, per user
+  const [searchOpen, setSearchOpen] = usePersistedState<boolean>('palette.open', false);
+  const [lastFilterId, setLastFilterId] = usePersistedState<string | null>('palette.lastFilter', null);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -72,7 +75,7 @@ export function DashboardTopBar() {
     };
     document.addEventListener('keydown', down);
     return () => document.removeEventListener('keydown', down);
-  }, []);
+  }, [setSearchOpen]);
 
   const go = (path: string) => {
     setSearchOpen(false);
@@ -112,11 +115,27 @@ export function DashboardTopBar() {
     { id: 'jump-attention', group: 'jump', label: isAr ? 'بنود تحتاج انتباه' : 'Items needing attention', keywords: ['attention', 'urgent', 'انتباه'], icon: AlertTriangle, run: () => go('/dashboard#attention') },
   ], [isAr]);
 
+  // When the user picks a filter/jump, remember it so it appears as a "Recent" entry next time.
+  const runWithMemory = useCallback(
+    (item: CommandEntry) => {
+      if (item.group === 'filters' || item.group === 'jump') {
+        setLastFilterId(item.id);
+      }
+      item.run();
+    },
+    [setLastFilterId]
+  );
+
   const grouped = useMemo(() => {
     const g: Record<CommandGroupKey, CommandEntry[]> = { navigate: [], create: [], filters: [], jump: [] };
     commands.forEach((c) => g[c.group].push(c));
     return g;
   }, [commands]);
+
+  const lastFilter = useMemo(
+    () => (lastFilterId ? commands.find((c) => c.id === lastFilterId) ?? null : null),
+    [commands, lastFilterId]
+  );
 
   const groupHeadings: Record<CommandGroupKey, string> = {
     navigate: isAr ? 'الانتقال' : 'Navigate',
@@ -174,6 +193,22 @@ export function DashboardTopBar() {
         <CommandInput placeholder={isAr ? 'ابحث في الأقسام، الفلاتر والإجراءات…' : 'Search sections, filters and actions…'} />
         <CommandList>
           <CommandEmpty>{isAr ? 'لا توجد نتائج' : 'No results.'}</CommandEmpty>
+          {lastFilter && (
+            <>
+              <CommandGroup heading={isAr ? 'الأخير' : 'Recent'}>
+                <CommandItem
+                  key={`recent-${lastFilter.id}`}
+                  value={`recent ${lastFilter.label} ${lastFilter.keywords.join(' ')}`}
+                  onSelect={() => runWithMemory(lastFilter)}
+                >
+                  <lastFilter.icon className="w-4 h-4 me-2 text-muted-foreground" />
+                  <span className="flex-1">{lastFilter.label}</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/60 rtl:rotate-180" />
+                </CommandItem>
+              </CommandGroup>
+              <CommandSeparator />
+            </>
+          )}
           {(Object.keys(grouped) as CommandGroupKey[]).map((key, idx) => {
             const items = grouped[key];
             if (items.length === 0) return null;
@@ -185,7 +220,7 @@ export function DashboardTopBar() {
                     <CommandItem
                       key={item.id}
                       value={`${item.label} ${item.keywords.join(' ')}`}
-                      onSelect={item.run}
+                      onSelect={() => runWithMemory(item)}
                     >
                       <item.icon className="w-4 h-4 me-2 text-muted-foreground" />
                       <span className="flex-1">{item.label}</span>

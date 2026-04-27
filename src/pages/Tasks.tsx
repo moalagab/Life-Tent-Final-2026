@@ -8,7 +8,9 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useTasks, useCreateTask, useUpdateTask, useDeleteTask, Task } from '@/hooks/useTasks';
 import { useProjects } from '@/hooks/useProjects';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { isToday, isPast, parseISO, startOfDay } from 'date-fns';
 import { TaskFormDialog } from '@/components/tasks/TaskFormDialog';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -30,11 +32,26 @@ export default function Tasks() {
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
   
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogStatus, setDialogStatus] = useState<TaskStatus>('todo');
   const [searchQuery, setSearchQuery] = useState('');
   const [draggedTask, setDraggedTask] = useState<string | null>(null);
-  const [categoryFilter, setCategoryFilter] = useState<'all' | 'work' | 'personal'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<'all' | 'work' | 'personal'>(
+    (searchParams.get('category') as 'all' | 'work' | 'personal') || 'all'
+  );
+  const dueFilter = (searchParams.get('filter') as 'overdue' | 'today' | null) || null;
+
+  // Open the create-task dialog when ?new=1 is present
+  useEffect(() => {
+    if (searchParams.get('new') === '1') {
+      setIsDialogOpen(true);
+      setDialogStatus('todo');
+      const next = new URLSearchParams(searchParams);
+      next.delete('new');
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // WIP limits per column
   const WIP_LIMITS: Record<TaskStatus, number> = {
@@ -73,7 +90,23 @@ export default function Tasks() {
         (categoryFilter === 'personal' && !(task as any).category)
       );
     }
+    if (dueFilter) {
+      const dayStart = startOfDay(new Date());
+      filtered = filtered.filter((task) => {
+        if (!task.due_date) return false;
+        const d = parseISO(task.due_date);
+        if (dueFilter === 'overdue') return isPast(d) && d < dayStart && task.status !== 'done';
+        if (dueFilter === 'today') return isToday(d);
+        return true;
+      });
+    }
     return filtered;
+  };
+
+  const clearDueFilter = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('filter');
+    setSearchParams(next, { replace: true });
   };
 
   const isWipLimitReached = (status: TaskStatus) => {
@@ -234,6 +267,24 @@ export default function Tasks() {
             {t('common.filter')}
           </Button>
         </div>
+
+        {/* Active deep-link filter banner */}
+        {dueFilter && (
+          <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/30 text-sm">
+            <Filter className="w-3.5 h-3.5 text-primary" />
+            <span className="text-foreground">
+              {dueFilter === 'overdue'
+                ? (currentLanguage === 'ar' ? 'يعرض المتأخر فقط' : 'Showing overdue only')
+                : (currentLanguage === 'ar' ? 'يعرض مهام اليوم فقط' : 'Showing today only')}
+            </span>
+            <button
+              onClick={clearDueFilter}
+              className="text-xs text-muted-foreground hover:text-foreground underline-offset-2 hover:underline ms-1"
+            >
+              {currentLanguage === 'ar' ? 'مسح' : 'Clear'}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Kanban Board */}
