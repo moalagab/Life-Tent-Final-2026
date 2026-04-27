@@ -168,31 +168,26 @@ const Index = () => {
 
   return (
     <MainLayout>
-      <div className="space-y-6 lg:space-y-8 pb-10 animate-fade-in">
-        {/* 1. Greeting */}
-        <GreetingSlim />
-
-        {/* 2. Attention */}
-        <AttentionStrip />
-
-        {/* 3. Layout preset switcher */}
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <p className="text-xs text-muted-foreground flex items-center gap-2 flex-wrap">
-            <span>
-              {isAr ? 'بدّل ترتيب لوحة التحكم بحسب تركيز يومك' : 'Switch dashboard arrangement to match your focus'}
+      <div className="space-y-8 lg:space-y-10 pb-12 animate-fade-in">
+        {/* 1. Greeting + preset switcher on one calm row */}
+        <div className="flex items-end justify-between gap-4 flex-wrap">
+          <GreetingSlim />
+          <div className="flex items-center gap-2">
+            <span className="hidden lg:inline-flex items-center gap-1 text-[10px] font-mono text-muted-foreground/60">
+              <kbd className="px-1.5 py-0.5 rounded border border-border/50 bg-muted/30">Alt</kbd>
+              <kbd className="px-1.5 py-0.5 rounded border border-border/50 bg-muted/30">1·2·3</kbd>
             </span>
-            <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-mono text-muted-foreground/70">
-              <kbd className="px-1.5 py-0.5 rounded border border-border/60 bg-background">Alt</kbd>+
-              <kbd className="px-1.5 py-0.5 rounded border border-border/60 bg-background">1</kbd>
-              <kbd className="px-1.5 py-0.5 rounded border border-border/60 bg-background">2</kbd>
-              <kbd className="px-1.5 py-0.5 rounded border border-border/60 bg-background">3</kbd>
-            </span>
-          </p>
-          <LayoutPresetSwitcher value={preset} onChange={setPreset} />
+            <LayoutPresetSwitcher value={preset} onChange={setPreset} />
+          </div>
         </div>
 
-        {/* 4. Sections per preset */}
-        {arrangements[preset]}
+        {/* 2. Attention ribbon */}
+        <AttentionStrip />
+
+        {/* 3. Sections per preset, separated by generous breathing room */}
+        <div className="space-y-8 lg:space-y-10">
+          {arrangements[preset]}
+        </div>
       </div>
     </MainLayout>
   );
