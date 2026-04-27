@@ -60,7 +60,7 @@
     --glass-bg-disabled: rgba(255, 255, 255, 0.5);
     --glass-border: rgba(15, 23, 42, 0.06);
     --glass-border-hover: rgba(15, 23, 42, 0.10);
-    --glass-border-active: hsla(38, 92%, 45%, 0.35);
+    --glass-border-active: hsla(33, 95%, 38%, 0.40);
     --glass-border-disabled: rgba(15, 23, 42, 0.04);
     --glass-blur: 24px;
 
@@ -179,7 +179,7 @@
   /* Light mode — soft warm ambient wash, subtle and premium */
   body {
     background:
-      radial-gradient(ellipse 80% 50% at 50% -10%, hsla(38, 92%, 50%, 0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 80% 50% at 50% -10%, hsla(33, 95%, 50%, 0.07) 0%, transparent 60%),
       radial-gradient(ellipse 60% 50% at 100% 100%, hsla(220, 30%, 50%, 0.04) 0%, transparent 60%),
       hsl(var(--background));
   }
