@@ -140,6 +140,17 @@
   body {
     @apply bg-background text-foreground antialiased;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Light mode — soft warm ambient wash, subtle and premium */
+  body {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, hsla(38, 92%, 50%, 0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 100% 100%, hsla(220, 30%, 50%, 0.04) 0%, transparent 60%),
+      hsl(var(--background));
   }
 
   .dark body {
