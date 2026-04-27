@@ -21,6 +21,8 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useSectionState } from '@/hooks/useSectionState';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet } from 'lucide-react';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
 import type { ReactNode } from 'react';
 
 /**
