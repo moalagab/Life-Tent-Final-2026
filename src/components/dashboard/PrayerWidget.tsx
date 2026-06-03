@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { getTodayPrayerTimes, getNextPrayer, PrayerTimes } from '@/lib/prayer-times';
-import { isRamadan } from '@/lib/hijri';
+import { isRamadan, formatHijriDate } from '@/lib/hijri';
 import { cn } from '@/lib/utils';
-import { Moon, Sun, Sunrise, Sunset, Clock } from 'lucide-react';
+import { Moon, Sun, Sunrise, Sunset, Clock, MapPin, CloudSun, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { DashboardWidgetShell } from './DashboardWidgetShell';
+import { format } from 'date-fns';
+import { ar, enUS } from 'date-fns/locale';
 
 const prayerIcons: Record<string, React.ReactNode> = {
   Fajr: <Sunrise className="w-3.5 h-3.5" />,
@@ -15,12 +17,40 @@ const prayerIcons: Record<string, React.ReactNode> = {
   Isha: <Moon className="w-3.5 h-3.5" />,
 };
 
+interface Weather {
+  temp: number;
+  code: number;
+  city: string;
+}
+
+// Open-Meteo WMO weather code → emoji + EN/AR label
+const weatherDescriptor = (code: number, isAr: boolean) => {
+  if (code === 0) return { emoji: '☀️', label: isAr ? 'صحو' : 'Clear' };
+  if (code <= 3) return { emoji: '⛅', label: isAr ? 'غائم جزئيًا' : 'Partly cloudy' };
+  if (code <= 48) return { emoji: '🌫️', label: isAr ? 'ضباب' : 'Fog' };
+  if (code <= 67) return { emoji: '🌧️', label: isAr ? 'مطر' : 'Rain' };
+  if (code <= 77) return { emoji: '❄️', label: isAr ? 'ثلج' : 'Snow' };
+  if (code <= 82) return { emoji: '🌦️', label: isAr ? 'زخات مطر' : 'Showers' };
+  if (code <= 99) return { emoji: '⛈️', label: isAr ? 'عاصفة رعدية' : 'Thunderstorm' };
+  return { emoji: '🌡️', label: isAr ? 'الطقس' : 'Weather' };
+};
+
+const LS_KEY = 'lt.weatherCache.v1';
+
 export function PrayerWidget() {
   const { t, currentLanguage } = useLanguage();
   const isAr = currentLanguage === 'ar';
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
   const [nextPrayer, setNextPrayer] = useState<{ prayer: any; remaining: string } | null>(null);
   const [isRamadanPeriod] = useState(isRamadan());
+  const [weather, setWeather] = useState<Weather | null>(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
+
+  const today = new Date();
+  const gregorian = format(today, 'EEEE, d MMMM yyyy', {
+    locale: isAr ? ar : enUS,
+  });
+  const hijri = formatHijriDate(today, isAr ? 'ar' : 'en');
 
   useEffect(() => {
     const times = getTodayPrayerTimes();
@@ -32,6 +62,63 @@ export function PrayerWidget() {
     return () => clearInterval(interval);
   }, []);
 
+  // Weather via geolocation → Open-Meteo (no API key needed)
+  useEffect(() => {
+    // Cache for 30 minutes
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (raw) {
+        const cached = JSON.parse(raw) as { ts: number; data: Weather };
+        if (Date.now() - cached.ts < 30 * 60 * 1000) {
+          setWeather(cached.data);
+          return;
+        }
+      }
+    } catch {}
+
+    if (!('geolocation' in navigator)) return;
+    setWeatherLoading(true);
+
+    navigator.geolocation.getCurrentPosition(
+      async ({ coords }) => {
+        try {
+          const { latitude: lat, longitude: lon } = coords;
+          // Current weather
+          const wRes = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code`
+          );
+          const wJson = await wRes.json();
+          // Reverse-geocode city name
+          let city = '';
+          try {
+            const gRes = await fetch(
+              `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}&language=${isAr ? 'ar' : 'en'}&count=1`
+            );
+            const gJson = await gRes.json();
+            city = gJson?.results?.[0]?.name || '';
+          } catch {}
+
+          const data: Weather = {
+            temp: Math.round(wJson?.current?.temperature_2m ?? 0),
+            code: wJson?.current?.weather_code ?? 0,
+            city,
+          };
+          setWeather(data);
+          try {
+            localStorage.setItem(LS_KEY, JSON.stringify({ ts: Date.now(), data }));
+          } catch {}
+        } catch {
+          // network/geocoding failure — silently skip
+        } finally {
+          setWeatherLoading(false);
+        }
+      },
+      () => setWeatherLoading(false),
+      { timeout: 10000, maximumAge: 30 * 60 * 1000 }
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   if (!prayerTimes || !nextPrayer) return null;
 
   const allPrayers = [
@@ -41,6 +128,8 @@ export function PrayerWidget() {
     prayerTimes.maghrib,
     prayerTimes.isha,
   ];
+
+  const w = weather ? weatherDescriptor(weather.code, isAr) : null;
 
   return (
     <DashboardWidgetShell
@@ -54,6 +143,39 @@ export function PrayerWidget() {
         ) : undefined
       }
     >
+      {/* Date + weather strip */}
+      <div className="flex items-center justify-between gap-2 mb-3 text-[11px]">
+        <div className="min-w-0">
+          <p className="text-foreground font-medium truncate">{gregorian}</p>
+          <p className="text-muted-foreground truncate">{hijri}</p>
+        </div>
+        <div className="shrink-0 text-end">
+          {weatherLoading ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
+          ) : weather && w ? (
+            <div className="flex items-center gap-1.5">
+              <span className="text-base leading-none">{w.emoji}</span>
+              <div className="leading-tight">
+                <p className="font-semibold text-foreground tabular-nums">
+                  {weather.temp}°
+                </p>
+                {weather.city && (
+                  <p className="text-muted-foreground flex items-center gap-0.5 justify-end">
+                    <MapPin className="w-2.5 h-2.5" />
+                    <span className="truncate max-w-[80px]">{weather.city}</span>
+                  </p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <span className="text-muted-foreground inline-flex items-center gap-1">
+              <CloudSun className="w-3 h-3" />
+              {isAr ? 'الطقس' : 'Weather'}
+            </span>
+          )}
+        </div>
+      </div>
+
       {/* Next Prayer — quiet highlight strip */}
       <div className="rounded-xl bg-primary/5 border border-primary/15 p-3 mb-3">
         <div className="flex items-center justify-between gap-3">
