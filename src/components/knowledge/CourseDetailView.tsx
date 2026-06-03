@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { 
   ArrowLeft, BookOpen, GraduationCap, Plus, Check, Clock, FileText, 
   Lightbulb, Play, Trash2, Edit3, MoreVertical, Star, RotateCcw,
-  ChevronDown, ChevronUp, ExternalLink, Loader2, Download
+  ChevronDown, ChevronUp, ExternalLink, Loader2, Download, Network
 } from 'lucide-react';
+import { CourseMindMap } from './CourseMindMap';
 import { generateCourseNotesPDF } from '@/lib/pdf-export';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,7 +35,7 @@ interface CourseDetailViewProps {
 
 export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetailViewProps) {
   const { t, currentLanguage } = useLanguage();
-  const [activeTab, setActiveTab] = useState<'lessons' | 'notes' | 'flashcards' | 'review'>('lessons');
+  const [activeTab, setActiveTab] = useState<'lessons' | 'notes' | 'flashcards' | 'mindmap' | 'review'>('lessons');
   const [isAddLessonOpen, setIsAddLessonOpen] = useState(false);
   const [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
   const [isAddFlashcardOpen, setIsAddFlashcardOpen] = useState(false);
@@ -291,6 +292,10 @@ export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetai
                   {flashcardsForReview.length}
                 </span>
               )}
+            </TabsTrigger>
+            <TabsTrigger value="mindmap" className="flex items-center gap-2">
+              <Network className="w-4 h-4" />
+              {currentLanguage === 'ar' ? 'الخريطة الذهنية' : 'Mind Map'}
             </TabsTrigger>
           </TabsList>
 
@@ -620,6 +625,16 @@ export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetai
               </p>
             </div>
           )}
+        </TabsContent>
+
+        {/* Mind Map Tab */}
+        <TabsContent value="mindmap" className="mt-4">
+          <CourseMindMap
+            course={course}
+            lessons={lessons}
+            notes={notes}
+            flashcards={flashcards}
+          />
         </TabsContent>
       </Tabs>
 
