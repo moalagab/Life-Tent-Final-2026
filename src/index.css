@@ -1,4 +1,67 @@
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap');
+/* LamaSans — primary brand typeface (replaces Tajawal across the entire app) */
+@font-face {
+  font-family: 'LamaSans';
+  font-style: normal;
+  font-weight: 100;
+  font-display: swap;
+  src: url('/__l5e/assets-v1/785d629c-3d00-4dd1-91f8-6f19cb617643/LamaSans-Thin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LamaSans';
+  font-style: normal;
+  font-weight: 200;
+  font-display: swap;
+  src: url('/__l5e/assets-v1/61b726da-d0a5-4248-9f3b-71a804c20918/LamaSans-ExtraLight.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LamaSans';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('/__l5e/assets-v1/aecf4408-9af7-4357-a2aa-1c4e8ea54963/LamaSans-Light.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LamaSans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/__l5e/assets-v1/da205a5c-05bc-40ce-8869-e363e4d3c795/LamaSans-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LamaSans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/__l5e/assets-v1/20b76992-8e07-45eb-a19a-81f4b580aed6/LamaSans-Medium.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LamaSans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/__l5e/assets-v1/020bc727-ab1d-4ebf-aaa1-475fe9842510/LamaSans-SemiBold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LamaSans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/__l5e/assets-v1/cd91ddd4-f46d-4c2b-845d-bbf23a9fcfb4/LamaSans-Bold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LamaSans';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/__l5e/assets-v1/4c4c3288-3013-4731-8ca7-9a1550f1a418/LamaSans-ExtraBold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LamaSans';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('/__l5e/assets-v1/0617db4b-3e00-473f-902e-307e6517c2bc/LamaSans-Black.woff2') format('woff2');
+}
 
 @tailwind base;
 @tailwind components;

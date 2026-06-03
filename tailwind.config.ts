@@ -14,8 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        tajawal: ['Tajawal', 'sans-serif'],
-        sans: ['Tajawal', 'sans-serif'],
+        lama: ['LamaSans', 'Tajawal', 'system-ui', 'sans-serif'],
+        tajawal: ['LamaSans', 'Tajawal', 'sans-serif'],
+        sans: ['LamaSans', 'Tajawal', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
