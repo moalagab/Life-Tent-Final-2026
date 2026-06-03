@@ -496,24 +496,31 @@ export function SubscriptionsManager() {
           {subscriptions?.map((sub) => {
             const daysUntil = differenceInDays(new Date(sub.next_billing_date), new Date());
             const isUpcoming = daysUntil >= 0 && daysUntil <= 7;
+            const isOverdue = sub.is_active && daysUntil < 0;
 
             return (
               <div 
                 key={sub.id} 
                 className={cn(
-                  'glass-card p-4 flex items-center justify-between',
-                  !sub.is_active && 'opacity-60'
+                  'glass-card p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3',
+                  !sub.is_active && 'opacity-60',
+                  isOverdue && 'border-destructive/60 border'
                 )}
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     <RefreshCw className="w-5 h-5 text-primary" />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-semibold">{sub.name}</h4>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="font-semibold truncate">{sub.name}</h4>
                       {!sub.is_active && (
                         <Badge variant="secondary">{t('finance.paused')}</Badge>
+                      )}
+                      {isOverdue && (
+                        <Badge variant="destructive">
+                          {language === 'ar' ? `متأخر ${Math.abs(daysUntil)} يوم` : `${Math.abs(daysUntil)}d overdue`}
+                        </Badge>
                       )}
                       {isUpcoming && sub.is_active && (
                         <Badge variant="outline" className="border-warning text-warning">
@@ -553,7 +560,7 @@ export function SubscriptionsManager() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 sm:gap-4 self-end sm:self-auto">
                   <div className="text-end">
                     <p className="font-bold text-lg">{sub.amount.toLocaleString()} {sub.currency || 'SAR'}</p>
                     <p className="text-xs text-muted-foreground">/{t(`finance.${sub.billing_cycle}`)}</p>
