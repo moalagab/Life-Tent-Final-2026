@@ -626,6 +626,16 @@ export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetai
             </div>
           )}
         </TabsContent>
+
+        {/* Mind Map Tab */}
+        <TabsContent value="mindmap" className="mt-4">
+          <CourseMindMap
+            course={course}
+            lessons={lessons}
+            notes={notes}
+            flashcards={flashcards}
+          />
+        </TabsContent>
       </Tabs>
 
       {/* Add Lesson Dialog */}
