@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @import url('https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;500;700;900&family=Lato:wght@300;400;700;900&display=swap');
 
 /* Local font-face definitions — place font files in `public/fonts/` */
@@ -28,6 +29,71 @@
   font-weight: 700;
   font-style: normal;
   font-display: swap;
+=======
+/* LamaSans — primary brand typeface (replaces Tajawal across the entire app) */
+@font-face {
+  font-family: 'LamaSans';
+  font-style: normal;
+  font-weight: 100;
+  font-display: swap;
+  src: url('/__l5e/assets-v1/785d629c-3d00-4dd1-91f8-6f19cb617643/LamaSans-Thin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LamaSans';
+  font-style: normal;
+  font-weight: 200;
+  font-display: swap;
+  src: url('/__l5e/assets-v1/61b726da-d0a5-4248-9f3b-71a804c20918/LamaSans-ExtraLight.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LamaSans';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('/__l5e/assets-v1/aecf4408-9af7-4357-a2aa-1c4e8ea54963/LamaSans-Light.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LamaSans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/__l5e/assets-v1/da205a5c-05bc-40ce-8869-e363e4d3c795/LamaSans-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LamaSans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/__l5e/assets-v1/20b76992-8e07-45eb-a19a-81f4b580aed6/LamaSans-Medium.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LamaSans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/__l5e/assets-v1/020bc727-ab1d-4ebf-aaa1-475fe9842510/LamaSans-SemiBold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LamaSans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/__l5e/assets-v1/cd91ddd4-f46d-4c2b-845d-bbf23a9fcfb4/LamaSans-Bold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LamaSans';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/__l5e/assets-v1/4c4c3288-3013-4731-8ca7-9a1550f1a418/LamaSans-ExtraBold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LamaSans';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('/__l5e/assets-v1/0617db4b-3e00-473f-902e-307e6517c2bc/LamaSans-Black.woff2') format('woff2');
+>>>>>>> fc2e83368e6e28cc1fd4fd54fab306c6d47a9fc2
 }
 
 @tailwind base;
@@ -64,103 +130,37 @@
     --muted-foreground: 215 14% 38%;   /* AA on background and card */
 
     --accent: 220 14% 93%;
-    --accent-foreground: 215 28% 14%;
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;500;700;900&family=Lato:wght@300;400;700;900&display=swap');
 
-    /* Status — calibrated for AA on light surfaces */
-    --destructive: 0 72% 44%;
-    --destructive-foreground: 0 0% 100%;
-
-    --success: 152 70% 28%;            /* deeper green → AA on white */
-    --success-foreground: 0 0% 100%;
-
-    --warning: 28 92% 36%;             /* amber-brown → AA on white */
-    --warning-foreground: 0 0% 100%;
-
-    /* Lines & focus */
-    --border: 220 14% 89%;
-    --input: 220 14% 91%;
-    --ring: 33 95% 38%;                /* AA UI-component contrast vs background */
-
-    --radius: 1rem;
-
-    /* Glass — unified state tokens (default / hover / active / disabled) */
-    --glass-bg: rgba(255, 255, 255, 0.72);
-    --glass-bg-hover: rgba(255, 255, 255, 0.86);
-    --glass-bg-active: rgba(255, 255, 255, 0.94);
-    --glass-bg-disabled: rgba(255, 255, 255, 0.5);
-    --glass-border: rgba(15, 23, 42, 0.06);
-    --glass-border-hover: rgba(15, 23, 42, 0.10);
-    --glass-border-active: hsla(33, 95%, 38%, 0.40);
-    --glass-border-disabled: rgba(15, 23, 42, 0.04);
-    --glass-blur: 24px;
-
-    /* Elevation scale — light mode (Stripe/Linear-grade soft shadows) */
-    --elev-1: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px -1px rgba(15, 23, 42, 0.04);
-    --elev-2: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px -2px rgba(15, 23, 42, 0.06);
-    --elev-3: 0 2px 4px rgba(15, 23, 42, 0.05), 0 12px 28px -8px rgba(15, 23, 42, 0.10);
-    --elev-4: 0 4px 8px rgba(15, 23, 42, 0.06), 0 24px 48px -12px rgba(15, 23, 42, 0.14);
-
-    /* Focus ring — gold halo, AA-visible on white */
-    --focus-ring: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(33 95% 38% / 0.65);
-
-    /* Brand gold gradient — keep identity, slight warm shift */
-    --gradient-gold: linear-gradient(135deg, hsl(43 95% 48%) 0%, hsl(34 95% 42%) 100%);
-    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.5) 100%);
-
-    /* Sidebar — slightly cooler than canvas for clear separation */
-    --sidebar-background: 220 22% 98%;
-    --sidebar-foreground: 215 25% 20%;
-    --sidebar-primary: 33 95% 32%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 14% 94%;
-    --sidebar-accent-foreground: 215 28% 14%;
-    --sidebar-border: 220 14% 90%;
-    --sidebar-ring: 33 95% 38%;
-  }
-
-  .dark {
-    /* Midnight Glass Design System */
-    --background: 213 58% 11%;
-    --foreground: 210 40% 96%;
-
-    --card: 213 45% 14%;
-    --card-foreground: 210 40% 96%;
-
-    --popover: 213 45% 12%;
-    --popover-foreground: 210 40% 96%;
-
-    --primary: 43 100% 50%;
-    --primary-foreground: 213 58% 11%;
-
-    --secondary: 213 35% 20%;
-    --secondary-foreground: 210 40% 96%;
-
-    --muted: 213 30% 18%;
-    --muted-foreground: 215 20% 55%;
-
-    --accent: 213 40% 22%;
-    --accent-foreground: 210 40% 96%;
-
-    --destructive: 14 80% 54%;
-    --destructive-foreground: 210 40% 98%;
-
-    --success: 142 70% 45%;
-    --success-foreground: 210 40% 98%;
-
-    --warning: 43 100% 50%;
-    --warning-foreground: 213 58% 11%;
-
-    --border: 213 30% 25%;
-    --input: 213 30% 20%;
-    --ring: 43 100% 50%;
-
-    /* Glass — unified state tokens (default / hover / active / disabled) */
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --glass-bg-hover: rgba(255, 255, 255, 0.08);
-    --glass-bg-active: rgba(255, 255, 255, 0.12);
-    --glass-bg-disabled: rgba(255, 255, 255, 0.03);
-    --glass-border: rgba(255, 255, 255, 0.10);
-    --glass-border-hover: rgba(255, 255, 255, 0.18);
+    /* Local font-face definitions — place font files in `public/fonts/` */
+    @font-face {
+      font-family: 'Noto Kufi Arabic';
+      src: url('/fonts/NotoKufiArabic-Regular.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Noto Kufi Arabic';
+      src: url('/fonts/NotoKufiArabic-Bold.woff2') format('woff2');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Lato';
+      src: url('/fonts/Lato-Regular.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Lato';
+      src: url('/fonts/Lato-Bold.woff2') format('woff2');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
     --glass-border-active: hsla(43, 100%, 55%, 0.45);
     --glass-border-disabled: rgba(255, 255, 255, 0.05);
     --glass-blur: 20px;

@@ -104,7 +104,7 @@ export function SubscriptionsManager() {
 
   const annualTotal = monthlyTotal * 12;
 
-  // Upcoming renewals
+  // Upcoming renewals (next 7 days)
   const upcomingRenewals = useMemo(() => {
     if (!subscriptions) return [];
     const in7Days = addDays(new Date(), 7);
@@ -114,6 +114,14 @@ export function SubscriptionsManager() {
         const nextDate = new Date(sub.next_billing_date);
         return isAfter(nextDate, new Date()) && isBefore(nextDate, in7Days);
       })
+      .sort((a, b) => new Date(a.next_billing_date).getTime() - new Date(b.next_billing_date).getTime());
+  }, [subscriptions]);
+
+  // Overdue subscriptions (active but billing date passed)
+  const overdueSubs = useMemo(() => {
+    if (!subscriptions) return [];
+    return subscriptions
+      .filter(sub => sub.is_active && isBefore(new Date(sub.next_billing_date), new Date()))
       .sort((a, b) => new Date(a.next_billing_date).getTime() - new Date(b.next_billing_date).getTime());
   }, [subscriptions]);
 
@@ -392,15 +400,15 @@ export function SubscriptionsManager() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">{t('finance.subscriptions')}</h2>
-          <p className="text-muted-foreground">
+      {/* Header — wraps on mobile */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold">{t('finance.subscriptions')}</h2>
+          <p className="text-sm text-muted-foreground">
             {subscriptions?.filter(s => s.is_active).length || 0} {t('finance.activeSubscriptions')}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Button
             variant={view === 'list' ? 'default' : 'outline'}
             size="sm"
@@ -418,7 +426,8 @@ export function SubscriptionsManager() {
           </Button>
           <Button variant="gold" onClick={() => setIsDialogOpen(true)}>
             <Plus className="w-4 h-4 me-2" />
-            {t('finance.addSubscription')}
+            <span className="hidden sm:inline">{t('finance.addSubscription')}</span>
+            <span className="sm:hidden">{language === 'ar' ? 'إضافة' : 'Add'}</span>
           </Button>
         </div>
       </div>
@@ -441,6 +450,28 @@ export function SubscriptionsManager() {
           <p className="text-2xl font-bold">{upcomingRenewals.length}</p>
         </div>
       </div>
+
+      {/* Overdue Alerts — highest priority */}
+      {overdueSubs.length > 0 && (
+        <div className="glass-card p-4 border-destructive/60 border bg-destructive/5">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="w-4 h-4 text-destructive" />
+            <h3 className="font-semibold text-destructive">
+              {language === 'ar' ? 'اشتراكات متأخرة' : 'Overdue Subscriptions'}
+            </h3>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {overdueSubs.map((sub) => {
+              const daysLate = Math.abs(differenceInDays(new Date(sub.next_billing_date), new Date()));
+              return (
+                <Badge key={sub.id} variant="destructive" className="py-1.5">
+                  {sub.name} · {language === 'ar' ? `متأخر ${daysLate} يوم` : `${daysLate}d late`} ({sub.amount} {sub.currency})
+                </Badge>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Upcoming Alerts */}
       {upcomingRenewals.length > 0 && (
@@ -465,24 +496,31 @@ export function SubscriptionsManager() {
           {subscriptions?.map((sub) => {
             const daysUntil = differenceInDays(new Date(sub.next_billing_date), new Date());
             const isUpcoming = daysUntil >= 0 && daysUntil <= 7;
+            const isOverdue = sub.is_active && daysUntil < 0;
 
             return (
               <div 
                 key={sub.id} 
                 className={cn(
-                  'glass-card p-4 flex items-center justify-between',
-                  !sub.is_active && 'opacity-60'
+                  'glass-card p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3',
+                  !sub.is_active && 'opacity-60',
+                  isOverdue && 'border-destructive/60 border'
                 )}
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     <RefreshCw className="w-5 h-5 text-primary" />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-semibold">{sub.name}</h4>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="font-semibold truncate">{sub.name}</h4>
                       {!sub.is_active && (
                         <Badge variant="secondary">{t('finance.paused')}</Badge>
+                      )}
+                      {isOverdue && (
+                        <Badge variant="destructive">
+                          {language === 'ar' ? `متأخر ${Math.abs(daysUntil)} يوم` : `${Math.abs(daysUntil)}d overdue`}
+                        </Badge>
                       )}
                       {isUpcoming && sub.is_active && (
                         <Badge variant="outline" className="border-warning text-warning">
@@ -522,7 +560,7 @@ export function SubscriptionsManager() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 sm:gap-4 self-end sm:self-auto">
                   <div className="text-end">
                     <p className="font-bold text-lg">{sub.amount.toLocaleString()} {sub.currency || 'SAR'}</p>
                     <p className="text-xs text-muted-foreground">/{t(`finance.${sub.billing_cycle}`)}</p>

@@ -13,10 +13,10 @@ export default {
       },
     },
     extend: {
-      fontFamily: {
+            fontFamily: {
         arabic: ['Noto Kufi Arabic', 'sans-serif'],
         sans: ['Lato', 'sans-serif'],
-      },
+            },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
