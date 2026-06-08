@@ -13,14 +13,41 @@
  */
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const FROM = "Life Tent OS <notifications@lifetent.online>";
 
-const cors = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+const ALLOWED_ORIGINS = [
+  "https://www.lifetent.online",
+  "https://lifetent.online",
+  "http://localhost:8080",
+  "http://localhost:8081",
+  "http://localhost:8082",
+  "http://localhost:8083",
+];
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("origin") ?? "";
+  const allowOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
+}
+
+async function verifyAuth(req: Request): Promise<boolean> {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return false;
+  const token = authHeader.replace("Bearer ", "");
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+  );
+  const { error } = await supabase.auth.getUser(token);
+  return !error;
+}
 
 // ── HTML email base ──────────────────────────────────────────────────────────
 function baseHtml(title: string, preheader: string, bodyHtml: string) {
@@ -209,7 +236,17 @@ function buildEmail(type: NotifType, userName: string, data: Record<string, unkn
 
 // ── Handler ──────────────────────────────────────────────────────────────────
 const handler = async (req: Request): Promise<Response> => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  const corsHeaders = getCorsHeaders(req);
+
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // ── Authentication check ─────────────────────────────────────────────────
+  const authenticated = await verifyAuth(req);
+  if (!authenticated) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
 
   try {
     const { type, to, userName, data } = await req.json() as {
@@ -221,7 +258,15 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!type || !to) {
       return new Response(JSON.stringify({ error: "type and to are required" }), {
-        status: 400, headers: { "Content-Type": "application/json", ...cors },
+        status: 400, headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    // Validate email format to prevent header injection
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(to)) {
+      return new Response(JSON.stringify({ error: "Invalid email address" }), {
+        status: 400, headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
 
@@ -237,13 +282,12 @@ const handler = async (req: Request): Promise<Response> => {
     if (error) throw new Error(error.message);
 
     return new Response(JSON.stringify({ success: true }), {
-      status: 200, headers: { "Content-Type": "application/json", ...cors },
+      status: 200, headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
-    console.error("send-notifications error:", message);
     return new Response(JSON.stringify({ error: message }), {
-      status: 500, headers: { "Content-Type": "application/json", ...cors },
+      status: 500, headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   }
 };
