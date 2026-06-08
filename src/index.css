@@ -1,4 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;500;700;900&family=Lato:wght@300;400;700;900&display=swap');
+/* ── Lama Sans — self-hosted (Arabic + Latin) ────────────────────────────── */
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-Thin.woff') format('woff'); font-weight: 100; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-ThinItalic.woff') format('woff'); font-weight: 100; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-ExtraLight.woff') format('woff'); font-weight: 200; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-ExtraLightItalic.woff') format('woff'); font-weight: 200; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-Light.woff') format('woff'); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-LightItalic.woff') format('woff'); font-weight: 300; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-Regular.woff') format('woff'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-RegularItalic.woff') format('woff'); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-Medium.woff') format('woff'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-MediumItalic.woff') format('woff'); font-weight: 500; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-SemiBold.woff') format('woff'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-SemiBoldItalic.woff') format('woff'); font-weight: 600; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-Bold.woff') format('woff'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-BoldItalic.woff') format('woff'); font-weight: 700; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-ExtraBold.woff') format('woff'); font-weight: 800; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-ExtraBoldItalic.woff') format('woff'); font-weight: 800; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-Black.woff') format('woff'); font-weight: 900; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-BlackItalic.woff') format('woff'); font-weight: 900; font-style: italic; font-display: swap; }
 
 @tailwind base;
 @tailwind components;
@@ -163,7 +181,7 @@
   }
 
   html {
-    font-family: 'Tajawal', sans-serif;
+    font-family: 'Lama Sans', sans-serif;
     font-weight: 400;
     letter-spacing: 0.01em;
   }
