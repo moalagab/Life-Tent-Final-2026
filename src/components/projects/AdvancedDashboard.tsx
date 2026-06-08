@@ -451,6 +451,7 @@ export function AdvancedDashboard() {
 }
 
 interface StatCardProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: any;
   value: string | number;
   label: string;

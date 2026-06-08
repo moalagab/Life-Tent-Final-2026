@@ -74,8 +74,8 @@ export function useMoodHabitCorrelation(days = 30) {
           .map(log => log.completed_at)
       );
 
-      let moodWithHabit: number[] = [];
-      let moodWithoutHabit: number[] = [];
+      const moodWithHabit: number[] = [];
+      const moodWithoutHabit: number[] = [];
 
       moodLogs.forEach(mood => {
         if (mood.mood_score) {

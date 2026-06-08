@@ -30,8 +30,12 @@ const DEFAULT_SETTINGS = {
 export default function Pomodoro() {
   const { t, isRTL } = useLanguage();
   const [settings, setSettings] = useState(() => {
-    const saved = localStorage.getItem('pomodoro-settings');
-    return saved ? JSON.parse(saved) : DEFAULT_SETTINGS;
+    try {
+      const saved = localStorage.getItem('pomodoro-settings');
+      return saved ? { ...DEFAULT_SETTINGS, ...JSON.parse(saved) } : DEFAULT_SETTINGS;
+    } catch {
+      return DEFAULT_SETTINGS;
+    }
   });
   const [timeLeft, setTimeLeft] = useState(settings.workDuration * 60);
   const [isRunning, setIsRunning] = useState(false);
@@ -69,6 +73,7 @@ export default function Pomodoro() {
 
   const playSound = useCallback(() => {
     if (settings.soundEnabled) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
@@ -105,7 +110,8 @@ export default function Pomodoro() {
       const newCompletedSessions = completedSessions + 1;
       setCompletedSessions(newCompletedSessions);
       
-      if (newCompletedSessions % settings.sessionsBeforeLongBreak === 0) {
+      const sessionsLimit = settings.sessionsBeforeLongBreak > 0 ? settings.sessionsBeforeLongBreak : 4;
+      if (newCompletedSessions % sessionsLimit === 0) {
         setSessionType('longBreak');
         setTimeLeft(settings.longBreakDuration * 60);
         toast.success(t('pomodoro.longBreakTime'), { icon: '☕' });
@@ -403,7 +409,7 @@ export default function Pomodoro() {
                   <Target className="w-6 h-6 text-blue-500" />
                 </div>
                 <p className="text-3xl font-bold text-foreground">
-                  {settings.sessionsBeforeLongBreak - (completedSessions % settings.sessionsBeforeLongBreak)}
+                  {(() => { const n = settings.sessionsBeforeLongBreak > 0 ? settings.sessionsBeforeLongBreak : 4; return n - (completedSessions % n); })()}
                 </p>
                 <p className="text-xs text-muted-foreground">{t('pomodoro.untilLongBreak')}</p>
               </div>

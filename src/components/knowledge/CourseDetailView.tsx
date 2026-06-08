@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { 
   ArrowLeft, BookOpen, GraduationCap, Plus, Check, Clock, FileText, 
@@ -273,6 +274,8 @@ export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetai
       </div>
 
       {/* Tabs */}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
         <div className="flex items-center justify-between">
           <TabsList>

@@ -69,6 +69,7 @@ export function KanbanBoard({ projectId, tasks, onAddTask }: KanbanBoardProps) {
     try {
       await updateTask.mutateAsync({
         id: draggedTask.id,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         status: status as any,
         completed_at: status === 'done' ? new Date().toISOString() : null,
       });

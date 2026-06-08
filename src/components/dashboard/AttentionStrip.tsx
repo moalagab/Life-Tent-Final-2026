@@ -27,8 +27,7 @@ interface AttentionItem {
  * Horizontal scroll on small screens, dot-coded severity, no loud cards.
  */
 export function AttentionStrip() {
-  const { currentLanguage } = useLanguage();
-  const isAr = currentLanguage === 'ar';
+  const { t } = useLanguage();
   const { data: tasks } = useTasks();
   const { data: events } = useEvents();
   const { data: projects } = useProjects();
@@ -36,17 +35,17 @@ export function AttentionStrip() {
   const now = new Date();
   const items: AttentionItem[] = [];
 
-  tasks?.forEach((t) => {
-    if (t.status === 'done' || !t.due_date) return;
-    const due = parseISO(t.due_date);
+  tasks?.forEach((task) => {
+    if (task.status === 'done' || !task.due_date) return;
+    const due = parseISO(task.due_date);
     if (isPast(due) && !isToday(due)) {
       const minutesOverdue = Math.max(1, differenceInMinutes(now, due));
       items.push({
-        id: `task-overdue-${t.id}`,
-        key: `task:${t.id}`,
+        id: `task-overdue-${task.id}`,
+        key: `task:${task.id}`,
         kind: 'overdue',
-        label: t.title,
-        meta: isAr ? 'متأخرة' : 'Overdue',
+        label: task.title,
+        meta: t('dashboard.overdue'),
         to: '/tasks?filter=overdue',
         severity: 'critical',
         rank: 0,
@@ -54,11 +53,11 @@ export function AttentionStrip() {
       });
     } else if (isToday(due)) {
       items.push({
-        id: `task-today-${t.id}`,
-        key: `task:${t.id}`,
+        id: `task-today-${task.id}`,
+        key: `task:${task.id}`,
         kind: 'due_today',
-        label: t.title,
-        meta: isAr ? 'اليوم' : 'Today',
+        label: task.title,
+        meta: t('common.today'),
         to: '/tasks?filter=today',
         severity: 'warn',
         rank: 1,
@@ -74,8 +73,8 @@ export function AttentionStrip() {
     if (minutesAway >= 0 && hoursAway <= 2) {
       const metaTime =
         minutesAway < 60
-          ? isAr ? `بعد ${minutesAway}د` : `In ${minutesAway}m`
-          : isAr ? `بعد ${hoursAway}س` : `In ${hoursAway}h`;
+          ? t('dashboard.inMinutes', { count: minutesAway })
+          : t('dashboard.inHours', { count: hoursAway });
       items.push({
         id: `event-${e.id}`,
         key: `event:${e.id}`,
@@ -97,7 +96,7 @@ export function AttentionStrip() {
         key: `project:${p.id}`,
         kind: 'stalled',
         label: p.title,
-        meta: isAr ? 'متوقف' : 'Stalled',
+        meta: t('dashboard.stalled'),
         to: '/projects',
         severity: 'info',
         rank: 3,
@@ -119,23 +118,23 @@ export function AttentionStrip() {
   if (sorted.length === 0) {
     return (
       <section
-        aria-label={isAr ? 'كل شيء على المسار الصحيح' : 'All caught up'}
+        aria-label={t('dashboard.allClear')}
         className="flex items-center gap-3 px-4 py-3 rounded-xl bg-success/5 border border-success/20"
       >
-        <div className="w-2 h-2 rounded-full bg-success" />
+        <div className="w-2 h-2 rounded-full bg-success" aria-hidden="true" />
         <p className="text-sm text-foreground/90">
-          {isAr ? 'كل شيء تحت السيطرة. لا بنود عاجلة.' : 'All caught up. Nothing urgent right now.'}
+          {t('dashboard.allClearDesc')}
         </p>
       </section>
     );
   }
 
   return (
-    <section aria-label={isAr ? 'يحتاج انتباهك' : 'Needs your attention'}>
+    <section aria-label={t('dashboard.needsAttention')}>
       <div className="flex items-center gap-2 mb-2.5">
-        <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
+        <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" aria-hidden="true" />
         <h2 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-foreground">
-          {isAr ? 'يحتاج انتباهك' : 'Needs attention'}
+          {t('dashboard.needsAttention')}
         </h2>
         <span className="text-[11px] text-muted-foreground tabular-nums">{sorted.length}</span>
       </div>

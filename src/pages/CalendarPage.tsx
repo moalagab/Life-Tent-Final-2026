@@ -2,7 +2,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Clock, Loader2, Target, FolderKanban, CheckSquare, Edit, Trash2, DollarSign, Milestone, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, addMonths, subMonths, parseISO } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, addMonths, subMonths, parseISO, isValid } from 'date-fns';
 import { useState } from 'react';
 import { formatHijriDate } from '@/lib/hijri';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -26,6 +26,7 @@ export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [editingEvent, setEditingEvent] = useState<any>(null);
   const [newEvent, setNewEvent] = useState({
     title: '',
@@ -58,8 +59,9 @@ export default function CalendarPage() {
 
   const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
   const selectedEvents = events?.filter(event => {
-    const eventDate = format(parseISO(event.start_time), 'yyyy-MM-dd');
-    return eventDate === selectedDateStr;
+    const parsed = parseISO(event.start_time);
+    if (!isValid(parsed)) return false;
+    return format(parsed, 'yyyy-MM-dd') === selectedDateStr;
   }) || [];
 
   // Get unified items for selected date
@@ -71,8 +73,9 @@ export default function CalendarPage() {
   const getEventsByDate = (date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
     return events?.filter(event => {
-      const eventDate = format(parseISO(event.start_time), 'yyyy-MM-dd');
-      return eventDate === dateStr;
+      const parsed = parseISO(event.start_time);
+      if (!isValid(parsed)) return false;
+      return format(parsed, 'yyyy-MM-dd') === dateStr;
     }) || [];
   };
 
@@ -97,6 +100,11 @@ export default function CalendarPage() {
   const handleCreateEvent = async () => {
     if (!newEvent.title || !newEvent.start_time) {
       toast.error(t('common.fillAllFields'));
+      return;
+    }
+
+    if (newEvent.end_time && newEvent.end_time < newEvent.start_time) {
+      toast.error(t('calendar.endTimeBeforeStart') || 'وقت الانتهاء يجب أن يكون بعد وقت البداية');
       return;
     }
 
@@ -134,13 +142,14 @@ export default function CalendarPage() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleEditEvent = (event: any) => {
     setEditingEvent(event);
     setNewEvent({
       title: event.title,
       description: event.description || '',
-      start_time: format(parseISO(event.start_time), 'HH:mm'),
-      end_time: event.end_time ? format(parseISO(event.end_time), 'HH:mm') : '',
+      start_time: isValid(parseISO(event.start_time)) ? format(parseISO(event.start_time), 'HH:mm') : '',
+      end_time: event.end_time && isValid(parseISO(event.end_time)) ? format(parseISO(event.end_time), 'HH:mm') : '',
       location: event.location || '',
       color: event.color || '#FFB400',
     });

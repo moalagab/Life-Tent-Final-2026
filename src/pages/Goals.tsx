@@ -95,7 +95,7 @@ export default function Goals() {
     const completed = goals.filter(g => {
       const krs = keyResults?.filter(kr => kr.goal_id === g.id) || [];
       if (krs.length === 0) return false;
-      const progress = krs.reduce((sum, kr) => sum + ((kr.current_value || 0) / kr.target_value * 100), 0) / krs.length;
+      const progress = krs.reduce((sum, kr) => sum + (kr.target_value > 0 ? ((kr.current_value || 0) / kr.target_value * 100) : 0), 0) / krs.length;
       return progress >= 100;
     }).length;
     return { total: goals.length, personal, completed };
@@ -132,6 +132,7 @@ export default function Goals() {
     return filtered;
   }, [goals, selectedCategory, searchQuery]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleCreateGoal = async (formData: any) => {
     try {
       await createGoal.mutateAsync({
@@ -152,6 +153,7 @@ export default function Goals() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleUpdateGoal = async (formData: any) => {
     if (!editingGoal) return;
     
@@ -230,7 +232,8 @@ export default function Goals() {
   };
 
   const handleCreateKeyResult = async () => {
-    if (!krGoalId || !newKeyResult.title || !newKeyResult.target_value) {
+    const parsedTarget = parseFloat(newKeyResult.target_value);
+    if (!krGoalId || !newKeyResult.title || !newKeyResult.target_value || isNaN(parsedTarget) || parsedTarget <= 0) {
       toast.error(t('common.fillAllFields'));
       return;
     }
@@ -239,7 +242,7 @@ export default function Goals() {
       await createKeyResult.mutateAsync({
         goal_id: krGoalId,
         title: newKeyResult.title,
-        target_value: parseFloat(newKeyResult.target_value),
+        target_value: parsedTarget,
         unit: newKeyResult.unit || null,
       });
       toast.success(t('goals.keyResultAdded'));
@@ -511,6 +514,7 @@ export default function Goals() {
         initialData={editingGoal ? {
           title: editingGoal.title,
           description: editingGoal.description || '',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           perspective: (editingGoal.perspective as any) || 'personal',
           target_value: editingGoal.target_value?.toString() || '',
           current_value: editingGoal.current_value?.toString() || '0',

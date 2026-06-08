@@ -85,8 +85,8 @@ export function DataImport() {
         // Format 2: Date, Description, Debit, Credit
         // Format 3: Date, Description, Amount, Type
         
-        let date = columns[0] || '';
-        let description = columns[1] || '';
+        const date = columns[0] || '';
+        const description = columns[1] || '';
         let amount = 0;
         let type: 'income' | 'expense' = 'expense';
 

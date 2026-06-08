@@ -21,7 +21,7 @@ interface Kpi {
  * No card-per-KPI noise. One glance, four numbers.
  */
 export function KpiStrip() {
-  const { currentLanguage } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const isAr = currentLanguage === 'ar';
   const { data: stats, isLoading: statsLoading } = useMonthlyStats();
   const { data: tasks, isLoading: tasksLoading } = useTasks();
@@ -59,41 +59,41 @@ export function KpiStrip() {
 
   const kpis: Kpi[] = [
     {
-      label: isAr ? 'صافي الثروة' : 'Net worth',
+      label: t('dashboard.netWorthLabel'),
       value: `${fmt(netWorth)}`,
       sub: burnDelta >= 0
-        ? `+${fmt(burnDelta)} ${isAr ? 'هذا الشهر' : 'this month'}`
-        : `${fmt(burnDelta)} ${isAr ? 'هذا الشهر' : 'this month'}`,
+        ? `+${fmt(burnDelta)} ${t('dashboard.thisMonth')}`
+        : `${fmt(burnDelta)} ${t('dashboard.thisMonth')}`,
       icon: Wallet,
       to: '/finance?tab=dashboard',
       emphasis: burnDelta >= 0 ? 'positive' : 'negative',
     },
     {
-      label: isAr ? 'المصروف الشهري' : 'Monthly burn',
+      label: t('dashboard.monthlyBurnLabel'),
       value: fmt(monthlyExpenses),
       sub: monthlyIncome > 0
-        ? `${Math.round((monthlyExpenses / monthlyIncome) * 100)}% ${isAr ? 'من الدخل' : 'of income'}`
-        : (isAr ? 'لا دخل مسجّل' : 'no income tracked'),
+        ? `${Math.round((monthlyExpenses / monthlyIncome) * 100)}% ${t('dashboard.ofIncome')}`
+        : t('dashboard.noIncomeTracked'),
       icon: TrendingDown,
       to: '/finance?tab=transactions',
       emphasis: 'neutral',
     },
     {
-      label: isAr ? 'تركيز اليوم' : 'Focus today',
+      label: t('dashboard.focusTodayLabel'),
       value: tasksToday.length > 0 ? `${focusPct}%` : '—',
       sub: tasksToday.length > 0
-        ? `${tasksTodayDone}/${tasksToday.length} ${isAr ? 'مكتملة' : 'done'}`
-        : (isAr ? 'لا مهام اليوم' : 'no tasks today'),
+        ? `${tasksTodayDone}/${tasksToday.length} ${t('dashboard.tasksDone')}`
+        : t('dashboard.noTasksToday'),
       icon: Flame,
       to: '/tasks?filter=today',
       emphasis: focusPct >= 70 ? 'positive' : 'neutral',
     },
     {
-      label: isAr ? 'مهام مستحقة' : 'Tasks due',
+      label: t('dashboard.tasksDueLabel'),
       value: String(tasksDueCount),
       sub: overdueCount > 0
-        ? `${overdueCount} ${isAr ? 'متأخرة' : 'overdue'}`
-        : (isAr ? 'لا متأخرات' : 'none overdue'),
+        ? `${overdueCount} ${t('dashboard.overdue')}`
+        : t('dashboard.noneOverdue'),
       icon: CheckSquare,
       to: overdueCount > 0 ? '/tasks?filter=overdue' : '/tasks?filter=today',
       emphasis: overdueCount > 0 ? 'negative' : 'neutral',
@@ -102,7 +102,7 @@ export function KpiStrip() {
 
   return (
     <section
-      aria-label={isAr ? 'مؤشرات رئيسية' : 'Key indicators'}
+      aria-label={t('dashboard.keyIndicators')}
       className="rounded-2xl bg-card/40 border border-border/40 overflow-hidden"
     >
       <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x rtl:lg:divide-x-reverse divide-border/40">

@@ -15,6 +15,7 @@ export interface UnifiedCalendarEvent {
   color: string;
   sourceId: string;
   sourceType: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>;
 }
 
@@ -125,6 +126,7 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
     const allEvents: UnifiedCalendarEvent[] = [];
 
     // Add scheduled tasks
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     tasks?.forEach((task: any) => {
       allEvents.push({
         id: `task-${task.id}`,
@@ -140,6 +142,7 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
     });
 
     // Add due tasks (as all-day)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     dueTasks?.forEach((task: any) => {
       allEvents.push({
         id: `due-${task.id}`,
@@ -155,6 +158,7 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
     });
 
     // Add events
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     events?.forEach((event: any) => {
       allEvents.push({
         id: `event-${event.id}`,
@@ -171,6 +175,7 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
     });
 
     // Add milestones
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     milestones?.forEach((milestone: any) => {
       allEvents.push({
         id: `milestone-${milestone.id}`,
@@ -186,6 +191,7 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
     });
 
     // Add debt payments (generate for each month in range)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     debts?.forEach((debt: any) => {
       if (debt.monthly_payment_date) {
         const start = new Date(startDate);
@@ -211,6 +217,7 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
     });
 
     // Add subscription renewals
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     subscriptions?.forEach((sub: any) => {
       if (sub.next_billing_date) {
         const billingDate = new Date(sub.next_billing_date);

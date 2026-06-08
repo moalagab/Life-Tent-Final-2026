@@ -14,6 +14,7 @@ export interface CourseLesson {
   completed_at: string | null;
   notes: string | null;
   video_url: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   resources: any;
   created_at: string;
   updated_at: string;

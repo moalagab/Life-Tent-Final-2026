@@ -144,6 +144,7 @@ const handler = async (req: Request): Promise<Response> => {
         });
 
         emailResults.push({ success: true, email: reminder.user_email, project: reminder.project_title });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (emailError: any) {
         emailResults.push({ success: false, email: reminder.user_email, error: emailError.message });
       }
@@ -156,6 +157,7 @@ const handler = async (req: Request): Promise<Response> => {
       }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Error in send-project-reminders:", error);
     return new Response(

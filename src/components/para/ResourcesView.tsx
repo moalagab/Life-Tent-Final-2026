@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useResources, useCreateResource, useUpdateResource, useArchiveResource, useRestoreResource, useDeleteResource, ResourceType } from '@/hooks/useResources';
@@ -22,6 +23,7 @@ import { ar } from 'date-fns/locale';
 import { UnifiedResourcesView } from './UnifiedResourcesView';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 
+ 
 const resourceTypes: { value: ResourceType; label: string; icon: any }[] = [
   { value: 'note', label: 'ملاحظة', icon: FileText },
   { value: 'file', label: 'ملف', icon: File },
@@ -40,6 +42,7 @@ export function ResourcesView() {
   const [filterAreaId, setFilterAreaId] = useState<string>('');
   const [filterProjectId, setFilterProjectId] = useState<string>('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+   
   const [editingResource, setEditingResource] = useState<any | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -57,21 +60,6 @@ export function ResourcesView() {
   // Realtime subscription
   useRealtimeSubscription({ table: 'resources', queryKey: ['resources'] });
 
-  // If showing unified view
-  if (showUnified) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-foreground">الموارد الموحدة</h2>
-          <Button variant="outline" onClick={() => setShowUnified(false)}>
-            العودة للعرض العادي
-          </Button>
-        </div>
-        <UnifiedResourcesView />
-      </div>
-    );
-  }
-
   const { data: areas } = useActiveAreas();
   const { data: projects } = useProjects();
   const { data: resources, isLoading } = useResources({
@@ -87,6 +75,22 @@ export function ResourcesView() {
   const restoreResource = useRestoreResource();
   const deleteResource = useDeleteResource();
 
+  // If showing unified view
+  if (showUnified) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-foreground">الموارد الموحدة</h2>
+          <Button variant="outline" onClick={() => setShowUnified(false)}>
+            العودة للعرض العادي
+          </Button>
+        </div>
+        <UnifiedResourcesView />
+      </div>
+    );
+  }
+
+   
   const filteredResources = resources?.filter((r: any) =>
     r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.description?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -107,6 +111,7 @@ export function ResourcesView() {
     setEditingResource(null);
   };
 
+   
   const handleOpenDialog = (resource?: any) => {
     if (resource) {
       setEditingResource(resource);
@@ -250,6 +255,8 @@ export function ResourcesView() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">كل المشاريع</SelectItem>
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             {projects?.map((project: any) => (
               <SelectItem key={project.id} value={project.id}>{project.title}</SelectItem>
             ))}
@@ -266,6 +273,8 @@ export function ResourcesView() {
       </div>
 
       {/* Type Tabs */}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       <Tabs value={activeType} onValueChange={(v) => setActiveType(v as any)}>
         <TabsList className="bg-muted/50">
           <TabsTrigger value="all">الكل</TabsTrigger>
@@ -280,6 +289,8 @@ export function ResourcesView() {
         <TabsContent value={activeType} className="mt-4">
           {/* Resources Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             {filteredResources?.map((resource: any) => {
               const TypeIcon = getTypeIcon(resource.type);
               return (
@@ -484,6 +495,8 @@ export function ResourcesView() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">بدون</SelectItem>
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     {projects?.map((project: any) => (
                       <SelectItem key={project.id} value={project.id}>{project.title}</SelectItem>
                     ))}

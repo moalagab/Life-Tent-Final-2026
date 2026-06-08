@@ -41,8 +41,10 @@ export function PrayerWidget() {
   const { t, currentLanguage } = useLanguage();
   const isAr = currentLanguage === 'ar';
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [nextPrayer, setNextPrayer] = useState<{ prayer: any; remaining: string } | null>(null);
-  const [isRamadanPeriod] = useState(isRamadan());
+  // Re-evaluate Ramadan status daily so the widget stays correct across midnight
+  const [isRamadanPeriod, setIsRamadanPeriod] = useState(isRamadan());
   const [weather, setWeather] = useState<Weather | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
 
@@ -56,7 +58,11 @@ export function PrayerWidget() {
     const times = getTodayPrayerTimes();
     setPrayerTimes(times);
 
-    const updateNext = () => setNextPrayer(getNextPrayer(times));
+    const updateNext = () => {
+      setNextPrayer(getNextPrayer(times));
+      // Refresh Ramadan status daily (re-check at every tick; cheap boolean call)
+      setIsRamadanPeriod(isRamadan());
+    };
     updateNext();
     const interval = setInterval(updateNext, 60000);
     return () => clearInterval(interval);
@@ -74,7 +80,7 @@ export function PrayerWidget() {
           return;
         }
       }
-    } catch {}
+    } catch { /* ignore cached parse errors */ }
 
     if (!('geolocation' in navigator)) return;
     setWeatherLoading(true);
@@ -96,7 +102,7 @@ export function PrayerWidget() {
             );
             const gJson = await gRes.json();
             city = gJson?.results?.[0]?.name || '';
-          } catch {}
+          } catch { /* ignore geocoding errors */ }
 
           const data: Weather = {
             temp: Math.round(wJson?.current?.temperature_2m ?? 0),
@@ -106,7 +112,7 @@ export function PrayerWidget() {
           setWeather(data);
           try {
             localStorage.setItem(LS_KEY, JSON.stringify({ ts: Date.now(), data }));
-          } catch {}
+          } catch { /* ignore localStorage errors */ }
         } catch {
           // network/geocoding failure — silently skip
         } finally {
@@ -138,7 +144,8 @@ export function PrayerWidget() {
       headerAction={
         isRamadanPeriod ? (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[11px] font-medium">
-            🌙 {isAr ? 'رمضان' : 'Ramadan'}
+            <span aria-hidden="true">🌙</span>
+            {isAr ? 'رمضان' : 'Ramadan'}
           </span>
         ) : undefined
       }
@@ -154,7 +161,7 @@ export function PrayerWidget() {
             <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
           ) : weather && w ? (
             <div className="flex items-center gap-1.5">
-              <span className="text-base leading-none">{w.emoji}</span>
+              <span className="text-base leading-none" aria-hidden="true">{w.emoji}</span>
               <div className="leading-tight">
                 <p className="font-semibold text-foreground tabular-nums">
                   {weather.temp}°
@@ -169,7 +176,7 @@ export function PrayerWidget() {
             </div>
           ) : (
             <span className="text-muted-foreground inline-flex items-center gap-1">
-              <CloudSun className="w-3 h-3" />
+              <CloudSun className="w-3 h-3" aria-hidden="true" />
               {isAr ? 'الطقس' : 'Weather'}
             </span>
           )}
@@ -201,7 +208,8 @@ export function PrayerWidget() {
         {isRamadanPeriod && nextPrayer.prayer.name === 'Maghrib' && (
           <div className="mt-2.5 pt-2.5 border-t border-primary/15 text-center">
             <p className="text-xs font-medium text-primary">
-              🌙 {isAr ? 'وقت الإفطار' : 'Iftar Time'}
+              <span aria-hidden="true">🌙 </span>
+              {isAr ? 'وقت الإفطار' : 'Iftar Time'}
             </p>
           </div>
         )}

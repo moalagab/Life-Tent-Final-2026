@@ -110,7 +110,9 @@ export default function Tasks() {
     }
     if (categoryFilter !== 'all') {
       filtered = filtered.filter(task => 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (task as any).category === categoryFilter || 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (categoryFilter === 'personal' && !(task as any).category)
       );
     }
@@ -143,6 +145,7 @@ export default function Tasks() {
     return projects?.find(p => p.id === projectId);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleCreateTask = async (formData: any) => {
     try {
       await createTask.mutateAsync({

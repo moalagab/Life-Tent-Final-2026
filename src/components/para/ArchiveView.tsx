@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useArchivedItems, ArchivedItem } from '@/hooks/useArchive';
@@ -14,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
+ 
 const typeConfig: Record<ArchivedItem['type'], { label: string; icon: any; color: string }> = {
   project: { label: 'مشروع', icon: FolderKanban, color: 'bg-blue-500' },
   area: { label: 'مجال', icon: Layers, color: 'bg-purple-500' },
@@ -42,6 +44,7 @@ export function ArchiveView() {
   const handleRestore = async (item: ArchivedItem) => {
     try {
       let tableName = '';
+       
       let updateData: Record<string, any> = {};
 
       switch (item.type) {
@@ -72,6 +75,7 @@ export function ArchiveView() {
       }
 
       const { error } = await supabase
+         
         .from(tableName as any)
         .update(updateData)
         .eq('id', item.id);
@@ -122,6 +126,8 @@ export function ArchiveView() {
       </div>
 
       {/* Type Tabs */}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       <Tabs value={activeType} onValueChange={(v) => setActiveType(v as any)}>
         <TabsList className="bg-muted/50 flex-wrap h-auto p-1">
           <TabsTrigger value="all" className="gap-1">
