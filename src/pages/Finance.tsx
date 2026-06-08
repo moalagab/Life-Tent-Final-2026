@@ -98,13 +98,13 @@ export default function Finance() {
       </div>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as FinanceTab)} className="space-y-6">
-        <div className={`overflow-x-auto pb-2 ${isRTL ? 'direction-rtl' : ''}`}>
-          <TabsList className={`inline-flex min-w-full md:min-w-0 h-auto p-1 bg-muted/50 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className="overflow-x-auto pb-2" dir={isRTL ? 'rtl' : 'ltr'}>
+          <TabsList className="inline-flex min-w-full md:min-w-0 h-auto p-1 bg-muted/50">
             {tabs.map(tab => (
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
-                className={`flex items-center gap-2 px-3 py-2 whitespace-nowrap ${isRTL ? 'flex-row-reverse' : ''}`}
+                className="flex items-center gap-2 px-3 py-2 whitespace-nowrap"
               >
                 <tab.icon className="w-4 h-4" />
                 <span className="hidden sm:inline">{tab.label}</span>
