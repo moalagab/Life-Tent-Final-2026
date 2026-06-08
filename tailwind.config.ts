@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
   darkMode: ["class"],
@@ -13,10 +14,10 @@ export default {
       },
     },
     extend: {
-            fontFamily: {
-        arabic: ['Noto Kufi Arabic', 'sans-serif'],
-        sans: ['Lato', 'sans-serif'],
-            },
+      fontFamily: {
+        tajawal: ['Tajawal', 'sans-serif'],
+        sans: ['Tajawal', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -148,5 +149,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindcssAnimate],
 } satisfies Config;

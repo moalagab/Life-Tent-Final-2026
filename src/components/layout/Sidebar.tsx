@@ -77,8 +77,12 @@ export function Sidebar() {
           )}
         </div>
         {isMobile && (
-          <button onClick={() => setMobileOpen(false)} className="p-2 hover:bg-sidebar-accent rounded-lg">
-            <X className="w-5 h-5" />
+          <button
+            onClick={() => setMobileOpen(false)}
+            aria-label={t('common.close')}
+            className="p-2 hover:bg-sidebar-accent rounded-lg"
+          >
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         )}
       </div>
@@ -92,6 +96,7 @@ export function Sidebar() {
               key={item.path}
               to={item.path}
               onClick={handleNavClick}
+              aria-current={isActive ? 'page' : undefined}
               className={cn(
                 'flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200',
                 'hover:bg-sidebar-accent group relative',
@@ -166,6 +171,7 @@ export function Sidebar() {
         {!isMobile && (
           <button
             onClick={() => setCollapsed(!collapsed)}
+            aria-label={collapsed ? t('common.expand') : t('common.collapse')}
             className={cn(
               'flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 w-full mt-1',
               'hover:bg-sidebar-accent group',
@@ -204,8 +210,8 @@ export function Sidebar() {
           </div>
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
-              <button className="p-2 hover:bg-sidebar-accent rounded-lg">
-                <Menu className="w-6 h-6" />
+              <button aria-label={t('common.expand')} className="p-2 hover:bg-sidebar-accent rounded-lg">
+                <Menu className="w-6 h-6" aria-hidden="true" />
               </button>
             </SheetTrigger>
             <SheetContent side={isRTL ? 'right' : 'left'} className="p-0 w-72 bg-sidebar border-sidebar-border">

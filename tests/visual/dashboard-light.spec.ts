@@ -24,7 +24,7 @@ test.beforeEach(async ({ page }, testInfo) => {
     try {
       localStorage.setItem('theme', 'light');
       localStorage.setItem('vite-ui-theme', 'light');
-    } catch {}
+    } catch { /* ignore localStorage errors in test env */ }
   });
 });
 

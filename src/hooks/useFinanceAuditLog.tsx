@@ -8,7 +8,9 @@ export interface FinanceAuditLog {
   entity_type: string;
   entity_id: string;
   action: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   old_values: Record<string, any> | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   new_values: Record<string, any> | null;
   source: string | null;
   created_at: string;

@@ -48,6 +48,11 @@ export default function Profile() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!file.type.startsWith('image/')) {
+      toast.error(t('profile.invalidFileType') || 'يُسمح فقط بملفات الصور (JPG, PNG, WebP)');
+      return;
+    }
+
     if (file.size > 2 * 1024 * 1024) {
       toast.error(t('profile.fileTooLarge'));
       return;

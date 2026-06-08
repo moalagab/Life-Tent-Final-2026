@@ -19,8 +19,12 @@ export function useNotifications() {
   const [permission, setPermission] = useState<NotificationPermission>('default');
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [enabled, setEnabled] = useState(() => {
-    const stored = localStorage.getItem('notifications-enabled');
-    return stored ? JSON.parse(stored) : false;
+    try {
+      const stored = localStorage.getItem('notifications-enabled');
+      return stored ? JSON.parse(stored) : false;
+    } catch {
+      return false;
+    }
   });
 
   useEffect(() => {

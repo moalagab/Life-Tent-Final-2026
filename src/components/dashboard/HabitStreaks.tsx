@@ -32,7 +32,7 @@ export function HabitStreaks() {
     if (habitLogs.length === 0) return 0;
 
     let streak = 0;
-    let currentDate = new Date();
+    const currentDate = new Date();
 
     for (let i = 0; i < 365; i++) {
       const dateStr = format(subDays(currentDate, i), 'yyyy-MM-dd');

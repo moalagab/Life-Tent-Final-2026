@@ -34,7 +34,7 @@ for (const preset of PRESETS) {
 
     // Persist preset before render-sensitive snapshot.
     await page.evaluate((p) => {
-      try { localStorage.setItem('dashboard.preset', JSON.stringify(p)); } catch {}
+      try { localStorage.setItem('dashboard.preset', JSON.stringify(p)); } catch { /* ignore */ }
     }, preset);
     await page.reload({ waitUntil: 'networkidle' });
 

@@ -32,8 +32,7 @@ const ALLOWED_TABS = [
 type FinanceTab = typeof ALLOWED_TABS[number];
 
 export default function Finance() {
-  const { currentLanguage } = useLanguage();
-  const language = currentLanguage;
+  const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const rawTab = searchParams.get('tab');
   const initialTab: FinanceTab = (ALLOWED_TABS as readonly string[]).includes(rawTab ?? '')
@@ -67,30 +66,30 @@ export default function Finance() {
   useRealtimeSubscription({ table: 'accounts', queryKey: ['accounts'] });
 
   const tabs = [
-    { id: 'dashboard', label: language === 'ar' ? 'لوحة التحكم' : 'Dashboard', icon: Gauge },
-    { id: 'accounts', label: language === 'ar' ? 'الحسابات' : 'Accounts', icon: Wallet },
-    { id: 'transactions', label: language === 'ar' ? 'العمليات' : 'Transactions', icon: Receipt },
-    { id: 'budget', label: language === 'ar' ? 'الميزانية' : 'Budget', icon: PiggyBank },
-    { id: 'wishlist', label: language === 'ar' ? 'قائمة الأمنيات' : 'Wishlist', icon: ShoppingBag },
-    { id: 'debts', label: language === 'ar' ? 'الديون' : 'Debts', icon: CreditCard },
-    { id: 'subscriptions', label: language === 'ar' ? 'الاشتراكات' : 'Subscriptions', icon: RefreshCw },
-    { id: 'investments', label: language === 'ar' ? 'الاستثمارات' : 'Investments', icon: TrendingUp },
-    { id: 'projects', label: language === 'ar' ? 'المشاريع' : 'Projects', icon: Briefcase },
-    { id: 'currencies', label: language === 'ar' ? 'العملات' : 'Currencies', icon: Globe },
-    { id: 'close', label: language === 'ar' ? 'الإقفال' : 'Close', icon: Lock },
-    { id: 'reports', label: language === 'ar' ? 'التقارير' : 'Reports', icon: FileText },
-    { id: 'audit', label: language === 'ar' ? 'سجل التدقيق' : 'Audit Log', icon: History },
-    { id: 'import', label: language === 'ar' ? 'استيراد' : 'Import', icon: Upload },
+    { id: 'dashboard', label: t('finance.dashboard'), icon: Gauge },
+    { id: 'accounts', label: t('finance.accounts'), icon: Wallet },
+    { id: 'transactions', label: t('finance.transactions'), icon: Receipt },
+    { id: 'budget', label: t('finance.budgets'), icon: PiggyBank },
+    { id: 'wishlist', label: t('finance.wishlist'), icon: ShoppingBag },
+    { id: 'debts', label: t('finance.debts'), icon: CreditCard },
+    { id: 'subscriptions', label: t('finance.subscriptions'), icon: RefreshCw },
+    { id: 'investments', label: t('finance.investments'), icon: TrendingUp },
+    { id: 'projects', label: t('finance.projectFinance'), icon: Briefcase },
+    { id: 'currencies', label: t('finance.currencies'), icon: Globe },
+    { id: 'close', label: t('finance.monthlyClose'), icon: Lock },
+    { id: 'reports', label: t('finance.reports'), icon: FileText },
+    { id: 'audit', label: t('finance.auditLog'), icon: History },
+    { id: 'import', label: t('finance.dataImport'), icon: Upload },
   ];
 
   return (
     <MainLayout>
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-foreground">
-          {language === 'ar' ? 'المالية' : 'Finance'}
+          {t('finance.title')}
         </h1>
         <p className="text-muted-foreground mt-1">
-          {language === 'ar' ? 'إدارة شاملة لأموالك واستثماراتك' : 'Complete financial management system'}
+          {t('finance.subtitle')}
         </p>
       </div>
 

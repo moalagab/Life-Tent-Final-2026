@@ -175,6 +175,7 @@ export function TaskFormDialog({
                     type="button"
                     onClick={() => setFormData({ 
                       ...formData, 
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       linkedTo: option.value as any,
                       project_id: option.value === 'project' ? formData.project_id : null,
                       goalId: option.value === 'goal' ? formData.goalId : undefined,
@@ -304,6 +305,7 @@ export function TaskFormDialog({
               </Label>
               <Select
                 value={formData.recurrence}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 onValueChange={(value: any) => setFormData({ ...formData, recurrence: value })}
               >
                 <SelectTrigger className="bg-muted/50 border-border/50">

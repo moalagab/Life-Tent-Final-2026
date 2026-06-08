@@ -113,7 +113,7 @@ export function DashboardTopBar() {
     { id: 'filter-month-finance', group: 'filters', label: isAr ? 'المالية - هذا الشهر' : 'Finance — this month', keywords: ['finance', 'month', 'شهر'], icon: Wallet, run: () => go('/finance?range=month') },
     { id: 'jump-calendar-today', group: 'jump', label: isAr ? 'انتقل إلى تقويم اليوم' : 'Jump to today in calendar', keywords: ['calendar', 'today', 'اليوم'], icon: Calendar, run: () => go('/calendar?date=today') },
     { id: 'jump-attention', group: 'jump', label: isAr ? 'بنود تحتاج انتباه' : 'Items needing attention', keywords: ['attention', 'urgent', 'انتباه'], icon: AlertTriangle, run: () => go('/dashboard#attention') },
-  ], [isAr]);
+  ], [isAr, go]);
 
   // When the user picks a filter/jump, remember it so it appears as a "Recent" entry next time.
   const runWithMemory = useCallback(

@@ -284,6 +284,7 @@ export function AreasView() {
               <Label>فترة المراجعة</Label>
               <Select
                 value={formData.review_cadence}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 onValueChange={(value: any) => setFormData({ ...formData, review_cadence: value })}
               >
                 <SelectTrigger>

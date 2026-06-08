@@ -117,6 +117,8 @@ export default function Settings() {
                 {/* Section Header */}
                 <button
                   onClick={() => toggleSection(section.id)}
+                  aria-expanded={expandedSection === section.id}
+                  aria-controls={`settings-section-${section.id}`}
                   className="w-full p-5 flex items-center gap-4 hover:bg-muted/30 transition-colors"
                 >
                   <div className={cn(
@@ -140,10 +142,15 @@ export default function Settings() {
                 </button>
 
                 {/* Section Content */}
-                <div className={cn(
-                  "overflow-hidden transition-all duration-300",
-                  expandedSection === section.id ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
-                )}>
+                <div
+                  id={`settings-section-${section.id}`}
+                  role="region"
+                  aria-labelledby={`settings-btn-${section.id}`}
+                  className={cn(
+                    "overflow-hidden transition-all duration-300",
+                    expandedSection === section.id ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
+                  )}
+                >
                   <div className="p-5 pt-0 border-t border-border/50">
                     <div className="pt-5">
                       {renderSectionContent(section.id)}
@@ -157,8 +164,8 @@ export default function Settings() {
 
         {/* Footer */}
         <div className="mt-12 text-center py-6 border-t border-border/50">
-          <p className="text-sm font-medium text-foreground">LIFE TENT v1.0.0</p>
-          <p className="text-xs text-muted-foreground mt-1">Built with ❤️ for the Middle East</p>
+          <p className="text-sm font-medium text-foreground">{t('settings.version')}</p>
+          <p className="text-xs text-muted-foreground mt-1">{t('settings.madeWith')}</p>
         </div>
       </div>
     </MainLayout>

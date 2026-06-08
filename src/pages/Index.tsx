@@ -31,8 +31,7 @@ import type { ReactNode } from 'react';
  */
 const Index = () => {
   useAutoReminders();
-  const { currentLanguage } = useLanguage();
-  const isAr = currentLanguage === 'ar';
+  const { t } = useLanguage();
 
   const [preset, setPreset] = usePersistedState<DashboardPreset>(
     'dashboard.preset',
@@ -50,13 +49,12 @@ const Index = () => {
       if (!next) return;
       e.preventDefault();
       setPreset(next);
-      const labelAr = { focus: 'تركيز', finance: 'مالية', execution: 'تنفيذ' }[next];
-      const labelEn = { focus: 'Focus', finance: 'Finance', execution: 'Execution' }[next];
-      toast.success(isAr ? `تم التبديل إلى ${labelAr}` : `Switched to ${labelEn}`);
+      const presetKey = { focus: 'dashboard.presetFocus', finance: 'dashboard.presetFinance', execution: 'dashboard.presetExecution' }[next] as string;
+      toast.success(`${t('dashboard.presetSwitched')}: ${t(presetKey)}`);
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [setPreset, isAr]);
+  }, [setPreset, t]);
 
   const overview = useSectionState('overview', true);
   const activeWork = useSectionState('active-work', true);
@@ -68,7 +66,7 @@ const Index = () => {
   const sectionOverview = (
     <section key="overview">
       <SectionHeader
-        title={isAr ? 'نظرة عامة' : 'Overview'}
+        title={t('dashboard.overview')}
         icon={Sparkles}
         collapsible
         open={overview.open}
@@ -81,7 +79,7 @@ const Index = () => {
   const sectionActiveWork = (
     <section key="active-work">
       <SectionHeader
-        title={isAr ? 'العمل النشط' : 'Active Work'}
+        title={t('dashboard.activeWork')}
         icon={Activity}
         collapsible
         open={activeWork.open}
@@ -108,7 +106,7 @@ const Index = () => {
   const sectionRhythm = (
     <section key="rhythm">
       <SectionHeader
-        title={isAr ? 'إيقاع يومك' : 'Today\u2019s Rhythm'}
+        title={t('dashboard.rhythm')}
         icon={LayoutGrid}
         collapsible
         open={rhythm.open}
@@ -127,7 +125,7 @@ const Index = () => {
   const sectionFinance = (
     <section key="finance">
       <SectionHeader
-        title={isAr ? 'لمحة مالية' : 'Finance Snapshot'}
+        title={t('dashboard.financeSnapshot')}
         icon={Wallet}
         collapsible
         open={finance.open}
@@ -144,7 +142,7 @@ const Index = () => {
   const sectionLibrary = (
     <section key="library">
       <SectionHeader
-        title={isAr ? 'المكتبة والمعرفة' : 'Library & Knowledge'}
+        title={t('dashboard.libraryKnowledge')}
         icon={BookOpen}
         collapsible
         open={library.open}

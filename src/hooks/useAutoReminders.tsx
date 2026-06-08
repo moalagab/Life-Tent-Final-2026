@@ -4,7 +4,7 @@ import { useTasks } from '@/hooks/useTasks';
 import { useEvents } from '@/hooks/useEvents';
 import { useHabits } from '@/hooks/useHabits';
 import { useLanguage } from '@/hooks/useLanguage';
-import { isToday, isTomorrow, differenceInMinutes, parseISO, setHours, setMinutes } from 'date-fns';
+import { isToday, isTomorrow, differenceInMinutes, parseISO, setHours, setMinutes, isValid } from 'date-fns';
 
 export function useAutoReminders() {
   const { enabled, sendNotification } = useNotifications();
@@ -13,39 +13,40 @@ export function useAutoReminders() {
   const { data: habits } = useHabits();
   const { t } = useLanguage();
   const scheduledRef = useRef<Set<string>>(new Set());
+  // Track all timeout IDs so we can clean them up on unmount / re-run
+  const timeoutIds = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   // Task reminders
   useEffect(() => {
     if (!enabled || !tasks) return;
 
     const now = new Date();
-    
+
     tasks.forEach(task => {
-      if (task.status === 'done' || !task.due_date) return;
+      if (!task.status || task.status === 'done' || !task.due_date) return;
       if (scheduledRef.current.has(`task-${task.id}`)) return;
 
       const dueDate = parseISO(task.due_date);
-      
-      // Check if task is due today or tomorrow
+      if (!isValid(dueDate)) return;
+
       if (isToday(dueDate) || isTomorrow(dueDate)) {
         const label = isToday(dueDate) ? t('common.today') : 'Tomorrow';
-        
-        // Send immediate notification for today's tasks
+
         if (isToday(dueDate)) {
           scheduledRef.current.add(`task-${task.id}`);
-          
-          // Check if it's morning (8 AM notification)
+
           const eightAM = setMinutes(setHours(now, 8), 0);
           const minsUntilEight = differenceInMinutes(eightAM, now);
-          
+
           if (minsUntilEight > 0 && minsUntilEight < 60) {
-            setTimeout(() => {
+            const id = setTimeout(() => {
               sendNotification(
                 `${t('notifications.taskDue')} - ${label}`,
                 task.title,
                 'task'
               );
             }, minsUntilEight * 60 * 1000);
+            timeoutIds.current.push(id);
           }
         }
       }
@@ -60,23 +61,25 @@ export function useAutoReminders() {
 
     events.forEach(event => {
       if (scheduledRef.current.has(`event-${event.id}`)) return;
-      
+
       const startTime = parseISO(event.start_time);
+      if (!isValid(startTime)) return;
+
       const minsUntilEvent = differenceInMinutes(startTime, now);
-      
-      // Notify 30 minutes before
+
       if (minsUntilEvent > 0 && minsUntilEvent <= 60) {
         scheduledRef.current.add(`event-${event.id}`);
-        
+
         const notifyIn = Math.max(0, minsUntilEvent - 30) * 60 * 1000;
-        
-        setTimeout(() => {
+
+        const id = setTimeout(() => {
           sendNotification(
             t('notifications.eventSoon'),
             `${event.title} - ${minsUntilEvent <= 30 ? 'Now' : 'In 30 mins'}`,
             'event'
           );
         }, notifyIn);
+        timeoutIds.current.push(id);
       }
     });
   }, [enabled, events, sendNotification, t]);
@@ -91,18 +94,27 @@ export function useAutoReminders() {
 
     if (minsUntilNine > 0 && minsUntilNine < 60) {
       const activeHabits = habits.filter(h => h.is_active);
-      
+
       if (activeHabits.length > 0 && !scheduledRef.current.has('habits-daily')) {
         scheduledRef.current.add('habits-daily');
-        
-        setTimeout(() => {
+
+        const id = setTimeout(() => {
           sendNotification(
             t('notifications.habitReminder'),
             `${activeHabits.length} ${t('habits.dailyHabits')}`,
             'habit'
           );
         }, minsUntilNine * 60 * 1000);
+        timeoutIds.current.push(id);
       }
     }
   }, [enabled, habits, sendNotification, t]);
+
+  // Cleanup all pending timeouts on unmount
+  useEffect(() => {
+    return () => {
+      timeoutIds.current.forEach(clearTimeout);
+      timeoutIds.current = [];
+    };
+  }, []);
 }

@@ -120,6 +120,7 @@ export interface FinanceSettings {
   default_currency: string;
   accounting_basis: 'cash' | 'accrual';
   fiscal_month_start_day: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   risk_profile?: any;
   show_decimal: boolean;
   auto_categorize: boolean;
@@ -164,6 +165,7 @@ export function useCreateCategory() {
     mutationFn: async (category: Partial<Category>) => {
       const { data, error } = await supabase
         .from('categories')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .insert({ ...category, user_id: user!.id } as any)
         .select()
         .single();
@@ -204,6 +206,7 @@ export function useCreateEnvelope() {
     mutationFn: async (envelope: Partial<Envelope>) => {
       const { data, error } = await supabase
         .from('envelopes')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .insert({ ...envelope, user_id: user!.id } as any)
         .select()
         .single();
@@ -266,6 +269,7 @@ export function useCreateSinkingFund() {
     mutationFn: async (fund: Partial<SinkingFund>) => {
       const { data, error } = await supabase
         .from('sinking_funds')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .insert({ ...fund, user_id: user!.id } as any)
         .select()
         .single();
@@ -327,6 +331,7 @@ export function useCreateDebt() {
     mutationFn: async (debt: Partial<Debt>) => {
       const { data, error } = await supabase
         .from('debts')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .insert({ ...debt, user_id: user!.id } as any)
         .select()
         .single();
@@ -411,6 +416,7 @@ export function useCreatePortfolio() {
     mutationFn: async (portfolio: Partial<InvestmentPortfolio>) => {
       const { data, error } = await supabase
         .from('investment_portfolios')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .insert({ ...portfolio, user_id: user!.id } as any)
         .select()
         .single();
@@ -450,6 +456,7 @@ export function useCreateAsset() {
     mutationFn: async (asset: Partial<InvestmentAsset>) => {
       const { data, error } = await supabase
         .from('investment_assets')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .insert({ ...asset, user_id: user!.id } as any)
         .select()
         .single();
@@ -495,6 +502,7 @@ export function useCreateHolding() {
     mutationFn: async (holding: Partial<InvestmentHolding>) => {
       const { data, error } = await supabase
         .from('investment_holdings')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .insert(holding as any)
         .select()
         .single();
@@ -515,6 +523,7 @@ export function useUpdateHolding() {
     mutationFn: async ({ id, asset, ...updates }: Partial<InvestmentHolding> & { id: string }) => {
       const { data, error } = await supabase
         .from('investment_holdings')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .update(updates as any)
         .eq('id', id)
         .select()
@@ -563,6 +572,7 @@ export function useCreateInvestmentTransaction() {
     mutationFn: async (tx: Partial<InvestmentTransaction>) => {
       const { data, error } = await supabase
         .from('investment_transactions')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .insert({ ...tx, user_id: user!.id } as any)
         .select()
         .single();
@@ -606,6 +616,7 @@ export function useCreateProjectFinance() {
     mutationFn: async (finance: Partial<ProjectFinance>) => {
       const { data, error } = await supabase
         .from('project_finance')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .insert({ ...finance, user_id: user!.id } as any)
         .select()
         .single();
@@ -701,9 +712,11 @@ export function useUpdateSubscription() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: async ({ id, ...updates }: { id: string; [key: string]: any }) => {
       const { data, error } = await supabase
         .from('subscriptions')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .update(updates as any)
         .eq('id', id)
         .select()
@@ -741,6 +754,7 @@ export function useCreateSubscription() {
   const { user } = useAuth();
 
   return useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: async (subscription: any) => {
       const { data, error } = await supabase
         .from('subscriptions')

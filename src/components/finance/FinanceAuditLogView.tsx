@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useFinanceAuditLog, useFinanceActivityLog } from '@/hooks/useFinanceAuditLog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -141,6 +142,8 @@ export function FinanceAuditLogView() {
               </div>
             ) : (
               <div className="space-y-2 max-h-[500px] overflow-y-auto">
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 {activityLogs.map((log: any) => {
                   const ActionIcon = actionIcons[log.action as keyof typeof actionIcons] || FileText;
                   return (

@@ -120,9 +120,9 @@ export function usePomodoroStats() {
   const todayWorkSessions = todaySessions?.filter(s => s.session_type === 'work') || [];
   const weeklyWorkSessions = weeklySessions?.filter(s => s.session_type === 'work') || [];
 
-  const totalMinutes = workSessions.reduce((acc, s) => acc + s.duration_minutes, 0);
-  const todayMinutes = todayWorkSessions.reduce((acc, s) => acc + s.duration_minutes, 0);
-  const weeklyMinutes = weeklyWorkSessions.reduce((acc, s) => acc + s.duration_minutes, 0);
+  const totalMinutes = workSessions.reduce((acc, s) => acc + (s.duration_minutes || 0), 0);
+  const todayMinutes = todayWorkSessions.reduce((acc, s) => acc + (s.duration_minutes || 0), 0);
+  const weeklyMinutes = weeklyWorkSessions.reduce((acc, s) => acc + (s.duration_minutes || 0), 0);
 
   // Calculate daily breakdown for the week
   const dailyBreakdown = getDailyBreakdown(weeklySessions || []);

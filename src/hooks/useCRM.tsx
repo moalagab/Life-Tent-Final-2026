@@ -94,7 +94,8 @@ export function useCreateCustomer() {
     mutationFn: async (customer: Omit<Partial<Customer>, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
       const { data, error } = await supabase
         .from('customers')
-        .insert({ ...customer, user_id: user?.id! } as any)
+         
+        .insert({ ...customer, user_id: user!.id } as never)
         .select()
         .single();
       if (error) throw error;
@@ -172,7 +173,8 @@ export function useCreateCase() {
     mutationFn: async (caseData: Omit<Partial<CustomerCase>, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
       const { data, error } = await supabase
         .from('customer_cases')
-        .insert({ ...caseData, user_id: user?.id! } as any)
+         
+        .insert({ ...caseData, user_id: user!.id } as never)
         .select()
         .single();
       if (error) throw error;
@@ -191,6 +193,7 @@ export function useUpdateCase() {
     mutationFn: async ({ id, customer, ...updates }: Partial<CustomerCase> & { id: string }) => {
       const { data, error } = await supabase
         .from('customer_cases')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .update(updates as any)
         .eq('id', id)
         .select()
@@ -250,7 +253,8 @@ export function useCreateCommunication() {
     mutationFn: async (comm: Omit<Partial<CustomerCommunication>, 'id' | 'user_id' | 'created_at'>) => {
       const { data, error } = await supabase
         .from('customer_communications')
-        .insert({ ...comm, user_id: user?.id! } as any)
+         
+        .insert({ ...comm, user_id: user!.id } as never)
         .select()
         .single();
       if (error) throw error;

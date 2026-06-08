@@ -17,11 +17,8 @@ const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 minutes
 
 export default function Auth() {
-  const { t, currentLanguage: language } = useLanguage();
-  
-  // Strong password validation for signup
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-  
+  const { t } = useLanguage();
+
   const loginSchema = z.object({
     email: z.string().trim().toLowerCase().email({ message: t('validation.invalidEmail') }),
     password: z.string().min(6, { message: t('validation.passwordMinLength') })
@@ -30,11 +27,11 @@ export default function Auth() {
   const signupSchema = z.object({
     email: z.string().trim().toLowerCase().email({ message: t('validation.invalidEmail') }),
     password: z.string()
-      .min(8, { message: language === 'ar' ? 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' : 'Password must be at least 8 characters' })
-      .regex(/[a-z]/, { message: language === 'ar' ? 'يجب أن تحتوي على حرف صغير' : 'Must contain a lowercase letter' })
-      .regex(/[A-Z]/, { message: language === 'ar' ? 'يجب أن تحتوي على حرف كبير' : 'Must contain an uppercase letter' })
-      .regex(/\d/, { message: language === 'ar' ? 'يجب أن تحتوي على رقم' : 'Must contain a number' })
-      .regex(/[@$!%*?&]/, { message: language === 'ar' ? 'يجب أن تحتوي على رمز خاص (@$!%*?&)' : 'Must contain a special character (@$!%*?&)' }),
+      .min(8, { message: t('auth.passwordMinLength8') })
+      .regex(/[a-z]/, { message: t('auth.passwordLowercase') })
+      .regex(/[A-Z]/, { message: t('auth.passwordUppercase') })
+      .regex(/\d/, { message: t('auth.passwordNumber') })
+      .regex(/[@$!%*?&]/, { message: t('auth.passwordSpecial') }),
     fullName: z.string().trim().min(2, { message: t('validation.nameMinLength') }).max(100)
   });
 
@@ -64,15 +61,15 @@ export default function Auth() {
   const { signIn, signUp, resetPassword, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
-  // Calculate password strength
+
+  // Calculate password strength (25 pts each: length, lower, upper, digit, special)
   const calculatePasswordStrength = useCallback((pwd: string) => {
     let strength = 0;
-    if (pwd.length >= 8) strength += 25;
-    if (/[a-z]/.test(pwd)) strength += 25;
-    if (/[A-Z]/.test(pwd)) strength += 25;
-    if (/\d/.test(pwd)) strength += 12.5;
-    if (/[@$!%*?&]/.test(pwd)) strength += 12.5;
+    if (pwd.length >= 8) strength += 20;
+    if (/[a-z]/.test(pwd)) strength += 20;
+    if (/[A-Z]/.test(pwd)) strength += 20;
+    if (/\d/.test(pwd)) strength += 20;
+    if (/[@$!%*?&]/.test(pwd)) strength += 20;
     return Math.min(100, strength);
   }, []);
   
@@ -145,10 +142,8 @@ export default function Auth() {
     // Check lockout for login attempts
     if (mode === 'login' && isLockedOut) {
       toast({
-        title: language === 'ar' ? 'تم إيقاف الحساب مؤقتاً' : 'Account Temporarily Locked',
-        description: language === 'ar' 
-          ? `يرجى الانتظار ${lockoutRemaining} ثانية قبل المحاولة مرة أخرى`
-          : `Please wait ${lockoutRemaining} seconds before trying again`,
+        title: t('auth.accountLocked'),
+        description: t('auth.lockoutWait', { seconds: lockoutRemaining }),
         variant: "destructive"
       });
       return;
@@ -184,16 +179,14 @@ export default function Auth() {
           if (newAttempts >= MAX_LOGIN_ATTEMPTS) {
             setLockoutUntil(Date.now() + LOCKOUT_DURATION);
             toast({
-              title: language === 'ar' ? 'تم إيقاف الحساب مؤقتاً' : 'Account Temporarily Locked',
-              description: language === 'ar' 
-                ? 'تم تجاوز عدد المحاولات المسموح. يرجى الانتظار 5 دقائق.'
-                : 'Too many failed attempts. Please wait 5 minutes.',
+              title: t('auth.accountLocked'),
+              description: t('auth.accountLockedDesc'),
               variant: "destructive"
             });
-          } else if (error.message.includes('Invalid login credentials')) {
+          } else if (error.message.includes('Invalid login credentials') || error.message.includes('invalid_credentials')) {
             toast({
               title: t('auth.loginError'),
-              description: `${t('auth.invalidCredentials')} (${MAX_LOGIN_ATTEMPTS - newAttempts} ${language === 'ar' ? 'محاولات متبقية' : 'attempts remaining'})`,
+              description: `${t('auth.invalidCredentials')} (${MAX_LOGIN_ATTEMPTS - newAttempts} ${t('auth.attemptsRemaining')})`,
               variant: "destructive"
             });
           } else {
@@ -234,9 +227,7 @@ export default function Auth() {
           setRegisteredEmail(email.trim().toLowerCase());
           toast({
             title: t('auth.accountCreated'),
-            description: language === 'ar' 
-              ? 'يرجى التحقق من بريدك الإلكتروني لتفعيل حسابك'
-              : 'Please check your email to verify your account'
+            description: t('auth.signupVerifyEmail')
           });
         }
       }
@@ -254,8 +245,8 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-background via-background to-secondary/20">
-      {/* Animated Background Effects */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      {/* Animated Background Effects — purely decorative */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
         {/* Gradient orbs */}
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-primary/8 to-primary/[0.02] rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
         <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-gradient-to-tl from-primary/5 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s', animationDelay: '1s' }} />
@@ -378,21 +369,15 @@ export default function Auth() {
                   <Mail className="w-8 h-8 text-green-500" />
                 </div>
                 <h3 className="text-lg font-medium text-foreground mb-2">
-                  {language === 'ar' ? 'تحقق من بريدك الإلكتروني' : 'Check Your Email'}
+                  {t('auth.verifyEmail')}
                 </h3>
                 <p className="text-muted-foreground text-sm mb-4">
-                  {language === 'ar' 
-                    ? `أرسلنا رابط التحقق إلى ${registeredEmail}` 
-                    : `We sent a verification link to ${registeredEmail}`}
+                  {t('auth.verificationSent')} {registeredEmail}
                 </p>
                 <div className="bg-secondary/50 rounded-lg p-4 mb-4">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Shield className="w-4 h-4 text-primary" />
-                    <span>
-                      {language === 'ar' 
-                        ? 'لن تتمكن من الدخول حتى تتحقق من بريدك الإلكتروني'
-                        : 'You cannot sign in until you verify your email'}
-                    </span>
+                    <Shield className="w-4 h-4 text-primary" aria-hidden="true" />
+                    <span>{t('auth.verificationRequired')}</span>
                   </div>
                 </div>
                 <Button
@@ -401,7 +386,7 @@ export default function Auth() {
                   className="mt-2"
                   onClick={() => switchMode('login')}
                 >
-                  {language === 'ar' ? 'العودة لتسجيل الدخول' : 'Back to Sign In'}
+                  {t('auth.backToSignIn')}
                 </Button>
               </div>
             </>
@@ -491,9 +476,10 @@ export default function Auth() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                       className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {showPassword ? <EyeOff className="w-5 h-5" aria-hidden="true" /> : <Eye className="w-5 h-5" aria-hidden="true" />}
                     </button>
                   </div>
                   {errors.password && (
@@ -506,37 +492,37 @@ export default function Auth() {
                       <div className="flex items-center gap-2">
                         <Progress value={passwordStrength} className="h-2 flex-1" />
                         <span className={`text-xs font-medium ${
-                          passwordStrength < 50 ? 'text-destructive' : 
-                          passwordStrength < 75 ? 'text-yellow-500' : 'text-green-500'
-                        }`}>
-                          {passwordStrength < 50 
-                            ? (language === 'ar' ? 'ضعيفة' : 'Weak')
-                            : passwordStrength < 75 
-                              ? (language === 'ar' ? 'متوسطة' : 'Medium')
-                              : (language === 'ar' ? 'قوية' : 'Strong')
+                          passwordStrength < 50 ? 'text-destructive' :
+                          passwordStrength < 80 ? 'text-yellow-500' : 'text-green-500'
+                        }`} aria-live="polite">
+                          {passwordStrength < 50
+                            ? t('auth.passwordWeak')
+                            : passwordStrength < 80
+                              ? t('auth.passwordMedium')
+                              : t('auth.passwordStrong')
                           }
                         </span>
                       </div>
-                      <div className="text-xs text-muted-foreground space-y-1">
-                        <div className="flex items-center gap-1">
-                          {password.length >= 8 ? <CheckCircle className="w-3 h-3 text-green-500" /> : <AlertTriangle className="w-3 h-3 text-muted-foreground" />}
-                          <span>{language === 'ar' ? '8 أحرف على الأقل' : 'At least 8 characters'}</span>
+                      <div className="text-xs text-muted-foreground space-y-1" role="list" aria-label={t('auth.password')}>
+                        <div className="flex items-center gap-1" role="listitem">
+                          {password.length >= 8 ? <CheckCircle className="w-3 h-3 text-green-500" aria-hidden="true" /> : <AlertTriangle className="w-3 h-3 text-muted-foreground" aria-hidden="true" />}
+                          <span>{t('auth.checkMinChars')}</span>
                         </div>
-                        <div className="flex items-center gap-1">
-                          {/[A-Z]/.test(password) ? <CheckCircle className="w-3 h-3 text-green-500" /> : <AlertTriangle className="w-3 h-3 text-muted-foreground" />}
-                          <span>{language === 'ar' ? 'حرف كبير' : 'Uppercase letter'}</span>
+                        <div className="flex items-center gap-1" role="listitem">
+                          {/[A-Z]/.test(password) ? <CheckCircle className="w-3 h-3 text-green-500" aria-hidden="true" /> : <AlertTriangle className="w-3 h-3 text-muted-foreground" aria-hidden="true" />}
+                          <span>{t('auth.checkUppercase')}</span>
                         </div>
-                        <div className="flex items-center gap-1">
-                          {/[a-z]/.test(password) ? <CheckCircle className="w-3 h-3 text-green-500" /> : <AlertTriangle className="w-3 h-3 text-muted-foreground" />}
-                          <span>{language === 'ar' ? 'حرف صغير' : 'Lowercase letter'}</span>
+                        <div className="flex items-center gap-1" role="listitem">
+                          {/[a-z]/.test(password) ? <CheckCircle className="w-3 h-3 text-green-500" aria-hidden="true" /> : <AlertTriangle className="w-3 h-3 text-muted-foreground" aria-hidden="true" />}
+                          <span>{t('auth.checkLowercase')}</span>
                         </div>
-                        <div className="flex items-center gap-1">
-                          {/\d/.test(password) ? <CheckCircle className="w-3 h-3 text-green-500" /> : <AlertTriangle className="w-3 h-3 text-muted-foreground" />}
-                          <span>{language === 'ar' ? 'رقم' : 'Number'}</span>
+                        <div className="flex items-center gap-1" role="listitem">
+                          {/\d/.test(password) ? <CheckCircle className="w-3 h-3 text-green-500" aria-hidden="true" /> : <AlertTriangle className="w-3 h-3 text-muted-foreground" aria-hidden="true" />}
+                          <span>{t('auth.checkNumber')}</span>
                         </div>
-                        <div className="flex items-center gap-1">
-                          {/[@$!%*?&]/.test(password) ? <CheckCircle className="w-3 h-3 text-green-500" /> : <AlertTriangle className="w-3 h-3 text-muted-foreground" />}
-                          <span>{language === 'ar' ? 'رمز خاص (@$!%*?&)' : 'Special character (@$!%*?&)'}</span>
+                        <div className="flex items-center gap-1" role="listitem">
+                          {/[@$!%*?&]/.test(password) ? <CheckCircle className="w-3 h-3 text-green-500" aria-hidden="true" /> : <AlertTriangle className="w-3 h-3 text-muted-foreground" aria-hidden="true" />}
+                          <span>{t('auth.checkSpecial')}</span>
                         </div>
                       </div>
                     </div>
@@ -544,27 +530,19 @@ export default function Auth() {
                   
                   {/* Lockout Warning */}
                   {mode === 'login' && loginAttempts > 0 && loginAttempts < MAX_LOGIN_ATTEMPTS && (
-                    <div className="flex items-center gap-2 text-yellow-500 text-xs mt-1">
-                      <Shield className="w-4 h-4" />
+                    <div className="flex items-center gap-2 text-yellow-500 text-xs mt-1" role="alert">
+                      <Shield className="w-4 h-4" aria-hidden="true" />
                       <span>
-                        {language === 'ar' 
-                          ? `${MAX_LOGIN_ATTEMPTS - loginAttempts} محاولات متبقية قبل الإيقاف المؤقت`
-                          : `${MAX_LOGIN_ATTEMPTS - loginAttempts} attempts remaining before lockout`
-                        }
+                        {MAX_LOGIN_ATTEMPTS - loginAttempts} {t('auth.attemptsBeforeLockout')}
                       </span>
                     </div>
                   )}
-                  
+
                   {/* Lockout Active */}
                   {mode === 'login' && isLockedOut && (
-                    <div className="flex items-center gap-2 text-destructive text-xs mt-1">
-                      <AlertTriangle className="w-4 h-4" />
-                      <span>
-                        {language === 'ar' 
-                          ? `الحساب موقوف مؤقتاً. يرجى الانتظار ${lockoutRemaining} ثانية`
-                          : `Account locked. Please wait ${lockoutRemaining} seconds`
-                        }
-                      </span>
+                    <div className="flex items-center gap-2 text-destructive text-xs mt-1" role="alert">
+                      <AlertTriangle className="w-4 h-4" aria-hidden="true" />
+                      <span>{t('auth.accountLockedWait', { seconds: lockoutRemaining })}</span>
                     </div>
                   )}
                 </div>

@@ -62,6 +62,7 @@ export default function Habits() {
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [editingHabit, setEditingHabit] = useState<any>(null);
   const [newHabit, setNewHabit] = useState({
     name: '',
@@ -204,15 +205,20 @@ export default function Habits() {
   };
 
   const getTotalStreak = () => {
-    if (!habits) return 0;
-    // Simple streak calculation - count consecutive days from today
+    if (!habits || habits.length === 0) return 0;
+    const activeHabits = habits.filter(h => h.is_active !== false);
+    if (activeHabits.length === 0) return 0;
     let streak = 0;
     for (let i = 0; i < 365; i++) {
       const date = subDays(today, i);
-      const allHabitsCompleted = habits.every(h => 
-        h.logs?.some(log => isSameDay(new Date(log.completed_at), date))
+      const allHabitsCompleted = activeHabits.every(h =>
+        h.logs?.some(log => {
+          if (!log.completed_at) return false;
+          const d = new Date(log.completed_at);
+          return !isNaN(d.getTime()) && isSameDay(d, date);
+        })
       );
-      if (allHabitsCompleted && habits.length > 0) {
+      if (allHabitsCompleted) {
         streak++;
       } else if (i > 0) {
         break;

@@ -94,7 +94,7 @@ describe("Light theme — WCAG contrast", () => {
       const status = Number(r) >= p.min ? "✓" : "✗";
       return `${status} ${p.name.padEnd(48)} ${r}:1 (min ${p.min}:1)`;
     });
-    // eslint-disable-next-line no-console
+     
     console.log("\nLight theme contrast report:\n" + lines.join("\n") + "\n");
     expect(lines.length).toBeGreaterThan(0);
   });

@@ -66,6 +66,7 @@ export function ProjectDetailDialog({ project, open, onOpenChange }: ProjectDeta
     try {
       await updateProject.mutateAsync({ 
         id: project.id, 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         phase: newPhase as any,
         status: newPhase === 'closing' ? 'completed' : project.status
       });

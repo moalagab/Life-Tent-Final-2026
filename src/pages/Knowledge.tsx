@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { MainLayout } from '@/components/layout/MainLayout';
 import { FileText, GraduationCap, Plus, Search, Tag, Sparkles, Loader2, Archive, RotateCcw, MoreVertical, ExternalLink, BookOpen, FolderOpen, Target, Briefcase, Trash2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -72,10 +73,11 @@ export default function Knowledge() {
       await createNote.mutateAsync({
         title: newNote.title,
         content: newNote.content || null,
-        tags: newNote.tags ? newNote.tags.split(',').map(t => t.trim()) : null,
+        tags: newNote.tags ? newNote.tags.split(',').map(t => t.trim()).filter(Boolean) || null : null,
         project_id: newNote.project_id || null,
         goal_id: newNote.goal_id || null,
         folder: newNote.folder || null,
+       
       } as any);
       toast.success(t('knowledge.noteAdded'));
       setIsNoteDialogOpen(false);
@@ -95,6 +97,7 @@ export default function Knowledge() {
         project_id: noteData.project_id || null,
         goal_id: noteData.goal_id || null,
         folder: noteData.folder || null,
+       
       } as any);
       toast.success(t('knowledge.noteUpdated'));
       // Update selected note with new data
@@ -348,6 +351,8 @@ export default function Knowledge() {
       </div>
 
       {/* Tabs */}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-6">
         <div className="flex items-center justify-between">
           <TabsList>

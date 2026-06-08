@@ -16,6 +16,7 @@ export interface Resource {
   area_id: string | null;
   project_id: string | null;
   tags: string[] | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: Record<string, any> | null;
   last_used_at: string | null;
   status: 'active' | 'archived';
@@ -82,6 +83,7 @@ export function useCreateResource() {
     mutationFn: async (resource: { type: ResourceType; title: string; description?: string | null; content?: string | null; source_url?: string | null; area_id?: string | null; project_id?: string | null; tags?: string[] | null }) => {
       const { data, error } = await supabase
         .from('resources')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .insert({ ...resource, user_id: user!.id, status: 'active' } as any)
         .select()
         .single();
