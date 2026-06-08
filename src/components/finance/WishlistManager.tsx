@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { 
   ShoppingBag, Plus, ExternalLink, Loader2, MoreVertical, 
   Edit, Trash2, Check, Star, Clock, Target, Image as ImageIcon,
@@ -20,6 +20,7 @@ import { useWishlistItems, useCreateWishlistItem, useUpdateWishlistItem, useDele
 import { useEnvelopes, useSinkingFunds } from '@/hooks/useAdvancedFinance';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { type Locale } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 
 const CATEGORIES = [
@@ -32,6 +33,379 @@ const CATEGORIES = [
   { id: 'entertainment', label: { ar: 'ترفيه', en: 'Entertainment' } },
   { id: 'other', label: { ar: 'أخرى', en: 'Other' } },
 ];
+
+interface WishlistFormData {
+  name: string;
+  description: string;
+  estimated_price: string;
+  currency: string;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  category: string;
+  url: string;
+  image_url: string;
+  target_date: string;
+  saved_amount: string;
+  linked_envelope_id: string;
+  linked_sinking_fund_id: string;
+  notes: string;
+}
+
+interface ItemFormProps {
+  isEdit?: boolean;
+  language: string;
+  formData: WishlistFormData;
+  setFormData: React.Dispatch<React.SetStateAction<WishlistFormData>>;
+  envelopes: { id: string; name: string }[] | undefined;
+  sinkingFunds: { id: string; name: string }[] | undefined;
+  handleCreate: () => void;
+  handleUpdate: () => void;
+  isCreatePending: boolean;
+  isUpdatePending: boolean;
+}
+
+function ItemForm({
+  isEdit = false,
+  language,
+  formData,
+  setFormData,
+  envelopes,
+  sinkingFunds,
+  handleCreate,
+  handleUpdate,
+  isCreatePending,
+  isUpdatePending,
+}: ItemFormProps) {
+  return (
+    <div className="space-y-4 mt-4 max-h-[65vh] overflow-y-auto pe-2">
+      <Input
+        dir="auto"
+        placeholder={language === 'ar' ? 'اسم المنتج/الخدمة' : 'Item name'}
+        value={formData.name}
+        onChange={(e) => { const v = e.target.value; setFormData(prev => ({ ...prev, name: v })); }}
+      />
+
+      <Textarea
+        dir="auto"
+        placeholder={language === 'ar' ? 'الوصف (اختياري)' : 'Description (optional)'}
+        value={formData.description}
+        onChange={(e) => { const v = e.target.value; setFormData(prev => ({ ...prev, description: v })); }}
+        rows={2}
+      />
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-sm text-muted-foreground mb-1 block">
+            {language === 'ar' ? 'السعر التقريبي' : 'Estimated Price'}
+          </label>
+          <Input
+            type="number"
+            placeholder="0"
+            value={formData.estimated_price}
+            onChange={(e) => { const v = e.target.value; setFormData(prev => ({ ...prev, estimated_price: v })); }}
+          />
+        </div>
+        <div>
+          <label className="text-sm text-muted-foreground mb-1 block">
+            {language === 'ar' ? 'العملة' : 'Currency'}
+          </label>
+          <Select value={formData.currency} onValueChange={(v) => setFormData(prev => ({ ...prev, currency: v }))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="SAR">SAR</SelectItem>
+              <SelectItem value="USD">USD</SelectItem>
+              <SelectItem value="AED">AED</SelectItem>
+              <SelectItem value="EGP">EGP</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-sm text-muted-foreground mb-1 block">
+            {language === 'ar' ? 'الأولوية' : 'Priority'}
+          </label>
+          <Select value={formData.priority} onValueChange={(v: any) => setFormData(prev => ({ ...prev, priority: v }))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="low">{language === 'ar' ? 'منخفض' : 'Low'}</SelectItem>
+              <SelectItem value="medium">{language === 'ar' ? 'متوسط' : 'Medium'}</SelectItem>
+              <SelectItem value="high">{language === 'ar' ? 'مرتفع' : 'High'}</SelectItem>
+              <SelectItem value="urgent">{language === 'ar' ? 'عاجل' : 'Urgent'}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <label className="text-sm text-muted-foreground mb-1 block">
+            {language === 'ar' ? 'الفئة' : 'Category'}
+          </label>
+          <Select value={formData.category} onValueChange={(v) => setFormData(prev => ({ ...prev, category: v }))}>
+            <SelectTrigger><SelectValue placeholder={language === 'ar' ? 'اختر' : 'Select'} /></SelectTrigger>
+            <SelectContent>
+              {CATEGORIES.map(cat => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.label[language as 'ar' | 'en']}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div>
+        <label className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
+          <LinkIcon className="w-3 h-3" />
+          {language === 'ar' ? 'رابط المنتج' : 'Product URL'}
+        </label>
+        <Input
+          type="url"
+          placeholder="https://..."
+          value={formData.url}
+          onChange={(e) => { const v = e.target.value; setFormData(prev => ({ ...prev, url: v })); }}
+        />
+      </div>
+
+      <div>
+        <label className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
+          <ImageIcon className="w-3 h-3" />
+          {language === 'ar' ? 'رابط الصورة' : 'Image URL'}
+        </label>
+        <Input
+          type="url"
+          placeholder="https://..."
+          value={formData.image_url}
+          onChange={(e) => { const v = e.target.value; setFormData(prev => ({ ...prev, image_url: v })); }}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-sm text-muted-foreground mb-1 block">
+            {language === 'ar' ? 'تاريخ الهدف' : 'Target Date'}
+          </label>
+          <Input
+            type="date"
+            value={formData.target_date}
+            onChange={(e) => { const v = e.target.value; setFormData(prev => ({ ...prev, target_date: v })); }}
+          />
+        </div>
+        <div>
+          <label className="text-sm text-muted-foreground mb-1 block">
+            {language === 'ar' ? 'المبلغ الموفر' : 'Saved Amount'}
+          </label>
+          <Input
+            type="number"
+            placeholder="0"
+            value={formData.saved_amount}
+            onChange={(e) => { const v = e.target.value; setFormData(prev => ({ ...prev, saved_amount: v })); }}
+          />
+        </div>
+      </div>
+
+      {(envelopes?.length || 0) > 0 && (
+        <div>
+          <label className="text-sm text-muted-foreground mb-1 block">
+            {language === 'ar' ? 'ربط بمغلف' : 'Link to Envelope'}
+          </label>
+          <Select value={formData.linked_envelope_id} onValueChange={(v) => setFormData(prev => ({ ...prev, linked_envelope_id: v === 'none' ? '' : v }))}>
+            <SelectTrigger><SelectValue placeholder={language === 'ar' ? 'اختر مغلف' : 'Select envelope'} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">{language === 'ar' ? 'بدون' : 'None'}</SelectItem>
+              {envelopes?.map(env => (
+                <SelectItem key={env.id} value={env.id}>{env.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {(sinkingFunds?.length || 0) > 0 && (
+        <div>
+          <label className="text-sm text-muted-foreground mb-1 block">
+            {language === 'ar' ? 'ربط بصندوق ادخار' : 'Link to Sinking Fund'}
+          </label>
+          <Select value={formData.linked_sinking_fund_id} onValueChange={(v) => setFormData(prev => ({ ...prev, linked_sinking_fund_id: v === 'none' ? '' : v }))}>
+            <SelectTrigger><SelectValue placeholder={language === 'ar' ? 'اختر صندوق' : 'Select fund'} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">{language === 'ar' ? 'بدون' : 'None'}</SelectItem>
+              {sinkingFunds?.map(fund => (
+                <SelectItem key={fund.id} value={fund.id}>{fund.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      <Textarea
+        dir="auto"
+        placeholder={language === 'ar' ? 'ملاحظات إضافية' : 'Additional notes'}
+        value={formData.notes}
+        onChange={(e) => { const v = e.target.value; setFormData(prev => ({ ...prev, notes: v })); }}
+        rows={2}
+      />
+
+      <Button
+        onClick={isEdit ? handleUpdate : handleCreate}
+        className="w-full"
+        disabled={isCreatePending || isUpdatePending}
+      >
+        {(isCreatePending || isUpdatePending) ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : isEdit ? (language === 'ar' ? 'حفظ التغييرات' : 'Save Changes') : (language === 'ar' ? 'إضافة' : 'Add')}
+      </Button>
+    </div>
+  );
+}
+
+interface ItemCardProps {
+  item: WishlistItem;
+  language: string;
+  locale: Locale;
+  getPriorityColor: (priority: string) => string;
+  getPriorityLabel: (priority: string) => string;
+  openEditDialog: (item: WishlistItem) => void;
+  handleStartSaving: (id: string) => void;
+  handleMarkAsPurchased: (id: string) => void;
+  handleDelete: (id: string) => void;
+}
+
+function ItemCard({
+  item,
+  language,
+  locale,
+  getPriorityColor,
+  getPriorityLabel,
+  openEditDialog,
+  handleStartSaving,
+  handleMarkAsPurchased,
+  handleDelete,
+}: ItemCardProps) {
+  const savedPercent = item.estimated_price ? ((item.saved_amount || 0) / item.estimated_price) * 100 : 0;
+  const categoryLabel = CATEGORIES.find(c => c.id === item.category)?.label[language as 'ar' | 'en'] || item.category;
+
+  return (
+    <div className="glass-card p-4 hover:shadow-lg transition-all duration-300 group">
+      <div className="flex gap-4">
+        {/* Image */}
+        <div className="w-24 h-24 rounded-xl bg-muted/50 flex-shrink-0 overflow-hidden">
+          {item.image_url ? (
+            <img
+              src={item.image_url}
+              alt={item.name}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/placeholder.svg';
+              }}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <ShoppingBag className="w-8 h-8 text-muted-foreground/50" />
+            </div>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold truncate">{item.name}</h3>
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                <Badge className={cn('text-xs', getPriorityColor(item.priority))}>
+                  {getPriorityLabel(item.priority)}
+                </Badge>
+                {categoryLabel && (
+                  <Badge variant="outline" className="text-xs">
+                    {categoryLabel}
+                  </Badge>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1">
+              {item.url && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => window.open(item.url, '_blank')}
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </Button>
+              )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreVertical className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => openEditDialog(item)}>
+                    <Edit className="w-4 h-4 me-2" />
+                    {language === 'ar' ? 'تعديل' : 'Edit'}
+                  </DropdownMenuItem>
+                  {item.status === 'pending' && (
+                    <DropdownMenuItem onClick={() => handleStartSaving(item.id)}>
+                      <Wallet className="w-4 h-4 me-2" />
+                      {language === 'ar' ? 'بدء التوفير' : 'Start Saving'}
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onClick={() => handleMarkAsPurchased(item.id)}>
+                    <Check className="w-4 h-4 me-2" />
+                    {language === 'ar' ? 'تم الشراء' : 'Mark Purchased'}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => handleDelete(item.id)}
+                    className="text-destructive"
+                  >
+                    <Trash2 className="w-4 h-4 me-2" />
+                    {language === 'ar' ? 'حذف' : 'Delete'}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+
+          {item.description && (
+            <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{item.description}</p>
+          )}
+
+          <div className="mt-3 space-y-2">
+            {item.estimated_price && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">
+                  {language === 'ar' ? 'السعر' : 'Price'}
+                </span>
+                <span className="font-semibold">
+                  {item.estimated_price.toLocaleString()} {item.currency}
+                </span>
+              </div>
+            )}
+
+            {item.saved_amount !== undefined && item.saved_amount > 0 && (
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">
+                    {language === 'ar' ? 'الموفر' : 'Saved'}: {item.saved_amount?.toLocaleString()} {item.currency}
+                  </span>
+                  <span className="text-primary font-medium">{savedPercent.toFixed(0)}%</span>
+                </div>
+                <Progress value={savedPercent} className="h-1.5" />
+              </div>
+            )}
+
+            {item.target_date && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Clock className="w-3 h-3" />
+                <span>{format(new Date(item.target_date), 'PPP', { locale })}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function WishlistManager() {
   const { t, currentLanguage } = useLanguage();
@@ -230,317 +604,6 @@ export function WishlistManager() {
     );
   }
 
-  const ItemForm = ({ isEdit = false }: { isEdit?: boolean }) => (
-    <div className="space-y-4 mt-4 max-h-[65vh] overflow-y-auto pe-2">
-      <Input
-        dir="auto"
-        placeholder={language === 'ar' ? 'اسم المنتج/الخدمة' : 'Item name'}
-        value={formData.name}
-        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-      />
-      
-      <Textarea
-        dir="auto"
-        placeholder={language === 'ar' ? 'الوصف (اختياري)' : 'Description (optional)'}
-        value={formData.description}
-        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-        rows={2}
-      />
-
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="text-sm text-muted-foreground mb-1 block">
-            {language === 'ar' ? 'السعر التقريبي' : 'Estimated Price'}
-          </label>
-          <Input
-            type="number"
-            placeholder="0"
-            value={formData.estimated_price}
-            onChange={(e) => setFormData({ ...formData, estimated_price: e.target.value })}
-          />
-        </div>
-        <div>
-          <label className="text-sm text-muted-foreground mb-1 block">
-            {language === 'ar' ? 'العملة' : 'Currency'}
-          </label>
-          <Select value={formData.currency} onValueChange={(v) => setFormData({ ...formData, currency: v })}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="SAR">SAR</SelectItem>
-              <SelectItem value="USD">USD</SelectItem>
-              <SelectItem value="AED">AED</SelectItem>
-              <SelectItem value="EGP">EGP</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="text-sm text-muted-foreground mb-1 block">
-            {language === 'ar' ? 'الأولوية' : 'Priority'}
-          </label>
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          <Select value={formData.priority} onValueChange={(v: any) => setFormData({ ...formData, priority: v })}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="low">{language === 'ar' ? 'منخفض' : 'Low'}</SelectItem>
-              <SelectItem value="medium">{language === 'ar' ? 'متوسط' : 'Medium'}</SelectItem>
-              <SelectItem value="high">{language === 'ar' ? 'مرتفع' : 'High'}</SelectItem>
-              <SelectItem value="urgent">{language === 'ar' ? 'عاجل' : 'Urgent'}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <label className="text-sm text-muted-foreground mb-1 block">
-            {language === 'ar' ? 'الفئة' : 'Category'}
-          </label>
-          <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
-            <SelectTrigger><SelectValue placeholder={language === 'ar' ? 'اختر' : 'Select'} /></SelectTrigger>
-            <SelectContent>
-              {CATEGORIES.map(cat => (
-                <SelectItem key={cat.id} value={cat.id}>
-                  {cat.label[language]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div>
-        <label className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
-          <LinkIcon className="w-3 h-3" />
-          {language === 'ar' ? 'رابط المنتج' : 'Product URL'}
-        </label>
-        <Input
-          type="url"
-          placeholder="https://..."
-          value={formData.url}
-          onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-        />
-      </div>
-
-      <div>
-        <label className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
-          <ImageIcon className="w-3 h-3" />
-          {language === 'ar' ? 'رابط الصورة' : 'Image URL'}
-        </label>
-        <Input
-          type="url"
-          placeholder="https://..."
-          value={formData.image_url}
-          onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="text-sm text-muted-foreground mb-1 block">
-            {language === 'ar' ? 'تاريخ الهدف' : 'Target Date'}
-          </label>
-          <Input
-            type="date"
-            value={formData.target_date}
-            onChange={(e) => setFormData({ ...formData, target_date: e.target.value })}
-          />
-        </div>
-        <div>
-          <label className="text-sm text-muted-foreground mb-1 block">
-            {language === 'ar' ? 'المبلغ الموفر' : 'Saved Amount'}
-          </label>
-          <Input
-            type="number"
-            placeholder="0"
-            value={formData.saved_amount}
-            onChange={(e) => setFormData({ ...formData, saved_amount: e.target.value })}
-          />
-        </div>
-      </div>
-
-      {(envelopes?.length || 0) > 0 && (
-        <div>
-          <label className="text-sm text-muted-foreground mb-1 block">
-            {language === 'ar' ? 'ربط بمغلف' : 'Link to Envelope'}
-          </label>
-          <Select value={formData.linked_envelope_id} onValueChange={(v) => setFormData({ ...formData, linked_envelope_id: v === 'none' ? '' : v })}>
-            <SelectTrigger><SelectValue placeholder={language === 'ar' ? 'اختر مغلف' : 'Select envelope'} /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">{language === 'ar' ? 'بدون' : 'None'}</SelectItem>
-              {envelopes?.map(env => (
-                <SelectItem key={env.id} value={env.id}>{env.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
-      {(sinkingFunds?.length || 0) > 0 && (
-        <div>
-          <label className="text-sm text-muted-foreground mb-1 block">
-            {language === 'ar' ? 'ربط بصندوق ادخار' : 'Link to Sinking Fund'}
-          </label>
-          <Select value={formData.linked_sinking_fund_id} onValueChange={(v) => setFormData({ ...formData, linked_sinking_fund_id: v === 'none' ? '' : v })}>
-            <SelectTrigger><SelectValue placeholder={language === 'ar' ? 'اختر صندوق' : 'Select fund'} /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">{language === 'ar' ? 'بدون' : 'None'}</SelectItem>
-              {sinkingFunds?.map(fund => (
-                <SelectItem key={fund.id} value={fund.id}>{fund.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
-      <Textarea
-        dir="auto"
-        placeholder={language === 'ar' ? 'ملاحظات إضافية' : 'Additional notes'}
-        value={formData.notes}
-        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-        rows={2}
-      />
-
-      <Button 
-        onClick={isEdit ? handleUpdate : handleCreate} 
-        className="w-full" 
-        disabled={createItem.isPending || updateItem.isPending}
-      >
-        {(createItem.isPending || updateItem.isPending) ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
-        ) : isEdit ? (language === 'ar' ? 'حفظ التغييرات' : 'Save Changes') : (language === 'ar' ? 'إضافة' : 'Add')}
-      </Button>
-    </div>
-  );
-
-  const ItemCard = ({ item }: { item: WishlistItem }) => {
-    const savedPercent = item.estimated_price ? ((item.saved_amount || 0) / item.estimated_price) * 100 : 0;
-    const categoryLabel = CATEGORIES.find(c => c.id === item.category)?.label[language] || item.category;
-
-    return (
-      <div className="glass-card p-4 hover:shadow-lg transition-all duration-300 group">
-        <div className="flex gap-4">
-          {/* Image */}
-          <div className="w-24 h-24 rounded-xl bg-muted/50 flex-shrink-0 overflow-hidden">
-            {item.image_url ? (
-              <img 
-                src={item.image_url} 
-                alt={item.name}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/placeholder.svg';
-                }}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <ShoppingBag className="w-8 h-8 text-muted-foreground/50" />
-              </div>
-            )}
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold truncate">{item.name}</h3>
-                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                  <Badge className={cn('text-xs', getPriorityColor(item.priority))}>
-                    {getPriorityLabel(item.priority)}
-                  </Badge>
-                  {categoryLabel && (
-                    <Badge variant="outline" className="text-xs">
-                      {categoryLabel}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-1">
-                {item.url && (
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8"
-                    onClick={() => window.open(item.url, '_blank')}
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                  </Button>
-                )}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <MoreVertical className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => openEditDialog(item)}>
-                      <Edit className="w-4 h-4 me-2" />
-                      {language === 'ar' ? 'تعديل' : 'Edit'}
-                    </DropdownMenuItem>
-                    {item.status === 'pending' && (
-                      <DropdownMenuItem onClick={() => handleStartSaving(item.id)}>
-                        <Wallet className="w-4 h-4 me-2" />
-                        {language === 'ar' ? 'بدء التوفير' : 'Start Saving'}
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem onClick={() => handleMarkAsPurchased(item.id)}>
-                      <Check className="w-4 h-4 me-2" />
-                      {language === 'ar' ? 'تم الشراء' : 'Mark Purchased'}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      onClick={() => handleDelete(item.id)}
-                      className="text-destructive"
-                    >
-                      <Trash2 className="w-4 h-4 me-2" />
-                      {language === 'ar' ? 'حذف' : 'Delete'}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-
-            {item.description && (
-              <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{item.description}</p>
-            )}
-
-            <div className="mt-3 space-y-2">
-              {item.estimated_price && (
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">
-                    {language === 'ar' ? 'السعر' : 'Price'}
-                  </span>
-                  <span className="font-semibold">
-                    {item.estimated_price.toLocaleString()} {item.currency}
-                  </span>
-                </div>
-              )}
-
-              {item.saved_amount !== undefined && item.saved_amount > 0 && (
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">
-                      {language === 'ar' ? 'الموفر' : 'Saved'}: {item.saved_amount?.toLocaleString()} {item.currency}
-                    </span>
-                    <span className="text-primary font-medium">{savedPercent.toFixed(0)}%</span>
-                  </div>
-                  <Progress value={savedPercent} className="h-1.5" />
-                </div>
-              )}
-
-              {item.target_date && (
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Clock className="w-3 h-3" />
-                  <span>{format(new Date(item.target_date), 'PPP', { locale })}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -567,7 +630,17 @@ export function WishlistManager() {
                 {language === 'ar' ? 'إضافة عنصر جديد' : 'Add New Item'}
               </DialogTitle>
             </DialogHeader>
-            <ItemForm />
+            <ItemForm
+              language={language}
+              formData={formData}
+              setFormData={setFormData}
+              envelopes={envelopes}
+              sinkingFunds={sinkingFunds}
+              handleCreate={handleCreate}
+              handleUpdate={handleUpdate}
+              isCreatePending={createItem.isPending}
+              isUpdatePending={updateItem.isPending}
+            />
           </DialogContent>
         </Dialog>
       </div>
@@ -632,26 +705,70 @@ export function WishlistManager() {
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
-              {items?.map(item => <ItemCard key={item.id} item={item} />)}
+              {items?.map(item => <ItemCard
+                  key={item.id}
+                  item={item}
+                  language={language}
+                  locale={locale}
+                  getPriorityColor={getPriorityColor}
+                  getPriorityLabel={getPriorityLabel}
+                  openEditDialog={openEditDialog}
+                  handleStartSaving={handleStartSaving}
+                  handleMarkAsPurchased={handleMarkAsPurchased}
+                  handleDelete={handleDelete}
+                />)}
             </div>
           )}
         </TabsContent>
 
         <TabsContent value="pending" className="mt-6">
           <div className="grid gap-4 md:grid-cols-2">
-            {pendingItems.map(item => <ItemCard key={item.id} item={item} />)}
+            {pendingItems.map(item => <ItemCard
+                  key={item.id}
+                  item={item}
+                  language={language}
+                  locale={locale}
+                  getPriorityColor={getPriorityColor}
+                  getPriorityLabel={getPriorityLabel}
+                  openEditDialog={openEditDialog}
+                  handleStartSaving={handleStartSaving}
+                  handleMarkAsPurchased={handleMarkAsPurchased}
+                  handleDelete={handleDelete}
+                />)}
           </div>
         </TabsContent>
 
         <TabsContent value="saving" className="mt-6">
           <div className="grid gap-4 md:grid-cols-2">
-            {savingItems.map(item => <ItemCard key={item.id} item={item} />)}
+            {savingItems.map(item => <ItemCard
+                  key={item.id}
+                  item={item}
+                  language={language}
+                  locale={locale}
+                  getPriorityColor={getPriorityColor}
+                  getPriorityLabel={getPriorityLabel}
+                  openEditDialog={openEditDialog}
+                  handleStartSaving={handleStartSaving}
+                  handleMarkAsPurchased={handleMarkAsPurchased}
+                  handleDelete={handleDelete}
+                />)}
           </div>
         </TabsContent>
 
         <TabsContent value="purchased" className="mt-6">
           <div className="grid gap-4 md:grid-cols-2">
-            {purchasedItems.map(item => <ItemCard key={item.id} item={item} />)}
+            {purchasedItems.map(item => <ItemCard
+                  key={item.id}
+                  item={item}
+                  language={language}
+                  locale={locale}
+                  getPriorityColor={getPriorityColor}
+                  getPriorityLabel={getPriorityLabel}
+                  openEditDialog={openEditDialog}
+                  handleStartSaving={handleStartSaving}
+                  handleMarkAsPurchased={handleMarkAsPurchased}
+                  handleDelete={handleDelete}
+                />)}
           </div>
         </TabsContent>
       </Tabs>
@@ -664,7 +781,18 @@ export function WishlistManager() {
               {language === 'ar' ? 'تعديل العنصر' : 'Edit Item'}
             </DialogTitle>
           </DialogHeader>
-          <ItemForm isEdit />
+          <ItemForm
+            isEdit
+            language={language}
+            formData={formData}
+            setFormData={setFormData}
+            envelopes={envelopes}
+            sinkingFunds={sinkingFunds}
+            handleCreate={handleCreate}
+            handleUpdate={handleUpdate}
+            isCreatePending={createItem.isPending}
+            isUpdatePending={updateItem.isPending}
+          />
         </DialogContent>
       </Dialog>
     </div>

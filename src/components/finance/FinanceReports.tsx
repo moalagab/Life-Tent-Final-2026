@@ -179,19 +179,42 @@ export function FinanceReports() {
   const subscriptionForecast = getSubscriptionForecast();
   const portfolioData = getPortfolioAllocation();
 
-  const handleExport = () => {
-    // Simple CSV export
-    const csvData = cashflowData.map(d => 
-      `${d.month},${d.income},${d.expenses},${d.net}`
-    ).join('\n');
-    
-    const blob = new Blob([`Month,Income,Expenses,Net\n${csvData}`], { type: 'text/csv' });
+  const handleExportCSV = () => {
+    const bom = '\uFEFF'; // UTF-8 BOM for Excel Arabic support
+    const header = language === 'ar'
+      ? 'الشهر,الدخل,المصاريف,الصافي\n'
+      : 'Month,Income,Expenses,Net\n';
+    const rows = cashflowData.map(d => `${d.month},${d.income},${d.expenses},${d.net}`).join('\n');
+    const blob = new Blob([bom + header + rows], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'finance-report.csv';
+    a.download = `finance-report-${format(new Date(), 'yyyy-MM')}.csv`;
     a.click();
+    URL.revokeObjectURL(url);
   };
+
+  const handleExportJSON = () => {
+    const payload = {
+      exportDate: new Date().toISOString(),
+      period,
+      netWorth: calculateNetWorth(),
+      cashflow: cashflowData,
+      categoryBreakdown: expensesByCategory,
+      accounts: accounts?.map(a => ({ name: a.name, type: a.type, balance: a.balance, currency: a.currency })),
+      activeDebts: debts?.filter(d => d.status === 'active').map(d => ({ name: d.name, remaining: d.remaining_amount, rate: d.interest_rate })),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `finance-report-${format(new Date(), 'yyyy-MM')}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Keep old name as alias for backwards compat
+  const handleExport = handleExportCSV;
 
   if (accountsLoading) {
     return (
@@ -225,9 +248,13 @@ export function FinanceReports() {
               <SelectItem value="1y">{language === 'ar' ? 'سنة' : '1 Year'}</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" onClick={handleExport}>
+          <Button variant="outline" size="sm" onClick={handleExportCSV}>
             <Download className="w-4 h-4 me-2" />
-            {language === 'ar' ? 'تصدير' : 'Export'}
+            CSV
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportJSON}>
+            <Download className="w-4 h-4 me-2" />
+            JSON
           </Button>
         </div>
       </div>

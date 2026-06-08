@@ -1,12 +1,13 @@
 import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
-import { Download, Cloud, Database, Loader2 } from 'lucide-react';
+import { Download, Cloud, Database, Loader2, Shield, Clock } from 'lucide-react';
 import { useTasks } from '@/hooks/useTasks';
 import { useProjects } from '@/hooks/useProjects';
 import { useHabits } from '@/hooks/useHabits';
 import { useGoals } from '@/hooks/useGoals';
 import { useTransactions, useAccounts } from '@/hooks/useFinance';
 import { exportTasks, exportProjects, exportHabits, exportGoals, exportTransactions, exportAccounts } from '@/lib/export-utils';
+import { useDataBackup } from '@/hooks/useDataBackup';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -21,6 +22,7 @@ export function DataSyncSettings() {
   const { data: accounts, isLoading: accountsLoading } = useAccounts();
 
   const isLoading = tasksLoading || projectsLoading || habitsLoading || goalsLoading || transactionsLoading || accountsLoading;
+  const { backup, backing, lastBackup } = useDataBackup();
 
   const handleExport = (type: string) => {
     try {
@@ -153,7 +155,7 @@ export function DataSyncSettings() {
         </div>
       </div>
 
-      {/* Full Backup */}
+      {/* Full Local Export */}
       <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -163,9 +165,34 @@ export function DataSyncSettings() {
               <p className="text-sm text-muted-foreground">{t('settings.fullBackupDesc')}</p>
             </div>
           </div>
-          <Button onClick={() => handleExport('all')}>
+          <Button variant="outline" onClick={() => handleExport('all')}>
             <Download className="w-4 h-4 me-2" />
-            {t('common.export')}
+            CSV
+          </Button>
+        </div>
+      </div>
+
+      {/* Full Cloud Backup */}
+      <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+              <Shield className="w-5 h-5 text-emerald-500" />
+            </div>
+            <div>
+              <h4 className="font-medium text-foreground">نسخة احتياطية شاملة (JSON)</h4>
+              <p className="text-sm text-muted-foreground">جميع بياناتك في ملف واحد قابل للاستعادة</p>
+              {lastBackup && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                  <Clock className="w-3 h-3" />
+                  آخر نسخة: {format(new Date(lastBackup), 'yyyy/MM/dd HH:mm')}
+                </div>
+              )}
+            </div>
+          </div>
+          <Button onClick={backup} disabled={backing} className="shrink-0">
+            {backing ? <Loader2 className="w-4 h-4 animate-spin me-2" /> : <Download className="w-4 h-4 me-2" />}
+            {backing ? 'جارٍ النسخ…' : 'نسخ احتياطي'}
           </Button>
         </div>
       </div>

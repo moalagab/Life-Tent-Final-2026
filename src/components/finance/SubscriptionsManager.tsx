@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   RefreshCw, Plus, Calendar, AlertTriangle, Star,
   Pause, Play, Trash2, Loader2, MoreVertical, Bell, Edit
@@ -26,6 +26,171 @@ const cycleLabels: Record<string, string> = {
   quarterly: 'Quarterly',
   annual: 'Annual',
 };
+
+interface SubscriptionFormData {
+  name: string;
+  provider: string;
+  amount: string;
+  currency: string;
+  billing_cycle: string;
+  next_billing_date: string;
+  category: string;
+  payment_account_id: string;
+  notes: string;
+}
+
+interface SubscriptionFormProps {
+  isEdit?: boolean;
+  language: string;
+  formData: SubscriptionFormData;
+  setFormData: React.Dispatch<React.SetStateAction<SubscriptionFormData>>;
+  t: (key: string) => string;
+  accounts: { id: string; name: string }[] | undefined;
+  handleCreateSubscription: () => void;
+  handleUpdateSubscription: () => void;
+  isCreatePending: boolean;
+  isUpdatePending: boolean;
+}
+
+function SubscriptionForm({
+  isEdit = false,
+  language,
+  formData,
+  setFormData,
+  t,
+  accounts,
+  handleCreateSubscription,
+  handleUpdateSubscription,
+  isCreatePending,
+  isUpdatePending,
+}: SubscriptionFormProps) {
+  return (
+    <div className="space-y-4 mt-4 max-h-[60vh] overflow-y-auto pe-2">
+      <div>
+        <Label>{language === 'ar' ? 'اسم الاشتراك' : 'Subscription Name'} *</Label>
+        <Input
+          dir="auto"
+          placeholder={t('finance.subscriptionName')}
+          value={formData.name}
+          onChange={(e) => { const v = e.target.value; setFormData(prev => ({ ...prev, name: v })); }}
+          className="mt-1"
+        />
+      </div>
+      <div>
+        <Label>{language === 'ar' ? 'المزود' : 'Provider'}</Label>
+        <Input
+          dir="auto"
+          placeholder={t('finance.provider')}
+          value={formData.provider}
+          onChange={(e) => { const v = e.target.value; setFormData(prev => ({ ...prev, provider: v })); }}
+          className="mt-1"
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label>{language === 'ar' ? 'المبلغ' : 'Amount'} *</Label>
+          <Input
+            type="number"
+            placeholder={t('finance.amount')}
+            value={formData.amount}
+            onChange={(e) => { const v = e.target.value; setFormData(prev => ({ ...prev, amount: v })); }}
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>{language === 'ar' ? 'العملة' : 'Currency'}</Label>
+          <Select
+            value={formData.currency}
+            onValueChange={(value) => setFormData(prev => ({ ...prev, currency: value }))}
+          >
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="SAR">SAR</SelectItem>
+              <SelectItem value="USD">USD</SelectItem>
+              <SelectItem value="AED">AED</SelectItem>
+              <SelectItem value="SDG">SDG</SelectItem>
+              <SelectItem value="EGP">EGP</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div>
+        <Label>{language === 'ar' ? 'دورة الفوترة' : 'Billing Cycle'}</Label>
+        <Select
+          value={formData.billing_cycle}
+          onValueChange={(value) => setFormData(prev => ({ ...prev, billing_cycle: value }))}
+        >
+          <SelectTrigger className="mt-1">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="weekly">{t('finance.weekly')}</SelectItem>
+            <SelectItem value="monthly">{t('finance.monthly')}</SelectItem>
+            <SelectItem value="quarterly">{t('finance.quarterly')}</SelectItem>
+            <SelectItem value="annual">{t('finance.annual')}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div>
+        <Label>{language === 'ar' ? 'تاريخ الفوترة القادم' : 'Next Billing Date'} *</Label>
+        <Input
+          type="date"
+          value={formData.next_billing_date}
+          onChange={(e) => { const v = e.target.value; setFormData(prev => ({ ...prev, next_billing_date: v })); }}
+          className="mt-1"
+        />
+      </div>
+      <div>
+        <Label>{language === 'ar' ? 'التصنيف' : 'Category'}</Label>
+        <Input
+          dir="auto"
+          placeholder={t('finance.category')}
+          value={formData.category}
+          onChange={(e) => { const v = e.target.value; setFormData(prev => ({ ...prev, category: v })); }}
+          className="mt-1"
+        />
+      </div>
+      <div>
+        <Label>{language === 'ar' ? 'حساب الدفع' : 'Payment Account'}</Label>
+        <Select
+          value={formData.payment_account_id || 'none'}
+          onValueChange={(value) => setFormData(prev => ({ ...prev, payment_account_id: value === 'none' ? '' : value }))}
+        >
+          <SelectTrigger className="mt-1">
+            <SelectValue placeholder={t('finance.selectAccount')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">{t('common.none')}</SelectItem>
+            {accounts?.map((acc) => (
+              <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div>
+        <Label>{language === 'ar' ? 'ملاحظات' : 'Notes'}</Label>
+        <Textarea
+          dir="auto"
+          placeholder={t('finance.notes')}
+          value={formData.notes}
+          onChange={(e) => { const v = e.target.value; setFormData(prev => ({ ...prev, notes: v })); }}
+          className="mt-1"
+        />
+      </div>
+      <Button
+        onClick={isEdit ? handleUpdateSubscription : handleCreateSubscription}
+        className="w-full"
+        disabled={isCreatePending || isUpdatePending}
+      >
+        {(isCreatePending || isUpdatePending) ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : isEdit ? t('common.update') : t('common.add')}
+      </Button>
+    </div>
+  );
+}
 
 export function SubscriptionsManager() {
   const { t, currentLanguage } = useLanguage();
@@ -272,133 +437,6 @@ export function SubscriptionsManager() {
       </div>
     );
   }
-
-  const SubscriptionForm = ({ isEdit = false }: { isEdit?: boolean }) => (
-    <div className="space-y-4 mt-4 max-h-[60vh] overflow-y-auto pe-2">
-      <div>
-        <Label>{language === 'ar' ? 'اسم الاشتراك' : 'Subscription Name'} *</Label>
-        <Input
-          dir="auto"
-          placeholder={t('finance.subscriptionName')}
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="mt-1"
-        />
-      </div>
-      <div>
-        <Label>{language === 'ar' ? 'المزود' : 'Provider'}</Label>
-        <Input
-          dir="auto"
-          placeholder={t('finance.provider')}
-          value={formData.provider}
-          onChange={(e) => setFormData({ ...formData, provider: e.target.value })}
-          className="mt-1"
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <Label>{language === 'ar' ? 'المبلغ' : 'Amount'} *</Label>
-          <Input
-            type="number"
-            placeholder={t('finance.amount')}
-            value={formData.amount}
-            onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-            className="mt-1"
-          />
-        </div>
-        <div>
-          <Label>{language === 'ar' ? 'العملة' : 'Currency'}</Label>
-          <Select 
-            value={formData.currency} 
-            onValueChange={(value) => setFormData({ ...formData, currency: value })}
-          >
-            <SelectTrigger className="mt-1">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="SAR">SAR</SelectItem>
-              <SelectItem value="USD">USD</SelectItem>
-              <SelectItem value="AED">AED</SelectItem>
-              <SelectItem value="SDG">SDG</SelectItem>
-              <SelectItem value="EGP">EGP</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      <div>
-        <Label>{language === 'ar' ? 'دورة الفوترة' : 'Billing Cycle'}</Label>
-        <Select 
-          value={formData.billing_cycle} 
-          onValueChange={(value) => setFormData({ ...formData, billing_cycle: value })}
-        >
-          <SelectTrigger className="mt-1">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="weekly">{t('finance.weekly')}</SelectItem>
-            <SelectItem value="monthly">{t('finance.monthly')}</SelectItem>
-            <SelectItem value="quarterly">{t('finance.quarterly')}</SelectItem>
-            <SelectItem value="annual">{t('finance.annual')}</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div>
-        <Label>{language === 'ar' ? 'تاريخ الفوترة القادم' : 'Next Billing Date'} *</Label>
-        <Input
-          type="date"
-          value={formData.next_billing_date}
-          onChange={(e) => setFormData({ ...formData, next_billing_date: e.target.value })}
-          className="mt-1"
-        />
-      </div>
-      <div>
-        <Label>{language === 'ar' ? 'التصنيف' : 'Category'}</Label>
-        <Input
-          dir="auto"
-          placeholder={t('finance.category')}
-          value={formData.category}
-          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-          className="mt-1"
-        />
-      </div>
-      <div>
-        <Label>{language === 'ar' ? 'حساب الدفع' : 'Payment Account'}</Label>
-        <Select 
-          value={formData.payment_account_id || 'none'} 
-          onValueChange={(value) => setFormData({ ...formData, payment_account_id: value === 'none' ? '' : value })}
-        >
-          <SelectTrigger className="mt-1">
-            <SelectValue placeholder={t('finance.selectAccount')} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">{t('common.none')}</SelectItem>
-            {accounts?.map((acc) => (
-              <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div>
-        <Label>{language === 'ar' ? 'ملاحظات' : 'Notes'}</Label>
-        <Textarea
-          dir="auto"
-          placeholder={t('finance.notes')}
-          value={formData.notes}
-          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-          className="mt-1"
-        />
-      </div>
-      <Button 
-        onClick={isEdit ? handleUpdateSubscription : handleCreateSubscription} 
-        className="w-full" 
-        disabled={createSubscription.isPending || updateSubscription.isPending}
-      >
-        {(createSubscription.isPending || updateSubscription.isPending) ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
-        ) : isEdit ? t('common.update') : t('common.add')}
-      </Button>
-    </div>
-  );
 
   return (
     <div className="space-y-6">
@@ -659,7 +697,17 @@ export function SubscriptionsManager() {
               {language === 'ar' ? 'أضف اشتراكًا جديدًا لتتبعه' : 'Add a new subscription to track'}
             </DialogDescription>
           </DialogHeader>
-          <SubscriptionForm />
+          <SubscriptionForm
+            language={language}
+            formData={formData}
+            setFormData={setFormData}
+            t={t}
+            accounts={accounts}
+            handleCreateSubscription={handleCreateSubscription}
+            handleUpdateSubscription={handleUpdateSubscription}
+            isCreatePending={createSubscription.isPending}
+            isUpdatePending={updateSubscription.isPending}
+          />
         </DialogContent>
       </Dialog>
 
@@ -678,7 +726,18 @@ export function SubscriptionsManager() {
               {language === 'ar' ? 'عدّل تفاصيل الاشتراك' : 'Update subscription details'}
             </DialogDescription>
           </DialogHeader>
-          <SubscriptionForm isEdit />
+          <SubscriptionForm
+            isEdit
+            language={language}
+            formData={formData}
+            setFormData={setFormData}
+            t={t}
+            accounts={accounts}
+            handleCreateSubscription={handleCreateSubscription}
+            handleUpdateSubscription={handleUpdateSubscription}
+            isCreatePending={createSubscription.isPending}
+            isUpdatePending={updateSubscription.isPending}
+          />
         </DialogContent>
       </Dialog>
     </div>

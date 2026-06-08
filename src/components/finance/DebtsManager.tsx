@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   CreditCard, Plus, TrendingDown, Calendar, AlertTriangle,
   Calculator, Loader2, MoreVertical, Target, ArrowRight, Edit, Trash2,
@@ -29,6 +29,326 @@ import { format, addMonths, differenceInMonths } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+
+interface DebtFormProps {
+  isEdit?: boolean;
+  language: string;
+  newDebt: {
+    name: string;
+    lender: string;
+    total_amount: string;
+    remaining_amount: string;
+    interest_rate: string;
+    minimum_payment: string;
+    monthly_payment: string;
+    monthly_payment_date: string;
+    start_date: string;
+    end_date: string;
+    currency: string;
+    debt_type: 'to_me' | 'from_me';
+    notes: string;
+  };
+  setNewDebt: React.Dispatch<React.SetStateAction<DebtFormProps['newDebt']>>;
+  setIsDialogOpen: (v: boolean) => void;
+  setIsEditDialogOpen: (v: boolean) => void;
+  setEditingDebt: (v: null) => void;
+  resetForm: () => void;
+  handleCreateDebt: () => void;
+  handleUpdateDebt: () => void;
+  isCreatePending: boolean;
+  isUpdatePending: boolean;
+}
+
+function DebtForm({
+  isEdit = false,
+  language,
+  newDebt,
+  setNewDebt,
+  setIsDialogOpen,
+  setIsEditDialogOpen,
+  setEditingDebt,
+  resetForm,
+  handleCreateDebt,
+  handleUpdateDebt,
+  isCreatePending,
+  isUpdatePending,
+}: DebtFormProps) {
+  return (
+    <div className="space-y-5 mt-4 max-h-[65vh] overflow-y-auto pe-2">
+      {/* Debt Type Toggle - More Prominent */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">
+          {language === 'ar' ? 'نوع الدين' : 'Debt Type'}
+        </Label>
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            type="button"
+            variant={newDebt.debt_type === 'from_me' ? 'destructive' : 'outline'}
+            onClick={() => setNewDebt(prev => ({ ...prev, debt_type: 'from_me' }))}
+            className={cn(
+              "h-14 flex flex-col items-center justify-center gap-1 transition-all",
+              newDebt.debt_type === 'from_me' && "ring-2 ring-destructive ring-offset-2"
+            )}
+          >
+            <ArrowDownRight className="w-5 h-5" />
+            <span className="text-xs font-medium">
+              {language === 'ar' ? 'دين عليّ' : 'I Owe'}
+            </span>
+          </Button>
+          <Button
+            type="button"
+            variant={newDebt.debt_type === 'to_me' ? 'default' : 'outline'}
+            className={cn(
+              "h-14 flex flex-col items-center justify-center gap-1 transition-all",
+              newDebt.debt_type === 'to_me' && "bg-success hover:bg-success/90 ring-2 ring-success ring-offset-2"
+            )}
+            onClick={() => setNewDebt(prev => ({ ...prev, debt_type: 'to_me' }))}
+          >
+            <ArrowUpRight className="w-5 h-5" />
+            <span className="text-xs font-medium">
+              {language === 'ar' ? 'دين لي' : 'Owed to Me'}
+            </span>
+          </Button>
+        </div>
+      </div>
+
+      {/* Basic Info */}
+      <div className="space-y-3">
+        <div>
+          <Label className="text-sm font-medium">
+            {language === 'ar' ? 'اسم الدين' : 'Debt Name'} <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            dir="auto"
+            placeholder={language === 'ar' ? 'مثال: قرض السيارة، بطاقة ائتمان...' : 'e.g. Car Loan, Credit Card...'}
+            value={newDebt.name}
+            onChange={(e) => { const v = e.target.value; setNewDebt(prev => ({ ...prev, name: v })); }}
+            className="mt-1"
+          />
+        </div>
+
+        <div>
+          <Label className="text-sm font-medium">
+            {newDebt.debt_type === 'to_me'
+              ? (language === 'ar' ? 'اسم المقترض' : 'Borrower Name')
+              : (language === 'ar' ? 'اسم المُقرض' : 'Lender Name')
+            }
+          </Label>
+          <Input
+            dir="auto"
+            placeholder={language === 'ar' ? 'الجهة أو الشخص' : 'Person or institution'}
+            value={newDebt.lender}
+            onChange={(e) => { const v = e.target.value; setNewDebt(prev => ({ ...prev, lender: v })); }}
+            className="mt-1"
+          />
+        </div>
+      </div>
+
+      {/* Amount Section */}
+      <div className="p-4 rounded-lg border bg-card space-y-4">
+        <h4 className="font-semibold text-sm flex items-center gap-2">
+          <CreditCard className="w-4 h-4" />
+          {language === 'ar' ? 'المبالغ' : 'Amounts'}
+        </h4>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label className="text-xs font-medium">
+              {language === 'ar' ? 'المبلغ الإجمالي' : 'Total Amount'} <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              type="number"
+              placeholder="0"
+              value={newDebt.total_amount}
+              onChange={(e) => {
+                const value = e.target.value;
+                setNewDebt(prev => ({
+                  ...prev,
+                  total_amount: value,
+                  remaining_amount: prev.remaining_amount || value
+                }));
+              }}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label className="text-xs font-medium">
+              {language === 'ar' ? 'المبلغ المتبقي' : 'Remaining'}
+            </Label>
+            <Input
+              type="number"
+              placeholder={newDebt.total_amount || '0'}
+              value={newDebt.remaining_amount}
+              onChange={(e) => { const v = e.target.value; setNewDebt(prev => ({ ...prev, remaining_amount: v })); }}
+              className="mt-1"
+            />
+          </div>
+        </div>
+
+        <div>
+          <Label className="text-xs font-medium">
+            {language === 'ar' ? 'العملة' : 'Currency'}
+          </Label>
+          <Select
+            value={newDebt.currency}
+            onValueChange={(value) => setNewDebt(prev => ({ ...prev, currency: value }))}
+          >
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="SAR">🇸🇦 SAR - {language === 'ar' ? 'ريال سعودي' : 'Saudi Riyal'}</SelectItem>
+              <SelectItem value="USD">🇺🇸 USD - {language === 'ar' ? 'دولار أمريكي' : 'US Dollar'}</SelectItem>
+              <SelectItem value="AED">🇦🇪 AED - {language === 'ar' ? 'درهم إماراتي' : 'UAE Dirham'}</SelectItem>
+              <SelectItem value="SDG">🇸🇩 SDG - {language === 'ar' ? 'جنيه سوداني' : 'Sudanese Pound'}</SelectItem>
+              <SelectItem value="EGP">🇪🇬 EGP - {language === 'ar' ? 'جنيه مصري' : 'Egyptian Pound'}</SelectItem>
+              <SelectItem value="KWD">🇰🇼 KWD - {language === 'ar' ? 'دينار كويتي' : 'Kuwaiti Dinar'}</SelectItem>
+              <SelectItem value="BHD">🇧🇭 BHD - {language === 'ar' ? 'دينار بحريني' : 'Bahraini Dinar'}</SelectItem>
+              <SelectItem value="QAR">🇶🇦 QAR - {language === 'ar' ? 'ريال قطري' : 'Qatari Riyal'}</SelectItem>
+              <SelectItem value="OMR">🇴🇲 OMR - {language === 'ar' ? 'ريال عماني' : 'Omani Rial'}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Monthly Payment Section */}
+      <div className="p-4 rounded-lg border bg-card space-y-4">
+        <h4 className="font-semibold text-sm flex items-center gap-2">
+          <Calendar className="w-4 h-4" />
+          {language === 'ar' ? 'تفاصيل السداد' : 'Payment Details'}
+        </h4>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label className="text-xs font-medium">
+              {language === 'ar' ? 'القسط الشهري' : 'Monthly Payment'}
+            </Label>
+            <Input
+              type="number"
+              placeholder="0"
+              value={newDebt.monthly_payment}
+              onChange={(e) => { const v = e.target.value; setNewDebt(prev => ({ ...prev, monthly_payment: v })); }}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label className="text-xs font-medium">
+              {language === 'ar' ? 'يوم السداد' : 'Payment Day'}
+            </Label>
+            <Select
+              value={newDebt.monthly_payment_date}
+              onValueChange={(value) => setNewDebt(prev => ({ ...prev, monthly_payment_date: value }))}
+            >
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder={language === 'ar' ? 'اختر' : 'Select'} />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 28 }, (_, i) => (
+                  <SelectItem key={i + 1} value={(i + 1).toString()}>
+                    {i + 1}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label className="text-xs font-medium">
+              {language === 'ar' ? 'الحد الأدنى للسداد' : 'Minimum Payment'}
+            </Label>
+            <Input
+              type="number"
+              placeholder="0"
+              value={newDebt.minimum_payment}
+              onChange={(e) => { const v = e.target.value; setNewDebt(prev => ({ ...prev, minimum_payment: v })); }}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label className="text-xs font-medium">
+              {language === 'ar' ? 'نسبة الفائدة %' : 'Interest Rate %'}
+            </Label>
+            <Input
+              type="number"
+              step="0.01"
+              placeholder="0"
+              value={newDebt.interest_rate}
+              onChange={(e) => { const v = e.target.value; setNewDebt(prev => ({ ...prev, interest_rate: v })); }}
+              className="mt-1"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Dates Section */}
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label className="text-sm font-medium">
+            {language === 'ar' ? 'تاريخ البداية' : 'Start Date'}
+          </Label>
+          <Input
+            type="date"
+            value={newDebt.start_date}
+            onChange={(e) => { const v = e.target.value; setNewDebt(prev => ({ ...prev, start_date: v })); }}
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label className="text-sm font-medium">
+            {language === 'ar' ? 'تاريخ الانتهاء' : 'End Date'}
+          </Label>
+          <Input
+            type="date"
+            value={newDebt.end_date}
+            onChange={(e) => { const v = e.target.value; setNewDebt(prev => ({ ...prev, end_date: v })); }}
+            className="mt-1"
+          />
+        </div>
+      </div>
+
+      {/* Notes */}
+      <div>
+        <Label className="text-sm font-medium">
+          {language === 'ar' ? 'ملاحظات' : 'Notes'}
+        </Label>
+        <Textarea
+          dir="auto"
+          placeholder={language === 'ar' ? 'أي ملاحظات إضافية...' : 'Any additional notes...'}
+          value={newDebt.notes}
+          onChange={(e) => { const v = e.target.value; setNewDebt(prev => ({ ...prev, notes: v })); }}
+          className="mt-1 min-h-[80px]"
+        />
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex gap-3 pt-2">
+        <Button
+          variant="outline"
+          onClick={() => {
+            if (isEdit) {
+              setIsEditDialogOpen(false);
+              setEditingDebt(null);
+            } else {
+              setIsDialogOpen(false);
+            }
+            resetForm();
+          }}
+          className="flex-1"
+        >
+          {language === 'ar' ? 'إلغاء' : 'Cancel'}
+        </Button>
+        <Button
+          onClick={isEdit ? handleUpdateDebt : handleCreateDebt}
+          className="flex-1"
+          disabled={isCreatePending || isUpdatePending}
+        >
+          {(isCreatePending || isUpdatePending) ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : isEdit ? (language === 'ar' ? 'حفظ التعديلات' : 'Save Changes') : (language === 'ar' ? 'إضافة الدين' : 'Add Debt')}
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export function DebtsManager() {
   const { t, currentLanguage } = useLanguage();
@@ -264,283 +584,6 @@ export function DebtsManager() {
     );
   }
 
-  const DebtForm = ({ isEdit = false }: { isEdit?: boolean }) => (
-    <div className="space-y-5 mt-4 max-h-[65vh] overflow-y-auto pe-2">
-      {/* Debt Type Toggle - More Prominent */}
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">
-          {language === 'ar' ? 'نوع الدين' : 'Debt Type'}
-        </Label>
-        <div className="grid grid-cols-2 gap-3">
-          <Button
-            type="button"
-            variant={newDebt.debt_type === 'from_me' ? 'destructive' : 'outline'}
-            onClick={() => setNewDebt({ ...newDebt, debt_type: 'from_me' })}
-            className={cn(
-              "h-14 flex flex-col items-center justify-center gap-1 transition-all",
-              newDebt.debt_type === 'from_me' && "ring-2 ring-destructive ring-offset-2"
-            )}
-          >
-            <ArrowDownRight className="w-5 h-5" />
-            <span className="text-xs font-medium">
-              {language === 'ar' ? 'دين عليّ' : 'I Owe'}
-            </span>
-          </Button>
-          <Button
-            type="button"
-            variant={newDebt.debt_type === 'to_me' ? 'default' : 'outline'}
-            className={cn(
-              "h-14 flex flex-col items-center justify-center gap-1 transition-all",
-              newDebt.debt_type === 'to_me' && "bg-success hover:bg-success/90 ring-2 ring-success ring-offset-2"
-            )}
-            onClick={() => setNewDebt({ ...newDebt, debt_type: 'to_me' })}
-          >
-            <ArrowUpRight className="w-5 h-5" />
-            <span className="text-xs font-medium">
-              {language === 'ar' ? 'دين لي' : 'Owed to Me'}
-            </span>
-          </Button>
-        </div>
-      </div>
-
-      {/* Basic Info */}
-      <div className="space-y-3">
-        <div>
-          <Label className="text-sm font-medium">
-            {language === 'ar' ? 'اسم الدين' : 'Debt Name'} <span className="text-destructive">*</span>
-          </Label>
-          <Input
-            dir="auto"
-            placeholder={language === 'ar' ? 'مثال: قرض السيارة، بطاقة ائتمان...' : 'e.g. Car Loan, Credit Card...'}
-            value={newDebt.name}
-            onChange={(e) => setNewDebt({ ...newDebt, name: e.target.value })}
-            className="mt-1"
-          />
-        </div>
-        
-        <div>
-          <Label className="text-sm font-medium">
-            {newDebt.debt_type === 'to_me' 
-              ? (language === 'ar' ? 'اسم المقترض' : 'Borrower Name')
-              : (language === 'ar' ? 'اسم المُقرض' : 'Lender Name')
-            }
-          </Label>
-          <Input
-            dir="auto"
-            placeholder={language === 'ar' ? 'الجهة أو الشخص' : 'Person or institution'}
-            value={newDebt.lender}
-            onChange={(e) => setNewDebt({ ...newDebt, lender: e.target.value })}
-            className="mt-1"
-          />
-        </div>
-      </div>
-
-      {/* Amount Section */}
-      <div className="p-4 rounded-lg border bg-card space-y-4">
-        <h4 className="font-semibold text-sm flex items-center gap-2">
-          <CreditCard className="w-4 h-4" />
-          {language === 'ar' ? 'المبالغ' : 'Amounts'}
-        </h4>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <Label className="text-xs font-medium">
-              {language === 'ar' ? 'المبلغ الإجمالي' : 'Total Amount'} <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              type="number"
-              placeholder="0"
-              value={newDebt.total_amount}
-              onChange={(e) => {
-                const value = e.target.value;
-                setNewDebt({ 
-                  ...newDebt, 
-                  total_amount: value,
-                  // Auto-fill remaining if empty
-                  remaining_amount: newDebt.remaining_amount || value
-                });
-              }}
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <Label className="text-xs font-medium">
-              {language === 'ar' ? 'المبلغ المتبقي' : 'Remaining'}
-            </Label>
-            <Input
-              type="number"
-              placeholder={newDebt.total_amount || '0'}
-              value={newDebt.remaining_amount}
-              onChange={(e) => setNewDebt({ ...newDebt, remaining_amount: e.target.value })}
-              className="mt-1"
-            />
-          </div>
-        </div>
-        
-        <div>
-          <Label className="text-xs font-medium">
-            {language === 'ar' ? 'العملة' : 'Currency'}
-          </Label>
-          <Select 
-            value={newDebt.currency} 
-            onValueChange={(value) => setNewDebt({ ...newDebt, currency: value })}
-          >
-            <SelectTrigger className="mt-1">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="SAR">🇸🇦 SAR - {language === 'ar' ? 'ريال سعودي' : 'Saudi Riyal'}</SelectItem>
-              <SelectItem value="USD">🇺🇸 USD - {language === 'ar' ? 'دولار أمريكي' : 'US Dollar'}</SelectItem>
-              <SelectItem value="AED">🇦🇪 AED - {language === 'ar' ? 'درهم إماراتي' : 'UAE Dirham'}</SelectItem>
-              <SelectItem value="SDG">🇸🇩 SDG - {language === 'ar' ? 'جنيه سوداني' : 'Sudanese Pound'}</SelectItem>
-              <SelectItem value="EGP">🇪🇬 EGP - {language === 'ar' ? 'جنيه مصري' : 'Egyptian Pound'}</SelectItem>
-              <SelectItem value="KWD">🇰🇼 KWD - {language === 'ar' ? 'دينار كويتي' : 'Kuwaiti Dinar'}</SelectItem>
-              <SelectItem value="BHD">🇧🇭 BHD - {language === 'ar' ? 'دينار بحريني' : 'Bahraini Dinar'}</SelectItem>
-              <SelectItem value="QAR">🇶🇦 QAR - {language === 'ar' ? 'ريال قطري' : 'Qatari Riyal'}</SelectItem>
-              <SelectItem value="OMR">🇴🇲 OMR - {language === 'ar' ? 'ريال عماني' : 'Omani Rial'}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* Monthly Payment Section */}
-      <div className="p-4 rounded-lg border bg-card space-y-4">
-        <h4 className="font-semibold text-sm flex items-center gap-2">
-          <Calendar className="w-4 h-4" />
-          {language === 'ar' ? 'تفاصيل السداد' : 'Payment Details'}
-        </h4>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <Label className="text-xs font-medium">
-              {language === 'ar' ? 'القسط الشهري' : 'Monthly Payment'}
-            </Label>
-            <Input
-              type="number"
-              placeholder="0"
-              value={newDebt.monthly_payment}
-              onChange={(e) => setNewDebt({ ...newDebt, monthly_payment: e.target.value })}
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <Label className="text-xs font-medium">
-              {language === 'ar' ? 'يوم السداد' : 'Payment Day'}
-            </Label>
-            <Select 
-              value={newDebt.monthly_payment_date} 
-              onValueChange={(value) => setNewDebt({ ...newDebt, monthly_payment_date: value })}
-            >
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder={language === 'ar' ? 'اختر' : 'Select'} />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.from({ length: 28 }, (_, i) => (
-                  <SelectItem key={i + 1} value={(i + 1).toString()}>
-                    {i + 1}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <Label className="text-xs font-medium">
-              {language === 'ar' ? 'الحد الأدنى للسداد' : 'Minimum Payment'}
-            </Label>
-            <Input
-              type="number"
-              placeholder="0"
-              value={newDebt.minimum_payment}
-              onChange={(e) => setNewDebt({ ...newDebt, minimum_payment: e.target.value })}
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <Label className="text-xs font-medium">
-              {language === 'ar' ? 'نسبة الفائدة %' : 'Interest Rate %'}
-            </Label>
-            <Input
-              type="number"
-              step="0.01"
-              placeholder="0"
-              value={newDebt.interest_rate}
-              onChange={(e) => setNewDebt({ ...newDebt, interest_rate: e.target.value })}
-              className="mt-1"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Dates Section */}
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <Label className="text-sm font-medium">
-            {language === 'ar' ? 'تاريخ البداية' : 'Start Date'}
-          </Label>
-          <Input
-            type="date"
-            value={newDebt.start_date}
-            onChange={(e) => setNewDebt({ ...newDebt, start_date: e.target.value })}
-            className="mt-1"
-          />
-        </div>
-        <div>
-          <Label className="text-sm font-medium">
-            {language === 'ar' ? 'تاريخ الانتهاء' : 'End Date'}
-          </Label>
-          <Input
-            type="date"
-            value={newDebt.end_date}
-            onChange={(e) => setNewDebt({ ...newDebt, end_date: e.target.value })}
-            className="mt-1"
-          />
-        </div>
-      </div>
-
-      {/* Notes */}
-      <div>
-        <Label className="text-sm font-medium">
-          {language === 'ar' ? 'ملاحظات' : 'Notes'}
-        </Label>
-        <Textarea
-          dir="auto"
-          placeholder={language === 'ar' ? 'أي ملاحظات إضافية...' : 'Any additional notes...'}
-          value={newDebt.notes}
-          onChange={(e) => setNewDebt({ ...newDebt, notes: e.target.value })}
-          className="mt-1 min-h-[80px]"
-        />
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex gap-3 pt-2">
-        <Button 
-          variant="outline"
-          onClick={() => {
-            if (isEdit) {
-              setIsEditDialogOpen(false);
-              setEditingDebt(null);
-            } else {
-              setIsDialogOpen(false);
-            }
-            resetForm();
-          }}
-          className="flex-1"
-        >
-          {language === 'ar' ? 'إلغاء' : 'Cancel'}
-        </Button>
-        <Button 
-          onClick={isEdit ? handleUpdateDebt : handleCreateDebt} 
-          className="flex-1" 
-          disabled={createDebt.isPending || updateDebt.isPending}
-        >
-          {(createDebt.isPending || updateDebt.isPending) ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : isEdit ? (language === 'ar' ? 'حفظ التعديلات' : 'Save Changes') : (language === 'ar' ? 'إضافة الدين' : 'Add Debt')}
-        </Button>
-      </div>
-    </div>
-  );
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -566,7 +609,19 @@ export function DebtsManager() {
                 {language === 'ar' ? 'أدخل تفاصيل الدين أو القرض' : 'Enter the debt or loan details'}
               </DialogDescription>
             </DialogHeader>
-            <DebtForm />
+            <DebtForm
+              language={language}
+              newDebt={newDebt}
+              setNewDebt={setNewDebt}
+              setIsDialogOpen={setIsDialogOpen}
+              setIsEditDialogOpen={setIsEditDialogOpen}
+              setEditingDebt={setEditingDebt}
+              resetForm={resetForm}
+              handleCreateDebt={handleCreateDebt}
+              handleUpdateDebt={handleUpdateDebt}
+              isCreatePending={createDebt.isPending}
+              isUpdatePending={updateDebt.isPending}
+            />
           </DialogContent>
         </Dialog>
       </div>
@@ -928,7 +983,20 @@ export function DebtsManager() {
               {language === 'ar' ? 'قم بتعديل تفاصيل الدين' : 'Update the debt details'}
             </DialogDescription>
           </DialogHeader>
-          <DebtForm isEdit />
+          <DebtForm
+            isEdit
+            language={language}
+            newDebt={newDebt}
+            setNewDebt={setNewDebt}
+            setIsDialogOpen={setIsDialogOpen}
+            setIsEditDialogOpen={setIsEditDialogOpen}
+            setEditingDebt={setEditingDebt}
+            resetForm={resetForm}
+            handleCreateDebt={handleCreateDebt}
+            handleUpdateDebt={handleUpdateDebt}
+            isCreatePending={createDebt.isPending}
+            isUpdatePending={updateDebt.isPending}
+          />
         </DialogContent>
       </Dialog>
 

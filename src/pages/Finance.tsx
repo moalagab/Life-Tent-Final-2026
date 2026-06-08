@@ -31,6 +31,10 @@ const ALLOWED_TABS = [
 ] as const;
 type FinanceTab = typeof ALLOWED_TABS[number];
 
+// Stable references — prevent useRealtimeSubscription from re-subscribing on every render
+const TRANSACTIONS_QUERY_KEY = ['transactions'];
+const ACCOUNTS_QUERY_KEY = ['accounts'];
+
 export default function Finance() {
   const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -62,8 +66,8 @@ export default function Finance() {
   }, [searchParams, setSearchParams]);
 
   // Realtime subscriptions
-  useRealtimeSubscription({ table: 'transactions', queryKey: ['transactions'] });
-  useRealtimeSubscription({ table: 'accounts', queryKey: ['accounts'] });
+  useRealtimeSubscription({ table: 'transactions', queryKey: TRANSACTIONS_QUERY_KEY });
+  useRealtimeSubscription({ table: 'accounts', queryKey: ACCOUNTS_QUERY_KEY });
 
   const tabs = [
     { id: 'dashboard', label: t('finance.dashboard'), icon: Gauge },

@@ -12,6 +12,9 @@ import { PrayerWidget } from '@/components/dashboard/PrayerWidget';
 import { KnowledgeWidget } from '@/components/dashboard/KnowledgeWidget';
 import { StudioWidget } from '@/components/dashboard/StudioWidget';
 import { FinanceSnapshot } from '@/components/dashboard/FinanceSnapshot';
+import { MorningBrief } from '@/components/dashboard/MorningBrief';
+import { MiddayCheckpoint } from '@/components/dashboard/MiddayCheckpoint';
+import { BehaviorInsights } from '@/components/dashboard/BehaviorInsights';
 import {
   LayoutPresetSwitcher,
   type DashboardPreset,
@@ -20,7 +23,7 @@ import { useAutoReminders } from '@/hooks/useAutoReminders';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useSectionState } from '@/hooks/useSectionState';
 import { usePersistedState } from '@/hooks/usePersistedState';
-import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet } from 'lucide-react';
+import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet, Brain } from 'lucide-react';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
 import type { ReactNode } from 'react';
@@ -61,6 +64,7 @@ const Index = () => {
   const rhythm = useSectionState('rhythm', true);
   const finance = useSectionState('finance', true);
   const library = useSectionState('library', false);
+  const aiSection = useSectionState('ai-intelligence', true);
 
   // ---- Section renderers ----
   const sectionOverview = (
@@ -157,11 +161,36 @@ const Index = () => {
     </section>
   );
 
+  const sectionAI = (
+    <section key="ai-intelligence">
+      <SectionHeader
+        title="الذكاء الاصطناعي"
+        icon={Brain}
+        collapsible
+        open={aiSection.open}
+        onToggle={aiSection.toggle}
+      />
+      {aiSection.open && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4 items-start">
+          {/* Morning brief spans 2 cols */}
+          <div className="lg:col-span-2 min-w-0">
+            <MorningBrief />
+          </div>
+          {/* Right column: midday + behavior */}
+          <div className="space-y-3 lg:space-y-4 min-w-0">
+            <MiddayCheckpoint />
+            <BehaviorInsights />
+          </div>
+        </div>
+      )}
+    </section>
+  );
+
   // ---- Preset arrangements ----
   const arrangements: Record<DashboardPreset, ReactNode[]> = {
-    focus: [sectionRhythm, sectionActiveWork, sectionOverview, sectionFinance, sectionLibrary],
-    finance: [sectionOverview, sectionFinance, sectionActiveWork, sectionRhythm, sectionLibrary],
-    execution: [sectionOverview, sectionActiveWork, sectionRhythm, sectionFinance, sectionLibrary],
+    focus: [sectionAI, sectionRhythm, sectionActiveWork, sectionOverview, sectionFinance, sectionLibrary],
+    finance: [sectionOverview, sectionFinance, sectionActiveWork, sectionRhythm, sectionAI, sectionLibrary],
+    execution: [sectionAI, sectionOverview, sectionActiveWork, sectionRhythm, sectionFinance, sectionLibrary],
   };
 
   return (

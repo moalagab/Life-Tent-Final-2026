@@ -1,34 +1,84 @@
 import { useLanguage } from '@/hooks/useLanguage';
 import { useNotifications } from '@/hooks/useNotifications';
 import { Switch } from '@/components/ui/switch';
-import { Bell, CalendarDays, CheckSquare, Repeat, AlertCircle } from 'lucide-react';
+import { Bell, CalendarDays, CheckSquare, Repeat, AlertCircle, Mail } from 'lucide-react';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+
+const PREFS_KEY = 'notification-prefs';
+
+interface NotificationPrefs {
+  taskReminders: boolean;
+  eventReminders: boolean;
+  habitReminders: boolean;
+  emailEnabled: boolean;
+  emailAddress: string;
+}
+
+function loadPrefs(): NotificationPrefs {
+  try {
+    const raw = localStorage.getItem(PREFS_KEY);
+    if (raw) return { ...defaultPrefs(), ...JSON.parse(raw) };
+  } catch { /* ignore */ }
+  return defaultPrefs();
+}
+
+function defaultPrefs(): NotificationPrefs {
+  return { taskReminders: true, eventReminders: true, habitReminders: true, emailEnabled: false, emailAddress: '' };
+}
+
+function savePrefs(prefs: NotificationPrefs) {
+  localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+}
+
+/** Exported so other hooks can read preferences without the Settings UI being mounted */
+export function getNotificationPrefs(): NotificationPrefs {
+  return loadPrefs();
+}
 
 export function NotificationSettings() {
-  const { t } = useLanguage();
+  const { t, currentLanguage: language } = useLanguage();
   const { enabled, enableNotifications, disableNotifications, permission } = useNotifications();
-  const [taskReminders, setTaskReminders] = useState(true);
-  const [eventReminders, setEventReminders] = useState(true);
-  const [habitReminders, setHabitReminders] = useState(true);
+  const [prefs, setPrefs] = useState<NotificationPrefs>(loadPrefs);
+  const [emailDraft, setEmailDraft] = useState(prefs.emailAddress);
+  const [savingEmail, setSavingEmail] = useState(false);
 
-  const handleNotificationToggle = async () => {
+  // Persist whenever prefs change
+  useEffect(() => { savePrefs(prefs); }, [prefs]);
+
+  const toggle = (key: keyof Pick<NotificationPrefs, 'taskReminders' | 'eventReminders' | 'habitReminders'>) =>
+    setPrefs(p => ({ ...p, [key]: !p[key] }));
+
+  const handleMasterToggle = async () => {
     if (enabled) {
       disableNotifications();
       toast.success(t('settings.notificationsDisabled'));
     } else {
-      const success = await enableNotifications();
-      if (success) {
-        toast.success(t('settings.notificationsEnabled'));
-      } else {
-        toast.error(t('settings.notificationPermissionDenied'));
-      }
+      const ok = await enableNotifications();
+      if (ok) toast.success(t('settings.notificationsEnabled'));
+      else toast.error(t('settings.notificationPermissionDenied'));
     }
+  };
+
+  const handleSaveEmail = () => {
+    if (emailDraft && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailDraft)) {
+      toast.error(language === 'ar' ? 'بريد إلكتروني غير صالح' : 'Invalid email address');
+      return;
+    }
+    setSavingEmail(true);
+    setPrefs(p => ({ ...p, emailAddress: emailDraft, emailEnabled: !!emailDraft }));
+    setTimeout(() => {
+      setSavingEmail(false);
+      toast.success(language === 'ar' ? 'تم حفظ إعدادات البريد' : 'Email settings saved');
+    }, 300);
   };
 
   return (
     <div className="space-y-6">
-      {/* Main Toggle */}
+      {/* Master Toggle */}
       <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -40,9 +90,8 @@ export function NotificationSettings() {
               <p className="text-sm text-muted-foreground">{t('settings.notificationsDesc')}</p>
             </div>
           </div>
-          <Switch checked={enabled} onCheckedChange={handleNotificationToggle} />
+          <Switch checked={enabled} onCheckedChange={handleMasterToggle} />
         </div>
-        
         {permission === 'denied' && (
           <div className="mt-3 flex items-center gap-2 text-destructive text-sm">
             <AlertCircle className="w-4 h-4" />
@@ -54,60 +103,66 @@ export function NotificationSettings() {
       {/* Notification Types */}
       <div className="space-y-3">
         <h4 className="text-sm font-medium text-foreground mb-4">{t('settings.notificationTypes')}</h4>
-        
-        {/* Task Reminders */}
-        <div className="p-4 rounded-xl bg-muted/30 border border-border flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
-              <CheckSquare className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <h4 className="font-medium text-foreground">{t('settings.taskReminders')}</h4>
-              <p className="text-sm text-muted-foreground">{t('settings.taskRemindersDesc')}</p>
-            </div>
-          </div>
-          <Switch 
-            checked={taskReminders} 
-            onCheckedChange={setTaskReminders}
-            disabled={!enabled}
-          />
-        </div>
 
-        {/* Event Reminders */}
-        <div className="p-4 rounded-xl bg-muted/30 border border-border flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
-              <CalendarDays className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+        {[
+          { key: 'taskReminders' as const, icon: CheckSquare, color: 'blue', titleKey: 'settings.taskReminders', descKey: 'settings.taskRemindersDesc' },
+          { key: 'eventReminders' as const, icon: CalendarDays, color: 'purple', titleKey: 'settings.eventReminders', descKey: 'settings.eventRemindersDesc' },
+          { key: 'habitReminders' as const, icon: Repeat, color: 'emerald', titleKey: 'settings.habitReminders', descKey: 'settings.habitRemindersDesc' },
+        ].map(({ key, icon: Icon, color, titleKey, descKey }) => (
+          <div key={key} className="p-4 rounded-xl bg-muted/30 border border-border flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-xl bg-${color}-500/10 flex items-center justify-center`}>
+                <Icon className={`w-5 h-5 text-${color}-600 dark:text-${color}-400`} />
+              </div>
+              <div>
+                <h4 className="font-medium text-foreground">{t(titleKey)}</h4>
+                <p className="text-sm text-muted-foreground">{t(descKey)}</p>
+              </div>
             </div>
-            <div>
-              <h4 className="font-medium text-foreground">{t('settings.eventReminders')}</h4>
-              <p className="text-sm text-muted-foreground">{t('settings.eventRemindersDesc')}</p>
-            </div>
+            <Switch checked={prefs[key]} onCheckedChange={() => toggle(key)} disabled={!enabled} />
           </div>
-          <Switch 
-            checked={eventReminders} 
-            onCheckedChange={setEventReminders}
-            disabled={!enabled}
-          />
-        </div>
+        ))}
+      </div>
 
-        {/* Habit Reminders */}
-        <div className="p-4 rounded-xl bg-muted/30 border border-border flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-              <Repeat className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <div>
-              <h4 className="font-medium text-foreground">{t('settings.habitReminders')}</h4>
-              <p className="text-sm text-muted-foreground">{t('settings.habitRemindersDesc')}</p>
-            </div>
+      {/* Email Notifications */}
+      <div className="p-4 rounded-xl bg-muted/30 border border-border space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Mail className="w-5 h-5 text-primary" />
           </div>
-          <Switch 
-            checked={habitReminders} 
-            onCheckedChange={setHabitReminders}
-            disabled={!enabled}
-          />
+          <div>
+            <h4 className="font-medium text-foreground">
+              {language === 'ar' ? 'إشعارات البريد الإلكتروني' : 'Email Notifications'}
+            </h4>
+            <p className="text-sm text-muted-foreground">
+              {language === 'ar' ? 'استلم تذكيرات مهمة عبر البريد' : 'Receive important reminders via email'}
+            </p>
+          </div>
         </div>
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <Label className="text-xs text-muted-foreground mb-1 block">
+              {language === 'ar' ? 'البريد الإلكتروني' : 'Email address'}
+            </Label>
+            <Input
+              type="email"
+              dir="ltr"
+              placeholder="you@example.com"
+              value={emailDraft}
+              onChange={e => setEmailDraft(e.target.value)}
+            />
+          </div>
+          <div className="flex items-end">
+            <Button onClick={handleSaveEmail} disabled={savingEmail} size="sm">
+              {language === 'ar' ? 'حفظ' : 'Save'}
+            </Button>
+          </div>
+        </div>
+        {prefs.emailEnabled && prefs.emailAddress && (
+          <p className="text-xs text-success">
+            ✓ {language === 'ar' ? `سيتم إرسال الإشعارات إلى ${prefs.emailAddress}` : `Notifications will be sent to ${prefs.emailAddress}`}
+          </p>
+        )}
       </div>
     </div>
   );
