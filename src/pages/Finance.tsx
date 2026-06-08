@@ -36,7 +36,7 @@ const TRANSACTIONS_QUERY_KEY = ['transactions'];
 const ACCOUNTS_QUERY_KEY = ['accounts'];
 
 export default function Finance() {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const rawTab = searchParams.get('tab');
   const initialTab: FinanceTab = (ALLOWED_TABS as readonly string[]).includes(rawTab ?? '')
@@ -98,13 +98,13 @@ export default function Finance() {
       </div>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as FinanceTab)} className="space-y-6">
-        <div className="overflow-x-auto pb-2">
-          <TabsList className="inline-flex min-w-full md:min-w-0 h-auto p-1 bg-muted/50">
+        <div className={`overflow-x-auto pb-2 ${isRTL ? 'direction-rtl' : ''}`}>
+          <TabsList className={`inline-flex min-w-full md:min-w-0 h-auto p-1 bg-muted/50 ${isRTL ? 'flex-row-reverse' : ''}`}>
             {tabs.map(tab => (
-              <TabsTrigger 
-                key={tab.id} 
+              <TabsTrigger
+                key={tab.id}
                 value={tab.id}
-                className="flex items-center gap-2 px-3 py-2 whitespace-nowrap"
+                className={`flex items-center gap-2 px-3 py-2 whitespace-nowrap ${isRTL ? 'flex-row-reverse' : ''}`}
               >
                 <tab.icon className="w-4 h-4" />
                 <span className="hidden sm:inline">{tab.label}</span>
