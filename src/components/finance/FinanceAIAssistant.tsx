@@ -11,6 +11,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useMonthlyStats, useTransactions, useAccounts } from '@/hooks/useFinance';
 import { useDebts, useEnvelopes, useSinkingFunds } from '@/hooks/useAdvancedFinance';
 import { useBudgets } from '@/hooks/useBudgets';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   role: 'user' | 'assistant';
