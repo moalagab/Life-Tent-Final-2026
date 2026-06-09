@@ -11,6 +11,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useMonthlyStats, useTransactions, useAccounts } from '@/hooks/useFinance';
 import { useDebts, useEnvelopes, useSinkingFunds } from '@/hooks/useAdvancedFinance';
 import { useBudgets } from '@/hooks/useBudgets';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -85,11 +86,14 @@ export function FinanceAIAssistant() {
     setIsLoading(true);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('يجب تسجيل الدخول');
+
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/finance-ai-assistant`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
           messages: [...messages, userMessage],

@@ -49,26 +49,25 @@ export function useUploadReceipt() {
 
   return useMutation({
     mutationFn: async ({ transactionId, file }: { transactionId: string; file: File }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
       const fileExt = file.name.split('.').pop();
       const fileName = `${transactionId}-${Date.now()}.${fileExt}`;
-      const filePath = `receipts/${fileName}`;
+      // Per-user folder so RLS owner-scoped policies apply
+      const filePath = `${user.id}/receipts/${fileName}`;
 
-      // Upload to storage
+      // Upload to private storage
       const { error: uploadError } = await supabase.storage
         .from('uploads')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('uploads')
-        .getPublicUrl(filePath);
-
-      // Update transaction with receipt URL
+      // Persist the storage path (not a public URL) — render via signed URLs at view time
       const { data, error } = await supabase
         .from('transactions')
-        .update({ receipt_url: urlData.publicUrl })
+        .update({ receipt_url: filePath })
         .eq('id', transactionId)
         .select()
         .single();
