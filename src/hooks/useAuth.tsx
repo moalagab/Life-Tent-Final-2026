@@ -66,15 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
-    console.log('[Auth] Supabase URL:', (supabase as any).supabaseUrl ?? (supabase as any).storageKey ?? 'unknown');
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/`,
-      },
-    });
-    console.log('[Auth] OAuth result:', { data, error });
-    return { error: error as Error | null };
+    const SUPABASE_URL = "https://oocddixbjiynladnvdfx.supabase.co";
+    const redirectTo = encodeURIComponent(`${window.location.origin}/`);
+    window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${redirectTo}`;
+    return { error: null };
   };
 
   const resetPassword = async (email: string) => {
