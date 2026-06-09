@@ -12,12 +12,14 @@ import { Label } from '@/components/ui/label';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Plus, Target, MoreVertical, Trash2, CheckSquare, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface ProjectGoalsTabProps {
   projectId: string;
 }
 
 export function ProjectGoalsTab({ projectId }: ProjectGoalsTabProps) {
+  const { currentLanguage } = useLanguage();
   const { data: allGoals, isLoading: goalsLoading } = useGoals();
   const { data: allKeyResults } = useKeyResults();
   const { data: allTasks } = useTasks();
@@ -63,7 +65,7 @@ export function ProjectGoalsTab({ projectId }: ProjectGoalsTabProps) {
 
   const handleCreateKr = async () => {
     if (!newKr.title.trim() || !selectedGoalId) {
-      toast.error('العنوان مطلوب');
+      toast.error(currentLanguage === 'ar' ? 'العنوان مطلوب' : 'Title is required');
       return;
     }
 
@@ -75,30 +77,30 @@ export function ProjectGoalsTab({ projectId }: ProjectGoalsTabProps) {
         current_value: 0,
         unit: newKr.unit,
       });
-      toast.success('تم إنشاء النتيجة الرئيسية');
+      toast.success(currentLanguage === 'ar' ? 'تم إنشاء النتيجة الرئيسية' : 'Key result created');
       setIsCreateKrOpen(false);
       setNewKr({ title: '', target_value: 100, unit: '%' });
       setSelectedGoalId(null);
     } catch (error) {
-      toast.error('حدث خطأ');
+      toast.error(currentLanguage === 'ar' ? 'حدث خطأ' : 'An error occurred');
     }
   };
 
   const handleUpdateKrValue = async (krId: string, currentValue: number) => {
     try {
       await updateKeyResult.mutateAsync({ id: krId, current_value: currentValue });
-      toast.success('تم تحديث القيمة');
+      toast.success(currentLanguage === 'ar' ? 'تم تحديث القيمة' : 'Value updated');
     } catch (error) {
-      toast.error('حدث خطأ');
+      toast.error(currentLanguage === 'ar' ? 'حدث خطأ' : 'An error occurred');
     }
   };
 
   const handleDeleteKr = async (krId: string) => {
     try {
       await deleteKeyResult.mutateAsync(krId);
-      toast.success('تم حذف النتيجة الرئيسية');
+      toast.success(currentLanguage === 'ar' ? 'تم حذف النتيجة الرئيسية' : 'Key result deleted');
     } catch (error) {
-      toast.error('حدث خطأ');
+      toast.error(currentLanguage === 'ar' ? 'حدث خطأ' : 'An error occurred');
     }
   };
 
@@ -108,7 +110,7 @@ export function ProjectGoalsTab({ projectId }: ProjectGoalsTabProps) {
   };
 
   if (goalsLoading) {
-    return <div className="flex items-center justify-center p-8">جارٍ التحميل...</div>;
+    return <div className="flex items-center justify-center p-8">{currentLanguage === 'ar' ? 'جارٍ التحميل...' : 'Loading...'}</div>;
   }
 
   return (
@@ -117,8 +119,8 @@ export function ProjectGoalsTab({ projectId }: ProjectGoalsTabProps) {
       {projectGoals.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
           <Target className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>لا توجد أهداف مرتبطة بهذا المشروع</p>
-          <p className="text-sm mt-2">يمكنك ربط الأهداف بالمشروع من صفحة الأهداف</p>
+          <p>{currentLanguage === 'ar' ? 'لا توجد أهداف مرتبطة بهذا المشروع' : 'No goals linked to this project'}</p>
+          <p className="text-sm mt-2">{currentLanguage === 'ar' ? 'يمكنك ربط الأهداف بالمشروع من صفحة الأهداف' : 'You can link goals to the project from the Goals page'}</p>
         </div>
       ) : (
          
@@ -183,7 +185,7 @@ export function ProjectGoalsTab({ projectId }: ProjectGoalsTabProps) {
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem onClick={() => handleDeleteKr(kr.id)}>
                                   <Trash2 className="w-4 h-4 ml-2" />
-                                  حذف
+                                  {currentLanguage === 'ar' ? 'حذف' : 'Delete'}
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -207,12 +209,12 @@ export function ProjectGoalsTab({ projectId }: ProjectGoalsTabProps) {
                           <div className="mt-3 pt-3 border-t border-border/50">
                             <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
                               <CheckSquare className="w-3 h-3" />
-                              <span>{linkedTasks.length} مهام مرتبطة</span>
+                              <span>{currentLanguage === 'ar' ? `${linkedTasks.length} مهام مرتبطة` : `${linkedTasks.length} linked tasks`}</span>
                             </div>
                             {nextTask && (
                               <div className="flex items-center gap-2 p-2 bg-background rounded text-sm">
                                 <ArrowRight className="w-3 h-3 text-primary" />
-                                <span className="font-medium">التالي:</span>
+                                <span className="font-medium">{currentLanguage === 'ar' ? 'التالي:' : 'Next:'}</span>
                                 <span>{nextTask.title}</span>
                               </div>
                             )}
@@ -224,7 +226,7 @@ export function ProjectGoalsTab({ projectId }: ProjectGoalsTabProps) {
 
                   {goalKrs.length === 0 && (
                     <p className="text-sm text-muted-foreground text-center py-2">
-                      لا توجد نتائج رئيسية - أضف KR لقياس التقدم
+                      {currentLanguage === 'ar' ? 'لا توجد نتائج رئيسية - أضف KR لقياس التقدم' : 'No key results — add a KR to measure progress'}
                     </p>
                   )}
                 </div>
@@ -238,21 +240,21 @@ export function ProjectGoalsTab({ projectId }: ProjectGoalsTabProps) {
       <Dialog open={isCreateKrOpen} onOpenChange={setIsCreateKrOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>نتيجة رئيسية جديدة (Key Result)</DialogTitle>
+            <DialogTitle>{currentLanguage === 'ar' ? 'نتيجة رئيسية جديدة (Key Result)' : 'New Key Result'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>العنوان</Label>
+              <Label>{currentLanguage === 'ar' ? 'العنوان' : 'Title'}</Label>
               <Input
                 dir="auto"
                 value={newKr.title}
                 onChange={(e) => setNewKr({ ...newKr, title: e.target.value })}
-                placeholder="مثال: زيادة المبيعات بنسبة 20%"
+                placeholder={currentLanguage === 'ar' ? 'مثال: زيادة المبيعات بنسبة 20%' : 'e.g. Increase sales by 20%'}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>القيمة المستهدفة</Label>
+                <Label>{currentLanguage === 'ar' ? 'القيمة المستهدفة' : 'Target Value'}</Label>
                 <Input
                   type="number"
                   value={newKr.target_value}
@@ -260,17 +262,17 @@ export function ProjectGoalsTab({ projectId }: ProjectGoalsTabProps) {
                 />
               </div>
               <div>
-                <Label>الوحدة</Label>
+                <Label>{currentLanguage === 'ar' ? 'الوحدة' : 'Unit'}</Label>
                 <Input
                   value={newKr.unit}
                   onChange={(e) => setNewKr({ ...newKr, unit: e.target.value })}
-                  placeholder="%, عدد, ريال..."
+                  placeholder={currentLanguage === 'ar' ? '%, عدد, ريال...' : '%, count, $...'}
                 />
               </div>
             </div>
             <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => setIsCreateKrOpen(false)}>إلغاء</Button>
-              <Button onClick={handleCreateKr} disabled={createKeyResult.isPending}>إنشاء</Button>
+              <Button variant="outline" onClick={() => setIsCreateKrOpen(false)}>{currentLanguage === 'ar' ? 'إلغاء' : 'Cancel'}</Button>
+              <Button onClick={handleCreateKr} disabled={createKeyResult.isPending}>{currentLanguage === 'ar' ? 'إنشاء' : 'Create'}</Button>
             </div>
           </div>
         </DialogContent>

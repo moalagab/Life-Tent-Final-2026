@@ -16,26 +16,28 @@ import { Plus, MoreVertical, Filter, CheckSquare, Trash2, Archive, Target, Calen
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface ProjectTasksTabProps {
   projectId: string;
 }
 
-const statusOptions = [
-  { value: 'all', label: 'الكل' },
-  { value: 'todo', label: 'للعمل' },
-  { value: 'in_progress', label: 'قيد التنفيذ' },
-  { value: 'done', label: 'مكتمل' },
-];
-
-const priorityOptions = [
-  { value: 'all', label: 'الكل' },
-  { value: 'high', label: 'عالي', color: 'bg-red-500' },
-  { value: 'medium', label: 'متوسط', color: 'bg-amber-500' },
-  { value: 'low', label: 'منخفض', color: 'bg-green-500' },
-];
-
 export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
+  const { currentLanguage } = useLanguage();
+
+  const statusOptions = [
+    { value: 'all', label: currentLanguage === 'ar' ? 'الكل' : 'All' },
+    { value: 'todo', label: currentLanguage === 'ar' ? 'للعمل' : 'To Do' },
+    { value: 'in_progress', label: currentLanguage === 'ar' ? 'قيد التنفيذ' : 'In Progress' },
+    { value: 'done', label: currentLanguage === 'ar' ? 'مكتمل' : 'Done' },
+  ];
+
+  const priorityOptions = [
+    { value: 'all', label: currentLanguage === 'ar' ? 'الكل' : 'All' },
+    { value: 'high', label: currentLanguage === 'ar' ? 'عالي' : 'High', color: 'bg-red-500' },
+    { value: 'medium', label: currentLanguage === 'ar' ? 'متوسط' : 'Medium', color: 'bg-amber-500' },
+    { value: 'low', label: currentLanguage === 'ar' ? 'منخفض' : 'Low', color: 'bg-green-500' },
+  ];
   const { data: allTasks, isLoading } = useTasks();
   const { data: keyResults } = useKeyResults();
   const createTask = useCreateTask();
@@ -94,16 +96,16 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
           await deleteTask.mutateAsync(taskId);
         }
       }
-      toast.success(`تم تنفيذ العملية على ${selectedTasks.length} مهام`);
+      toast.success(currentLanguage === 'ar' ? `تم تنفيذ العملية على ${selectedTasks.length} مهام` : `Action applied to ${selectedTasks.length} tasks`);
       setSelectedTasks([]);
     } catch (error) {
-      toast.error('حدث خطأ');
+      toast.error(currentLanguage === 'ar' ? 'حدث خطأ' : 'An error occurred');
     }
   };
 
   const handleCreateTask = async () => {
     if (!newTask.title.trim()) {
-      toast.error('العنوان مطلوب');
+      toast.error(currentLanguage === 'ar' ? 'العنوان مطلوب' : 'Title is required');
       return;
     }
 
@@ -111,28 +113,28 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
       await createTask.mutateAsync({
         title: newTask.title,
         description: newTask.description || null,
-         
+
         priority: newTask.priority as any,
         project_id: projectId,
         kr_id: newTask.kr_id || null,
         status: 'todo',
-       
+
       } as any);
-      toast.success('تم إنشاء المهمة');
+      toast.success(currentLanguage === 'ar' ? 'تم إنشاء المهمة' : 'Task created');
       setIsCreateOpen(false);
       setNewTask({ title: '', description: '', priority: 'medium', kr_id: '' });
     } catch (error) {
-      toast.error('حدث خطأ');
+      toast.error(currentLanguage === 'ar' ? 'حدث خطأ' : 'An error occurred');
     }
   };
 
   const handleStatusChange = async (taskId: string, status: string) => {
     try {
-       
+
       await updateTask.mutateAsync({ id: taskId, status: status as any });
-      toast.success('تم تحديث الحالة');
+      toast.success(currentLanguage === 'ar' ? 'تم تحديث الحالة' : 'Status updated');
     } catch (error) {
-      toast.error('حدث خطأ');
+      toast.error(currentLanguage === 'ar' ? 'حدث خطأ' : 'An error occurred');
     }
   };
 
@@ -144,7 +146,7 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
   };
 
   if (isLoading) {
-    return <div className="flex items-center justify-center p-8">جارٍ التحميل...</div>;
+    return <div className="flex items-center justify-center p-8">{currentLanguage === 'ar' ? 'جارٍ التحميل...' : 'Loading...'}</div>;
   }
 
   return (
@@ -154,7 +156,7 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
         <div className="flex items-center gap-2">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[130px]">
-              <SelectValue placeholder="الحالة" />
+              <SelectValue placeholder={currentLanguage === 'ar' ? 'الحالة' : 'Status'} />
             </SelectTrigger>
             <SelectContent>
               {statusOptions.map((opt) => (
@@ -164,7 +166,7 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
           </Select>
           <Select value={priorityFilter} onValueChange={setPriorityFilter}>
             <SelectTrigger className="w-[130px]">
-              <SelectValue placeholder="الأولوية" />
+              <SelectValue placeholder={currentLanguage === 'ar' ? 'الأولوية' : 'Priority'} />
             </SelectTrigger>
             <SelectContent>
               {priorityOptions.map((opt) => (
@@ -175,25 +177,25 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
         </div>
         <Button onClick={() => setIsCreateOpen(true)} className="bg-gradient-gold text-primary-foreground">
           <Plus className="w-4 h-4 ml-2" />
-          مهمة جديدة
+          {currentLanguage === 'ar' ? 'مهمة جديدة' : 'New Task'}
         </Button>
       </div>
 
       {/* Bulk Actions */}
       {selectedTasks.length > 0 && (
         <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-          <span className="text-sm text-muted-foreground">تم تحديد {selectedTasks.length} مهام</span>
+          <span className="text-sm text-muted-foreground">{currentLanguage === 'ar' ? `تم تحديد ${selectedTasks.length} مهام` : `${selectedTasks.length} tasks selected`}</span>
           <Button size="sm" variant="outline" onClick={() => handleBulkAction('complete')}>
             <CheckSquare className="w-4 h-4 ml-1" />
-            إكمال
+            {currentLanguage === 'ar' ? 'إكمال' : 'Complete'}
           </Button>
           <Button size="sm" variant="outline" onClick={() => handleBulkAction('archive')}>
             <Archive className="w-4 h-4 ml-1" />
-            أرشفة
+            {currentLanguage === 'ar' ? 'أرشفة' : 'Archive'}
           </Button>
           <Button size="sm" variant="destructive" onClick={() => handleBulkAction('delete')}>
             <Trash2 className="w-4 h-4 ml-1" />
-            حذف
+            {currentLanguage === 'ar' ? 'حذف' : 'Delete'}
           </Button>
         </div>
       )}
@@ -206,7 +208,7 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
               checked={selectedTasks.length === filteredTasks.length && filteredTasks.length > 0}
               onCheckedChange={handleSelectAll}
             />
-            <span className="text-sm text-muted-foreground">تحديد الكل</span>
+            <span className="text-sm text-muted-foreground">{currentLanguage === 'ar' ? 'تحديد الكل' : 'Select All'}</span>
           </div>
         )}
 
@@ -255,9 +257,9 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="todo">للعمل</SelectItem>
-                        <SelectItem value="in_progress">قيد التنفيذ</SelectItem>
-                        <SelectItem value="done">مكتمل</SelectItem>
+                        <SelectItem value="todo">{currentLanguage === 'ar' ? 'للعمل' : 'To Do'}</SelectItem>
+                        <SelectItem value="in_progress">{currentLanguage === 'ar' ? 'قيد التنفيذ' : 'In Progress'}</SelectItem>
+                        <SelectItem value="done">{currentLanguage === 'ar' ? 'مكتمل' : 'Done'}</SelectItem>
                       </SelectContent>
                     </Select>
                     <DropdownMenu>
@@ -269,7 +271,7 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => deleteTask.mutateAsync(task.id)}>
                           <Trash2 className="w-4 h-4 ml-2" />
-                          حذف
+                          {currentLanguage === 'ar' ? 'حذف' : 'Delete'}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -283,7 +285,7 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
         {filteredTasks.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
             <CheckSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>لا توجد مهام</p>
+            <p>{currentLanguage === 'ar' ? 'لا توجد مهام' : 'No tasks found'}</p>
           </div>
         )}
       </div>
@@ -292,50 +294,50 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>مهمة جديدة</DialogTitle>
+            <DialogTitle>{currentLanguage === 'ar' ? 'مهمة جديدة' : 'New Task'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>العنوان</Label>
+              <Label>{currentLanguage === 'ar' ? 'العنوان' : 'Title'}</Label>
               <Input
                 dir="auto"
                 value={newTask.title}
                 onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-                placeholder="عنوان المهمة..."
+                placeholder={currentLanguage === 'ar' ? 'عنوان المهمة...' : 'Task title...'}
               />
             </div>
             <div>
-              <Label>الوصف</Label>
+              <Label>{currentLanguage === 'ar' ? 'الوصف' : 'Description'}</Label>
               <Textarea
                 dir="auto"
                 value={newTask.description}
                 onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
-                placeholder="وصف المهمة..."
+                placeholder={currentLanguage === 'ar' ? 'وصف المهمة...' : 'Task description...'}
                 rows={2}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>الأولوية</Label>
+                <Label>{currentLanguage === 'ar' ? 'الأولوية' : 'Priority'}</Label>
                 <Select value={newTask.priority} onValueChange={(v) => setNewTask({ ...newTask, priority: v })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="high">عالي</SelectItem>
-                    <SelectItem value="medium">متوسط</SelectItem>
-                    <SelectItem value="low">منخفض</SelectItem>
+                    <SelectItem value="high">{currentLanguage === 'ar' ? 'عالي' : 'High'}</SelectItem>
+                    <SelectItem value="medium">{currentLanguage === 'ar' ? 'متوسط' : 'Medium'}</SelectItem>
+                    <SelectItem value="low">{currentLanguage === 'ar' ? 'منخفض' : 'Low'}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label>ربط بـ KR</Label>
+                <Label>{currentLanguage === 'ar' ? 'ربط بـ KR' : 'Link to KR'}</Label>
                 <Select value={newTask.kr_id || 'none'} onValueChange={(v) => setNewTask({ ...newTask, kr_id: v === 'none' ? '' : v })}>
                   <SelectTrigger>
-                    <SelectValue placeholder="اختياري" />
+                    <SelectValue placeholder={currentLanguage === 'ar' ? 'اختياري' : 'Optional'} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">بدون</SelectItem>
+                    <SelectItem value="none">{currentLanguage === 'ar' ? 'بدون' : 'None'}</SelectItem>
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     {keyResults?.map((kr: any) => (
@@ -346,8 +348,8 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
               </div>
             </div>
             <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => setIsCreateOpen(false)}>إلغاء</Button>
-              <Button onClick={handleCreateTask} disabled={createTask.isPending}>إنشاء</Button>
+              <Button variant="outline" onClick={() => setIsCreateOpen(false)}>{currentLanguage === 'ar' ? 'إلغاء' : 'Cancel'}</Button>
+              <Button onClick={handleCreateTask} disabled={createTask.isPending}>{currentLanguage === 'ar' ? 'إنشاء' : 'Create'}</Button>
             </div>
           </div>
         </DialogContent>

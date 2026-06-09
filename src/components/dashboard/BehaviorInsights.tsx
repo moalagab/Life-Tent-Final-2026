@@ -19,10 +19,12 @@ import {
 import { cn } from '@/lib/utils';
 import { useBehaviorEngine } from '@/hooks/useBehaviorEngine';
 import { usePersonalizationMemory } from '@/hooks/usePersonalizationMemory';
+import { useLanguage } from '@/hooks/useLanguage';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+const DAY_NAMES_AR = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+const DAY_NAMES_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 function GaugeRow({
   label,
@@ -125,6 +127,9 @@ function InsightCard({ text }: { text: string }) {
 export function BehaviorInsights() {
   const { data: profile, isLoading } = useBehaviorEngine();
   const { trends } = usePersonalizationMemory();
+  const { currentLanguage } = useLanguage();
+
+  const DAY_NAMES = currentLanguage === 'ar' ? DAY_NAMES_AR : DAY_NAMES_EN;
 
   if (isLoading) {
     return (
@@ -132,7 +137,7 @@ export function BehaviorInsights() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Brain className="w-4 h-4 text-violet-400" />
-            تحليل السلوك
+            {currentLanguage === 'ar' ? 'تحليل السلوك' : 'Behavior Analysis'}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -162,8 +167,9 @@ export function BehaviorInsights() {
     low:    'bg-success/15 text-success border-success/25',
   }[profile.todayRiskLevel];
 
-  const riskLabel = profile.todayRiskLevel === 'high' ? 'مرتفع'
-    : profile.todayRiskLevel === 'medium' ? 'متوسط' : 'منخفض';
+  const riskLabel = currentLanguage === 'ar'
+    ? (profile.todayRiskLevel === 'high' ? 'مرتفع' : profile.todayRiskLevel === 'medium' ? 'متوسط' : 'منخفض')
+    : (profile.todayRiskLevel === 'high' ? 'High' : profile.todayRiskLevel === 'medium' ? 'Medium' : 'Low');
 
   return (
     <Card>
@@ -171,14 +177,15 @@ export function BehaviorInsights() {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
             <Brain className="w-4 h-4 text-violet-400" />
-            تحليل السلوك
+            {currentLanguage === 'ar' ? 'تحليل السلوك' : 'Behavior Analysis'}
           </CardTitle>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1">
               <TrendIcon className={cn('w-3.5 h-3.5', trendColor)} />
               <span className={cn('text-xs', trendColor)}>
-                {trends.weeklyCompletionTrend === 'improving' ? 'تحسّن'
-                  : trends.weeklyCompletionTrend === 'declining' ? 'تراجع' : 'مستقر'}
+                {currentLanguage === 'ar'
+                  ? (trends.weeklyCompletionTrend === 'improving' ? 'تحسّن' : trends.weeklyCompletionTrend === 'declining' ? 'تراجع' : 'مستقر')
+                  : (trends.weeklyCompletionTrend === 'improving' ? 'Improving' : trends.weeklyCompletionTrend === 'declining' ? 'Declining' : 'Stable')}
               </span>
             </div>
             <Badge className={cn('text-[10px] border', riskBadgeStyle)} variant="outline">
@@ -194,29 +201,29 @@ export function BehaviorInsights() {
         <div className="grid grid-cols-2 gap-2">
           <StatCard
             icon={CheckCircle2}
-            label="إجمالي المنجز"
+            label={currentLanguage === 'ar' ? 'إجمالي المنجز' : 'Total Completed'}
             value={trends.totalTasksCompleted}
-            sub="مهمة في السجل"
+            sub={currentLanguage === 'ar' ? 'مهمة في السجل' : 'tasks on record'}
             color="text-success"
           />
           <StatCard
             icon={Clock}
-            label="ذروة الإنتاجية"
+            label={currentLanguage === 'ar' ? 'ذروة الإنتاجية' : 'Peak Productivity'}
             value={`${profile.peakHour.toString().padStart(2, '0')}:00`}
             sub={DAY_NAMES[profile.peakDay]}
           />
           <StatCard
             icon={Flame}
-            label="عادات هشة"
+            label={currentLanguage === 'ar' ? 'عادات هشة' : 'Fragile Habits'}
             value={profile.fragileHabitIds.length}
-            sub="تحتاج تعزيز"
+            sub={currentLanguage === 'ar' ? 'تحتاج تعزيز' : 'need reinforcement'}
             color={profile.fragileHabitIds.length > 0 ? 'text-amber-500' : 'text-success'}
           />
           <StatCard
             icon={AlertTriangle}
-            label="مهام متوقفة"
+            label={currentLanguage === 'ar' ? 'مهام متوقفة' : 'Stalled Tasks'}
             value={profile.stalledTaskIds.length}
-            sub="+3 أيام تأخير"
+            sub={currentLanguage === 'ar' ? '+3 أيام تأخير' : '+3 days overdue'}
             color={profile.stalledTaskIds.length > 0 ? 'text-destructive' : 'text-success'}
           />
         </div>
@@ -224,22 +231,22 @@ export function BehaviorInsights() {
         {/* Performance gauges */}
         <div className="space-y-3 pt-1">
           <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-            <BarChart3 className="w-3.5 h-3.5" /> مؤشرات الأداء
+            <BarChart3 className="w-3.5 h-3.5" /> {currentLanguage === 'ar' ? 'مؤشرات الأداء' : 'Performance Indicators'}
           </p>
           <GaugeRow
-            label="معدل الإنجاز"
-            sublabel="كلما ارتفع أفضل"
+            label={currentLanguage === 'ar' ? 'معدل الإنجاز' : 'Completion Rate'}
+            sublabel={currentLanguage === 'ar' ? 'كلما ارتفع أفضل' : 'higher is better'}
             value={profile.completionRate}
           />
           <GaugeRow
-            label="التسويف"
-            sublabel="كلما انخفض أفضل"
+            label={currentLanguage === 'ar' ? 'التسويف' : 'Procrastination'}
+            sublabel={currentLanguage === 'ar' ? 'كلما انخفض أفضل' : 'lower is better'}
             value={profile.procrastinationScore}
             low
           />
           <GaugeRow
-            label="الإفراط في الالتزام"
-            sublabel="كلما انخفض أفضل"
+            label={currentLanguage === 'ar' ? 'الإفراط في الالتزام' : 'Overcommitment'}
+            sublabel={currentLanguage === 'ar' ? 'كلما انخفض أفضل' : 'lower is better'}
             value={profile.overcommitmentScore}
             low
           />
@@ -249,7 +256,7 @@ export function BehaviorInsights() {
         {profile.insights.length > 0 && (
           <div className="space-y-1.5">
             <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-              <Zap className="w-3.5 h-3.5" /> رؤى مخصصة
+              <Zap className="w-3.5 h-3.5" /> {currentLanguage === 'ar' ? 'رؤى مخصصة' : 'Personalized Insights'}
             </p>
             {profile.insights.map((insight, i) => (
               <InsightCard key={i} text={insight} />
@@ -261,7 +268,7 @@ export function BehaviorInsights() {
         {profile.distractionPatterns && profile.distractionPatterns.length > 0 && (
           <div className="space-y-1.5 pt-1">
             <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-500" /> أنماط التشتت
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-500" /> {currentLanguage === 'ar' ? 'أنماط التشتت' : 'Distraction Patterns'}
             </p>
             {profile.distractionPatterns.map((p, i) => (
               <div

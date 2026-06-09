@@ -14,21 +14,23 @@ import { Plus, MoreVertical, Trash2, FileText, Link2, Film, BookOpen, File, Exte
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface ProjectResourcesTabProps {
   projectId: string;
 }
 
-const resourceTypes = [
-  { value: 'note', label: 'ملاحظة', icon: FileText },
-  { value: 'file', label: 'ملف', icon: File },
-  { value: 'link', label: 'رابط', icon: Link2 },
-  { value: 'course', label: 'دورة', icon: BookOpen },
-  { value: 'media', label: 'وسائط', icon: Film },
-  { value: 'document', label: 'مستند', icon: FileText },
-];
-
 export function ProjectResourcesTab({ projectId }: ProjectResourcesTabProps) {
+  const { currentLanguage } = useLanguage();
+
+  const resourceTypes = [
+    { value: 'note', label: currentLanguage === 'ar' ? 'ملاحظة' : 'Note', icon: FileText },
+    { value: 'file', label: currentLanguage === 'ar' ? 'ملف' : 'File', icon: File },
+    { value: 'link', label: currentLanguage === 'ar' ? 'رابط' : 'Link', icon: Link2 },
+    { value: 'course', label: currentLanguage === 'ar' ? 'دورة' : 'Course', icon: BookOpen },
+    { value: 'media', label: currentLanguage === 'ar' ? 'وسائط' : 'Media', icon: Film },
+    { value: 'document', label: currentLanguage === 'ar' ? 'مستند' : 'Document', icon: FileText },
+  ];
   const { data: allResources, isLoading } = useResources({ project_id: projectId });
   const createResource = useCreateResource();
   const deleteResource = useDeleteResource();
@@ -45,7 +47,7 @@ export function ProjectResourcesTab({ projectId }: ProjectResourcesTabProps) {
 
   const handleCreate = async () => {
     if (!newResource.title.trim()) {
-      toast.error('العنوان مطلوب');
+      toast.error(currentLanguage === 'ar' ? 'العنوان مطلوب' : 'Title is required');
       return;
     }
 
@@ -54,20 +56,20 @@ export function ProjectResourcesTab({ projectId }: ProjectResourcesTabProps) {
         ...newResource,
         project_id: projectId,
       });
-      toast.success('تم إنشاء المورد');
+      toast.success(currentLanguage === 'ar' ? 'تم إنشاء المورد' : 'Resource created');
       setIsCreateOpen(false);
       setNewResource({ type: 'note', title: '', description: '', content: '', source_url: '' });
     } catch (error) {
-      toast.error('حدث خطأ');
+      toast.error(currentLanguage === 'ar' ? 'حدث خطأ' : 'An error occurred');
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
       await deleteResource.mutateAsync(id);
-      toast.success('تم حذف المورد');
+      toast.success(currentLanguage === 'ar' ? 'تم حذف المورد' : 'Resource deleted');
     } catch (error) {
-      toast.error('حدث خطأ');
+      toast.error(currentLanguage === 'ar' ? 'حدث خطأ' : 'An error occurred');
     }
   };
 
@@ -77,17 +79,17 @@ export function ProjectResourcesTab({ projectId }: ProjectResourcesTabProps) {
   };
 
   if (isLoading) {
-    return <div className="flex items-center justify-center p-8">جارٍ التحميل...</div>;
+    return <div className="flex items-center justify-center p-8">{currentLanguage === 'ar' ? 'جارٍ التحميل...' : 'Loading...'}</div>;
   }
 
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <span className="text-sm text-muted-foreground">{allResources?.length || 0} موارد</span>
+        <span className="text-sm text-muted-foreground">{allResources?.length || 0} {currentLanguage === 'ar' ? 'موارد' : 'resources'}</span>
         <Button onClick={() => setIsCreateOpen(true)} className="bg-gradient-gold text-primary-foreground">
           <Plus className="w-4 h-4 ml-2" />
-          مورد جديد
+          {currentLanguage === 'ar' ? 'مورد جديد' : 'New Resource'}
         </Button>
       </div>
 
@@ -122,12 +124,12 @@ export function ProjectResourcesTab({ projectId }: ProjectResourcesTabProps) {
                       {resource.source_url && (
                         <DropdownMenuItem onClick={() => window.open(resource.source_url, '_blank')}>
                           <ExternalLink className="w-4 h-4 ml-2" />
-                          فتح الرابط
+                          {currentLanguage === 'ar' ? 'فتح الرابط' : 'Open Link'}
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuItem onClick={() => handleDelete(resource.id)} className="text-destructive">
                         <Trash2 className="w-4 h-4 ml-2" />
-                        حذف
+                        {currentLanguage === 'ar' ? 'حذف' : 'Delete'}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -147,7 +149,7 @@ export function ProjectResourcesTab({ projectId }: ProjectResourcesTabProps) {
       {allResources?.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           <Database className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>لا توجد موارد مرتبطة بهذا المشروع</p>
+          <p>{currentLanguage === 'ar' ? 'لا توجد موارد مرتبطة بهذا المشروع' : 'No resources linked to this project'}</p>
         </div>
       )}
 
@@ -155,11 +157,11 @@ export function ProjectResourcesTab({ projectId }: ProjectResourcesTabProps) {
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>مورد جديد</DialogTitle>
+            <DialogTitle>{currentLanguage === 'ar' ? 'مورد جديد' : 'New Resource'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>النوع</Label>
+              <Label>{currentLanguage === 'ar' ? 'النوع' : 'Type'}</Label>
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               <Select value={newResource.type} onValueChange={(v) => setNewResource({ ...newResource, type: v as any })}>
@@ -179,16 +181,16 @@ export function ProjectResourcesTab({ projectId }: ProjectResourcesTabProps) {
               </Select>
             </div>
             <div>
-              <Label>العنوان</Label>
+              <Label>{currentLanguage === 'ar' ? 'العنوان' : 'Title'}</Label>
               <Input
                 dir="auto"
                 value={newResource.title}
                 onChange={(e) => setNewResource({ ...newResource, title: e.target.value })}
-                placeholder="عنوان المورد..."
+                placeholder={currentLanguage === 'ar' ? 'عنوان المورد...' : 'Resource title...'}
               />
             </div>
             <div>
-              <Label>الوصف</Label>
+              <Label>{currentLanguage === 'ar' ? 'الوصف' : 'Description'}</Label>
               <Textarea
                 dir="auto"
                 value={newResource.description}
@@ -198,7 +200,7 @@ export function ProjectResourcesTab({ projectId }: ProjectResourcesTabProps) {
             </div>
             {(newResource.type === 'link' || newResource.type === 'course') && (
               <div>
-                <Label>الرابط</Label>
+                <Label>{currentLanguage === 'ar' ? 'الرابط' : 'URL'}</Label>
                 <Input
                   type="url"
                   value={newResource.source_url}
@@ -209,7 +211,7 @@ export function ProjectResourcesTab({ projectId }: ProjectResourcesTabProps) {
             )}
             {(newResource.type === 'note' || newResource.type === 'document') && (
               <div>
-                <Label>المحتوى</Label>
+                <Label>{currentLanguage === 'ar' ? 'المحتوى' : 'Content'}</Label>
                 <Textarea
                   dir="auto"
                   value={newResource.content}
@@ -219,8 +221,8 @@ export function ProjectResourcesTab({ projectId }: ProjectResourcesTabProps) {
               </div>
             )}
             <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => setIsCreateOpen(false)}>إلغاء</Button>
-              <Button onClick={handleCreate} disabled={createResource.isPending}>إنشاء</Button>
+              <Button variant="outline" onClick={() => setIsCreateOpen(false)}>{currentLanguage === 'ar' ? 'إلغاء' : 'Cancel'}</Button>
+              <Button onClick={handleCreate} disabled={createResource.isPending}>{currentLanguage === 'ar' ? 'إنشاء' : 'Create'}</Button>
             </div>
           </div>
         </DialogContent>

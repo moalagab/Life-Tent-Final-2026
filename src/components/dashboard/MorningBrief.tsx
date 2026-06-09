@@ -19,6 +19,7 @@ import { useAIDecisionEngine } from '@/hooks/useAIDecisionEngine';
 import type { AIAction } from '@/hooks/useAIDecisionEngine';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { useLanguage } from '@/hooks/useLanguage';
 
 // ── Action icon/color maps ─────────────────────────────────────────────────────
 
@@ -37,10 +38,16 @@ const ACTION_COLORS: Record<AIAction['priority'], string> = {
   low:    'border-border bg-muted/20',
 };
 
-const PRIORITY_LABEL: Record<AIAction['priority'], string> = {
+const PRIORITY_LABEL_AR: Record<AIAction['priority'], string> = {
   high:   'عاجل',
   medium: 'مهم',
   low:    'عادي',
+};
+
+const PRIORITY_LABEL_EN: Record<AIAction['priority'], string> = {
+  high:   'Urgent',
+  medium: 'Important',
+  low:    'Normal',
 };
 
 const PRIORITY_BADGE: Record<AIAction['priority'], string> = {
@@ -56,13 +63,16 @@ function ActionCard({
   index,
   isDone,
   onToggle,
+  lang = 'ar',
 }: {
   action: AIAction;
   index: number;
   isDone: boolean;
   onToggle: (i: number) => void;
+  lang?: string;
 }) {
   const Icon = ACTION_ICONS[action.type];
+  const PRIORITY_LABEL = lang === 'ar' ? PRIORITY_LABEL_AR : PRIORITY_LABEL_EN;
 
   return (
     <div
@@ -103,7 +113,7 @@ function ActionCard({
             ? 'bg-success border-success text-success-foreground'
             : 'border-border hover:border-primary'
         )}
-        aria-label={isDone ? 'إلغاء التحديد' : 'تحديد كمنجز'}
+        aria-label={lang === 'ar' ? (isDone ? 'إلغاء التحديد' : 'تحديد كمنجز') : (isDone ? 'Unmark' : 'Mark as done')}
       >
         {isDone && <CheckCircle2 className="w-3 h-3 text-white" />}
       </button>
@@ -143,6 +153,7 @@ export function MorningBrief() {
     result, scoredTasks, profile, isReady, isAnalysing,
     error, analyse, refresh, doneActions, toggleActionDone,
   } = useAIDecisionEngine();
+  const { currentLanguage } = useLanguage();
 
   const [showAllActions, setShowAllActions] = useState(false);
 
@@ -164,7 +175,7 @@ export function MorningBrief() {
     : 'text-success';
 
   const computedAgo = result?.computedAt
-    ? formatDistanceToNow(new Date(result.computedAt), { locale: ar, addSuffix: true })
+    ? formatDistanceToNow(new Date(result.computedAt), { locale: currentLanguage === 'ar' ? ar : undefined, addSuffix: true })
     : null;
 
   // ── Loading skeleton ──────────────────────────────────────────────────────
@@ -175,7 +186,7 @@ export function MorningBrief() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Sunrise className="w-4 h-4 text-amber-400" />
-            إحاطة الصباح
+            {currentLanguage === 'ar' ? 'إحاطة الصباح' : 'Morning Brief'}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -195,10 +206,12 @@ export function MorningBrief() {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
             <Sunrise className="w-4 h-4 text-amber-400" />
-            إحاطة الصباح
+            {currentLanguage === 'ar' ? 'إحاطة الصباح' : 'Morning Brief'}
             {profile && (
               <span className={cn('text-xs font-normal', riskColor)}>
-                · {profile.todayRiskLevel === 'high' ? 'خطر مرتفع' : profile.todayRiskLevel === 'medium' ? 'خطر متوسط' : 'وضع جيد'}
+                · {currentLanguage === 'ar'
+                  ? (profile.todayRiskLevel === 'high' ? 'خطر مرتفع' : profile.todayRiskLevel === 'medium' ? 'خطر متوسط' : 'وضع جيد')
+                  : (profile.todayRiskLevel === 'high' ? 'High risk' : profile.todayRiskLevel === 'medium' ? 'Medium risk' : 'Good')}
               </span>
             )}
           </CardTitle>
@@ -212,7 +225,7 @@ export function MorningBrief() {
               className="h-7 w-7"
               onClick={refresh}
               disabled={isAnalysing}
-              aria-label="تحديث التحليل"
+              aria-label={currentLanguage === 'ar' ? 'تحديث التحليل' : 'Refresh analysis'}
             >
               <RefreshCw className={cn('w-3.5 h-3.5', isAnalysing && 'animate-spin')} />
             </Button>
@@ -225,7 +238,7 @@ export function MorningBrief() {
         {error && !result && (
           <div className="flex items-center gap-2 p-3 rounded-xl bg-destructive/10 border border-destructive/20">
             <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />
-            <p className="text-sm text-destructive">تعذّر تحميل التحليل — تحقق من اتصالك</p>
+            <p className="text-sm text-destructive">{currentLanguage === 'ar' ? 'تعذّر تحميل التحليل — تحقق من اتصالك' : 'Failed to load analysis — check your connection'}</p>
           </div>
         )}
 
@@ -263,7 +276,7 @@ export function MorningBrief() {
         {/* Top priority tasks */}
         {topTasks.length > 0 && (
           <div>
-            <p className="text-xs font-medium text-muted-foreground mb-2">أولويات اليوم</p>
+            <p className="text-xs font-medium text-muted-foreground mb-2">{currentLanguage === 'ar' ? 'أولويات اليوم' : "Today's Priorities"}</p>
             <div>
               {topTasks.map((task, i) => (
                 <TaskRow key={task.id} task={task} rank={i + 1} />
@@ -277,9 +290,9 @@ export function MorningBrief() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs font-medium text-muted-foreground">
-                الإجراءات المقترحة
+                {currentLanguage === 'ar' ? 'الإجراءات المقترحة' : 'Suggested Actions'}
                 {doneCount > 0 && (
-                  <span className="text-success mr-1">({doneCount}/{actions.length} منجز)</span>
+                  <span className="text-success mr-1">({doneCount}/{actions.length} {currentLanguage === 'ar' ? 'منجز' : 'done'})</span>
                 )}
               </p>
             </div>
@@ -291,6 +304,7 @@ export function MorningBrief() {
                   index={i}
                   isDone={doneActions.has(i)}
                   onToggle={toggleActionDone}
+                  lang={currentLanguage}
                 />
               ))}
             </div>
@@ -300,9 +314,9 @@ export function MorningBrief() {
                 className="mt-2 w-full flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
               >
                 {showAllActions ? (
-                  <><ChevronUp className="w-3.5 h-3.5" /> عرض أقل</>
+                  <><ChevronUp className="w-3.5 h-3.5" /> {currentLanguage === 'ar' ? 'عرض أقل' : 'Show less'}</>
                 ) : (
-                  <><ChevronDown className="w-3.5 h-3.5" /> +{actions.length - 3} إجراءات أخرى</>
+                  <><ChevronDown className="w-3.5 h-3.5" /> +{actions.length - 3} {currentLanguage === 'ar' ? 'إجراءات أخرى' : 'more actions'}</>
                 )}
               </button>
             )}
@@ -313,13 +327,13 @@ export function MorningBrief() {
         {!result && !error && isReady && (
           <div className="text-center py-6">
             <Sunrise className="w-8 h-8 text-muted-foreground mx-auto mb-3 opacity-50" />
-            <p className="text-sm text-muted-foreground mb-3">اضغط لتوليد إحاطة يومية ذكية</p>
+            <p className="text-sm text-muted-foreground mb-3">{currentLanguage === 'ar' ? 'اضغط لتوليد إحاطة يومية ذكية' : 'Tap to generate a smart daily brief'}</p>
             <Button size="sm" variant="gold" onClick={() => analyse('morning')} disabled={isAnalysing}>
               {isAnalysing ? (
                 <span className="flex items-center gap-1.5">
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" /> جارٍ التحليل...
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" /> {currentLanguage === 'ar' ? 'جارٍ التحليل...' : 'Analysing...'}
                 </span>
-              ) : 'بدء التحليل'}
+              ) : (currentLanguage === 'ar' ? 'بدء التحليل' : 'Start Analysis')}
             </Button>
           </div>
         )}

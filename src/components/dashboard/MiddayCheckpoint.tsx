@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAIDecisionEngine } from '@/hooks/useAIDecisionEngine';
+import { useLanguage } from '@/hooks/useLanguage';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -35,20 +36,20 @@ function EnergyDots({ level }: { level: number }) {
   );
 }
 
-function TrendBadge({ trend }: { trend: 'improving' | 'declining' | 'stable' }) {
+function TrendBadge({ trend, lang = 'ar' }: { trend: 'improving' | 'declining' | 'stable'; lang?: string }) {
   if (trend === 'improving') return (
     <span className="flex items-center gap-1 text-xs text-success">
-      <TrendingUp className="w-3 h-3" /> تحسّن
+      <TrendingUp className="w-3 h-3" /> {lang === 'ar' ? 'تحسّن' : 'Improving'}
     </span>
   );
   if (trend === 'declining') return (
     <span className="flex items-center gap-1 text-xs text-destructive">
-      <TrendingDown className="w-3 h-3" /> تراجع
+      <TrendingDown className="w-3 h-3" /> {lang === 'ar' ? 'تراجع' : 'Declining'}
     </span>
   );
   return (
     <span className="flex items-center gap-1 text-xs text-muted-foreground">
-      <Minus className="w-3 h-3" /> مستقر
+      <Minus className="w-3 h-3" /> {lang === 'ar' ? 'مستقر' : 'Stable'}
     </span>
   );
 }
@@ -60,6 +61,7 @@ export function MiddayCheckpoint() {
     result, scoredTasks, profile, trends,
     doneToday, isReady, isAnalysing, error, analyse, refresh,
   } = useAIDecisionEngine();
+  const { currentLanguage } = useLanguage();
 
   useEffect(() => {
     if (isReady && !result && !isAnalysing) {
@@ -81,7 +83,7 @@ export function MiddayCheckpoint() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Sun className="w-4 h-4 text-orange-400" />
-            نقطة التفتيش
+            {currentLanguage === 'ar' ? 'نقطة التفتيش' : 'Checkpoint'}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -98,7 +100,7 @@ export function MiddayCheckpoint() {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
             <Sun className="w-4 h-4 text-orange-400" />
-            نقطة منتصف اليوم
+            {currentLanguage === 'ar' ? 'نقطة منتصف اليوم' : 'Midday Checkpoint'}
           </CardTitle>
           <Button
             variant="ghost"
@@ -106,7 +108,7 @@ export function MiddayCheckpoint() {
             className="h-7 w-7"
             onClick={refresh}
             disabled={isAnalysing}
-            aria-label="تحديث التحليل"
+            aria-label={currentLanguage === 'ar' ? 'تحديث التحليل' : 'Refresh analysis'}
           >
             <RefreshCw className={cn('w-3.5 h-3.5', isAnalysing && 'animate-spin')} />
           </Button>
@@ -120,22 +122,22 @@ export function MiddayCheckpoint() {
             {/* Done today */}
             <div className="text-center p-2 rounded-xl bg-success/10 border border-success/20">
               <p className="text-lg font-bold text-success">{doneToday}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">منجز</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{currentLanguage === 'ar' ? 'منجز' : 'Done'}</p>
             </div>
             {/* Remaining */}
             <div className="text-center p-2 rounded-xl bg-muted/40">
               <p className="text-lg font-bold">{remaining}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">متبقي</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{currentLanguage === 'ar' ? 'متبقي' : 'Left'}</p>
             </div>
             {/* Energy */}
             <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-muted/40 gap-1">
               <EnergyDots level={profile.energyEstimate} />
-              <p className="text-[10px] text-muted-foreground">الطاقة</p>
+              <p className="text-[10px] text-muted-foreground">{currentLanguage === 'ar' ? 'الطاقة' : 'Energy'}</p>
             </div>
             {/* Trend */}
             <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-muted/40 gap-1">
-              <TrendBadge trend={trends.weeklyCompletionTrend} />
-              <p className="text-[10px] text-muted-foreground">الأسبوع</p>
+              <TrendBadge trend={trends.weeklyCompletionTrend} lang={currentLanguage} />
+              <p className="text-[10px] text-muted-foreground">{currentLanguage === 'ar' ? 'الأسبوع' : 'Week'}</p>
             </div>
           </div>
         )}
@@ -143,7 +145,7 @@ export function MiddayCheckpoint() {
         {/* Progress bar */}
         <div>
           <div className="flex justify-between text-xs text-muted-foreground mb-1">
-            <span>تقدم اليوم</span>
+            <span>{currentLanguage === 'ar' ? 'تقدم اليوم' : "Today's Progress"}</span>
             <span>{progressPct}% ({doneToday} / {total})</span>
           </div>
           <Progress value={progressPct} className="h-2" />
@@ -168,7 +170,7 @@ export function MiddayCheckpoint() {
         {doNowTasks.length > 0 && (
           <div>
             <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-              <Zap className="w-3 h-3" /> أنجز الآن
+              <Zap className="w-3 h-3" /> {currentLanguage === 'ar' ? 'أنجز الآن' : 'Do Now'}
             </p>
             <div className="space-y-1.5">
               {doNowTasks.map(task => (
@@ -189,7 +191,7 @@ export function MiddayCheckpoint() {
         {deferTasks.length > 0 && (
           <div>
             <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-              <AlertTriangle className="w-3 h-3" /> أجّل لغداً
+              <AlertTriangle className="w-3 h-3" /> {currentLanguage === 'ar' ? 'أجّل لغداً' : 'Defer to Tomorrow'}
             </p>
             <div className="space-y-1.5">
               {deferTasks.map(task => (
@@ -215,7 +217,7 @@ export function MiddayCheckpoint() {
 
         {/* Error */}
         {error && (
-          <p className="text-xs text-destructive text-center">تعذّر الاتصال بالذكاء الاصطناعي</p>
+          <p className="text-xs text-destructive text-center">{currentLanguage === 'ar' ? 'تعذّر الاتصال بالذكاء الاصطناعي' : 'Could not connect to AI'}</p>
         )}
 
         {/* Trigger manually */}
@@ -223,9 +225,9 @@ export function MiddayCheckpoint() {
           <Button size="sm" className="w-full" onClick={() => analyse('midday')} disabled={isAnalysing}>
             {isAnalysing ? (
               <span className="flex items-center gap-1.5">
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" /> جارٍ التحليل...
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" /> {currentLanguage === 'ar' ? 'جارٍ التحليل...' : 'Analysing...'}
               </span>
-            ) : 'تحليل منتصف اليوم'}
+            ) : (currentLanguage === 'ar' ? 'تحليل منتصف اليوم' : 'Analyse Midday')}
           </Button>
         )}
       </CardContent>
