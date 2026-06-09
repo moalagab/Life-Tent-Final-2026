@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  LayoutDashboard, Wallet, Receipt, PiggyBank, 
+import {
+  LayoutDashboard, Wallet, Receipt, PiggyBank,
   CreditCard, RefreshCw, TrendingUp, FileText, Briefcase, Upload,
-  Globe, Lock, Gauge, ShoppingBag, History
+  Gauge, ShoppingBag, History
 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { FinanceDashboard } from '@/components/finance/FinanceDashboard';
@@ -18,8 +18,6 @@ import { InvestmentsManager } from '@/components/finance/InvestmentsManager';
 import { ProjectFinanceManager } from '@/components/finance/ProjectFinanceManager';
 import { FinanceReports } from '@/components/finance/FinanceReports';
 import { DataImport } from '@/components/finance/DataImport';
-import { CurrencyManager } from '@/components/finance/CurrencyManager';
-import { MonthlyClose } from '@/components/finance/MonthlyClose';
 import { WishlistManager } from '@/components/finance/WishlistManager';
 import { FinanceAIAssistant } from '@/components/finance/FinanceAIAssistant';
 import { FinanceAuditLogView } from '@/components/finance/FinanceAuditLogView';
@@ -27,7 +25,7 @@ import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 
 const ALLOWED_TABS = [
   'dashboard','accounts','transactions','budget','wishlist','debts',
-  'subscriptions','investments','projects','currencies','close','reports','audit','import',
+  'subscriptions','investments','projects','reports','audit','import',
 ] as const;
 type FinanceTab = typeof ALLOWED_TABS[number];
 
@@ -79,8 +77,6 @@ export default function Finance() {
     { id: 'subscriptions', label: t('finance.subscriptions'), icon: RefreshCw },
     { id: 'investments', label: t('finance.investments'), icon: TrendingUp },
     { id: 'projects', label: t('finance.projectFinance'), icon: Briefcase },
-    { id: 'currencies', label: t('finance.currencies'), icon: Globe },
-    { id: 'close', label: t('finance.monthlyClose'), icon: Lock },
     { id: 'reports', label: t('finance.reports'), icon: FileText },
     { id: 'audit', label: t('finance.auditLog'), icon: History },
     { id: 'import', label: t('finance.dataImport'), icon: Upload },
@@ -122,8 +118,6 @@ export default function Finance() {
         <TabsContent value="subscriptions"><SubscriptionsManager /></TabsContent>
         <TabsContent value="investments"><InvestmentsManager /></TabsContent>
         <TabsContent value="projects"><ProjectFinanceManager /></TabsContent>
-        <TabsContent value="currencies"><CurrencyManager /></TabsContent>
-        <TabsContent value="close"><MonthlyClose /></TabsContent>
         <TabsContent value="reports"><FinanceReports /></TabsContent>
         <TabsContent value="audit"><FinanceAuditLogView /></TabsContent>
         <TabsContent value="import"><DataImport /></TabsContent>

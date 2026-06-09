@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { MainLayout } from '@/components/layout/MainLayout';
 import { FileText, GraduationCap, Plus, Search, Tag, Sparkles, Loader2, Archive, RotateCcw, MoreVertical, ExternalLink, BookOpen, FolderOpen, Target, Briefcase, Trash2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -351,9 +350,7 @@ export default function Knowledge() {
       </div>
 
       {/* Tabs */}
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-6">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'notes' | 'courses' | 'archived')} className="space-y-6">
         <div className="flex items-center justify-between">
           <TabsList>
             <TabsTrigger value="notes" className="flex items-center gap-2">

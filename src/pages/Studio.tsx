@@ -319,6 +319,7 @@ export default function Studio() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div className="overflow-x-auto" dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}>
           <TabsList className="h-auto p-1 flex-wrap">
             {tabs.map((tab) => (
               <TabsTrigger 
@@ -336,6 +337,7 @@ export default function Studio() {
               </TabsTrigger>
             ))}
           </TabsList>
+          </div>
 
           {/* View Mode Toggle */}
           <div className="flex items-center gap-2">
