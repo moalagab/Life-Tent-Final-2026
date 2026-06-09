@@ -27,18 +27,14 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!user) {
-    console.log('[ProtectedRoute] no user → redirect /');
     return <Navigate to="/" replace />;
   }
 
   // Redirect new users to onboarding (skip for /onboarding and /admin)
   const ONBOARDING_EXEMPT = ['/onboarding', '/admin'];
-  console.log('[ProtectedRoute] path:', location.pathname, '| isCompleted:', isCompleted, '| exempt:', ONBOARDING_EXEMPT.includes(location.pathname));
   if (!isCompleted && !ONBOARDING_EXEMPT.includes(location.pathname)) {
-    console.log('[ProtectedRoute] → redirect /onboarding');
     return <Navigate to="/onboarding" replace />;
   }
 
-  console.log('[ProtectedRoute] → rendering children');
   return <>{children}</>;
 }

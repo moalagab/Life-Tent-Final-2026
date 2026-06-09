@@ -169,9 +169,7 @@ export function useIsAdmin(): boolean | null {
       .select('is_admin')
       .eq('user_id', user.id)
       .maybeSingle()
-      .then(({ data, error }) => {
-        if (error) console.error('[useIsAdmin] error:', error.message);
-        console.log('[useIsAdmin] data:', data, '→ isAdmin:', data?.is_admin === true);
+      .then(({ data }) => {
         setIsAdmin(data?.is_admin === true);
       });
   }, [user, authLoading]);

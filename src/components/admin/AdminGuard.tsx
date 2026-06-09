@@ -7,7 +7,6 @@ interface AdminGuardProps {
 
 export function AdminGuard({ children }: AdminGuardProps) {
   const isAdmin = useIsAdmin();
-  console.log('[AdminGuard] isAdmin:', isAdmin);
 
   if (isAdmin === null) {
     return (
