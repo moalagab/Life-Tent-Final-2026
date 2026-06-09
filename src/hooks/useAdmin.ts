@@ -164,12 +164,9 @@ export function useIsAdmin(): boolean | null {
 
     let cancelled = false;
     supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('user_id', user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!cancelled) setIsAdmin(data?.is_admin === true);
+      .rpc('check_is_admin')
+      .then(({ data, error }) => {
+        if (!cancelled) setIsAdmin(error ? false : data === true);
       });
     return () => { cancelled = true; };
   }, [user, authLoading]);
