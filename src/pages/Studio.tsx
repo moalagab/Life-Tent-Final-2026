@@ -223,10 +223,25 @@ export default function Studio() {
   ];
 
   const shelfFilters = [
-    { id: 'all', label: currentLanguage === 'ar' ? 'الكل' : 'All' },
-    { id: 'in_progress', label: currentLanguage === 'ar' ? 'قيد القراءة' : 'Reading' },
-    { id: 'want', label: currentLanguage === 'ar' ? 'أريد القراءة' : 'Want to Read' },
-    { id: 'completed', label: currentLanguage === 'ar' ? 'مكتمل' : 'Completed' },
+    { id: 'all',        label: currentLanguage === 'ar' ? 'الكل' : 'All' },
+    {
+      id: 'in_progress',
+      label: currentLanguage === 'ar'
+        ? (activeTab === 'movies' ? 'قيد المشاهدة' : activeTab === 'podcasts' ? 'قيد الاستماع' : 'قيد القراءة')
+        : (activeTab === 'movies' ? 'Watching'      : activeTab === 'podcasts' ? 'Listening'    : 'Reading'),
+    },
+    {
+      id: 'want',
+      label: currentLanguage === 'ar'
+        ? (activeTab === 'movies' ? 'أود مشاهدته' : activeTab === 'podcasts' ? 'أود الاستماع إليه' : 'أريد القراءة')
+        : (activeTab === 'movies' ? 'Want to Watch' : activeTab === 'podcasts' ? 'Want to Listen'    : 'Want to Read'),
+    },
+    {
+      id: 'completed',
+      label: currentLanguage === 'ar'
+        ? (activeTab === 'movies' ? 'تمت مشاهدته' : 'مكتمل')
+        : (activeTab === 'movies' ? 'Watched'       : 'Completed'),
+    },
   ];
 
   const renderItemsGrid = (items: MediaItem[], isArchived = false) => (
@@ -317,7 +332,7 @@ export default function Studio() {
       />
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
+      <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as typeof activeTab); setSelectedShelf('all'); }}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="overflow-x-auto" dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}>
           <TabsList className="h-auto p-1 flex-wrap" dir={currentLanguage === 'ar' ? 'rtl' as const : 'ltr' as const}>
