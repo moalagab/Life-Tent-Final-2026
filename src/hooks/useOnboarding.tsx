@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-
-const STORAGE_KEY = 'onboarding_completed';
+import { supabase } from '@/integrations/supabase/client';
 
 export type FocusArea = 'tasks' | 'projects' | 'finance' | 'habits' | 'goals' | 'knowledge';
 export type DashboardPreset = 'focus' | 'finance' | 'execution';
@@ -21,40 +20,50 @@ interface OnboardingContextType {
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
 
-function getStorageKey(userId?: string) {
-  return userId ? `${STORAGE_KEY}_${userId}` : STORAGE_KEY;
-}
-
 export function OnboardingProvider({ children }: { children: ReactNode }) {
   const { user, loading: authLoading } = useAuth();
   const [isCompleted, setIsCompleted] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Re-check localStorage after auth resolves — prevents false redirect to /onboarding
+  // Check Supabase DB (persists across devices/browsers)
   useEffect(() => {
     if (authLoading) return;
-    const key = getStorageKey(user?.id);
-    setIsCompleted(localStorage.getItem(key) === 'true');
-    setLoading(false);
+    if (!user) { setIsCompleted(false); setLoading(false); return; }
+
+    let cancelled = false;
+    supabase
+      .from('profiles')
+      .select('onboarding_completed')
+      .eq('user_id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled) return;
+        setIsCompleted(data?.onboarding_completed === true);
+        setLoading(false);
+      });
+    return () => { cancelled = true; };
   }, [user?.id, authLoading]);
 
-  const completeOnboarding = useCallback((data: OnboardingData) => {
-    const key = getStorageKey(user?.id);
-    localStorage.setItem(key, 'true');
-    if (data.focusAreas.length > 0) {
-      localStorage.setItem('onboarding_focus_areas', JSON.stringify(data.focusAreas));
-    }
-    if (data.preset) {
-      localStorage.setItem('dashboard_preset', data.preset);
-    }
+  const markComplete = useCallback(async () => {
+    if (!user) return;
+    await supabase
+      .from('profiles')
+      .update({ onboarding_completed: true })
+      .eq('user_id', user.id);
     setIsCompleted(true);
-  }, [user?.id]);
+  }, [user]);
+
+  const completeOnboarding = useCallback((data: OnboardingData) => {
+    if (data.focusAreas.length > 0)
+      localStorage.setItem('onboarding_focus_areas', JSON.stringify(data.focusAreas));
+    if (data.preset)
+      localStorage.setItem('dashboard_preset', data.preset);
+    markComplete();
+  }, [markComplete]);
 
   const skipOnboarding = useCallback(() => {
-    const key = getStorageKey(user?.id);
-    localStorage.setItem(key, 'true');
-    setIsCompleted(true);
-  }, [user?.id]);
+    markComplete();
+  }, [markComplete]);
 
   return (
     <OnboardingContext.Provider value={{ isCompleted, loading, completeOnboarding, skipOnboarding }}>
