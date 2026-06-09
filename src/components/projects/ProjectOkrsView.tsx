@@ -167,7 +167,6 @@ export function ProjectOkrsView({ projectId }: ProjectOkrsViewProps) {
                 {isExpanded && (
                   <div className="border-t border-border/50 bg-muted/10 p-4 space-y-3">
                     {keyResults.length > 0 ? (
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       keyResults.map((kr: any) => {
                         const progress = kr.target_value > 0 
                           ? Math.round((kr.current_value / kr.target_value) * 100) 

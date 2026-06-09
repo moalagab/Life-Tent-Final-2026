@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo } from 'react';
 import { useTasks, useUpdateTask, useDeleteTask, useCreateTask, Task } from '@/hooks/useTasks';
 import { useKeyResults } from '@/hooks/useGoals';
@@ -212,8 +211,6 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
           </div>
         )}
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         {filteredTasks.map((task: any) => {
           const krTitle = getKrTitle(task.kr_id);
           return (
@@ -338,8 +335,6 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">{currentLanguage === 'ar' ? 'بدون' : 'None'}</SelectItem>
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     {keyResults?.map((kr: any) => (
                       <SelectItem key={kr.id} value={kr.id}>{kr.title}</SelectItem>
                     ))}

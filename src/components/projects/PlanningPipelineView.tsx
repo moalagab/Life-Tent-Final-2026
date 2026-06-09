@@ -261,7 +261,6 @@ export function PlanningPipelineView() {
 interface PipelineDetailDialogProps {
   pipeline: PlanningPipeline | null;
   onClose: () => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdate: (data: Partial<PlanningPipeline> & { id: string }) => Promise<any>;
   onDelete: (id: string) => void;
   onConvert: (pipeline: PlanningPipeline) => void;
@@ -275,7 +274,6 @@ function PipelineDetailDialog({ pipeline, onClose, onUpdate, onDelete, onConvert
 
   if (!pipeline) return null;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleFieldChange = async (field: keyof PlanningPipeline, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };

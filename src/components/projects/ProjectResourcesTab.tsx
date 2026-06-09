@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { useResources, useCreateResource, useDeleteResource } from '@/hooks/useResources';
 import { Card, CardContent } from '@/components/ui/card';
@@ -95,8 +94,6 @@ export function ProjectResourcesTab({ projectId }: ProjectResourcesTabProps) {
 
       {/* Resources Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         {allResources?.map((resource: any) => {
           const TypeIcon = getTypeIcon(resource.type);
           return (
@@ -162,8 +159,6 @@ export function ProjectResourcesTab({ projectId }: ProjectResourcesTabProps) {
           <div className="space-y-4">
             <div>
               <Label>{currentLanguage === 'ar' ? 'النوع' : 'Type'}</Label>
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               <Select value={newResource.type} onValueChange={(v) => setNewResource({ ...newResource, type: v as any })}>
                 <SelectTrigger>
                   <SelectValue />

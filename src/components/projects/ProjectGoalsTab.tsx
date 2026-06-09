@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { useGoals, useKeyResults, useCreateKeyResult, useUpdateKeyResult, useDeleteKeyResult } from '@/hooks/useGoals';
 import { useTasks } from '@/hooks/useTasks';
@@ -157,8 +156,6 @@ export function ProjectGoalsTab({ projectId }: ProjectGoalsTabProps) {
               <CardContent className="pt-2">
                 {/* Key Results */}
                 <div className="space-y-3">
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   {goalKrs.map((kr: any) => {
                     const krProgress = calculateKrProgress(kr);
                     const linkedTasks = getKrTasks(kr.id);

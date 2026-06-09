@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { useCustomers, useCustomerCases, useCustomerCommunications } from '@/hooks/useCRM';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -81,8 +80,6 @@ export function ProjectCRMTab({ projectId }: ProjectCRMTabProps) {
             </div>
           ) : (
             <div className="grid gap-4">
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               {projectCustomers.map((customer: any) => (
                 <Card key={customer.id}>
                   <CardContent className="p-4">
@@ -124,8 +121,6 @@ export function ProjectCRMTab({ projectId }: ProjectCRMTabProps) {
             </div>
           ) : (
             <div className="grid gap-4">
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               {projectCases.map((caseItem: any) => {
                  
                 const customer = projectCustomers.find((c: any) => c.id === caseItem.customer_id);
@@ -161,8 +156,6 @@ export function ProjectCRMTab({ projectId }: ProjectCRMTabProps) {
             </div>
           ) : (
             <div className="space-y-4">
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               {projectComms.map((comm: any) => {
                  
                 const customer = projectCustomers.find((c: any) => c.id === comm.customer_id);
