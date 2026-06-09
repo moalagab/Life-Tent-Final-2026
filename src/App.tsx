@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { OnboardingProvider } from "@/hooks/useOnboarding";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { queryClient } from "@/lib/queryClient";
@@ -16,6 +17,8 @@ import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 // Lazy-load all protected pages — splits each into its own chunk
+const Onboarding      = lazy(() => import("./pages/Onboarding"));
+const AdminDashboard  = lazy(() => import("./pages/admin/AdminDashboard"));
 const Index        = lazy(() => import("./pages/Index"));
 const Projects     = lazy(() => import("./pages/Projects"));
 const Tasks        = lazy(() => import("./pages/Tasks"));
@@ -45,6 +48,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <OnboardingProvider>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/"                     element={<LandingPage />} />
@@ -52,6 +56,8 @@ const App = () => (
                 <Route path="/auth"                 element={<Auth />} />
                 <Route path="/auth/reset-password"  element={<ResetPassword />} />
 
+                <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+                <Route path="/admin"      element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
                 <Route path="/dashboard"  element={<ProtectedRoute><Index /></ProtectedRoute>} />
                 <Route path="/projects"   element={<ProtectedRoute><Projects /></ProtectedRoute>} />
                 <Route path="/tasks"      element={<ProtectedRoute><Tasks /></ProtectedRoute>} />
@@ -68,6 +74,7 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
+            </OnboardingProvider>
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>

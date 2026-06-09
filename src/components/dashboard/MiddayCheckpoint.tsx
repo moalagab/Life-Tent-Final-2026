@@ -1,9 +1,8 @@
 /**
  * MiddayCheckpoint — Midday re-evaluation widget.
  *
- * Appears between 12:00 and 15:00.
- * Shows: progress so far, energy re-check, task re-prioritisation,
- * and a focused "what to do in the next 3 hours" plan.
+ * Shows: done-today count, remaining tasks, energy, trend,
+ * AI brief, do-now tasks, deferred tasks, coaching, energy tip.
  */
 import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +12,7 @@ import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Sun, RefreshCw, Zap, TrendingUp, TrendingDown, Minus,
-  AlertTriangle, CheckCircle2,
+  AlertTriangle, CheckCircle2, Battery, ListTodo,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAIDecisionEngine } from '@/hooks/useAIDecisionEngine';
@@ -57,8 +56,10 @@ function TrendBadge({ trend }: { trend: 'improving' | 'declining' | 'stable' }) 
 // ── Main component ────────────────────────────────────────────────────────────
 
 export function MiddayCheckpoint() {
-  const { result, scoredTasks, profile, trends, isReady, isAnalysing, error, analyse, refresh } =
-    useAIDecisionEngine();
+  const {
+    result, scoredTasks, profile, trends,
+    doneToday, isReady, isAnalysing, error, analyse, refresh,
+  } = useAIDecisionEngine();
 
   useEffect(() => {
     if (isReady && !result && !isAnalysing) {
@@ -66,8 +67,13 @@ export function MiddayCheckpoint() {
     }
   }, [isReady, result, isAnalysing, analyse]);
 
-  const doNowTasks   = scoredTasks.filter(t => t.action === 'do_now').slice(0, 3);
-  const deferTasks   = scoredTasks.filter(t => t.action === 'defer').slice(0, 2);
+  const doNowTasks  = scoredTasks.filter(t => t.action === 'do_now').slice(0, 3);
+  const deferTasks  = scoredTasks.filter(t => t.action === 'defer').slice(0, 2);
+  const remaining   = scoredTasks.length;
+
+  // Progress: done / (done + remaining)
+  const total       = doneToday + remaining;
+  const progressPct = total > 0 ? Math.round((doneToday / total) * 100) : 0;
 
   if (!isReady || (isAnalysing && !result)) {
     return (
@@ -100,6 +106,7 @@ export function MiddayCheckpoint() {
             className="h-7 w-7"
             onClick={refresh}
             disabled={isAnalysing}
+            aria-label="تحديث التحليل"
           >
             <RefreshCw className={cn('w-3.5 h-3.5', isAnalysing && 'animate-spin')} />
           </Button>
@@ -109,11 +116,16 @@ export function MiddayCheckpoint() {
       <CardContent className="space-y-4">
         {/* Stats row */}
         {profile && (
-          <div className="grid grid-cols-3 gap-3">
-            {/* Completion */}
+          <div className="grid grid-cols-4 gap-2">
+            {/* Done today */}
+            <div className="text-center p-2 rounded-xl bg-success/10 border border-success/20">
+              <p className="text-lg font-bold text-success">{doneToday}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">منجز</p>
+            </div>
+            {/* Remaining */}
             <div className="text-center p-2 rounded-xl bg-muted/40">
-              <p className="text-lg font-bold">{profile.completionRate}%</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">إنجاز</p>
+              <p className="text-lg font-bold">{remaining}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">متبقي</p>
             </div>
             {/* Energy */}
             <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-muted/40 gap-1">
@@ -128,21 +140,27 @@ export function MiddayCheckpoint() {
           </div>
         )}
 
-        {/* Completion bar */}
-        {profile && (
-          <div>
-            <div className="flex justify-between text-xs text-muted-foreground mb-1">
-              <span>تقدم اليوم</span>
-              <span>{profile.completionRate}%</span>
-            </div>
-            <Progress value={profile.completionRate} className="h-2" />
+        {/* Progress bar */}
+        <div>
+          <div className="flex justify-between text-xs text-muted-foreground mb-1">
+            <span>تقدم اليوم</span>
+            <span>{progressPct}% ({doneToday} / {total})</span>
           </div>
-        )}
+          <Progress value={progressPct} className="h-2" />
+        </div>
 
         {/* AI brief */}
         {result?.brief && (
           <div className="p-3 rounded-xl bg-muted/30 border border-border/40">
             <p className="text-sm leading-relaxed">{result.brief}</p>
+          </div>
+        )}
+
+        {/* Energy tip */}
+        {result?.energy_tip && (
+          <div className="flex gap-2 p-2.5 rounded-xl bg-blue-500/5 border border-blue-500/20">
+            <Battery className="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />
+            <p className="text-xs text-blue-700 dark:text-blue-400">{result.energy_tip}</p>
           </div>
         )}
 
@@ -154,10 +172,13 @@ export function MiddayCheckpoint() {
             </p>
             <div className="space-y-1.5">
               {doNowTasks.map(task => (
-                <div key={task.id} className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/20">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                <div
+                  key={task.id}
+                  className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/20"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
                   <span className="text-sm flex-1 truncate">{task.title}</span>
-                  <Badge variant="outline" className="text-[10px] flex-shrink-0">{task.adaptiveScore}</Badge>
+                  <Badge variant="outline" className="text-[10px] shrink-0">{task.adaptiveScore}</Badge>
                 </div>
               ))}
             </div>
@@ -172,7 +193,11 @@ export function MiddayCheckpoint() {
             </p>
             <div className="space-y-1.5">
               {deferTasks.map(task => (
-                <div key={task.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 border border-border/40">
+                <div
+                  key={task.id}
+                  className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 border border-border/40"
+                >
+                  <ListTodo className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                   <span className="text-sm flex-1 truncate text-muted-foreground">{task.title}</span>
                 </div>
               ))}
@@ -183,7 +208,7 @@ export function MiddayCheckpoint() {
         {/* Coaching */}
         {result?.coaching && (
           <div className="flex gap-2 p-2.5 rounded-xl bg-amber-500/5 border border-amber-500/20">
-            <Zap className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 mt-0.5" />
+            <Zap className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
             <p className="text-xs text-amber-700 dark:text-amber-400">{result.coaching}</p>
           </div>
         )}
@@ -196,7 +221,11 @@ export function MiddayCheckpoint() {
         {/* Trigger manually */}
         {!result && !error && isReady && (
           <Button size="sm" className="w-full" onClick={() => analyse('midday')} disabled={isAnalysing}>
-            {isAnalysing ? 'جارٍ التحليل...' : 'تحليل منتصف اليوم'}
+            {isAnalysing ? (
+              <span className="flex items-center gap-1.5">
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" /> جارٍ التحليل...
+              </span>
+            ) : 'تحليل منتصف اليوم'}
           </Button>
         )}
       </CardContent>

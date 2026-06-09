@@ -37,7 +37,8 @@
     "export": "تصدير",
     "exportSuccess": "تم التصدير بنجاح",
     "exportError": "فشل التصدير",
-    "update": "تحديث"
+    "update": "تحديث",
+    "admin": "لوحة الادمن"
   },
   "dashboard": {
     "greeting": "مرحباً",

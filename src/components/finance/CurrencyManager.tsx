@@ -309,7 +309,7 @@ export function CurrencyManager() {
                     type="number"
                     step="0.0001"
                     value={newRate.rate}
-                    onChange={(e) => setNewRate({ ...newRate, rate: e.target.value })}
+                    onChange={(e) => { const v = e.target.value; setNewRate(prev => ({ ...prev, rate: v })); }}
                     placeholder={`1 ${newRate.from_currency} = ? ${newRate.to_currency}`}
                   />
                 </div>

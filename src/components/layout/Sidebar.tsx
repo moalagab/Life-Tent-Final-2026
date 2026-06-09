@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsAdmin } from '@/hooks/useAdmin';
 import {
   LayoutDashboard,
   FolderKanban,
@@ -22,6 +23,7 @@ import {
   Timer,
   Menu,
   X,
+  ShieldCheck,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
@@ -149,6 +151,7 @@ export function Sidebar() {
   const { signOut, user } = useAuth();
   const { t, isRTL } = useLanguage();
   const isMobile = useIsMobile();
+  const isAdmin = useIsAdmin();
 
   const navItems = [
     { path: '/dashboard', icon: LayoutDashboard, labelKey: 'common.dashboard' },
@@ -161,6 +164,7 @@ export function Sidebar() {
     { path: '/calendar', icon: Calendar, labelKey: 'common.calendar' },
     { path: '/studio', icon: Film, labelKey: 'common.studio' },
     { path: '/pomodoro', icon: Timer, labelKey: 'common.pomodoro' },
+    ...(isAdmin ? [{ path: '/admin', icon: ShieldCheck, labelKey: 'common.admin' }] : []),
   ];
 
   const handleSignOut = async () => {

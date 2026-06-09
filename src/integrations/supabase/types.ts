@@ -1905,9 +1905,13 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          banned_at: string | null
+          banned_reason: string | null
           created_at: string
           full_name: string | null
           id: string
+          is_admin: boolean | null
+          is_banned: boolean | null
           preferred_language: string | null
           reading_goal_yearly: number | null
           reading_reminder_enabled: boolean | null
@@ -1918,9 +1922,13 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          banned_at?: string | null
+          banned_reason?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
+          is_admin?: boolean | null
+          is_banned?: boolean | null
           preferred_language?: string | null
           reading_goal_yearly?: number | null
           reading_reminder_enabled?: boolean | null
@@ -1931,9 +1939,13 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          banned_at?: string | null
+          banned_reason?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
+          is_admin?: boolean | null
+          is_banned?: boolean | null
           preferred_language?: string | null
           reading_goal_yearly?: number | null
           reading_reminder_enabled?: boolean | null
