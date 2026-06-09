@@ -166,6 +166,7 @@ export function useIsAdmin(): boolean | null {
     supabase
       .rpc('check_is_admin')
       .then(({ data, error }) => {
+        console.log('[useIsAdmin]', { data, error, userId: user.id });
         if (!cancelled) setIsAdmin(error ? false : data === true);
       });
     return () => { cancelled = true; };
