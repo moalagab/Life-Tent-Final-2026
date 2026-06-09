@@ -14,6 +14,7 @@ export interface OnboardingData {
 
 interface OnboardingContextType {
   isCompleted: boolean;
+  loading: boolean;
   completeOnboarding: (data: OnboardingData) => void;
   skipOnboarding: () => void;
 }
@@ -25,14 +26,17 @@ function getStorageKey(userId?: string) {
 }
 
 export function OnboardingProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [isCompleted, setIsCompleted] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Re-check localStorage whenever the authenticated user changes (fixes null-user init bug)
+  // Re-check localStorage after auth resolves — prevents false redirect to /onboarding
   useEffect(() => {
+    if (authLoading) return;
     const key = getStorageKey(user?.id);
     setIsCompleted(localStorage.getItem(key) === 'true');
-  }, [user?.id]);
+    setLoading(false);
+  }, [user?.id, authLoading]);
 
   const completeOnboarding = useCallback((data: OnboardingData) => {
     const key = getStorageKey(user?.id);
@@ -53,7 +57,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   }, [user?.id]);
 
   return (
-    <OnboardingContext.Provider value={{ isCompleted, completeOnboarding, skipOnboarding }}>
+    <OnboardingContext.Provider value={{ isCompleted, loading, completeOnboarding, skipOnboarding }}>
       {children}
     </OnboardingContext.Provider>
   );

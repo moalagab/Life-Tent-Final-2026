@@ -9,11 +9,11 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
-  const { isCompleted } = useOnboarding();
+  const { user, loading: authLoading } = useAuth();
+  const { isCompleted, loading: onboardingLoading } = useOnboarding();
   const location = useLocation();
 
-  if (loading) {
+  if (authLoading || onboardingLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

@@ -35,6 +35,9 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       workbox: {
+        // Serve index.html for all SPA navigation (fixes /admin 404 when SW serves stale cache)
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/assets/, /^\/api/],
         // Cache the app shell
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         runtimeCaching: [
