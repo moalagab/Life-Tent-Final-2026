@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo } from 'react';
-import { Search, Plus, Command, type LucideIcon } from 'lucide-react';
+import { Search, Plus, Command, Sun, Moon, Globe, type LucideIcon } from 'lucide-react';
+import { useTheme } from '@/hooks/useTheme';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
 import { usePersistedState } from '@/hooks/usePersistedState';
@@ -59,7 +60,8 @@ interface CommandEntry {
  * Search is a typed command palette: navigation + create + dashboard filters/jumps.
  */
 export function DashboardTopBar() {
-  const { currentLanguage, isRTL } = useLanguage();
+  const { currentLanguage, isRTL, toggleLanguage } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const isAr = currentLanguage === 'ar';
   const navigate = useNavigate();
   // Persist palette open state and last-used filter id, per user
@@ -164,6 +166,28 @@ export function DashboardTopBar() {
         </button>
 
         <div className="flex-1 md:flex-none" />
+
+        {/* Language & Theme toggles */}
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleLanguage}
+            className="h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground"
+            title={isAr ? 'English' : 'العربية'}
+          >
+            <Globe className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            className="h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground"
+            title={theme === 'dark' ? (isAr ? 'المظهر الفاتح' : 'Light mode') : (isAr ? 'المظهر الداكن' : 'Dark mode')}
+          >
+            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </Button>
+        </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
