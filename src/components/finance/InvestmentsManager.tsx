@@ -804,7 +804,7 @@ export function InvestmentsManager() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-4" dir={language === 'ar' ? 'rtl' as const : 'ltr' as const}>
           <TabsTrigger value="holdings">{language === 'ar' ? 'الحيازات' : 'Holdings'}</TabsTrigger>
           <TabsTrigger value="allocation">{language === 'ar' ? 'التوزيع' : 'Allocation'}</TabsTrigger>
           <TabsTrigger value="rebalance">{language === 'ar' ? 'إعادة التوازن' : 'Rebalance'}</TabsTrigger>

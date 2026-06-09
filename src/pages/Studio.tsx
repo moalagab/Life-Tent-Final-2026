@@ -320,7 +320,7 @@ export default function Studio() {
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="overflow-x-auto" dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}>
-          <TabsList className="h-auto p-1 flex-wrap">
+          <TabsList className="h-auto p-1 flex-wrap" dir={currentLanguage === 'ar' ? 'rtl' as const : 'ltr' as const}>
             {tabs.map((tab) => (
               <TabsTrigger 
                 key={tab.id} 
