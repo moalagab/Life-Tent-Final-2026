@@ -72,12 +72,11 @@ export default function Knowledge() {
       await createNote.mutateAsync({
         title: newNote.title,
         content: newNote.content || null,
-        tags: newNote.tags ? newNote.tags.split(',').map(t => t.trim()).filter(Boolean) || null : null,
+        tags: newNote.tags ? newNote.tags.split(',').map(t => t.trim()).filter(Boolean) : null,
         project_id: newNote.project_id || null,
         goal_id: newNote.goal_id || null,
         folder: newNote.folder || null,
-       
-      } as any);
+      });
       toast.success(t('knowledge.noteAdded'));
       setIsNoteDialogOpen(false);
       setNewNote({ title: '', content: '', tags: '', project_id: '', goal_id: '', folder: '' });
@@ -96,8 +95,7 @@ export default function Knowledge() {
         project_id: noteData.project_id || null,
         goal_id: noteData.goal_id || null,
         folder: noteData.folder || null,
-       
-      } as any);
+      });
       toast.success(t('knowledge.noteUpdated'));
       // Update selected note with new data
       if (selectedNote && selectedNote.id === noteData.id) {

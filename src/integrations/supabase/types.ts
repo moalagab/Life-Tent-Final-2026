@@ -2871,11 +2871,91 @@ export type Database = {
         ]
       }
     }
+      admin_audit_log: {
+        Row: {
+          id: string
+          admin_user_id: string | null
+          action: string
+          target_user_id: string | null
+          details: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          admin_user_id?: string | null
+          action: string
+          target_user_id?: string | null
+          details?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          admin_user_id?: string | null
+          action?: string
+          target_user_id?: string | null
+          details?: Json
+          created_at?: string
+        }
+        Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          plan: string
+          status: string
+          trial_ends_at: string | null
+          current_period_start: string | null
+          current_period_end: string | null
+          cancelled_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          plan?: string
+          status?: string
+          trial_ends_at?: string | null
+          current_period_start?: string | null
+          current_period_end?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          plan?: string
+          status?: string
+          trial_ends_at?: string | null
+          current_period_start?: string | null
+          current_period_end?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+    }
     Views: {
       [_ in never]: never
     }
     Functions: {
       is_service_role: { Args: never; Returns: boolean }
+      get_admin_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      get_admin_users: {
+        Args: {
+          p_search?: string
+          p_filter?: string
+          p_offset?: number
+          p_limit?: number
+        }
+        Returns: Json
+      }
     }
     Enums: {
       account_type: "bank" | "wallet" | "cash" | "credit" | "investment"

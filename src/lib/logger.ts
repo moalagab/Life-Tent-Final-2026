@@ -58,7 +58,6 @@ class Logger {
       if (entry.context) args.push(entry.context);
       if (entry.error) args.push(entry.error);
 
-      // eslint-disable-next-line no-console
       console[level === 'debug' ? 'log' : level](...args);
     }
 

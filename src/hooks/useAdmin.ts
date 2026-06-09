@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './useAuth';
 import type {
   AdminUser, AdminStats, AdminUsersResult,
   SubscriptionPlan, UserFilter,
@@ -153,25 +154,24 @@ export function useAdmin() {
 
 // ── Lightweight admin-check hook ──────────────────────────────────────────────
 
-import { useEffect, useState as useStateAlias } from 'react';
-import { useAuth } from './useAuth';
-
 export function useIsAdmin(): boolean | null {
   const { user, loading: authLoading } = useAuth();
-  const [isAdmin, setIsAdmin] = useStateAlias<boolean | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
     if (!user) { setIsAdmin(false); return; }
 
+    let cancelled = false;
     supabase
       .from('profiles')
       .select('is_admin')
       .eq('user_id', user.id)
       .maybeSingle()
       .then(({ data }) => {
-        setIsAdmin(data?.is_admin === true);
+        if (!cancelled) setIsAdmin(data?.is_admin === true);
       });
+    return () => { cancelled = true; };
   }, [user, authLoading]);
 
   return isAdmin;

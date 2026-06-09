@@ -142,8 +142,6 @@ export function FinanceAuditLogView() {
               </div>
             ) : (
               <div className="space-y-2 max-h-[500px] overflow-y-auto">
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 {activityLogs.map((log: any) => {
                   const ActionIcon = actionIcons[log.action as keyof typeof actionIcons] || FileText;
                   return (

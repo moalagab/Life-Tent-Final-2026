@@ -77,10 +77,10 @@ export function DashboardTopBar() {
     return () => document.removeEventListener('keydown', down);
   }, [setSearchOpen]);
 
-  const go = (path: string) => {
+  const go = useCallback((path: string) => {
     setSearchOpen(false);
     navigate(path);
-  };
+  }, [navigate, setSearchOpen]);
 
   const commands: CommandEntry[] = useMemo(() => [
     // ---- Navigate ----
