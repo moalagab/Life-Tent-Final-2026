@@ -1,0 +1,6 @@
+{
+  "appId": "com.lifetent.app",
+  "appName": "life-tent",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}
