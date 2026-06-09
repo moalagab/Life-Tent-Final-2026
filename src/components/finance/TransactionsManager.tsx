@@ -318,7 +318,7 @@ export function TransactionsManager() {
                   <Button
                     type="button"
                     variant={newTransaction.type === 'expense' ? 'destructive' : 'outline'}
-                    onClick={() => setNewTransaction({ ...newTransaction, type: 'expense' })}
+                    onClick={() => setNewTransaction(prev => ({ ...prev, type: 'expense' }))}
                     className="h-12"
                   >
                     <ArrowDownRight className="w-5 h-5 me-2" />
@@ -328,7 +328,7 @@ export function TransactionsManager() {
                     type="button"
                     variant={newTransaction.type === 'income' ? 'default' : 'outline'}
                     className={cn('h-12', newTransaction.type === 'income' && 'bg-success hover:bg-success/90')}
-                    onClick={() => setNewTransaction({ ...newTransaction, type: 'income' })}
+                    onClick={() => setNewTransaction(prev => ({ ...prev, type: 'income' }))}
                   >
                     <ArrowUpRight className="w-5 h-5 me-2" />
                     {language === 'ar' ? 'دخل' : 'Income'}
@@ -340,7 +340,7 @@ export function TransactionsManager() {
                   <Input
                     placeholder={language === 'ar' ? 'مثال: مشتريات السوبرماركت' : 'e.g., Grocery shopping'}
                     value={newTransaction.description}
-                    onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })}
+                    onChange={(e) => { const v = e.target.value; setNewTransaction(prev => ({ ...prev, description: v })); }}
                     dir="auto"
                   />
                 </div>
@@ -351,7 +351,7 @@ export function TransactionsManager() {
                     type="number"
                     placeholder="0.00"
                     value={newTransaction.amount}
-                    onChange={(e) => setNewTransaction({ ...newTransaction, amount: e.target.value })}
+                    onChange={(e) => { const v = e.target.value; setNewTransaction(prev => ({ ...prev, amount: v })); }}
                   />
                 </div>
 
@@ -360,7 +360,7 @@ export function TransactionsManager() {
                   <Input
                     type="date"
                     value={newTransaction.date}
-                    onChange={(e) => setNewTransaction({ ...newTransaction, date: e.target.value })}
+                    onChange={(e) => { const v = e.target.value; setNewTransaction(prev => ({ ...prev, date: v })); }}
                   />
                 </div>
 
@@ -368,7 +368,7 @@ export function TransactionsManager() {
                   <Label>{language === 'ar' ? 'الحساب' : 'Account'} *</Label>
                   <Select 
                     value={newTransaction.account_id} 
-                    onValueChange={(value) => setNewTransaction({ ...newTransaction, account_id: value })}
+                    onValueChange={(value) => setNewTransaction(prev => ({ ...prev, account_id: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={language === 'ar' ? 'اختر الحساب' : 'Select account'} />
@@ -385,7 +385,7 @@ export function TransactionsManager() {
                   <Label>{language === 'ar' ? 'الفئة' : 'Category'}</Label>
                   <Select 
                     value={newTransaction.category} 
-                    onValueChange={(value) => setNewTransaction({ ...newTransaction, category: value })}
+                    onValueChange={(value) => setNewTransaction(prev => ({ ...prev, category: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={language === 'ar' ? 'اختر الفئة' : 'Select category'} />
@@ -407,7 +407,7 @@ export function TransactionsManager() {
                   <Label>{language === 'ar' ? 'المشروع (اختياري)' : 'Project (Optional)'}</Label>
                   <Select 
                     value={newTransaction.project_id || 'none'} 
-                    onValueChange={(value) => setNewTransaction({ ...newTransaction, project_id: value === 'none' ? '' : value })}
+                    onValueChange={(value) => setNewTransaction(prev => ({ ...prev, project_id: value === 'none' ? '' : value }))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={language === 'ar' ? 'ربط بمشروع' : 'Link to project'} />
@@ -426,7 +426,7 @@ export function TransactionsManager() {
                   <Textarea
                     placeholder={language === 'ar' ? 'ملاحظات إضافية...' : 'Additional notes...'}
                     value={newTransaction.notes}
-                    onChange={(e) => setNewTransaction({ ...newTransaction, notes: e.target.value })}
+                    onChange={(e) => { const v = e.target.value; setNewTransaction(prev => ({ ...prev, notes: v })); }}
                     dir="auto"
                   />
                 </div>
@@ -659,7 +659,7 @@ export function TransactionsManager() {
               <Button
                 type="button"
                 variant={editTransaction.type === 'expense' ? 'destructive' : 'outline'}
-                onClick={() => setEditTransaction({ ...editTransaction, type: 'expense' })}
+                onClick={() => setEditTransaction(prev => ({ ...prev, type: 'expense' }))}
               >
                 <ArrowDownRight className="w-4 h-4 me-2" />
                 {language === 'ar' ? 'مصروف' : 'Expense'}
@@ -668,7 +668,7 @@ export function TransactionsManager() {
                 type="button"
                 variant={editTransaction.type === 'income' ? 'default' : 'outline'}
                 className={cn(editTransaction.type === 'income' && 'bg-success hover:bg-success/90')}
-                onClick={() => setEditTransaction({ ...editTransaction, type: 'income' })}
+                onClick={() => setEditTransaction(prev => ({ ...prev, type: 'income' }))}
               >
                 <ArrowUpRight className="w-4 h-4 me-2" />
                 {language === 'ar' ? 'دخل' : 'Income'}
@@ -679,17 +679,17 @@ export function TransactionsManager() {
               <Label>{language === 'ar' ? 'الوصف' : 'Description'}</Label>
               <Input
                 value={editTransaction.description}
-                onChange={(e) => setEditTransaction({ ...editTransaction, description: e.target.value })}
+                onChange={(e) => { const v = e.target.value; setEditTransaction(prev => ({ ...prev, description: v })); }}
                 dir="auto"
               />
             </div>
-            
+
             <div>
               <Label>{language === 'ar' ? 'المبلغ' : 'Amount'}</Label>
               <Input
                 type="number"
                 value={editTransaction.amount}
-                onChange={(e) => setEditTransaction({ ...editTransaction, amount: e.target.value })}
+                onChange={(e) => { const v = e.target.value; setEditTransaction(prev => ({ ...prev, amount: v })); }}
               />
             </div>
 
@@ -698,7 +698,7 @@ export function TransactionsManager() {
               <Input
                 type="date"
                 value={editTransaction.date}
-                onChange={(e) => setEditTransaction({ ...editTransaction, date: e.target.value })}
+                onChange={(e) => { const v = e.target.value; setEditTransaction(prev => ({ ...prev, date: v })); }}
               />
             </div>
 
@@ -706,7 +706,7 @@ export function TransactionsManager() {
               <Label>{language === 'ar' ? 'الفئة' : 'Category'}</Label>
               <Input
                 value={editTransaction.category}
-                onChange={(e) => setEditTransaction({ ...editTransaction, category: e.target.value })}
+                onChange={(e) => { const v = e.target.value; setEditTransaction(prev => ({ ...prev, category: v })); }}
                 dir="auto"
               />
             </div>
@@ -715,7 +715,7 @@ export function TransactionsManager() {
               <Label>{language === 'ar' ? 'ملاحظات' : 'Notes'}</Label>
               <Textarea
                 value={editTransaction.notes}
-                onChange={(e) => setEditTransaction({ ...editTransaction, notes: e.target.value })}
+                onChange={(e) => { const v = e.target.value; setEditTransaction(prev => ({ ...prev, notes: v })); }}
                 dir="auto"
               />
             </div>

@@ -368,12 +368,12 @@ export function InvestmentsManager() {
                 <Input
                   placeholder={language === 'ar' ? 'اسم المحفظة' : 'Portfolio name'}
                   value={newPortfolio.name}
-                  onChange={(e) => setNewPortfolio({ ...newPortfolio, name: e.target.value })}
+                  onChange={(e) => { const v = e.target.value; setNewPortfolio(prev => ({ ...prev, name: v })); }}
                 />
                 <Input
                   placeholder={language === 'ar' ? 'الوصف' : 'Description'}
                   value={newPortfolio.description}
-                  onChange={(e) => setNewPortfolio({ ...newPortfolio, description: e.target.value })}
+                  onChange={(e) => { const v = e.target.value; setNewPortfolio(prev => ({ ...prev, description: v })); }}
                 />
                 <Select 
                   value={newPortfolio.base_currency} 
@@ -415,7 +415,7 @@ export function InvestmentsManager() {
                 <Input
                   placeholder={language === 'ar' ? 'اسم الأصل' : 'Asset name'}
                   value={newAsset.name}
-                  onChange={(e) => setNewAsset({ ...newAsset, name: e.target.value })}
+                  onChange={(e) => { const v = e.target.value; setNewAsset(prev => ({ ...prev, name: v })); }}
                 />
                 <Select 
                   value={newAsset.type} 
@@ -437,7 +437,7 @@ export function InvestmentsManager() {
                 <Input
                   placeholder={language === 'ar' ? 'السوق' : 'Exchange'}
                   value={newAsset.exchange}
-                  onChange={(e) => setNewAsset({ ...newAsset, exchange: e.target.value })}
+                  onChange={(e) => { const v = e.target.value; setNewAsset(prev => ({ ...prev, exchange: v })); }}
                 />
                 <Button onClick={handleCreateAsset} className="w-full" disabled={createAsset.isPending}>
                   {createAsset.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.add')}
@@ -478,7 +478,7 @@ export function InvestmentsManager() {
                     <Input
                       type="number"
                       value={newHolding.quantity}
-                      onChange={(e) => setNewHolding({ ...newHolding, quantity: e.target.value })}
+                      onChange={(e) => { const v = e.target.value; setNewHolding(prev => ({ ...prev, quantity: v })); }}
                     />
                   </div>
                   <div>
@@ -486,7 +486,7 @@ export function InvestmentsManager() {
                     <Input
                       type="number"
                       value={newHolding.avg_cost}
-                      onChange={(e) => setNewHolding({ ...newHolding, avg_cost: e.target.value })}
+                      onChange={(e) => { const v = e.target.value; setNewHolding(prev => ({ ...prev, avg_cost: v })); }}
                     />
                   </div>
                 </div>
@@ -497,7 +497,7 @@ export function InvestmentsManager() {
                     <Input
                       type="number"
                       value={newHolding.current_price}
-                      onChange={(e) => setNewHolding({ ...newHolding, current_price: e.target.value })}
+                      onChange={(e) => { const v = e.target.value; setNewHolding(prev => ({ ...prev, current_price: v })); }}
                     />
                   </div>
                   <div>
@@ -505,7 +505,7 @@ export function InvestmentsManager() {
                     <Input
                       type="number"
                       value={newHolding.target_allocation}
-                      onChange={(e) => setNewHolding({ ...newHolding, target_allocation: e.target.value })}
+                      onChange={(e) => { const v = e.target.value; setNewHolding(prev => ({ ...prev, target_allocation: v })); }}
                     />
                   </div>
                 </div>
@@ -518,7 +518,7 @@ export function InvestmentsManager() {
                       <Input
                         type="number"
                         value={newHolding.entry_target_price}
-                        onChange={(e) => setNewHolding({ ...newHolding, entry_target_price: e.target.value })}
+                        onChange={(e) => { const v = e.target.value; setNewHolding(prev => ({ ...prev, entry_target_price: v })); }}
                         className="h-8"
                       />
                     </div>
@@ -527,7 +527,7 @@ export function InvestmentsManager() {
                       <Input
                         type="number"
                         value={newHolding.stop_loss_price}
-                        onChange={(e) => setNewHolding({ ...newHolding, stop_loss_price: e.target.value })}
+                        onChange={(e) => { const v = e.target.value; setNewHolding(prev => ({ ...prev, stop_loss_price: v })); }}
                         className="h-8"
                       />
                     </div>
@@ -536,7 +536,7 @@ export function InvestmentsManager() {
                       <Input
                         type="number"
                         value={newHolding.take_profit_price}
-                        onChange={(e) => setNewHolding({ ...newHolding, take_profit_price: e.target.value })}
+                        onChange={(e) => { const v = e.target.value; setNewHolding(prev => ({ ...prev, take_profit_price: v })); }}
                         className="h-8"
                       />
                     </div>
@@ -559,7 +559,7 @@ export function InvestmentsManager() {
                   <Textarea
                     placeholder={language === 'ar' ? 'لماذا هذا الاستثمار؟ ما هي استراتيجية الخروج؟' : 'Why this investment? Exit strategy?'}
                     value={newHolding.investment_journal}
-                    onChange={(e) => setNewHolding({ ...newHolding, investment_journal: e.target.value })}
+                    onChange={(e) => { const v = e.target.value; setNewHolding(prev => ({ ...prev, investment_journal: v })); }}
                     rows={3}
                   />
                 </div>
@@ -616,30 +616,30 @@ export function InvestmentsManager() {
                     type="number"
                     placeholder={language === 'ar' ? 'الكمية' : 'Quantity'}
                     value={newTransaction.quantity}
-                    onChange={(e) => setNewTransaction({ ...newTransaction, quantity: e.target.value })}
+                    onChange={(e) => { const v = e.target.value; setNewTransaction(prev => ({ ...prev, quantity: v })); }}
                   />
                   <Input
                     type="number"
                     placeholder={language === 'ar' ? 'السعر' : 'Price'}
                     value={newTransaction.price}
-                    onChange={(e) => setNewTransaction({ ...newTransaction, price: e.target.value })}
+                    onChange={(e) => { const v = e.target.value; setNewTransaction(prev => ({ ...prev, price: v })); }}
                   />
                 </div>
                 <Input
                   type="number"
                   placeholder={language === 'ar' ? 'الرسوم' : 'Fees'}
                   value={newTransaction.fees}
-                  onChange={(e) => setNewTransaction({ ...newTransaction, fees: e.target.value })}
+                  onChange={(e) => { const v = e.target.value; setNewTransaction(prev => ({ ...prev, fees: v })); }}
                 />
                 <Input
                   type="date"
                   value={newTransaction.date}
-                  onChange={(e) => setNewTransaction({ ...newTransaction, date: e.target.value })}
+                  onChange={(e) => { const v = e.target.value; setNewTransaction(prev => ({ ...prev, date: v })); }}
                 />
                 <Input
                   placeholder={language === 'ar' ? 'ملاحظات' : 'Notes'}
                   value={newTransaction.notes}
-                  onChange={(e) => setNewTransaction({ ...newTransaction, notes: e.target.value })}
+                  onChange={(e) => { const v = e.target.value; setNewTransaction(prev => ({ ...prev, notes: v })); }}
                 />
                 <Button onClick={handleCreateTransaction} className="w-full" disabled={createTransaction.isPending}>
                   {createTransaction.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.add')}

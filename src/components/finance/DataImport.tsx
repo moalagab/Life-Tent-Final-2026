@@ -438,7 +438,7 @@ export function DataImport() {
                   <Input
                     placeholder={language === 'ar' ? 'مثال: STC' : 'e.g., STC'}
                     value={newRule.pattern}
-                    onChange={(e) => setNewRule({ ...newRule, pattern: e.target.value })}
+                    onChange={(e) => { const v = e.target.value; setNewRule(prev => ({ ...prev, pattern: v })); }}
                   />
                 </div>
                 <div className="flex-1">
@@ -448,7 +448,7 @@ export function DataImport() {
                   <Input
                     placeholder={language === 'ar' ? 'مثال: اتصالات' : 'e.g., Telecom'}
                     value={newRule.category}
-                    onChange={(e) => setNewRule({ ...newRule, category: e.target.value })}
+                    onChange={(e) => { const v = e.target.value; setNewRule(prev => ({ ...prev, category: v })); }}
                   />
                 </div>
                 <div className="flex items-end">

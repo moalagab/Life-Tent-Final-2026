@@ -256,7 +256,7 @@ export function AccountsManager() {
                 <Input
                   placeholder={language === 'ar' ? 'مثال: البنك الأهلي' : 'e.g., Main Bank'}
                   value={newAccount.name}
-                  onChange={(e) => setNewAccount({ ...newAccount, name: e.target.value })}
+                  onChange={(e) => { const v = e.target.value; setNewAccount(prev => ({ ...prev, name: v })); }}
                   dir="auto"
                 />
               </div>
@@ -264,7 +264,7 @@ export function AccountsManager() {
                 <Label>{language === 'ar' ? 'نوع الحساب' : 'Account Type'}</Label>
                 <Select 
                   value={newAccount.type} 
-                  onValueChange={(value) => setNewAccount({ ...newAccount, type: value })}
+                  onValueChange={(value) => setNewAccount(prev => ({ ...prev, type: value }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -284,7 +284,7 @@ export function AccountsManager() {
                 <Label>{language === 'ar' ? 'العملة' : 'Currency'}</Label>
                 <Select 
                   value={newAccount.currency} 
-                  onValueChange={(value) => setNewAccount({ ...newAccount, currency: value })}
+                  onValueChange={(value) => setNewAccount(prev => ({ ...prev, currency: value }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -304,7 +304,7 @@ export function AccountsManager() {
                   type="number"
                   placeholder="0.00"
                   value={newAccount.balance}
-                  onChange={(e) => setNewAccount({ ...newAccount, balance: e.target.value })}
+                  onChange={(e) => { const v = e.target.value; setNewAccount(prev => ({ ...prev, balance: v })); }}
                 />
               </div>
               <Button 

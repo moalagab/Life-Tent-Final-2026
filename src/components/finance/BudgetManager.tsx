@@ -455,7 +455,7 @@ export function BudgetManager() {
                     <Input
                       placeholder={language === 'ar' ? 'مثال: الطعام، المواصلات...' : 'e.g., Food, Transport...'}
                       value={newBudget.category}
-                      onChange={(e) => setNewBudget({ ...newBudget, category: e.target.value })}
+                      onChange={(e) => { const v = e.target.value; setNewBudget(prev => ({ ...prev, category: v })); }}
                     />
                   </div>
                   <div>
@@ -464,7 +464,7 @@ export function BudgetManager() {
                       type="number"
                       placeholder="0.00"
                       value={newBudget.limit_amount}
-                      onChange={(e) => setNewBudget({ ...newBudget, limit_amount: e.target.value })}
+                      onChange={(e) => { const v = e.target.value; setNewBudget(prev => ({ ...prev, limit_amount: v })); }}
                     />
                   </div>
                   <div>
@@ -472,7 +472,7 @@ export function BudgetManager() {
                     <Textarea
                       placeholder={language === 'ar' ? 'ملاحظات اختيارية...' : 'Optional notes...'}
                       value={newBudget.notes}
-                      onChange={(e) => setNewBudget({ ...newBudget, notes: e.target.value })}
+                      onChange={(e) => { const v = e.target.value; setNewBudget(prev => ({ ...prev, notes: v })); }}
                     />
                   </div>
                   <Button onClick={handleCreateBudget} className="w-full" disabled={createBudget.isPending}>
@@ -574,7 +574,7 @@ export function BudgetManager() {
                     <Input
                       placeholder={language === 'ar' ? 'اسم المظروف' : 'Envelope name'}
                       value={newEnvelope.name}
-                      onChange={(e) => setNewEnvelope({ ...newEnvelope, name: e.target.value })}
+                      onChange={(e) => { const v = e.target.value; setNewEnvelope(prev => ({ ...prev, name: v })); }}
                     />
                   </div>
                   <div>
@@ -583,7 +583,7 @@ export function BudgetManager() {
                       type="number"
                       placeholder="0.00"
                       value={newEnvelope.target_amount}
-                      onChange={(e) => setNewEnvelope({ ...newEnvelope, target_amount: e.target.value })}
+                      onChange={(e) => { const v = e.target.value; setNewEnvelope(prev => ({ ...prev, target_amount: v })); }}
                     />
                   </div>
                   <div>
@@ -591,7 +591,7 @@ export function BudgetManager() {
                     <Input
                       type="color"
                       value={newEnvelope.color}
-                      onChange={(e) => setNewEnvelope({ ...newEnvelope, color: e.target.value })}
+                      onChange={(e) => { const v = e.target.value; setNewEnvelope(prev => ({ ...prev, color: v })); }}
                     />
                   </div>
                   <Button onClick={handleCreateEnvelope} className="w-full" disabled={createEnvelope.isPending}>
@@ -702,7 +702,7 @@ export function BudgetManager() {
                     <Input
                       placeholder={language === 'ar' ? 'اسم الصندوق' : 'Fund name'}
                       value={newFund.name}
-                      onChange={(e) => setNewFund({ ...newFund, name: e.target.value })}
+                      onChange={(e) => { const v = e.target.value; setNewFund(prev => ({ ...prev, name: v })); }}
                     />
                   </div>
                   <div>
@@ -711,7 +711,7 @@ export function BudgetManager() {
                       type="number"
                       placeholder="0.00"
                       value={newFund.target_amount}
-                      onChange={(e) => setNewFund({ ...newFund, target_amount: e.target.value })}
+                      onChange={(e) => { const v = e.target.value; setNewFund(prev => ({ ...prev, target_amount: v })); }}
                     />
                   </div>
                   <div>
@@ -719,7 +719,7 @@ export function BudgetManager() {
                     <Input
                       type="date"
                       value={newFund.target_date}
-                      onChange={(e) => setNewFund({ ...newFund, target_date: e.target.value })}
+                      onChange={(e) => { const v = e.target.value; setNewFund(prev => ({ ...prev, target_date: v })); }}
                     />
                   </div>
                   <div>
@@ -728,7 +728,7 @@ export function BudgetManager() {
                       type="number"
                       placeholder="0.00"
                       value={newFund.monthly_contribution}
-                      onChange={(e) => setNewFund({ ...newFund, monthly_contribution: e.target.value })}
+                      onChange={(e) => { const v = e.target.value; setNewFund(prev => ({ ...prev, monthly_contribution: v })); }}
                     />
                   </div>
                   <Button onClick={handleCreateFund} className="w-full" disabled={createSinkingFund.isPending}>
@@ -880,7 +880,7 @@ export function BudgetManager() {
               <Label>{language === 'ar' ? 'الفئة' : 'Category'}</Label>
               <Input
                 value={newBudget.category}
-                onChange={(e) => setNewBudget({ ...newBudget, category: e.target.value })}
+                onChange={(e) => { const v = e.target.value; setNewBudget(prev => ({ ...prev, category: v })); }}
               />
             </div>
             <div>
@@ -888,14 +888,14 @@ export function BudgetManager() {
               <Input
                 type="number"
                 value={newBudget.limit_amount}
-                onChange={(e) => setNewBudget({ ...newBudget, limit_amount: e.target.value })}
+                onChange={(e) => { const v = e.target.value; setNewBudget(prev => ({ ...prev, limit_amount: v })); }}
               />
             </div>
             <div>
               <Label>{language === 'ar' ? 'ملاحظات' : 'Notes'}</Label>
               <Textarea
                 value={newBudget.notes}
-                onChange={(e) => setNewBudget({ ...newBudget, notes: e.target.value })}
+                onChange={(e) => { const v = e.target.value; setNewBudget(prev => ({ ...prev, notes: v })); }}
               />
             </div>
             <Button onClick={handleUpdateBudget} className="w-full" disabled={updateBudget.isPending}>
@@ -916,7 +916,7 @@ export function BudgetManager() {
               <Label>{language === 'ar' ? 'الاسم' : 'Name'}</Label>
               <Input
                 value={newEnvelope.name}
-                onChange={(e) => setNewEnvelope({ ...newEnvelope, name: e.target.value })}
+                onChange={(e) => { const v = e.target.value; setNewEnvelope(prev => ({ ...prev, name: v })); }}
               />
             </div>
             <div>
@@ -924,7 +924,7 @@ export function BudgetManager() {
               <Input
                 type="number"
                 value={newEnvelope.target_amount}
-                onChange={(e) => setNewEnvelope({ ...newEnvelope, target_amount: e.target.value })}
+                onChange={(e) => { const v = e.target.value; setNewEnvelope(prev => ({ ...prev, target_amount: v })); }}
               />
             </div>
             <div>
@@ -932,7 +932,7 @@ export function BudgetManager() {
               <Input
                 type="color"
                 value={newEnvelope.color}
-                onChange={(e) => setNewEnvelope({ ...newEnvelope, color: e.target.value })}
+                onChange={(e) => { const v = e.target.value; setNewEnvelope(prev => ({ ...prev, color: v })); }}
               />
             </div>
             <Button onClick={handleUpdateEnvelope} className="w-full" disabled={updateEnvelope.isPending}>
@@ -953,7 +953,7 @@ export function BudgetManager() {
               <Label>{language === 'ar' ? 'الاسم' : 'Name'}</Label>
               <Input
                 value={newFund.name}
-                onChange={(e) => setNewFund({ ...newFund, name: e.target.value })}
+                onChange={(e) => { const v = e.target.value; setNewFund(prev => ({ ...prev, name: v })); }}
               />
             </div>
             <div>
@@ -961,7 +961,7 @@ export function BudgetManager() {
               <Input
                 type="number"
                 value={newFund.target_amount}
-                onChange={(e) => setNewFund({ ...newFund, target_amount: e.target.value })}
+                onChange={(e) => { const v = e.target.value; setNewFund(prev => ({ ...prev, target_amount: v })); }}
               />
             </div>
             <div>
@@ -969,7 +969,7 @@ export function BudgetManager() {
               <Input
                 type="date"
                 value={newFund.target_date}
-                onChange={(e) => setNewFund({ ...newFund, target_date: e.target.value })}
+                onChange={(e) => { const v = e.target.value; setNewFund(prev => ({ ...prev, target_date: v })); }}
               />
             </div>
             <div>
@@ -977,7 +977,7 @@ export function BudgetManager() {
               <Input
                 type="number"
                 value={newFund.monthly_contribution}
-                onChange={(e) => setNewFund({ ...newFund, monthly_contribution: e.target.value })}
+                onChange={(e) => { const v = e.target.value; setNewFund(prev => ({ ...prev, monthly_contribution: v })); }}
               />
             </div>
             <Button onClick={handleUpdateFund} className="w-full" disabled={updateSinkingFund.isPending}>
