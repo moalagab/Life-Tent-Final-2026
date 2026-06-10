@@ -36,9 +36,15 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       .select('onboarding_completed')
       .eq('user_id', user.id)
       .maybeSingle()
-      .then(({ data }) => {
+      .then(({ data, error }) => {
         if (cancelled) return;
-        setIsCompleted(data?.onboarding_completed === true);
+        // null row or query error → treat as completed (don't block existing users)
+        // false → new user who hasn't done onboarding yet
+        if (error || data === null) {
+          setIsCompleted(true);
+        } else {
+          setIsCompleted(data.onboarding_completed !== false);
+        }
         setLoading(false);
       });
     return () => { cancelled = true; };
