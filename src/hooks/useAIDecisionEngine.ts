@@ -2,17 +2,27 @@
  * useAIDecisionEngine — Frontend orchestrator for the AI layer.
  *
  * Wires together:
- *   - useBehaviorEngine    → BehaviorProfile
- *   - useAdaptivePriority  → ScoredTask[]
+ *   - useBehaviorEngine        → BehaviorProfile
+ *   - useAdaptivePriority      → ScoredTask[]
  *   - usePersonalizationMemory → DerivedTrends
  *   - ai-decision-engine edge function → AIDecisionResult
  *
- * Improvements:
- *   - Sends habits & goals summary for richer AI context
- *   - Sends done-today count
- *   - Uses full_name from user metadata instead of email prefix
- *   - Tracks which AI actions have been marked done (localStorage)
- *   - Cache TTL: 2h for morning, 4h for midday/full
+ * Modes:
+ *   morning  (05:00–11:59) — daily plan & energy allocation
+ *   midday   (12:00–14:59) — progress check & re-prioritisation
+ *   evening  (18:00–23:59) — reflection & tomorrow's prep
+ *   full     (all other)   — deep strategic analysis
+ *
+ * Cache TTL:
+ *   morning  2h | midday 4h | evening 8h | full 4h
+ *
+ * What's new vs previous version:
+ *   - evening mode
+ *   - finance context (upcoming bills, budget health)
+ *   - analysis proceeds even with 0 pending tasks (great day!)
+ *   - completedToday & focusTaskCount forwarded to edge function
+ *   - weekSummary flag on Sundays for strategic review
+ *   - shorter staleTime for tasks (5 min) so AI context is fresh
  */
 import { useState, useCallback, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -21,12 +31,12 @@ import { useAuth } from './useAuth';
 import { useBehaviorEngine } from './useBehaviorEngine';
 import { useAdaptivePriority } from './useAdaptivePriority';
 import { usePersonalizationMemory } from './usePersonalizationMemory';
-import { format, subDays } from 'date-fns';
+import { format, subDays, addDays, getDay } from 'date-fns';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
 export interface AIAction {
-  type: 'focus' | 'reschedule' | 'delegate' | 'review' | 'habit' | 'energy';
+  type: 'focus' | 'reschedule' | 'delegate' | 'review' | 'habit' | 'energy' | 'finance';
   title: string;
   description: string;
   taskId?: string | null;
@@ -41,16 +51,24 @@ export interface AIDecisionResult {
   highlight?: string;
   actions: AIAction[];
   computedAt: string;
-  mode: 'morning' | 'midday' | 'full';
+  mode: AnalysisMode;
 }
 
-type AnalysisMode = 'morning' | 'midday' | 'full';
+export type AnalysisMode = 'morning' | 'midday' | 'evening' | 'full';
+
+interface FinanceSummary {
+  upcomingBillsCount: number;
+  totalUpcomingAmount: number;
+  overBudgetCategories: number;
+  healthScore: 'good' | 'warning' | 'critical';
+}
 
 // ── Cache helpers ─────────────────────────────────────────────────────────────
 
 const CACHE_TTL: Record<AnalysisMode, number> = {
-  morning: 2 * 60 * 60 * 1000,   // 2h — morning brief refreshes at midday
+  morning: 2 * 60 * 60 * 1000,   // 2h
   midday:  4 * 60 * 60 * 1000,   // 4h
+  evening: 8 * 60 * 60 * 1000,   // 8h — lasts through the night
   full:    4 * 60 * 60 * 1000,
 };
 
@@ -97,13 +115,13 @@ function saveDoneActions(userId: string, mode: AnalysisMode, indices: Set<number
   } catch { /* ignore */ }
 }
 
-// ── Task fetch query ──────────────────────────────────────────────────────────
+// ── Sub-queries ───────────────────────────────────────────────────────────────
 
 function useRawTasks() {
   const { user } = useAuth();
   return useQuery({
     queryKey: ['ai-engine-tasks', user?.id],
-    staleTime: 1000 * 60 * 15,
+    staleTime: 1000 * 60 * 5, // 5 min — fresh context for AI
     queryFn: async () => {
       const { data, error } = await supabase
         .from('tasks')
@@ -117,8 +135,6 @@ function useRawTasks() {
   });
 }
 
-// ── Habits summary query ──────────────────────────────────────────────────────
-
 function useHabitsSummary() {
   const { user } = useAuth();
   return useQuery({
@@ -130,15 +146,13 @@ function useHabitsSummary() {
         supabase.from('habits').select('id').eq('is_active', true),
         supabase.from('habit_logs').select('habit_id').eq('completed_at', today),
       ]);
-      const totalActive = habitsRes.data?.length ?? 0;
+      const totalActive    = habitsRes.data?.length ?? 0;
       const todayCompleted = logsRes.data?.length ?? 0;
-      return { totalActive, todayCompleted, fragileCount: 0 }; // fragileCount from BehaviorEngine
+      return { totalActive, todayCompleted, fragileCount: 0 };
     },
     enabled: !!user,
   });
 }
-
-// ── Goals summary query ───────────────────────────────────────────────────────
 
 function useGoalsSummary() {
   const { user } = useAuth();
@@ -151,8 +165,8 @@ function useGoalsSummary() {
         .select('id, progress')
         .eq('status', 'active');
       const goals = data ?? [];
-      const activeCount = goals.length;
-      const avgProgress = activeCount > 0
+      const activeCount  = goals.length;
+      const avgProgress  = activeCount > 0
         ? goals.reduce((sum, g) => sum + (g.progress ?? 0), 0) / activeCount
         : 0;
       return { activeCount, avgProgress };
@@ -160,8 +174,6 @@ function useGoalsSummary() {
     enabled: !!user,
   });
 }
-
-// ── Done-today count query ────────────────────────────────────────────────────
 
 function useDoneToday() {
   const { user } = useAuth();
@@ -181,6 +193,63 @@ function useDoneToday() {
   });
 }
 
+function useFinanceSummary(): { data: FinanceSummary | undefined; isLoading: boolean } {
+  const { user } = useAuth();
+  const query = useQuery({
+    queryKey: ['ai-finance-summary', user?.id],
+    staleTime: 1000 * 60 * 60, // 1h — financial data changes slowly
+    queryFn: async (): Promise<FinanceSummary> => {
+      const today    = format(new Date(), 'yyyy-MM-dd');
+      const in7days  = format(addDays(new Date(), 7), 'yyyy-MM-dd');
+      const monthStart = today.substring(0, 8) + '01';
+
+      const [subsRes, budgetsRes] = await Promise.all([
+        // Upcoming subscription renewals within 7 days
+        supabase.from('subscriptions')
+          .select('amount, next_billing_date')
+          .eq('is_active', true)
+          .gte('next_billing_date', today)
+          .lte('next_billing_date', in7days),
+        // Budgets that are over-limit this month
+        supabase.from('budgets')
+          .select('id, amount, spent')
+          .eq('status', 'active')
+          .gte('start_date', monthStart),
+      ]);
+
+      const subs = subsRes.data ?? [];
+      const budgets = budgetsRes.data ?? [];
+
+      const upcomingBillsCount  = subs.length;
+      const totalUpcomingAmount = subs.reduce((s, b) => s + (b.amount ?? 0), 0);
+      const overBudgetCategories = budgets.filter(b => (b.spent ?? 0) > (b.amount ?? 0)).length;
+
+      let healthScore: FinanceSummary['healthScore'] = 'good';
+      if (overBudgetCategories > 2 || upcomingBillsCount > 3) healthScore = 'warning';
+      if (overBudgetCategories > 5) healthScore = 'critical';
+
+      return { upcomingBillsCount, totalUpcomingAmount, overBudgetCategories, healthScore };
+    },
+    enabled: !!user,
+  });
+  return { data: query.data, isLoading: query.isLoading };
+}
+
+// ── Mode detection ────────────────────────────────────────────────────────────
+
+function detectMode(): AnalysisMode {
+  const hour = new Date().getHours();
+  if (hour >= 5  && hour < 12) return 'morning';
+  if (hour >= 12 && hour < 15) return 'midday';
+  if (hour >= 18)              return 'evening';
+  return 'full';
+}
+
+/** True on Sunday — triggers strategic weekly review */
+function isWeekSummaryDay(): boolean {
+  return getDay(new Date()) === 0;
+}
+
 // ── Main hook ────────────────────────────────────────────────────────────────
 
 export function useAIDecisionEngine() {
@@ -191,23 +260,16 @@ export function useAIDecisionEngine() {
   const { data: rawTasks = [], isLoading: tasksLoading } = useRawTasks();
   const { trends, recordSnapshot } = usePersonalizationMemory();
   const { data: habitsSummary } = useHabitsSummary();
-  const { data: goalsSummary } = useGoalsSummary();
+  const { data: goalsSummary  } = useGoalsSummary();
   const { data: doneToday = 0 } = useDoneToday();
+  const { data: financeSummary } = useFinanceSummary();
 
   const scoredTasks = useAdaptivePriority(rawTasks, profile);
 
-  const [result, setResult] = useState<AIDecisionResult | null>(null);
+  const [result,      setResult]      = useState<AIDecisionResult | null>(null);
   const [isAnalysing, setIsAnalysing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error,       setError]       = useState<string | null>(null);
   const [doneActions, setDoneActions] = useState<Set<number>>(() => new Set());
-
-  // Auto-detect mode based on time of day
-  const detectMode = useCallback((): AnalysisMode => {
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 11) return 'morning';
-    if (hour >= 12 && hour < 15) return 'midday';
-    return 'full';
-  }, []);
 
   // Load cached result and done-actions on mount
   useEffect(() => {
@@ -216,46 +278,41 @@ export function useAIDecisionEngine() {
     const cached = loadCached(userId, mode);
     if (cached) setResult(cached);
     setDoneActions(loadDoneActions(userId, mode));
-  }, [userId, user, detectMode]);
+  }, [userId, user]);
 
   // Record snapshot whenever a fresh BehaviorProfile is computed
   useEffect(() => {
     if (!profile) return;
     const today = format(new Date(), 'yyyy-MM-dd');
-    const key = `lt.snapshot-recorded.${userId}.${today}`;
+    const key   = `lt.snapshot-recorded.${userId}.${today}`;
     if (localStorage.getItem(key)) return;
     recordSnapshot(profile, doneToday);
     localStorage.setItem(key, '1');
   }, [profile, userId, doneToday, recordSnapshot]);
 
-  // Resolve display name: prefer full_name from metadata, fallback to email prefix
-  const resolveUserName = useCallback(() => {
+  const resolveUserName = useCallback((): string => {
     const meta = user?.user_metadata;
     if (meta?.full_name) return meta.full_name as string;
-    if (meta?.name) return meta.name as string;
-    const email = user?.email ?? '';
+    if (meta?.name)      return meta.name as string;
+    const email  = user?.email ?? '';
     const prefix = email.split('@')[0];
-    // Capitalise and replace dots/underscores
     return prefix.replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   }, [user]);
 
-  const analyse = useCallback(async (mode?: AnalysisMode) => {
-    if (!profile || scoredTasks.length === 0) return;
+  const analyse = useCallback(async (forceMode?: AnalysisMode) => {
+    // Allow analysis even when all tasks are done (great day = 0 pending)
+    if (!profile) return;
 
-    const selectedMode = mode ?? detectMode();
+    const selectedMode = forceMode ?? detectMode();
 
-    if (!mode) {
+    if (!forceMode) {
       const cached = loadCached(userId, selectedMode);
-      if (cached) {
-        setResult(cached);
-        return;
-      }
+      if (cached) { setResult(cached); return; }
     }
 
     setIsAnalysing(true);
     setError(null);
 
-    // Build habits summary enriched with fragile count from profile
     const enrichedHabits = habitsSummary
       ? { ...habitsSummary, fragileCount: profile.fragileHabitIds.length }
       : undefined;
@@ -263,14 +320,21 @@ export function useAIDecisionEngine() {
     try {
       const { data, error: fnError } = await supabase.functions.invoke('ai-decision-engine', {
         body: {
-          profile,
-          tasks: scoredTasks.slice(0, 10),
+          profile: {
+            ...profile,
+            completedToday:  profile.completedToday,
+            focusTaskCount:  profile.focusTaskCount,
+            weekendProductivityRatio: profile.weekendProductivityRatio,
+          },
+          tasks:     scoredTasks.slice(0, 10),
           trends,
-          mode: selectedMode,
-          userName: resolveUserName(),
-          habits: enrichedHabits,
-          goals: goalsSummary,
+          mode:      selectedMode,
+          userName:  resolveUserName(),
+          habits:    enrichedHabits,
+          goals:     goalsSummary,
           doneToday,
+          finance:   financeSummary,
+          isWeekSummary: selectedMode === 'morning' && isWeekSummaryDay(),
         },
       });
 
@@ -279,12 +343,11 @@ export function useAIDecisionEngine() {
       const aiResult: AIDecisionResult = {
         ...data,
         computedAt: new Date().toISOString(),
-        mode: selectedMode,
+        mode:       selectedMode,
       };
 
       saveCache(userId, aiResult);
       setResult(aiResult);
-      // Reset done actions for new result
       const freshDone = new Set<number>();
       setDoneActions(freshDone);
       saveDoneActions(userId, selectedMode, freshDone);
@@ -293,15 +356,14 @@ export function useAIDecisionEngine() {
     } finally {
       setIsAnalysing(false);
     }
-  }, [profile, scoredTasks, trends, userId, habitsSummary, goalsSummary, doneToday, detectMode, resolveUserName]);
+  }, [profile, scoredTasks, trends, userId, habitsSummary, goalsSummary, doneToday, financeSummary, resolveUserName]);
 
   const refresh = useCallback(() => {
     const mode = detectMode();
     try { localStorage.removeItem(cacheKey(userId, mode)); } catch { /* */ }
     analyse(mode);
-  }, [userId, analyse, detectMode]);
+  }, [userId, analyse]);
 
-  /** Mark an action (by index) as done/undone */
   const toggleActionDone = useCallback((index: number) => {
     const mode = detectMode();
     setDoneActions(prev => {
@@ -311,9 +373,10 @@ export function useAIDecisionEngine() {
       saveDoneActions(userId, mode, next);
       return next;
     });
-  }, [userId, detectMode]);
+  }, [userId]);
 
   const isReady = !profileLoading && !tasksLoading;
+  const currentMode = detectMode();
 
   return {
     result,
@@ -321,6 +384,7 @@ export function useAIDecisionEngine() {
     profile,
     trends,
     doneToday,
+    currentMode,
     isReady,
     isAnalysing,
     error,

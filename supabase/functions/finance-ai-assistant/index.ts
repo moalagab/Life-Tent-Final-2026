@@ -1,148 +1,281 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+/**
+ * finance-ai-assistant — Gemini-powered financial AI assistant.
+ *
+ * Streams responses in OpenAI-compatible SSE format so the frontend
+ * needs no changes (parses data.choices[0].delta.content).
+ *
+ * Previously used Lovable AI gateway — now calls Gemini directly.
+ */
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// ── CORS ──────────────────────────────────────────────────────────────────────
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+const ALLOWED_ORIGINS = [
+  "https://www.lifetent.online",
+  "https://lifetent.online",
+  "http://localhost:8080",
+  "http://localhost:8081",
+  "http://localhost:8082",
+  "http://localhost:8083",
+];
 
-  try {
-    // Require authenticated user
-    const authHeader = req.headers.get("Authorization") ?? "";
-    if (!authHeader.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const supabaseAuth = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      { global: { headers: { Authorization: authHeader } } }
-    );
-    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("origin") ?? "";
+  const allowOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
+}
 
-    const { messages, type, context } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
+// ── Auth ──────────────────────────────────────────────────────────────────────
 
-    let systemPrompt = "";
+async function verifyAuth(req: Request): Promise<boolean> {
+  const authHeader = req.headers.get("Authorization") ?? "";
+  if (!authHeader.startsWith("Bearer ")) return false;
+  const token = authHeader.replace("Bearer ", "");
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+  );
+  const { error } = await supabase.auth.getUser(token);
+  return !error;
+}
 
-    switch (type) {
-      case "finance-assistant":
-        systemPrompt = `أنت مساعد مالي ذكي باللغة العربية. تساعد المستخدمين في:
+// ── System prompts ────────────────────────────────────────────────────────────
+
+function buildSystemPrompt(type: string, context: unknown): string {
+  const ctxStr = context ? JSON.stringify(context, null, 2) : "لا توجد بيانات";
+
+  switch (type) {
+    case "finance-assistant":
+      return `أنت مساعد مالي ذكي باللغة العربية. تساعد المستخدمين في:
 - تحليل المصروفات والإيرادات
 - تقديم نصائح مالية مخصصة
 - المساعدة في وضع الميزانيات
 - تحليل الديون واستراتيجيات السداد
 - تقديم رؤى حول الادخار والاستثمار
 
-السياق المالي الحالي للمستخدم:
-${context ? JSON.stringify(context, null, 2) : 'لا يوجد سياق متاح'}
+السياق المالي الحالي:
+${ctxStr}
 
-قواعد مهمة:
-- كن موجزاً ومفيداً
-- قدم نصائح عملية وقابلة للتنفيذ
-- استخدم الأرقام والنسب المئوية عند الإمكان
-- تحدث بلغة المستخدم (عربي أو إنجليزي)`;
-        break;
+قواعد: كن موجزاً ومفيداً، قدم نصائح عملية، استخدم الأرقام والنسب عند الإمكان.`;
 
-      case "spending-analysis":
-        systemPrompt = `أنت محلل مصروفات ذكي. حلل البيانات المالية التالية وقدم:
+    case "spending-analysis":
+      return `أنت محلل مصروفات ذكي. حلل البيانات التالية وقدم:
 1. تحليل أنماط الإنفاق
-2. تحديد المجالات التي يمكن تقليل المصروفات فيها
+2. المجالات القابلة للتقليص
 3. مقارنة الإنفاق الفعلي بالميزانية
 4. توصيات محددة للتحسين
 
-البيانات:
-${context ? JSON.stringify(context, null, 2) : 'لا توجد بيانات'}`;
-        break;
+البيانات: ${ctxStr}`;
 
-      case "debt-strategy":
-        systemPrompt = `أنت خبير في استراتيجيات سداد الديون. بناءً على المعلومات التالية:
-1. قم بتحليل الديون الحالية
-2. قدم خطة سداد مُحسّنة
-3. قارن بين استراتيجية كرة الثلج والانهيار الجليدي
-4. احسب التوفير المحتمل في الفوائد
+    case "debt-strategy":
+      return `أنت خبير في استراتيجيات سداد الديون. قدم:
+1. تحليل الديون الحالية
+2. خطة سداد مُحسّنة
+3. مقارنة استراتيجية كرة الثلج والانهيار الجليدي
+4. التوفير المحتمل في الفوائد
 
-معلومات الديون:
-${context ? JSON.stringify(context, null, 2) : 'لا توجد ديون'}`;
-        break;
+معلومات الديون: ${ctxStr}`;
 
-      case "budget-suggestions":
-        systemPrompt = `أنت مستشار ميزانية محترف. بناءً على الدخل والمصروفات:
+    case "budget-suggestions":
+      return `أنت مستشار ميزانية محترف. بناءً على البيانات:
 1. اقترح توزيع الميزانية الأمثل
 2. حدد أولويات الإنفاق
 3. اقترح صناديق ادخار مناسبة
-4. قدم نصائح لتحقيق الأهداف المالية
+4. نصائح لتحقيق الأهداف المالية
 
-البيانات المالية:
-${context ? JSON.stringify(context, null, 2) : 'لا توجد بيانات'}`;
-        break;
+البيانات المالية: ${ctxStr}`;
 
-      default:
-        systemPrompt = `أنت مساعد ذكي متعدد الاستخدامات. ساعد المستخدم في طلبه بشكل احترافي ومفيد.`;
-    }
+    default:
+      return "أنت مساعد ذكي متعدد الاستخدامات. ساعد المستخدم بشكل احترافي ومفيد.";
+  }
+}
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages,
-        ],
-        stream: true,
-      }),
-    });
+// ── Gemini streaming → OpenAI SSE transformer ────────────────────────────────
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "تم تجاوز حد الطلبات. يرجى المحاولة لاحقاً." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+/**
+ * Reads Gemini's SSE stream and re-emits each text chunk in
+ * OpenAI-compatible format: `data: {"choices":[{"delta":{"content":"…"}}]}`
+ *
+ * Gemini SSE chunk shape:
+ * data: {"candidates":[{"content":{"parts":[{"text":"…"}]}}]}
+ */
+function transformGeminiStream(geminiBody: ReadableStream<Uint8Array>): ReadableStream<Uint8Array> {
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  return new ReadableStream({
+    async start(controller) {
+      const reader = geminiBody.getReader();
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? ""; // keep incomplete last line
+
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            const raw = line.slice(6).trim();
+            if (!raw || raw === "[DONE]") continue;
+
+            let text = "";
+            try {
+              const parsed = JSON.parse(raw);
+              text = parsed?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+            } catch {
+              continue;
+            }
+
+            if (!text) continue;
+
+            // Emit in OpenAI-compatible format
+            const openaiChunk = JSON.stringify({
+              choices: [{ delta: { content: text }, finish_reason: null, index: 0 }],
+            });
+            controller.enqueue(encoder.encode(`data: ${openaiChunk}\n\n`));
+          }
+        }
+
+        // Flush remaining buffer
+        if (buffer.startsWith("data: ")) {
+          const raw = buffer.slice(6).trim();
+          if (raw && raw !== "[DONE]") {
+            try {
+              const parsed = JSON.parse(raw);
+              const text = parsed?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+              if (text) {
+                const openaiChunk = JSON.stringify({
+                  choices: [{ delta: { content: text }, finish_reason: null, index: 0 }],
+                });
+                controller.enqueue(encoder.encode(`data: ${openaiChunk}\n\n`));
+              }
+            } catch { /* skip */ }
+          }
+        }
+
+        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+      } catch (err) {
+        console.error("Stream transform error:", err);
+      } finally {
+        controller.close();
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "يرجى إضافة رصيد لاستخدام المساعد الذكي." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      return new Response(JSON.stringify({ error: "حدث خطأ في الخدمة" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    },
+  });
+}
 
-    return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
-    });
-  } catch (error) {
-    console.error("Finance AI assistant error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
-      status: 500,
+// ── Handler ───────────────────────────────────────────────────────────────────
+
+const GEMINI_STREAM_URL =
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse";
+
+Deno.serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
+
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  const authenticated = await verifyAuth(req);
+  if (!authenticated) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
+
+  const apiKey = Deno.env.get("GEMINI_API_KEY");
+  if (!apiKey) {
+    return new Response(
+      JSON.stringify({ error: "GEMINI_API_KEY not configured" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+
+  let messages: { role: string; content: string }[];
+  let type: string;
+  let context: unknown;
+
+  try {
+    ({ messages, type, context } = await req.json());
+  } catch {
+    return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const systemPrompt = buildSystemPrompt(type, context);
+
+  // Convert messages to Gemini contents format
+  const geminiContents = [
+    { role: "user", parts: [{ text: systemPrompt }] },
+    { role: "model", parts: [{ text: "مفهوم. كيف يمكنني مساعدتك؟" }] },
+    ...messages.map((m) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    })),
+  ];
+
+  let geminiRes: Response;
+  try {
+    geminiRes = await fetch(`${GEMINI_STREAM_URL}&key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: geminiContents,
+        generationConfig: {
+          temperature:     0.7,
+          maxOutputTokens: 2048,
+        },
+      }),
+    });
+  } catch (networkErr) {
+    console.error("Gemini network error:", networkErr);
+    return new Response(
+      JSON.stringify({ error: "تعذّر الاتصال بالمساعد الذكي. يرجى المحاولة لاحقاً." }),
+      { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+
+  if (!geminiRes.ok) {
+    const errText = await geminiRes.text();
+    console.error(`Gemini API ${geminiRes.status}:`, errText);
+
+    if (geminiRes.status === 429) {
+      return new Response(
+        JSON.stringify({ error: "تم تجاوز حد الطلبات. يرجى المحاولة لاحقاً." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    return new Response(
+      JSON.stringify({ error: "حدث خطأ في الخدمة. يرجى المحاولة لاحقاً." }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+
+  if (!geminiRes.body) {
+    return new Response(
+      JSON.stringify({ error: "لم يُعَد أي محتوى من المساعد." }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+
+  const transformed = transformGeminiStream(geminiRes.body);
+
+  return new Response(transformed, {
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      "X-Accel-Buffering": "no",
+    },
+  });
 });

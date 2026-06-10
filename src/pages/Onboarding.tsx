@@ -167,11 +167,11 @@ function StepAppearance({ isRTL }: { isRTL: boolean }) {
       {/* Theme */}
       <div className="space-y-3">
         <p className="text-sm font-medium text-foreground flex items-center gap-2">
-          <Sun className="w-4 h-4 text-primary" />
+          <Moon className="w-4 h-4 text-primary" />
           {isRTL ? 'المظهر' : 'Theme'}
         </p>
         <div className="grid grid-cols-2 gap-3">
-          {(['light', 'dark'] as const).map((t) => (
+          {(['dark', 'light'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTheme(t)}
@@ -183,10 +183,12 @@ function StepAppearance({ isRTL }: { isRTL: boolean }) {
               )}
             >
               <div className="flex justify-center mb-1">
-                {t === 'light' ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
+                {t === 'dark' ? <Moon className="w-6 h-6" /> : <Sun className="w-6 h-6" />}
               </div>
               <div className="font-semibold">
-                {t === 'light' ? (isRTL ? 'فاتح' : 'Light') : (isRTL ? 'داكن' : 'Dark')}
+                {t === 'dark'
+                  ? (isRTL ? 'داكن (افتراضي)' : 'Dark (default)')
+                  : (isRTL ? 'فاتح' : 'Light')}
               </div>
             </button>
           ))}
