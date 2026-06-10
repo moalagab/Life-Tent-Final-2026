@@ -28,7 +28,7 @@ function EnergyDots({ level }: { level: number }) {
           key={i}
           className={cn(
             'w-2.5 h-2.5 rounded-full transition-colors',
-            i <= level ? 'bg-amber-400' : 'bg-muted'
+            i <= level ? 'bg-primary/60' : 'bg-muted'
           )}
         />
       ))}
@@ -209,9 +209,9 @@ export function MiddayCheckpoint() {
 
         {/* Coaching */}
         {result?.coaching && (
-          <div className="flex gap-2 p-2.5 rounded-xl bg-amber-500/5 border border-amber-500/20">
-            <Zap className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-700 dark:text-amber-400">{result.coaching}</p>
+          <div className="flex gap-2 p-2.5 rounded-xl bg-primary/5 border border-primary/20">
+            <Zap className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+            <p className="text-xs text-primary/80 dark:text-primary/70">{result.coaching}</p>
           </div>
         )}
 

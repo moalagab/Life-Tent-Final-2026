@@ -458,7 +458,7 @@ export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetai
                             <div key={note.id} className="p-2 rounded-lg bg-muted/30 text-sm">
                               <div className="flex items-center justify-between">
                                 <span className="font-medium">{note.title}</span>
-                                {note.is_important && <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />}
+                                {note.is_important && <Star className="w-3 h-3 text-primary fill-yellow-500" />}
                               </div>
                               {note.content && <p className="text-muted-foreground text-xs mt-1">{note.content}</p>}
                             </div>
@@ -496,7 +496,7 @@ export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetai
                 <div key={note.id} className="glass-card p-4 group">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      {note.is_important && <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />}
+                      {note.is_important && <Star className="w-4 h-4 text-primary fill-yellow-500" />}
                       <h4 className="font-medium text-foreground">{note.title}</h4>
                     </div>
                     <Button 
@@ -707,7 +707,7 @@ export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetai
                   onChange={(e) => setNewNote({ ...newNote, is_important: e.target.checked })}
                   className="rounded border-border"
                 />
-                <Star className="w-4 h-4 text-yellow-500" />
+                <Star className="w-4 h-4 text-primary" />
               </label>
             </div>
             <Button onClick={handleAddNote} className="w-full" disabled={createNote.isPending}>

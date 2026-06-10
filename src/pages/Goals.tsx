@@ -37,7 +37,7 @@ type CategoryFilter = 'all' | 'personal' | 'financial' | 'customer' | 'processes
 
 const categoryConfig = {
   all: { icon: LayoutGrid, color: 'bg-foreground text-background' },
-  personal: { icon: User, color: 'bg-amber-500 text-white' },
+  personal: { icon: User, color: 'bg-primary/80 text-white' },
   financial: { icon: TrendingUp, color: 'bg-primary text-primary-foreground' },
   customer: { icon: Users, color: 'bg-blue-500 text-white' },
   processes: { icon: Cog, color: 'bg-success text-white' },
@@ -373,10 +373,10 @@ export default function Goals() {
                   </div>
                 </div>
               </div>
-              <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 border border-amber-500/20">
+              <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 border border-primary/20">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                    <User className="w-5 h-5 text-amber-500" />
+                  <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center">
+                    <User className="w-5 h-5 text-primary" />
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-foreground">{stats.personal}</p>

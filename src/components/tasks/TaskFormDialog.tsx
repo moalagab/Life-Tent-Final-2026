@@ -262,7 +262,7 @@ export function TaskFormDialog({
                   {habits?.map((habit) => (
                     <SelectItem key={habit.id} value={habit.id}>
                       <div className="flex items-center gap-2">
-                        <Sparkles className="w-3 h-3 text-amber-500" />
+                        <Sparkles className="w-3 h-3 text-primary" />
                         {habit.name}
                       </div>
                     </SelectItem>

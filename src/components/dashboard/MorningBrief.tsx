@@ -34,7 +34,7 @@ const ACTION_ICONS: Record<AIAction['type'], React.ElementType> = {
 
 const ACTION_COLORS: Record<AIAction['priority'], string> = {
   high:   'border-destructive/40 bg-destructive/5',
-  medium: 'border-amber-500/40 bg-amber-500/5',
+  medium: 'border-primary/30 bg-primary/5',
   low:    'border-border bg-muted/20',
 };
 
@@ -52,7 +52,7 @@ const PRIORITY_LABEL_EN: Record<AIAction['priority'], string> = {
 
 const PRIORITY_BADGE: Record<AIAction['priority'], string> = {
   high:   'bg-destructive/15 text-destructive border-destructive/20',
-  medium: 'bg-amber-500/15 text-amber-600 border-amber-500/20',
+  medium: 'bg-primary/15 text-primary/80 border-primary/20',
   low:    'bg-muted text-muted-foreground',
 };
 
@@ -131,7 +131,7 @@ function TaskRow({
   rank: number;
 }) {
   const rankColor =
-    rank === 1 ? 'text-amber-500' : rank === 2 ? 'text-slate-400' : 'text-amber-700/70';
+    rank === 1 ? 'text-primary' : rank === 2 ? 'text-slate-400' : 'text-primary/80/70';
   return (
     <div className="flex items-center gap-3 py-2 border-b border-border/30 last:border-0">
       <span className={cn('text-xs font-bold w-5 text-center shrink-0', rankColor)}>#{rank}</span>
@@ -171,7 +171,7 @@ export function MorningBrief() {
 
   const riskColor =
     profile?.todayRiskLevel === 'high'   ? 'text-destructive'
-    : profile?.todayRiskLevel === 'medium' ? 'text-amber-500'
+    : profile?.todayRiskLevel === 'medium' ? 'text-primary'
     : 'text-success';
 
   const computedAgo = result?.computedAt
@@ -185,7 +185,7 @@ export function MorningBrief() {
       <Card className="col-span-2">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
-            <Sunrise className="w-4 h-4 text-amber-400" />
+            <Sunrise className="w-4 h-4 text-primary" />
             {currentLanguage === 'ar' ? 'إحاطة الصباح' : 'Morning Brief'}
           </CardTitle>
         </CardHeader>
@@ -205,7 +205,7 @@ export function MorningBrief() {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
-            <Sunrise className="w-4 h-4 text-amber-400" />
+            <Sunrise className="w-4 h-4 text-primary" />
             {currentLanguage === 'ar' ? 'إحاطة الصباح' : 'Morning Brief'}
             {profile && (
               <span className={cn('text-xs font-normal', riskColor)}>
@@ -267,9 +267,9 @@ export function MorningBrief() {
 
         {/* Coaching tip */}
         {result?.coaching && (
-          <div className="flex gap-2 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
-            <Zap className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-            <p className="text-sm text-amber-700 dark:text-amber-400">{result.coaching}</p>
+          <div className="flex gap-2 p-3 rounded-xl bg-primary/5 border border-primary/20">
+            <Zap className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+            <p className="text-sm text-primary/80 dark:text-primary/70">{result.coaching}</p>
           </div>
         )}
 

@@ -69,7 +69,7 @@ export function ReadingGoalCard({ booksRead, onNavigateToGoals }: ReadingGoalCar
               <p className="text-sm text-muted-foreground flex items-center gap-1.5">
                 <TrendingUp className={cn(
                   'w-4 h-4',
-                  isOnTrack ? 'text-green-500' : 'text-amber-500'
+                  isOnTrack ? 'text-green-500' : 'text-primary'
                 )} />
                 {isOnTrack 
                   ? (currentLanguage === 'ar' ? 'على المسار الصحيح' : 'On track')

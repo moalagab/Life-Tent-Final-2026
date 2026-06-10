@@ -21,7 +21,7 @@ const typeConfig: Record<CommunicationType, { label: string; labelAr: string; ic
   call: { label: 'Call', labelAr: 'مكالمة', icon: Phone, color: 'bg-green-500' },
   email: { label: 'Email', labelAr: 'بريد', icon: Mail, color: 'bg-blue-500' },
   meeting: { label: 'Meeting', labelAr: 'اجتماع', icon: Calendar, color: 'bg-purple-500' },
-  note: { label: 'Note', labelAr: 'ملاحظة', icon: FileText, color: 'bg-yellow-500' },
+  note: { label: 'Note', labelAr: 'ملاحظة', icon: FileText, color: 'bg-primary/80' },
   message: { label: 'Message', labelAr: 'رسالة', icon: MessageSquare, color: 'bg-pink-500' },
 };
 

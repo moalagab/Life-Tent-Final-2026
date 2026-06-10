@@ -96,7 +96,7 @@ export function GoalFormDialog({
   };
 
   const perspectiveOptions = [
-    { value: 'personal', label: t('goals.category.personal'), icon: User, color: 'bg-amber-500' },
+    { value: 'personal', label: t('goals.category.personal'), icon: User, color: 'bg-primary/80' },
     { value: 'financial', label: t('goals.category.financial'), icon: TrendingUp, color: 'bg-primary' },
     { value: 'customer', label: t('goals.category.customer'), icon: Users, color: 'bg-blue-500' },
     { value: 'processes', label: t('goals.category.processes'), icon: Cog, color: 'bg-success' },
@@ -317,7 +317,7 @@ export function GoalFormDialog({
                 {habits?.map((habit) => (
                   <SelectItem key={habit.id} value={habit.id}>
                     <div className="flex items-center gap-2">
-                      <Sparkles className="w-3 h-3 text-amber-500" />
+                      <Sparkles className="w-3 h-3 text-primary" />
                       {habit.name}
                     </div>
                   </SelectItem>

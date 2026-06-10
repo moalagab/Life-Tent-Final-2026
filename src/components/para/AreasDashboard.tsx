@@ -99,7 +99,7 @@ export function AreasDashboard() {
   const healthColors = {
     excellent: 'bg-emerald-500',
     good: 'bg-primary',
-    warning: 'bg-amber-500',
+    warning: 'bg-primary/80',
     critical: 'bg-destructive',
   };
 
@@ -163,8 +163,8 @@ export function AreasDashboard() {
         <Card className="glass-card">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                <Target className="w-5 h-5 text-amber-500" />
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Target className="w-5 h-5 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-foreground">{totalGoals}</p>
@@ -256,7 +256,7 @@ export function AreasDashboard() {
                   </p>
                 </div>
                 <div className="p-2 rounded-lg bg-muted/30">
-                  <Target className="w-4 h-4 mx-auto text-amber-500 mb-1" />
+                  <Target className="w-4 h-4 mx-auto text-primary mb-1" />
                   <p className="text-sm font-medium text-foreground">{area.goalCount}</p>
                   <p className="text-xs text-muted-foreground">
                     {currentLanguage === 'ar' ? 'أهداف' : 'Goals'}

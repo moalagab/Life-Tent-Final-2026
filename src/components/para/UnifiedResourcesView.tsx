@@ -273,7 +273,7 @@ export function UnifiedResourcesView() {
                     'w-10 h-10 rounded-xl flex items-center justify-center shrink-0',
                     resource.type === 'note' && 'bg-blue-500/10 text-blue-500',
                     resource.type === 'link' && 'bg-emerald-500/10 text-emerald-500',
-                    resource.type === 'file' && 'bg-amber-500/10 text-amber-500',
+                    resource.type === 'file' && 'bg-primary/10 text-primary',
                     resource.type === 'book' && 'bg-purple-500/10 text-purple-500',
                     resource.type === 'movie' && 'bg-pink-500/10 text-pink-500',
                     resource.type === 'podcast' && 'bg-indigo-500/10 text-indigo-500',

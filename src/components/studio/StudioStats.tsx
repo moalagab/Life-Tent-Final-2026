@@ -94,8 +94,8 @@ export function StudioStats() {
           icon={BookOpen}
           value={stats.totalBooks}
           label={currentLanguage === 'ar' ? 'كتب' : 'Books'}
-          color="text-amber-500"
-          bg="bg-amber-500/10"
+          color="text-primary"
+          bg="bg-primary/10"
         />
         <StatCard
           icon={Film}
@@ -269,7 +269,7 @@ export function StudioStats() {
             label={currentLanguage === 'ar' ? 'أريد قراءته' : 'Want to Read'}
             value={stats.statusCount.want}
             total={Object.values(stats.statusCount).reduce((a, b) => a + b, 0)}
-            color="bg-amber-500"
+            color="bg-primary/80"
           />
         </div>
       </div>

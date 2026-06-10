@@ -452,7 +452,7 @@ export default function Knowledge() {
                       </span>
                     )}
                     {note.folder && (
-                      <span className="flex items-center gap-1 text-[10px] text-amber-500">
+                      <span className="flex items-center gap-1 text-[10px] text-primary">
                         <FolderOpen className="w-3 h-3" />
                         {note.folder}
                       </span>

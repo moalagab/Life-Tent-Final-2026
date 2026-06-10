@@ -166,11 +166,11 @@ export function GoalAnalytics({ goals, keyResults }: GoalAnalyticsProps) {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-amber-500/10 to-amber-500/5 border-amber-500/20">
+        <Card className="bg-gradient-to-br from-amber-500/10 to-amber-500/5 border-primary/20">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
-                <Clock className="w-5 h-5 text-amber-500" />
+              <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+                <Clock className="w-5 h-5 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-foreground">{analytics.inProgress}</p>
@@ -300,7 +300,7 @@ export function GoalAnalytics({ goals, keyResults }: GoalAnalyticsProps) {
                     </div>
                     <div className={cn(
                       'w-8 h-8 rounded-lg flex items-center justify-center',
-                      goal.perspective === 'personal' ? 'bg-amber-500/10' :
+                      goal.perspective === 'personal' ? 'bg-primary/10' :
                       goal.perspective === 'financial' ? 'bg-primary/10' :
                       goal.perspective === 'customer' ? 'bg-blue-500/10' :
                       goal.perspective === 'processes' ? 'bg-success/10' :
@@ -308,7 +308,7 @@ export function GoalAnalytics({ goals, keyResults }: GoalAnalyticsProps) {
                     )}>
                       <Icon className={cn(
                         'w-4 h-4',
-                        goal.perspective === 'personal' ? 'text-amber-500' :
+                        goal.perspective === 'personal' ? 'text-primary' :
                         goal.perspective === 'financial' ? 'text-primary' :
                         goal.perspective === 'customer' ? 'text-blue-500' :
                         goal.perspective === 'processes' ? 'text-success' :

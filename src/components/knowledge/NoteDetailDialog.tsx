@@ -199,7 +199,7 @@ export function NoteDetailDialog({
               )}
               {note.folder && (
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 text-sm">
-                  <FolderOpen className="w-4 h-4 text-amber-500" />
+                  <FolderOpen className="w-4 h-4 text-primary" />
                   <span className="text-muted-foreground">{currentLanguage === 'ar' ? 'مجلد:' : 'Folder:'}</span>
                   <span className="font-medium text-foreground">{note.folder}</span>
                 </div>

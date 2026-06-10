@@ -221,7 +221,7 @@ export function ReadingReminder() {
 
           {/* Permission Warning */}
           {!hasPermission && (
-            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 text-xs">
+            <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-primary/80 text-xs">
               {currentLanguage === 'ar' 
                 ? 'يجب السماح بالإشعارات لتفعيل التذكيرات'
                 : 'Notification permission required for reminders'}

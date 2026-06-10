@@ -358,7 +358,7 @@ export default function Habits() {
               {getTotalStreak() >= 7 && (
                 <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30">
                   <span className="text-xs">🔥</span>
-                  <span className="text-xs font-medium text-amber-500">
+                  <span className="text-xs font-medium text-primary">
                     {getTotalStreak() >= 30 ? '🏆' : getTotalStreak() >= 14 ? '⭐' : '🎯'}
                   </span>
                 </div>

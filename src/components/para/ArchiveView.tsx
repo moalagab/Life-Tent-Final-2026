@@ -19,7 +19,7 @@ import { toast } from 'sonner';
 const typeConfig: Record<ArchivedItem['type'], { label: string; icon: any; color: string }> = {
   project: { label: 'مشروع', icon: FolderKanban, color: 'bg-blue-500' },
   area: { label: 'مجال', icon: Layers, color: 'bg-purple-500' },
-  goal: { label: 'هدف', icon: Target, color: 'bg-amber-500' },
+  goal: { label: 'هدف', icon: Target, color: 'bg-primary/80' },
   task: { label: 'مهمة', icon: CheckSquare, color: 'bg-green-500' },
   resource: { label: 'مورد', icon: Database, color: 'bg-cyan-500' },
   customer: { label: 'عميل', icon: Users, color: 'bg-pink-500' },

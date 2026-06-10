@@ -520,7 +520,7 @@ export default function Auth() {
                         <Progress value={passwordStrength} className="h-2 flex-1" />
                         <span className={`text-xs font-medium ${
                           passwordStrength < 50 ? 'text-destructive' :
-                          passwordStrength < 80 ? 'text-yellow-500' : 'text-green-500'
+                          passwordStrength < 80 ? 'text-primary' : 'text-green-500'
                         }`} aria-live="polite">
                           {passwordStrength < 50
                             ? t('auth.passwordWeak')
@@ -557,7 +557,7 @@ export default function Auth() {
                   
                   {/* Lockout Warning */}
                   {mode === 'login' && loginAttempts > 0 && loginAttempts < MAX_LOGIN_ATTEMPTS && (
-                    <div className="flex items-center gap-2 text-yellow-500 text-xs mt-1" role="alert">
+                    <div className="flex items-center gap-2 text-primary text-xs mt-1" role="alert">
                       <Shield className="w-4 h-4" aria-hidden="true" />
                       <span>
                         {MAX_LOGIN_ATTEMPTS - loginAttempts} {t('auth.attemptsBeforeLockout')}

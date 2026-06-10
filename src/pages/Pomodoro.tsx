@@ -261,7 +261,7 @@ export default function Pomodoro() {
                           <span className={cn(
                             'w-2 h-2 rounded-full',
                             task.priority === 'high' ? 'bg-destructive' :
-                            task.priority === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'
+                            task.priority === 'medium' ? 'bg-primary/80' : 'bg-emerald-500'
                           )} />
                           {task.title}
                         </div>

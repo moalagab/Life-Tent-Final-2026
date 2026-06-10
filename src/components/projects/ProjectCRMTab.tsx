@@ -23,7 +23,7 @@ const pipelineColors: Record<string, string> = {
   new: 'bg-slate-500',
   contacted: 'bg-blue-500',
   qualified: 'bg-purple-500',
-  proposal: 'bg-amber-500',
+  proposal: 'bg-primary/80',
   negotiation: 'bg-orange-500',
   closed_won: 'bg-green-500',
   closed_lost: 'bg-red-500',

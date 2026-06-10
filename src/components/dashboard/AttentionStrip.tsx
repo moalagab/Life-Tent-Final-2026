@@ -143,7 +143,7 @@ export function AttentionStrip() {
         {sorted.map((item) => {
           const dotColor =
             item.severity === 'critical' ? 'bg-destructive'
-            : item.severity === 'warn' ? 'bg-amber-500'
+            : item.severity === 'warn' ? 'bg-primary/80'
             : item.severity === 'soon' ? 'bg-primary'
             : 'bg-muted-foreground';
           const Icon =

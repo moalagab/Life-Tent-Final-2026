@@ -79,11 +79,11 @@ export function NotificationSettings() {
   return (
     <div className="space-y-6">
       {/* Master Toggle */}
-      <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20">
+      <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-primary/20">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
-              <Bell className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+              <Bell className="w-5 h-5 text-primary/80 dark:text-primary" />
             </div>
             <div>
               <h4 className="font-medium text-foreground">{t('settings.enableNotifications')}</h4>

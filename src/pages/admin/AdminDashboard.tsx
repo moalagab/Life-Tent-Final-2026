@@ -270,7 +270,7 @@ function AdminContent() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard icon={Users}       label="إجمالي المستخدمين"  value={stats?.total_users}          iconColor="bg-blue-100 text-blue-600 dark:bg-blue-900/30" />
             <StatCard icon={UserCheck}   label="نشطون اليوم"         value={stats?.active_today}         iconColor="bg-green-100 text-green-600 dark:bg-green-900/30" />
-            <StatCard icon={Crown}       label="مشتركو برو"          value={stats?.pro_subscribers}      iconColor="bg-amber-100 text-amber-600 dark:bg-amber-900/30" />
+            <StatCard icon={Crown}       label="مشتركو برو"          value={stats?.pro_subscribers}      iconColor="bg-amber-100 text-primary/80 dark:bg-amber-900/30" />
             <StatCard icon={Briefcase}   label="مشتركو أعمال"        value={stats?.business_subscribers} iconColor="bg-violet-100 text-violet-600 dark:bg-violet-900/30" />
             <StatCard icon={CalendarDays}label="جدد هذا الشهر"       value={stats?.new_this_month}       iconColor="bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30" />
             <StatCard icon={TrendingUp}  label="نشطون هذا الأسبوع"  value={stats?.active_this_week}     iconColor="bg-orange-100 text-orange-600 dark:bg-orange-900/30" />

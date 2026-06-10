@@ -39,8 +39,8 @@ function GaugeRow({
 }) {
   const color =
     low
-      ? value < 30 ? 'bg-success' : value < 60 ? 'bg-amber-500' : 'bg-destructive'
-      : value >= 70 ? 'bg-success' : value >= 40 ? 'bg-amber-500' : 'bg-destructive';
+      ? value < 30 ? 'bg-success' : value < 60 ? 'bg-primary/80' : 'bg-destructive'
+      : value >= 70 ? 'bg-success' : value >= 40 ? 'bg-primary/80' : 'bg-destructive';
 
   return (
     <div className="space-y-1">
@@ -102,13 +102,13 @@ function insightVariant(text: string): 'positive' | 'warning' | 'critical' {
 
 const INSIGHT_STYLES = {
   positive: 'bg-success/5 border-success/25 text-success dark:text-green-400',
-  warning:  'bg-amber-500/5 border-amber-500/25 text-amber-700 dark:text-amber-400',
+  warning:  'bg-primary/5 border-primary/20 text-primary/80 dark:text-primary/70',
   critical: 'bg-destructive/5 border-destructive/25 text-destructive',
 };
 
 const INSIGHT_DOTS = {
   positive: 'text-success',
-  warning:  'text-amber-500',
+  warning:  'text-primary',
   critical: 'text-destructive',
 };
 
@@ -163,7 +163,7 @@ export function BehaviorInsights() {
 
   const riskBadgeStyle = {
     high:   'bg-destructive/15 text-destructive border-destructive/25',
-    medium: 'bg-amber-500/15 text-amber-600 border-amber-500/25',
+    medium: 'bg-primary/15 text-primary/80 border-primary/20',
     low:    'bg-success/15 text-success border-success/25',
   }[profile.todayRiskLevel];
 
@@ -217,7 +217,7 @@ export function BehaviorInsights() {
             label={currentLanguage === 'ar' ? 'عادات هشة' : 'Fragile Habits'}
             value={profile.fragileHabitIds.length}
             sub={currentLanguage === 'ar' ? 'تحتاج تعزيز' : 'need reinforcement'}
-            color={profile.fragileHabitIds.length > 0 ? 'text-amber-500' : 'text-success'}
+            color={profile.fragileHabitIds.length > 0 ? 'text-primary' : 'text-success'}
           />
           <StatCard
             icon={AlertTriangle}
@@ -268,14 +268,14 @@ export function BehaviorInsights() {
         {profile.distractionPatterns && profile.distractionPatterns.length > 0 && (
           <div className="space-y-1.5 pt-1">
             <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-500" /> {currentLanguage === 'ar' ? 'أنماط التشتت' : 'Distraction Patterns'}
+              <AlertTriangle className="w-3.5 h-3.5 text-primary" /> {currentLanguage === 'ar' ? 'أنماط التشتت' : 'Distraction Patterns'}
             </p>
             {profile.distractionPatterns.map((p, i) => (
               <div
                 key={i}
-                className="flex items-start gap-2 text-xs p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/20 text-amber-700 dark:text-amber-400"
+                className="flex items-start gap-2 text-xs p-2.5 rounded-lg bg-primary/5 border border-primary/20 text-primary/80 dark:text-primary/70"
               >
-                <span className="text-amber-500 font-bold mt-0.5">→</span>
+                <span className="text-primary font-bold mt-0.5">→</span>
                 <span>{p}</span>
               </div>
             ))}

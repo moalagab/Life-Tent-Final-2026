@@ -32,9 +32,9 @@ export function StudioWidget() {
         title={t('common.studio')}
         subtitle={currentLanguage === 'ar' ? 'مكتبتك' : 'Library'}
         icon={BookOpen}
-        iconColor="text-amber-500"
-        iconBg="bg-amber-500/10"
-        accentColor="bg-amber-500/10"
+        iconColor="text-primary"
+        iconBg="bg-primary/10"
+        accentColor="bg-primary/10"
         linkTo="/studio"
         linkText={t('common.viewAll')}
       >
@@ -50,9 +50,9 @@ export function StudioWidget() {
       title={t('common.studio')}
       subtitle={currentLanguage === 'ar' ? 'مكتبتك' : 'Library'}
       icon={BookOpen}
-      iconColor="text-amber-500"
-      iconBg="bg-amber-500/10"
-      accentColor="bg-amber-500/10"
+      iconColor="text-primary"
+      iconBg="bg-primary/10"
+      accentColor="bg-primary/10"
       linkTo="/studio"
       linkText={t('common.viewAll')}
     >

@@ -96,7 +96,7 @@ export function MoodHabitCorrelation() {
       <Card className="glass-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-amber-500" />
+            <Sparkles className="w-5 h-5 text-primary" />
             {currentLanguage === 'ar' ? 'تحليل العلاقة بين المزاج والعادات' : 'Mood-Habit Correlation'}
           </CardTitle>
         </CardHeader>
@@ -119,7 +119,7 @@ export function MoodHabitCorrelation() {
     <Card className="glass-card">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-amber-500" />
+          <Sparkles className="w-5 h-5 text-primary" />
           {currentLanguage === 'ar' ? 'تحليل العلاقة بين المزاج والعادات' : 'Mood-Habit Correlation'}
         </CardTitle>
         <p className="text-sm text-muted-foreground">

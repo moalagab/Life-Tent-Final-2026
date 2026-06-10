@@ -447,7 +447,7 @@ export default function Tasks() {
 
                           {/* Focus Badge */}
                           {task.is_focus && (
-                            <Badge className="text-xs gap-1 bg-amber-500/20 text-amber-600">
+                            <Badge className="text-xs gap-1 bg-primary/15 text-primary/80">
                               <Target className="w-3 h-3" />
                               {currentLanguage === 'ar' ? 'تركيز' : 'Focus'}
                             </Badge>

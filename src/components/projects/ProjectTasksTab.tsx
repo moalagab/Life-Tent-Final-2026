@@ -34,7 +34,7 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
   const priorityOptions = [
     { value: 'all', label: currentLanguage === 'ar' ? 'الكل' : 'All' },
     { value: 'high', label: currentLanguage === 'ar' ? 'عالي' : 'High', color: 'bg-red-500' },
-    { value: 'medium', label: currentLanguage === 'ar' ? 'متوسط' : 'Medium', color: 'bg-amber-500' },
+    { value: 'medium', label: currentLanguage === 'ar' ? 'متوسط' : 'Medium', color: 'bg-primary/80' },
     { value: 'low', label: currentLanguage === 'ar' ? 'منخفض' : 'Low', color: 'bg-green-500' },
   ];
   const { data: allTasks, isLoading } = useTasks();

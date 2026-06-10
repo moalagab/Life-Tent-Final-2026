@@ -66,7 +66,7 @@ interface GoalCardProps {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const perspectiveConfig: Record<string, { icon: any; color: string; bg: string }> = {
-  personal: { icon: User, color: 'text-amber-500', bg: 'bg-amber-500/10 border-amber-500/20' },
+  personal: { icon: User, color: 'text-primary', bg: 'bg-primary/10 border-primary/20' },
   financial: { icon: TrendingUp, color: 'text-primary', bg: 'bg-primary/10 border-primary/20' },
   customer: { icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10 border-blue-500/20' },
   processes: { icon: Cog, color: 'text-success', bg: 'bg-success/10 border-success/20' },

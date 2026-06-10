@@ -27,7 +27,7 @@ const statusConfig: Record<CaseStatus, { label: string; labelAr: string; icon: R
 
 const priorityConfig: Record<CasePriority, { label: string; labelAr: string; color: string }> = {
   low: { label: 'Low', labelAr: 'منخفضة', color: 'bg-green-500' },
-  medium: { label: 'Medium', labelAr: 'متوسطة', color: 'bg-yellow-500' },
+  medium: { label: 'Medium', labelAr: 'متوسطة', color: 'bg-primary/80' },
   high: { label: 'High', labelAr: 'عالية', color: 'bg-orange-500' },
   urgent: { label: 'Urgent', labelAr: 'عاجلة', color: 'bg-red-500' },
 };
