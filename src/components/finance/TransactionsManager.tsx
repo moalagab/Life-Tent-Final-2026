@@ -43,7 +43,6 @@ export function TransactionsManager() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
@@ -173,7 +172,6 @@ export function TransactionsManager() {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const openEditDialog = (tx: any) => {
     setEditTransaction({
       id: tx.id,

@@ -50,7 +50,6 @@ export function useCreateWishlistItem() {
     mutationFn: async (item: Partial<WishlistItem>) => {
       const { data, error } = await supabase
         .from('wishlist_items')
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .insert({ ...item, user_id: user!.id } as any)
         .select()
         .single();

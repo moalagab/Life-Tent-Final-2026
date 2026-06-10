@@ -25,85 +25,85 @@
 @layer base {
   :root {
     /* ============================================
-       Light Mode — Premium × Life Tent
-       Apple-grade neutrals · Deep bronze-gold identity
-       Zero yellow/orange tints on surfaces
+       Light Mode — Life Tent OS Premium
+       Apple-grade clarity · Deep Navy identity
+       Zero warm tints — pure cool neutrals
        ============================================ */
 
-    /* Surfaces — pure cool whites like Apple macOS */
-    --background: 220 20% 97%;            /* #F4F5F7 — cool, clean */
-    --foreground: 220 25% 8%;             /* near-black, crisp */
+    /* Surfaces */
+    --background: 220 18% 97%;            /* #F4F5F8 — cool off-white */
+    --foreground: 222 30% 9%;             /* near-black */
 
-    --card: 0 0% 100%;                    /* pure white */
-    --card-foreground: 220 25% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 30% 9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 8%;
+    --popover-foreground: 222 30% 9%;
 
-    /* Primary — deep bronze-gold (identity, no bright yellow) */
-    --primary: 34 72% 32%;               /* deep rich bronze — elegant, not orange */
+    /* Primary — deep navy (no gold, no orange, no yellow) */
+    --primary: 222 60% 28%;              /* #1B2F6B — deep navy blue */
     --primary-foreground: 0 0% 100%;
 
-    /* Neutral scale — cool grey like Apple's system fills */
+    /* Neutral scale */
     --secondary: 220 16% 95%;
     --secondary-foreground: 220 20% 20%;
 
-    --muted: 220 16% 93%;
+    --muted: 220 14% 93%;
     --muted-foreground: 220 12% 46%;
 
-    --accent: 220 16% 92%;               /* pure cool grey — NO gold tint */
-    --accent-foreground: 220 25% 14%;
+    --accent: 220 14% 91%;
+    --accent-foreground: 222 30% 12%;
 
     /* Status */
-    --destructive: 0 72% 42%;
+    --destructive: 0 70% 42%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 152 66% 26%;
+    --success: 152 64% 25%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 80% 36%;               /* only used for warning badges */
+    --warning: 25 70% 38%;               /* muted terracotta — warm but not gold */
     --warning-foreground: 0 0% 100%;
 
     /* Lines & focus */
-    --border: 220 16% 88%;               /* barely-there hairline */
-    --input: 220 16% 91%;
-    --ring: 34 72% 38%;
+    --border: 220 14% 87%;
+    --input: 220 14% 91%;
+    --ring: 222 60% 35%;
 
     --radius: 1rem;
 
-    /* Glass — premium frosted clarity */
-    --glass-bg: rgba(255, 255, 255, 0.82);
-    --glass-bg-hover: rgba(255, 255, 255, 0.91);
+    /* Glass */
+    --glass-bg: rgba(255, 255, 255, 0.84);
+    --glass-bg-hover: rgba(255, 255, 255, 0.92);
     --glass-bg-active: rgba(255, 255, 255, 0.97);
     --glass-bg-disabled: rgba(255, 255, 255, 0.50);
-    --glass-border: rgba(30, 40, 60, 0.07);
-    --glass-border-hover: rgba(30, 40, 60, 0.12);
-    --glass-border-active: hsla(34, 72%, 38%, 0.35);
-    --glass-border-disabled: rgba(30, 40, 60, 0.04);
+    --glass-border: rgba(20, 30, 60, 0.07);
+    --glass-border-hover: rgba(20, 30, 60, 0.11);
+    --glass-border-active: hsla(222, 60%, 35%, 0.30);
+    --glass-border-disabled: rgba(20, 30, 60, 0.04);
     --glass-blur: 48px;
 
-    /* Elevation — barely-there shadows, Apple-grade depth */
-    --elev-1: 0 1px 2px rgba(20, 28, 48, 0.05);
-    --elev-2: 0 2px 8px rgba(20, 28, 48, 0.06), 0 1px 2px rgba(20, 28, 48, 0.04);
-    --elev-3: 0 4px 20px rgba(20, 28, 48, 0.08), 0 2px 6px rgba(20, 28, 48, 0.04);
-    --elev-4: 0 8px 36px rgba(20, 28, 48, 0.10), 0 3px 10px rgba(20, 28, 48, 0.05);
+    /* Elevation — Apple-grade micro-depth */
+    --elev-1: 0 1px 2px rgba(18, 26, 52, 0.05);
+    --elev-2: 0 2px 8px rgba(18, 26, 52, 0.07), 0 1px 2px rgba(18, 26, 52, 0.04);
+    --elev-3: 0 4px 20px rgba(18, 26, 52, 0.09), 0 2px 6px rgba(18, 26, 52, 0.04);
+    --elev-4: 0 8px 36px rgba(18, 26, 52, 0.11), 0 3px 10px rgba(18, 26, 52, 0.05);
 
     /* Focus ring */
-    --focus-ring: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(34 72% 38% / 0.55);
+    --focus-ring: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(222 60% 35% / 0.50);
 
-    /* Brand gradients — deep bronze, NO bright yellow */
-    --gradient-gold: linear-gradient(135deg, hsl(36 68% 40%) 0%, hsl(30 65% 28%) 100%);
-    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(248,249,252,0.60) 100%);
+    /* Gradients — navy, NO gold */
+    --gradient-gold: linear-gradient(135deg, hsl(222 60% 32%) 0%, hsl(222 55% 22%) 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.93) 0%, rgba(244,245,248,0.65) 100%);
 
-    /* Sidebar — crisp white, feather-light separation */
-    --sidebar-background: 220 22% 99%;
-    --sidebar-foreground: 220 22% 16%;
-    --sidebar-primary: 34 72% 32%;
+    /* Sidebar */
+    --sidebar-background: 220 20% 99%;
+    --sidebar-foreground: 222 25% 15%;
+    --sidebar-primary: 222 60% 28%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 16% 94%;
-    --sidebar-accent-foreground: 220 22% 12%;
-    --sidebar-border: 220 16% 91%;
-    --sidebar-ring: 34 72% 38%;
+    --sidebar-accent: 220 14% 94%;
+    --sidebar-accent-foreground: 222 28% 12%;
+    --sidebar-border: 220 14% 90%;
+    --sidebar-ring: 222 60% 35%;
   }
 
   .dark {

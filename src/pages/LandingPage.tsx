@@ -70,7 +70,7 @@ export default function LandingPage() {
       icon: Target,
       title: t('landing.goalManagement'),
       description: t('landing.goalManagementDesc'),
-      color: 'from-amber-500 to-orange-600'
+      color: 'from-primary/20 to-orange-600'
     },
     {
       icon: CheckCircle,
@@ -257,7 +257,7 @@ export default function LandingPage() {
           {/* Main Heading */}
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 leading-tight">
             <span className="block animate-fade-in" style={{ animationDelay: '0.1s' }}>
-              <span className="bg-gradient-to-r from-primary via-yellow-500 to-primary bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
+              <span className="bg-gradient-to-r from-primary/60 via-primary to-primary/60 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
                 {t('landing.heroTitle1')}
               </span>
             </span>
@@ -402,7 +402,7 @@ export default function LandingPage() {
                 <div className="glass-card p-8 relative z-10">
                   <div className="grid grid-cols-2 gap-5">
                     <div className="glass-card p-6 text-center group hover:scale-105 transition-all duration-300">
-                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform shadow-lg">
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-orange-600 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform shadow-lg">
                         <Target className="w-7 h-7 text-white" />
                       </div>
                       <div className="text-3xl font-bold gold-text mb-1">8+</div>

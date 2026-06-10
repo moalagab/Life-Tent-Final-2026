@@ -206,7 +206,6 @@ export function SubscriptionsManager() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [editingSub, setEditingSub] = useState<any>(null);
   const [view, setView] = useState<'list' | 'calendar'>('list');
 
@@ -383,7 +382,6 @@ export function SubscriptionsManager() {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const openEditDialog = (sub: any) => {
     setEditingSub(sub);
     setFormData({

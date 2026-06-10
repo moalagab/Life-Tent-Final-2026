@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -874,12 +873,8 @@ export function InvestmentsManager() {
                   </div>
                 </div>
 
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 {(h as any).investment_journal && (
                   <div className="mt-3 p-2 rounded-lg bg-muted/30 text-sm">
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     <p className="text-muted-foreground line-clamp-2">{(h as any).investment_journal}</p>
                   </div>
                 )}

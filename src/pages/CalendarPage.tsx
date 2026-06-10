@@ -26,7 +26,6 @@ export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [editingEvent, setEditingEvent] = useState<any>(null);
   const [newEvent, setNewEvent] = useState({
     title: '',
@@ -142,7 +141,6 @@ export default function CalendarPage() {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleEditEvent = (event: any) => {
     setEditingEvent(event);
     setNewEvent({

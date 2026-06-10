@@ -73,7 +73,6 @@ export default function Pomodoro() {
 
   const playSound = useCallback(() => {
     if (settings.soundEnabled) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
@@ -193,7 +192,7 @@ export default function Pomodoro() {
       color: 'text-primary',
       bgColor: 'bg-primary/10',
       ringColor: 'stroke-primary',
-      gradient: 'from-primary/20 to-amber-500/20',
+      gradient: 'from-primary/20 to-primary/10/20',
       icon: Brain,
     },
     shortBreak: {

@@ -54,7 +54,7 @@ export interface CustomerCommunication {
 // Pipeline stages
 export const PIPELINE_STAGES = [
   { id: 'new', label: 'جديد', labelEn: 'New', color: 'bg-blue-500' },
-  { id: 'contacted', label: 'تم التواصل', labelEn: 'Contacted', color: 'bg-yellow-500' },
+  { id: 'contacted', label: 'تم التواصل', labelEn: 'Contacted', color: 'bg-primary/20' },
   { id: 'qualified', label: 'مؤهل', labelEn: 'Qualified', color: 'bg-purple-500' },
   { id: 'proposal', label: 'عرض سعر', labelEn: 'Proposal', color: 'bg-orange-500' },
   { id: 'negotiation', label: 'تفاوض', labelEn: 'Negotiation', color: 'bg-pink-500' },
@@ -193,7 +193,6 @@ export function useUpdateCase() {
     mutationFn: async ({ id, customer, ...updates }: Partial<CustomerCase> & { id: string }) => {
       const { data, error } = await supabase
         .from('customer_cases')
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .update(updates as any)
         .eq('id', id)
         .select()

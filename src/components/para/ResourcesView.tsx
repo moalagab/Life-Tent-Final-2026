@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useResources, useCreateResource, useUpdateResource, useArchiveResource, useRestoreResource, useDeleteResource, ResourceType } from '@/hooks/useResources';
@@ -255,8 +254,6 @@ export function ResourcesView() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">كل المشاريع</SelectItem>
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             {projects?.map((project: any) => (
               <SelectItem key={project.id} value={project.id}>{project.title}</SelectItem>
             ))}
@@ -273,8 +270,6 @@ export function ResourcesView() {
       </div>
 
       {/* Type Tabs */}
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       <Tabs value={activeType} onValueChange={(v) => setActiveType(v as any)}>
         <TabsList className="bg-muted/50">
           <TabsTrigger value="all">الكل</TabsTrigger>
@@ -289,8 +284,6 @@ export function ResourcesView() {
         <TabsContent value={activeType} className="mt-4">
           {/* Resources Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             {filteredResources?.map((resource: any) => {
               const TypeIcon = getTypeIcon(resource.type);
               return (
@@ -495,8 +488,6 @@ export function ResourcesView() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">بدون</SelectItem>
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     {projects?.map((project: any) => (
                       <SelectItem key={project.id} value={project.id}>{project.title}</SelectItem>
                     ))}

@@ -29,7 +29,7 @@ export default function Settings() {
       label: t('settings.notifications'), 
       icon: Bell, 
       description: t('settings.notificationsDesc'),
-      gradient: 'from-amber-500/20 to-orange-500/20'
+      gradient: 'from-primary/20/20 to-orange-500/20'
     },
     { 
       id: 'language', 

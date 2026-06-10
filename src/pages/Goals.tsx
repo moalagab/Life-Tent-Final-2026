@@ -132,7 +132,6 @@ export default function Goals() {
     return filtered;
   }, [goals, selectedCategory, searchQuery]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleCreateGoal = async (formData: any) => {
     try {
       await createGoal.mutateAsync({
@@ -153,7 +152,6 @@ export default function Goals() {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleUpdateGoal = async (formData: any) => {
     if (!editingGoal) return;
     
@@ -373,7 +371,7 @@ export default function Goals() {
                   </div>
                 </div>
               </div>
-              <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 border border-primary/20">
+              <div className="p-4 rounded-xl bg-gradient-to-br from-primary/20/10 to-primary/10/5 border border-primary/20">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center">
                     <User className="w-5 h-5 text-primary" />
@@ -514,7 +512,6 @@ export default function Goals() {
         initialData={editingGoal ? {
           title: editingGoal.title,
           description: editingGoal.description || '',
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           perspective: (editingGoal.perspective as any) || 'personal',
           target_value: editingGoal.target_value?.toString() || '',
           current_value: editingGoal.current_value?.toString() || '0',

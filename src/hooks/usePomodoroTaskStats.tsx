@@ -49,9 +49,7 @@ export function usePomodoroTaskStats() {
       } else {
         statsMap.set(session.task_id, {
           taskId: session.task_id,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           taskTitle: (session.tasks as any).title,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           projectTitle: (session.tasks as any).projects?.title || null,
           totalSessions: 1,
           totalMinutes: session.duration_minutes,

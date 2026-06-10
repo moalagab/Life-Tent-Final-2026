@@ -166,7 +166,7 @@ export function GoalAnalytics({ goals, keyResults }: GoalAnalyticsProps) {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-amber-500/10 to-amber-500/5 border-primary/20">
+        <Card className="bg-gradient-to-br from-primary/20/10 to-primary/10/5 border-primary/20">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">

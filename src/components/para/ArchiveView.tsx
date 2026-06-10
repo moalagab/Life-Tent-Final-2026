@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useArchivedItems, ArchivedItem } from '@/hooks/useArchive';
@@ -126,8 +125,6 @@ export function ArchiveView() {
       </div>
 
       {/* Type Tabs */}
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       <Tabs value={activeType} onValueChange={(v) => setActiveType(v as any)}>
         <TabsList className="bg-muted/50 flex-wrap h-auto p-1">
           <TabsTrigger value="all" className="gap-1">

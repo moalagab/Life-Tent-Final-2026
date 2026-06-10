@@ -79,7 +79,7 @@ export function NotificationSettings() {
   return (
     <div className="space-y-6">
       {/* Master Toggle */}
-      <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-primary/20">
+      <div className="p-4 rounded-xl bg-gradient-to-br from-primary/20/10 to-orange-500/10 border border-primary/20">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">

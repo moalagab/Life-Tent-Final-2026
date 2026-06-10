@@ -41,7 +41,6 @@ export function PrayerWidget() {
   const { t, currentLanguage } = useLanguage();
   const isAr = currentLanguage === 'ar';
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [nextPrayer, setNextPrayer] = useState<{ prayer: any; remaining: string } | null>(null);
   // Re-evaluate Ramadan status daily so the widget stays correct across midnight
   const [isRamadanPeriod, setIsRamadanPeriod] = useState(isRamadan());
@@ -122,7 +121,6 @@ export function PrayerWidget() {
       () => setWeatherLoading(false),
       { timeout: 10000, maximumAge: 30 * 60 * 1000 }
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!prayerTimes || !nextPrayer) return null;

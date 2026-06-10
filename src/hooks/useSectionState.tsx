@@ -32,7 +32,6 @@ export function useSectionState(sectionId: string, defaultOpen = true) {
     } catch {
       /* ignore */
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storageKey]);
 
   const toggle = useCallback(() => {

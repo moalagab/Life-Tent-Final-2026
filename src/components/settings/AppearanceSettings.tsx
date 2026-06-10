@@ -25,7 +25,7 @@ export function AppearanceSettings() {
             className={cn(
               'relative flex flex-col items-center gap-3 p-6 rounded-2xl border-2 transition-all duration-300',
               theme === 'light'
-                ? 'border-primary bg-gradient-to-br from-amber-100/50 to-orange-100/50 dark:from-amber-900/30 dark:to-orange-900/30 shadow-lg shadow-primary/10'
+                ? 'border-primary bg-gradient-to-br from-primary/20/50 to-orange-100/50 dark:from-primary/20/30 dark:to-orange-900/30 shadow-lg shadow-primary/10'
                 : 'border-border hover:border-primary/50 hover:bg-muted/30'
             )}
           >
@@ -34,7 +34,7 @@ export function AppearanceSettings() {
                 <Check className="w-4 h-4 text-primary-foreground" />
               </div>
             )}
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-orange-500 flex items-center justify-center shadow-lg">
               <Sun className="w-8 h-8 text-white" />
             </div>
             <div className="text-center">

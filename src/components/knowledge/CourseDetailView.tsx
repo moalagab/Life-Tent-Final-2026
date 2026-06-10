@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { 
   ArrowLeft, BookOpen, GraduationCap, Plus, Check, Clock, FileText, 
@@ -274,8 +273,6 @@ export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetai
       </div>
 
       {/* Tabs */}
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
         <div className="flex items-center justify-between">
           <TabsList>
@@ -458,7 +455,7 @@ export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetai
                             <div key={note.id} className="p-2 rounded-lg bg-muted/30 text-sm">
                               <div className="flex items-center justify-between">
                                 <span className="font-medium">{note.title}</span>
-                                {note.is_important && <Star className="w-3 h-3 text-primary fill-yellow-500" />}
+                                {note.is_important && <Star className="w-3 h-3 text-primary fill-primary" />}
                               </div>
                               {note.content && <p className="text-muted-foreground text-xs mt-1">{note.content}</p>}
                             </div>
@@ -496,7 +493,7 @@ export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetai
                 <div key={note.id} className="glass-card p-4 group">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      {note.is_important && <Star className="w-4 h-4 text-primary fill-yellow-500" />}
+                      {note.is_important && <Star className="w-4 h-4 text-primary fill-primary" />}
                       <h4 className="font-medium text-foreground">{note.title}</h4>
                     </div>
                     <Button 

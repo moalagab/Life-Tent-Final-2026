@@ -8,7 +8,6 @@ export interface ArchivedItem {
   title: string;
   description?: string | null;
   archived_at: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   original_data: Record<string, any>;
 }
 

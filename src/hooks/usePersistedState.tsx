@@ -28,7 +28,7 @@ export function usePersistedState<T>(key: string, initial: T) {
   // Re-sync when the user (and therefore key) changes
   useEffect(() => {
     setValueState(read());
-  }, [storageKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [read]);
 
   const setValue = useCallback(
     (next: T | ((prev: T) => T)) => {

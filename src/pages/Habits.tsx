@@ -62,7 +62,6 @@ export default function Habits() {
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [editingHabit, setEditingHabit] = useState<any>(null);
   const [newHabit, setNewHabit] = useState({
     name: '',
@@ -356,7 +355,7 @@ export default function Habits() {
             <div className="flex items-center gap-3">
               {/* Streak Badges */}
               {getTotalStreak() >= 7 && (
-                <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30">
+                <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-gradient-to-r from-primary/20/20 to-orange-500/20 border border-primary/20">
                   <span className="text-xs">🔥</span>
                   <span className="text-xs font-medium text-primary">
                     {getTotalStreak() >= 30 ? '🏆' : getTotalStreak() >= 14 ? '⭐' : '🎯'}

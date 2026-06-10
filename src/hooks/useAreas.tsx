@@ -10,7 +10,6 @@ export interface Area {
   owner_id: string | null;
   status: 'active' | 'archived';
   review_cadence: 'weekly' | 'monthly' | 'quarterly' | 'yearly';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   kpi_json: Record<string, any> | null;
   color: string | null;
   icon: string | null;
@@ -72,7 +71,6 @@ export function useCreateArea() {
     mutationFn: async (area: { name: string; description?: string; color?: string; review_cadence?: string }) => {
       const { data, error } = await supabase
         .from('areas')
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .insert({ ...area, user_id: user!.id, status: 'active' } as any)
         .select()
         .single();
@@ -93,7 +91,6 @@ export function useUpdateArea() {
     mutationFn: async ({ id, ...updates }: { id: string; name?: string; description?: string; color?: string; review_cadence?: string }) => {
       const { data, error } = await supabase
         .from('areas')
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .update(updates as any)
         .eq('id', id)
         .select()
