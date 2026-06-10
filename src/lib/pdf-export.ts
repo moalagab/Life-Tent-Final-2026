@@ -196,7 +196,7 @@ export function generateCourseNotesPDF(data: {
   checkPageBreak(20);
   pdf.setFontSize(8);
   pdf.setTextColor(150, 150, 150);
-  pdf.text('Generated with Lovable - Your Personal Learning Platform', pageWidth / 2, pageHeight - 10, { align: 'center' });
+  pdf.text('LIFE TENT OS — نظام إدارة حياتك', pageWidth / 2, pageHeight - 10, { align: 'center' });
 
   // Save
   const safeFilename = data.courseTitle.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').substring(0, 50);
