@@ -66,10 +66,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
-    const SUPABASE_URL = "https://oocddixbjiynladnvdfx.supabase.co";
-    const redirectTo = encodeURIComponent(`${window.location.origin}/`);
-    window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${redirectTo}`;
-    return { error: null };
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/`,
+      },
+    });
+    return { error: error as Error | null };
   };
 
   const resetPassword = async (email: string) => {

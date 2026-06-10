@@ -1,18 +1,35 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// ── CORS — restricted to known origins only ──────────────────────────────────
+const ALLOWED_ORIGINS = [
+  "https://www.lifetent.online",
+  "https://lifetent.online",
+  "http://localhost:8080",
+  "http://localhost:8081",
+  "http://localhost:8082",
+  "http://localhost:8083",
+];
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("origin") ?? "";
+  const allowOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    "Access-Control-Allow-Origin":  allowOrigin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
+}
 
 const handler = async (req: Request): Promise<Response> => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   const authHeader = req.headers.get("Authorization");
-  if (!authHeader) {
+  if (!authHeader?.startsWith("Bearer ")) {
     return new Response(JSON.stringify({ error: "Missing Authorization header" }), {
       status: 401,
       headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -20,10 +37,9 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    // Use the user's JWT to fetch only their own data (respects RLS)
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } }
     );
 
@@ -35,7 +51,6 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Fetch all user data in parallel
     const [
       profileResult,
       projectsResult,
@@ -66,27 +81,27 @@ const handler = async (req: Request): Promise<Response> => {
 
     const exportData = {
       exported_at: new Date().toISOString(),
-      user_id: user.id,
-      email: user.email,
+      user_id:     user.id,
+      email:       user.email,
       data: {
-        profile: profileResult.data,
-        projects: projectsResult.data ?? [],
-        tasks: tasksResult.data ?? [],
-        goals: goalsResult.data ?? [],
-        habits: habitsResult.data ?? [],
-        habit_logs: habitLogsResult.data ?? [],
+        profile:      profileResult.data,
+        projects:     projectsResult.data     ?? [],
+        tasks:        tasksResult.data        ?? [],
+        goals:        goalsResult.data        ?? [],
+        habits:       habitsResult.data       ?? [],
+        habit_logs:   habitLogsResult.data    ?? [],
         transactions: transactionsResult.data ?? [],
-        accounts: accountsResult.data ?? [],
-        budgets: budgetsResult.data ?? [],
-        events: eventsResult.data ?? [],
-        notes: notesResult.data ?? [],
-        courses: coursesResult.data ?? [],
+        accounts:     accountsResult.data     ?? [],
+        budgets:      budgetsResult.data      ?? [],
+        events:       eventsResult.data       ?? [],
+        notes:        notesResult.data        ?? [],
+        courses:      coursesResult.data      ?? [],
       },
       stats: {
-        projects_count: projectsResult.data?.length ?? 0,
-        tasks_count: tasksResult.data?.length ?? 0,
-        goals_count: goalsResult.data?.length ?? 0,
-        habits_count: habitsResult.data?.length ?? 0,
+        projects_count:     projectsResult.data?.length     ?? 0,
+        tasks_count:        tasksResult.data?.length        ?? 0,
+        goals_count:        goalsResult.data?.length        ?? 0,
+        habits_count:       habitsResult.data?.length       ?? 0,
         transactions_count: transactionsResult.data?.length ?? 0,
       },
     };
@@ -107,4 +122,4 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-serve(handler);
+Deno.serve(handler);

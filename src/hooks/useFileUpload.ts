@@ -40,7 +40,9 @@ interface UseFileUploadReturn {
 }
 
 function randomId() {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
 }
 
 function ext(filename: string) {
