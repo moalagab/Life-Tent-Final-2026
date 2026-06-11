@@ -1,20 +1,24 @@
 /**
  * capacitor.ts — Platform detection + native bridge utilities.
  *
- * Import this instead of checking Capacitor directly so all
- * platform logic is centralised and testable.
+ * Uses runtime window.Capacitor check instead of a static import
+ * so @capacitor/core is NOT bundled into the web critical path.
  */
-import { Capacitor } from '@capacitor/core';
 
-export const platform   = Capacitor.getPlatform();   // 'android' | 'ios' | 'web'
-export const isNative   = Capacitor.isNativePlatform();
-export const isAndroid  = platform === 'android';
-export const isIOS      = platform === 'ios';
-export const isWeb      = platform === 'web';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const cap = (window as any).Capacitor as
+  | { isNativePlatform(): boolean; getPlatform(): string; isPluginAvailable(name: string): boolean }
+  | undefined;
+
+export const isNative  = typeof cap !== 'undefined' && cap.isNativePlatform();
+export const platform  = isNative ? cap!.getPlatform() : 'web';   // 'android' | 'ios' | 'web'
+export const isAndroid = platform === 'android';
+export const isIOS     = platform === 'ios';
+export const isWeb     = !isNative;
 
 /** Safe plugin availability check */
 export function isPluginAvailable(name: string): boolean {
-  return Capacitor.isPluginAvailable(name);
+  return cap?.isPluginAvailable(name) ?? false;
 }
 
 /**

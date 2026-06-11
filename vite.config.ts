@@ -65,12 +65,34 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         // Inject push event handlers into the generated Service Worker
         importScripts: ['/sw-push.js'],
-        // Serve index.html for all SPA navigation (fixes /admin 404 when SW serves stale cache)
+        // Serve index.html for all SPA navigation
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/assets/, /^\/api/, /^\/offline/],
-        // Cache the app shell + offline page
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        // Precache ONLY the app shell (html + css + tiny js entry).
+        // Large JS chunks are runtime-cached on first use — avoids 3 MB download on install.
+        globPatterns: ["**/*.{css,html,ico,png,svg,woff2}"],
+        // Exclude known heavy chunks from precache entirely
+        globIgnores: [
+          "**/jspdf*",
+          "**/html2canvas*",
+          "**/vendor-charts*",
+          "**/purify*",
+          "**/Knowledge*",
+          "**/Finance*",
+          "**/Projects*",
+          "**/Studio*",
+        ],
         runtimeCaching: [
+          {
+            // All JS assets — stale-while-revalidate (fast load, background update)
+            urlPattern: /\/assets\/.*\.js$/,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "js-chunks",
+              expiration: { maxEntries: 120, maxAgeSeconds: 60 * 60 * 24 * 7 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
           {
             // Supabase API — network-first, fall back to cache
             urlPattern: /^https:\/\/[a-z]+\.supabase\.co\/rest\//,
@@ -133,6 +155,8 @@ export default defineConfig(({ mode }) => ({
           "vendor-forms": ["react-hook-form", "@hookform/resolvers", "zod"],
           "vendor-i18n": ["i18next", "react-i18next"],
           "vendor-dates": ["date-fns"],
+          "vendor-sentry": ["@sentry/react", "@sentry/browser"],
+          "vendor-capacitor": ["@capacitor/core"],
         },
       },
     },

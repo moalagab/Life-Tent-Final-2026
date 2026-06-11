@@ -14,13 +14,11 @@ import { PWAUpdatePrompt } from "@/components/PWAUpdatePrompt";
 import { useAppLifecycle } from "@/hooks/useAppLifecycle";
 import { isNative } from "@/lib/capacitor";
 
-// Eagerly load auth pages (always needed)
-import LandingPage from "./pages/LandingPage";
-import Auth from "./pages/Auth";
-import ResetPassword from "./pages/ResetPassword";
-import NotFound from "./pages/NotFound";
-
-// Lazy-load all protected pages — splits each into its own chunk
+// Lazy-load all pages — nothing is eagerly bundled into the critical path
+const LandingPage     = lazy(() => import("./pages/LandingPage"));
+const Auth            = lazy(() => import("./pages/Auth"));
+const ResetPassword   = lazy(() => import("./pages/ResetPassword"));
+const NotFound        = lazy(() => import("./pages/NotFound"));
 const Onboarding      = lazy(() => import("./pages/Onboarding"));
 const AdminDashboard  = lazy(() => import("./pages/admin/AdminDashboard"));
 const Index        = lazy(() => import("./pages/Index"));
