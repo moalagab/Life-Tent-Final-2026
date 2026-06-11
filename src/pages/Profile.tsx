@@ -1,5 +1,5 @@
 import { MainLayout } from '@/components/layout/MainLayout';
-import { User, Camera, Loader2, Save } from 'lucide-react';
+import { User, Camera, Loader2, Save, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -88,9 +88,14 @@ export default function Profile() {
   return (
     <MainLayout>
       <div className="max-w-2xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">{t('profile.title')}</h1>
-          <p className="text-muted-foreground mt-1">{t('profile.subtitle')}</p>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-sm">
+            <UserCircle className="w-5 h-5 text-primary-foreground" strokeWidth={1.8} />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-foreground leading-tight">{t('profile.title')}</h1>
+            <p className="text-[11px] text-muted-foreground">{t('profile.subtitle')}</p>
+          </div>
         </div>
 
         <div className="glass-card p-8">

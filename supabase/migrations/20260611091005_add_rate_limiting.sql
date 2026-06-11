@@ -40,6 +40,7 @@ CREATE INDEX IF NOT EXISTS rate_limit_counters_window_start_idx
 ALTER TABLE rate_limit_counters ENABLE ROW LEVEL SECURITY;
 
 -- Block all direct access; the function uses SECURITY DEFINER to bypass RLS
+DROP POLICY IF EXISTS "no_direct_access" ON rate_limit_counters;
 CREATE POLICY "no_direct_access"
   ON rate_limit_counters
   FOR ALL

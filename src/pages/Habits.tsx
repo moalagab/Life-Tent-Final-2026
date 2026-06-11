@@ -238,26 +238,36 @@ export default function Habits() {
 
   return (
     <MainLayout>
-      <div className="mb-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">{t('habits.title')}</h1>
-            <p className="text-muted-foreground mt-1">{t('habits.subtitle')}</p>
+      <div className="mb-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-rose-500 flex items-center justify-center shadow-sm">
+              <Flame className="w-5 h-5 text-white" strokeWidth={1.8} />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-foreground leading-tight">{t('habits.title')}</h1>
+              <p className="text-[11px] text-muted-foreground">
+                {habits?.length || 0} {t('habits.title')} · {getTotalStreak()} 🔥
+              </p>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button 
-              variant={showCorrelation ? 'default' : 'outline'} 
+          <div className="flex items-center gap-2">
+            <button
               onClick={() => setShowCorrelation(!showCorrelation)}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all',
+                showCorrelation ? 'bg-primary text-primary-foreground' : 'bg-muted/60 text-muted-foreground hover:bg-muted',
+              )}
             >
-              <BarChart3 className="w-5 h-5 me-2" />
-              {t('habits.correlationInsight')}
-            </Button>
+              <BarChart3 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{t('habits.correlationInsight')}</span>
+            </button>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="gold" size="lg">
-                  <Plus className="w-5 h-5 me-2" />
-                  {t('habits.newHabit')}
-                </Button>
+                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold transition-all active:scale-95 shadow-sm">
+                  <Plus className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{t('habits.newHabit')}</span>
+                </button>
               </DialogTrigger>
             <DialogContent>
               <DialogHeader>

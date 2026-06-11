@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { User, Bell, Globe, Shield, Palette, Database, ChevronDown, ChevronUp } from 'lucide-react';
+import { User, Bell, Globe, Shield, Palette, Database, ChevronDown, ChevronUp, Settings as SettingsIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 import { ProfileSettings } from '@/components/settings/ProfileSettings';
@@ -88,16 +88,14 @@ export default function Settings() {
     <MainLayout>
       <div className="max-w-3xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-            </span>
-            {t('settings.title')}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-slate-500 to-slate-700 flex items-center justify-center shadow-sm">
+            <SettingsIcon className="w-5 h-5 text-white" strokeWidth={1.8} />
           </div>
-          <h1 className="text-3xl font-bold text-foreground">{t('settings.title')}</h1>
-          <p className="text-muted-foreground mt-1">{t('settings.subtitle')}</p>
+          <div>
+            <h1 className="text-lg font-bold text-foreground leading-tight">{t('settings.title')}</h1>
+            <p className="text-[11px] text-muted-foreground">{t('settings.subtitle')}</p>
+          </div>
         </div>
 
         {/* Settings Sections */}

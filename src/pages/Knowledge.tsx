@@ -203,24 +203,27 @@ export default function Knowledge() {
 
   return (
     <MainLayout>
-      <div className="mb-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">{t('knowledge.title')}</h1>
-            <p className="text-muted-foreground mt-1">{t('knowledge.subtitle')}</p>
+      <div className="mb-5">
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm">
+              <GraduationCap className="w-5 h-5 text-white" strokeWidth={1.8} />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-foreground leading-tight">{t('knowledge.title')}</h1>
+              <p className="text-[11px] text-muted-foreground">
+                {(notes?.length || 0) + (courses?.length || 0)} {currentLanguage === 'ar' ? 'عنصر' : 'items'}
+              </p>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Button variant="outline" size="lg">
-              <Sparkles className="w-5 h-5 me-2" />
-              {t('knowledge.aiInsights')}
-            </Button>
+          <div className="flex items-center gap-2">
             {activeTab === 'notes' && (
               <Dialog open={isNoteDialogOpen} onOpenChange={setIsNoteDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="gold" size="lg">
-                    <Plus className="w-5 h-5 me-2" />
-                    {t('knowledge.newNote')}
-                  </Button>
+                  <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold transition-all active:scale-95 shadow-sm">
+                    <Plus className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">{t('knowledge.newNote')}</span>
+                  </button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
@@ -305,10 +308,10 @@ export default function Knowledge() {
             {activeTab === 'courses' && (
               <Dialog open={isCourseDialogOpen} onOpenChange={setIsCourseDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="gold" size="lg">
-                    <Plus className="w-5 h-5 me-2" />
-                    {t('knowledge.newCourse')}
-                  </Button>
+                  <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold transition-all active:scale-95 shadow-sm">
+                    <Plus className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">{t('knowledge.newCourse')}</span>
+                  </button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
@@ -348,44 +351,96 @@ export default function Knowledge() {
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'notes' | 'courses' | 'archived')} className="space-y-6">
-        <div className="flex flex-wrap items-center gap-3">
-          <div dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'} className="overflow-x-auto">
-          <TabsList>
-            <TabsTrigger value="notes" className="flex items-center gap-2">
-              <FileText className="w-4 h-4" />
-              {t('knowledge.notes')}
-              {notes && notes.length > 0 && (
-                <span className="text-xs bg-muted px-1.5 py-0.5 rounded-full">{notes.length}</span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="courses" className="flex items-center gap-2">
-              <GraduationCap className="w-4 h-4" />
-              {t('knowledge.courses')}
-              {courses && courses.length > 0 && (
-                <span className="text-xs bg-muted px-1.5 py-0.5 rounded-full">{courses.length}</span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="archived" className="flex items-center gap-2">
-              <Archive className="w-4 h-4" />
-              {t('knowledge.archived')}
-              {archivedNotes && archivedNotes.length > 0 && (
-                <span className="text-xs bg-muted px-1.5 py-0.5 rounded-full">{archivedNotes.length}</span>
-              )}
-            </TabsTrigger>
-          </TabsList>
-          </div>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'notes' | 'courses' | 'archived')} className="space-y-5">
 
-          <div className="relative w-full sm:w-auto">
-            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder={t('knowledge.searchNotes')}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="ps-10 pe-4 py-2 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 w-full sm:w-64"
-            />
-          </div>
+        {/* ── Visual tab selector ── */}
+        <div className="grid grid-cols-3 gap-3" dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}>
+          {/* Notes */}
+          <button
+            onClick={() => setActiveTab('notes')}
+            className={cn(
+              'flex flex-col items-center gap-2.5 py-4 px-2 rounded-2xl border transition-all duration-200 active:scale-95',
+              activeTab === 'notes'
+                ? 'bg-violet-500/10 border-violet-400/40 shadow-sm'
+                : 'bg-muted/30 border-transparent hover:bg-muted/50',
+            )}
+          >
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm">
+              <FileText className="w-5 h-5 text-white" strokeWidth={1.8} />
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <span className={cn('text-xs font-semibold', activeTab === 'notes' ? 'text-violet-500' : 'text-foreground/80')}>
+                {t('knowledge.notes')}
+              </span>
+              {(notes?.length ?? 0) > 0 && (
+                <span className={cn('text-[10px] font-medium tabular-nums', activeTab === 'notes' ? 'text-violet-400' : 'text-muted-foreground')}>
+                  {notes!.length}
+                </span>
+              )}
+            </div>
+          </button>
+
+          {/* Courses */}
+          <button
+            onClick={() => setActiveTab('courses')}
+            className={cn(
+              'flex flex-col items-center gap-2.5 py-4 px-2 rounded-2xl border transition-all duration-200 active:scale-95',
+              activeTab === 'courses'
+                ? 'bg-indigo-500/10 border-indigo-400/40 shadow-sm'
+                : 'bg-muted/30 border-transparent hover:bg-muted/50',
+            )}
+          >
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-sm">
+              <GraduationCap className="w-5 h-5 text-white" strokeWidth={1.8} />
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <span className={cn('text-xs font-semibold', activeTab === 'courses' ? 'text-indigo-500' : 'text-foreground/80')}>
+                {t('knowledge.courses')}
+              </span>
+              {(courses?.length ?? 0) > 0 && (
+                <span className={cn('text-[10px] font-medium tabular-nums', activeTab === 'courses' ? 'text-indigo-400' : 'text-muted-foreground')}>
+                  {courses!.length}
+                </span>
+              )}
+            </div>
+          </button>
+
+          {/* Archive */}
+          <button
+            onClick={() => setActiveTab('archived')}
+            className={cn(
+              'flex flex-col items-center gap-2.5 py-4 px-2 rounded-2xl border transition-all duration-200 active:scale-95',
+              activeTab === 'archived'
+                ? 'bg-slate-500/10 border-slate-400/40 shadow-sm'
+                : 'bg-muted/30 border-transparent hover:bg-muted/50',
+            )}
+          >
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center shadow-sm">
+              <Archive className="w-5 h-5 text-white" strokeWidth={1.8} />
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <span className={cn('text-xs font-semibold', activeTab === 'archived' ? 'text-slate-400' : 'text-foreground/80')}>
+                {t('knowledge.archived')}
+              </span>
+              {(archivedNotes?.length ?? 0) > 0 && (
+                <span className={cn('text-[10px] font-medium tabular-nums', activeTab === 'archived' ? 'text-slate-400' : 'text-muted-foreground')}>
+                  {archivedNotes!.length}
+                </span>
+              )}
+            </div>
+          </button>
+        </div>
+
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder={t('knowledge.searchNotes')}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full ps-10 pe-4 py-2.5 rounded-xl bg-muted/50 border border-border/60 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 text-sm"
+          />
         </div>
 
         {/* Notes Tab */}

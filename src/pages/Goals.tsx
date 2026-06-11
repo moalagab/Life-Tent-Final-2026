@@ -36,12 +36,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 type CategoryFilter = 'all' | 'personal' | 'financial' | 'customer' | 'processes' | 'learning';
 
 const categoryConfig = {
-  all: { icon: LayoutGrid, color: 'bg-foreground text-background' },
-  personal: { icon: User, color: 'bg-primary/80 text-white' },
-  financial: { icon: TrendingUp, color: 'bg-primary text-primary-foreground' },
-  customer: { icon: Users, color: 'bg-blue-500 text-white' },
-  processes: { icon: Cog, color: 'bg-success text-white' },
-  learning: { icon: GraduationCap, color: 'bg-purple-500 text-white' },
+  all:       { icon: LayoutGrid,   color: 'bg-foreground text-background', from: 'from-slate-600',   to: 'to-slate-700',   activeBorder: 'border-slate-400/40'   },
+  personal:  { icon: User,         color: 'bg-primary/80 text-white',      from: 'from-amber-500',   to: 'to-orange-500',  activeBorder: 'border-amber-400/40'   },
+  financial: { icon: TrendingUp,   color: 'bg-primary text-white',         from: 'from-emerald-500', to: 'to-teal-600',    activeBorder: 'border-emerald-400/40' },
+  customer:  { icon: Users,        color: 'bg-blue-500 text-white',         from: 'from-blue-500',    to: 'to-indigo-600',  activeBorder: 'border-blue-400/40'    },
+  processes: { icon: Cog,          color: 'bg-green-500 text-white',        from: 'from-green-500',   to: 'to-emerald-600', activeBorder: 'border-green-400/40'   },
+  learning:  { icon: GraduationCap,color: 'bg-purple-500 text-white',      from: 'from-purple-500',  to: 'to-indigo-600',  activeBorder: 'border-purple-400/40'  },
 };
 
 export default function Goals() {
@@ -269,38 +269,48 @@ export default function Goals() {
     <MainLayout>
       <div className="space-y-6 animate-fade-in">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">{t('goals.title')}</h1>
-            <p className="text-muted-foreground mt-1">{t('goals.subtitle')}</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-sm">
+              <Target className="w-5 h-5 text-white" strokeWidth={1.8} />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-foreground leading-tight">{t('goals.title')}</h1>
+              <p className="text-[11px] text-muted-foreground">
+                {stats.total} {currentLanguage === 'ar' ? 'هدف نشط' : 'active goals'}
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button 
-              variant={activeTab === 'archive' ? 'default' : 'outline'}
-              onClick={() => setActiveTab(activeTab === 'archive' ? 'goals' : 'archive')}
-              className="gap-2"
-            >
-              <Archive className="w-4 h-4" />
-              {t('goals.archive')}
-              {archivedGoals && archivedGoals.length > 0 && (
-                <Badge variant="secondary" className="ms-1">{archivedGoals.length}</Badge>
-              )}
-            </Button>
-            <Button 
-              variant={activeTab === 'analytics' ? 'default' : 'outline'}
+            <button
               onClick={() => setActiveTab(activeTab === 'analytics' ? 'goals' : 'analytics')}
-              className="gap-2"
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all',
+                activeTab === 'analytics' ? 'bg-primary text-primary-foreground' : 'bg-muted/60 text-muted-foreground hover:bg-muted',
+              )}
             >
-              <BarChart3 className="w-4 h-4" />
-              {currentLanguage === 'ar' ? 'التحليلات' : 'Analytics'}
-            </Button>
-            <Button 
+              <BarChart3 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{currentLanguage === 'ar' ? 'تحليلات' : 'Analytics'}</span>
+            </button>
+            <button
+              onClick={() => setActiveTab(activeTab === 'archive' ? 'goals' : 'archive')}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all',
+                activeTab === 'archive' ? 'bg-muted-foreground text-white' : 'bg-muted/60 text-muted-foreground hover:bg-muted',
+              )}
+            >
+              <Archive className="w-3.5 h-3.5" />
+              {archivedGoals && archivedGoals.length > 0 && (
+                <span className="px-1 py-0.5 rounded-full bg-background/30 text-[10px]">{archivedGoals.length}</span>
+              )}
+            </button>
+            <button
               onClick={() => setIsDialogOpen(true)}
-              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/25"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold transition-all active:scale-95 shadow-sm"
             >
-              <Plus className="w-5 h-5 me-2" />
-              {t('goals.newObjective')}
-            </Button>
+              <Plus className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{t('goals.newObjective')}</span>
+            </button>
           </div>
         </div>
 
@@ -358,41 +368,21 @@ export default function Goals() {
           </div>
         ) : (
           <>
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                    <Target className="w-5 h-5 text-primary" />
+            {/* Stats strip */}
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { icon: Target,   value: stats.total,     label: t('goals.activeGoals'),    bg: 'bg-amber-500/12',   text: 'text-amber-500' },
+                { icon: User,     value: stats.personal,  label: t('goals.personalGoals'),  bg: 'bg-blue-500/12',    text: 'text-blue-500' },
+                { icon: Sparkles, value: stats.completed, label: t('goals.completedGoals'), bg: 'bg-green-500/12',   text: 'text-green-500' },
+              ].map(({ icon: Icon, value, label, bg, text }) => (
+                <div key={label} className="rounded-2xl border border-border/50 bg-card/60 p-3.5">
+                  <div className={cn('w-8 h-8 rounded-xl flex items-center justify-center mb-2', bg)}>
+                    <Icon className={cn('w-4 h-4', text)} strokeWidth={1.8} />
                   </div>
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{stats.total}</p>
-                    <p className="text-xs text-muted-foreground">{t('goals.activeGoals')}</p>
-                  </div>
+                  <p className="text-xl font-bold text-foreground leading-none">{value}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1 leading-tight">{label}</p>
                 </div>
-              </div>
-              <div className="p-4 rounded-xl bg-gradient-to-br from-primary/20/10 to-primary/10/5 border border-primary/20">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center">
-                    <User className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{stats.personal}</p>
-                    <p className="text-xs text-muted-foreground">{t('goals.personalGoals')}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="p-4 rounded-xl bg-gradient-to-br from-success/10 to-success/5 border border-success/20">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-success/20 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-success" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{stats.completed}</p>
-                    <p className="text-xs text-muted-foreground">{t('goals.completedGoals')}</p>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
 
             {/* Filters & Search */}
@@ -427,29 +417,80 @@ export default function Goals() {
               </div>
             </div>
 
-            {/* Category Tabs */}
-            <div className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                const isSelected = selectedCategory === tab.id;
-                const config = categoryConfig[tab.id];
-                
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setSelectedCategory(tab.id)}
-                    className={cn(
-                      'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap',
-                      isSelected 
-                        ? config.color + ' shadow-lg'
-                        : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
-                    )}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {tab.label}
-                  </button>
-                );
-              })}
+            {/* Category Tabs — gradient card grid (3+3) */}
+            <div className="space-y-3">
+              <div className="grid grid-cols-3 gap-3">
+                {tabs.slice(0, 3).map((tab) => {
+                  const Icon = tab.icon;
+                  const isSelected = selectedCategory === tab.id;
+                  const config = categoryConfig[tab.id];
+                  const count = tab.id === 'all'
+                    ? (goals?.length ?? 0)
+                    : (goals?.filter(g => g.perspective === tab.id).length ?? 0);
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setSelectedCategory(tab.id)}
+                      className={cn(
+                        'flex flex-col items-center justify-center gap-2.5 py-4 px-2 rounded-2xl transition-all duration-200 active:scale-95 border',
+                        isSelected
+                          ? cn('bg-card/80 border-border/50 shadow-sm', config.activeBorder)
+                          : 'border-transparent bg-muted/30 hover:bg-muted/50',
+                      )}
+                    >
+                      <div className={cn(
+                        'w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-sm relative',
+                        config.from, config.to,
+                      )}>
+                        <Icon className="w-5 h-5 text-white" strokeWidth={1.8} />
+                        {count > 0 && (
+                          <span className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-background text-foreground text-[10px] font-bold flex items-center justify-center border border-border/50 shadow-sm">
+                            {count}
+                          </span>
+                        )}
+                      </div>
+                      <p className={cn('text-xs font-semibold text-center leading-tight', isSelected ? 'text-foreground' : 'text-foreground/70')}>
+                        {tab.label}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                {tabs.slice(3).map((tab) => {
+                  const Icon = tab.icon;
+                  const isSelected = selectedCategory === tab.id;
+                  const config = categoryConfig[tab.id];
+                  const count = goals?.filter(g => g.perspective === tab.id).length ?? 0;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setSelectedCategory(tab.id)}
+                      className={cn(
+                        'flex flex-col items-center justify-center gap-2.5 py-4 px-2 rounded-2xl transition-all duration-200 active:scale-95 border',
+                        isSelected
+                          ? cn('bg-card/80 border-border/50 shadow-sm', config.activeBorder)
+                          : 'border-transparent bg-muted/30 hover:bg-muted/50',
+                      )}
+                    >
+                      <div className={cn(
+                        'w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-sm relative',
+                        config.from, config.to,
+                      )}>
+                        <Icon className="w-5 h-5 text-white" strokeWidth={1.8} />
+                        {count > 0 && (
+                          <span className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-background text-foreground text-[10px] font-bold flex items-center justify-center border border-border/50 shadow-sm">
+                            {count}
+                          </span>
+                        )}
+                      </div>
+                      <p className={cn('text-xs font-semibold text-center leading-tight', isSelected ? 'text-foreground' : 'text-foreground/70')}>
+                        {tab.label}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Goals Grid/List */}

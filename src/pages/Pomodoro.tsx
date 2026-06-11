@@ -230,27 +230,60 @@ export default function Pomodoro() {
     <MainLayout>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-            <Timer className="w-4 h-4" />
-            {t('pomodoro.title')}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-sm">
+              <Timer className="w-5 h-5 text-white" strokeWidth={1.8} />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-foreground leading-tight">{t('pomodoro.title')}</h1>
+              <p className="text-[11px] text-muted-foreground">{t('pomodoro.subtitle')}</p>
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-foreground">{t('pomodoro.title')}</h1>
-          <p className="text-muted-foreground mt-1">{t('pomodoro.subtitle')}</p>
+          {completedSessions > 0 && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-600">
+              <Flame className="w-3.5 h-3.5" />
+              <span className="text-xs font-semibold">{completedSessions}</span>
+            </div>
+          )}
         </div>
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="timer" className="gap-2">
-              <Timer className="w-4 h-4" />
-              {t('pomodoro.timer')}
-            </TabsTrigger>
-            <TabsTrigger value="stats" className="gap-2">
-              <BarChart3 className="w-4 h-4" />
-              {t('pomodoro.statistics')}
-            </TabsTrigger>
-          </TabsList>
+          {/* Gradient card tab selector */}
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            {[
+              { value: 'timer', icon: Timer,    from: 'from-orange-500', to: 'to-red-500',    activeBorder: 'border-orange-400/40', arLabel: t('pomodoro.timer'),      enLabel: t('pomodoro.timer')      },
+              { value: 'stats', icon: BarChart3, from: 'from-emerald-500',to: 'to-teal-600',   activeBorder: 'border-emerald-400/40',arLabel: t('pomodoro.statistics'), enLabel: t('pomodoro.statistics') },
+            ].map(tab => {
+              const active = activeTab === tab.value;
+              return (
+                <button
+                  key={tab.value}
+                  onClick={() => setActiveTab(tab.value)}
+                  className={cn(
+                    'flex flex-col items-center justify-center gap-2.5 py-4 px-2 rounded-2xl transition-all duration-200 active:scale-95 border',
+                    active
+                      ? cn('bg-card/80 border-border/50 shadow-sm', tab.activeBorder)
+                      : 'border-transparent bg-muted/30 hover:bg-muted/50',
+                  )}
+                >
+                  <div className={cn(
+                    'w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-sm',
+                    tab.from, tab.to,
+                  )}>
+                    <tab.icon className="w-5 h-5 text-white" strokeWidth={1.8} />
+                  </div>
+                  <p className={cn(
+                    'text-xs font-semibold text-center leading-tight',
+                    active ? 'text-foreground' : 'text-foreground/70',
+                  )}>
+                    {tab.enLabel}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
 
           {/* Timer Tab */}
           <TabsContent value="timer" className="mt-6">

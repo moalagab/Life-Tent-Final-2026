@@ -228,18 +228,25 @@ export default function Tasks() {
     <MainLayout>
       <div className="mb-8 animate-fade-in">
         {/* Header */}
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">{t('tasks.title')}</h1>
-            <p className="text-muted-foreground mt-1">{t('tasks.subtitle')}</p>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
+              <FolderKanban className="w-5 h-5 text-white" strokeWidth={1.8} />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-foreground leading-tight">{t('tasks.title')}</h1>
+              <p className="text-[11px] text-muted-foreground">
+                {tasks?.filter(t => t.status !== 'done').length || 0} {currentLanguage === 'ar' ? 'مهمة نشطة' : 'active tasks'}
+              </p>
+            </div>
           </div>
-          <Button
+          <button
             onClick={() => openDialogForStatus('todo')}
-            className="hidden md:inline-flex bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/25"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold transition-all active:scale-95 shadow-sm"
           >
-            <Plus className="w-5 h-5 me-2" />
-            {t('tasks.newTask')}
-          </Button>
+            <Plus className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{t('tasks.newTask')}</span>
+          </button>
         </div>
 
         {/* Search & Filters */}

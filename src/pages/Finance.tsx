@@ -22,6 +22,7 @@ import { WishlistManager } from '@/components/finance/WishlistManager';
 import { FinanceAIAssistant } from '@/components/finance/FinanceAIAssistant';
 import { FinanceAuditLogView } from '@/components/finance/FinanceAuditLogView';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
+import { cn } from '@/lib/utils';
 
 const ALLOWED_TABS = [
   'dashboard','accounts','transactions','budget','wishlist','debts',
@@ -84,30 +85,45 @@ export default function Finance() {
 
   return (
     <MainLayout>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground">
-          {t('finance.title')}
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          {t('finance.subtitle')}
-        </p>
+      {/* Header */}
+      <div className="mb-5">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-sm">
+            <Wallet className="w-5 h-5 text-white" strokeWidth={1.8} />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-foreground leading-tight">{t('finance.title')}</h1>
+            <p className="text-[11px] text-muted-foreground">{t('finance.subtitle')}</p>
+          </div>
+        </div>
+
+        {/* Pill tabs — horizontal scroll */}
+        <div className="overflow-x-auto -mx-1 px-1 pb-1">
+          <div className="inline-flex gap-1.5 min-w-max">
+            {tabs.map(tab => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as FinanceTab)}
+                  className={cn(
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 active:scale-95',
+                    isActive
+                      ? 'bg-emerald-500 text-white shadow-sm'
+                      : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
+                  )}
+                >
+                  <tab.icon className="w-3.5 h-3.5" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as FinanceTab)} className="space-y-6">
-        <div className="overflow-x-auto pb-2" dir={isRTL ? 'rtl' : 'ltr'}>
-          <TabsList className="inline-flex min-w-full md:min-w-0 h-auto p-1 bg-muted/50" dir={isRTL ? 'rtl' as const : 'ltr' as const}>
-            {tabs.map(tab => (
-              <TabsTrigger
-                key={tab.id}
-                value={tab.id}
-                className="flex items-center gap-2 px-3 py-2 whitespace-nowrap"
-              >
-                <tab.icon className="w-4 h-4" />
-                <span className="hidden sm:inline">{tab.label}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </div>
+        <div />
 
         <TabsContent value="dashboard"><FinanceDashboard /></TabsContent>
         <TabsContent value="accounts"><AccountsManager /></TabsContent>

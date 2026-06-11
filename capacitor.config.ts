@@ -51,6 +51,7 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: 'automatic',
     scrollEnabled: true,
+    scheme: 'lifetent',
   },
 };
 

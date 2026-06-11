@@ -40,9 +40,20 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 30% 9%;
 
-    /* Primary — deep navy (no gold, no orange, no yellow) */
-    --primary: 222 60% 28%;              /* #1B2F6B — deep navy blue */
+    /* Primary — Life Tent brand identity: deep navy */
+    --primary: 222 60% 28%;              /* #1B2F6B — deep navy */
     --primary-foreground: 0 0% 100%;
+
+    /* Module semantic colors — per Life Tent design SKILL */
+    --module-tasks:     221 83% 53%;   /* #2563EB blue */
+    --module-finance:   152 64% 40%;   /* #10B981 emerald */
+    --module-goals:     38 92% 50%;    /* #F59E0B amber */
+    --module-habits:    160 84% 39%;   /* emerald-green */
+    --module-projects:  271 81% 56%;   /* #A855F7 purple */
+    --module-knowledge: 258 90% 66%;   /* violet */
+    --module-studio:    338 90% 60%;   /* rose */
+    --module-calendar:  199 89% 48%;   /* sky */
+    --module-pomodoro:  4 86% 58%;     /* red-orange */
 
     /* Neutral scale */
     --secondary: 220 16% 95%;
@@ -107,70 +118,69 @@
   }
 
   .dark {
-    /* Midnight Glass Design System */
-    --background: 213 58% 11%;
-    --foreground: 210 40% 96%;
+    /* Deep Navy Glass Design System — brand hue 222 (#1B2F6B identity) */
+    --background: 222 65% 12%;
+    --foreground: 220 30% 95%;
 
-    --card: 213 45% 14%;
-    --card-foreground: 210 40% 96%;
+    --card: 222 55% 17%;
+    --card-foreground: 220 30% 95%;
 
-    --popover: 213 45% 12%;
-    --popover-foreground: 210 40% 96%;
+    --popover: 222 60% 11%;
+    --popover-foreground: 220 30% 95%;
 
     --primary: 43 100% 50%;
-    --primary-foreground: 213 58% 11%;
+    --primary-foreground: 222 65% 12%;
 
-    --secondary: 213 35% 20%;
-    --secondary-foreground: 210 40% 96%;
+    --secondary: 222 40% 22%;
+    --secondary-foreground: 220 30% 92%;
 
-    --muted: 213 30% 18%;
-    --muted-foreground: 215 20% 55%;
+    --muted: 222 35% 22%;
+    --muted-foreground: 222 18% 58%;
 
-    --accent: 213 40% 22%;
-    --accent-foreground: 210 40% 96%;
+    --accent: 222 40% 24%;
+    --accent-foreground: 220 30% 95%;
 
     --destructive: 14 80% 54%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 220 30% 98%;
 
     --success: 142 70% 45%;
     --success-foreground: 210 40% 98%;
 
     --warning: 43 100% 50%;
-    --warning-foreground: 213 58% 11%;
+    --warning-foreground: 222 65% 12%;
 
-    --border: 213 30% 25%;
-    --input: 213 30% 20%;
+    --border: 222 35% 26%;
+    --input: 222 35% 22%;
     --ring: 43 100% 50%;
 
-    /* Glass — unified state tokens (default / hover / active / disabled) */
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --glass-bg-hover: rgba(255, 255, 255, 0.08);
-    --glass-bg-active: rgba(255, 255, 255, 0.12);
+    /* Glass — navy-glass state tokens */
+    --glass-bg: rgba(255, 255, 255, 0.06);
+    --glass-bg-hover: rgba(255, 255, 255, 0.10);
+    --glass-bg-active: rgba(255, 255, 255, 0.14);
     --glass-bg-disabled: rgba(255, 255, 255, 0.03);
-    --glass-border: rgba(255, 255, 255, 0.10);
-    --glass-border-hover: rgba(255, 255, 255, 0.18);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-border-hover: rgba(255, 255, 255, 0.20);
     --glass-border-active: hsla(43, 100%, 55%, 0.45);
     --glass-border-disabled: rgba(255, 255, 255, 0.05);
     --glass-blur: 20px;
 
-    /* Elevation scale — dark mode */
-    --elev-1: 0 1px 2px rgba(0, 0, 0, 0.30), 0 1px 3px -1px rgba(0, 0, 0, 0.30);
-    --elev-2: 0 2px 6px rgba(0, 0, 0, 0.35), 0 8px 20px -6px rgba(0, 0, 0, 0.40);
-    --elev-3: 0 4px 12px rgba(0, 0, 0, 0.45), 0 16px 32px -8px rgba(0, 0, 0, 0.55);
-    --elev-4: 0 8px 16px rgba(0, 0, 0, 0.50), 0 28px 56px -12px rgba(0, 0, 0, 0.65);
+    /* Elevation scale — navy depth */
+    --elev-1: 0 1px 2px rgba(8, 18, 52, 0.40), 0 1px 3px -1px rgba(8, 18, 52, 0.35);
+    --elev-2: 0 2px 6px rgba(8, 18, 52, 0.45), 0 8px 20px -6px rgba(8, 18, 52, 0.50);
+    --elev-3: 0 4px 12px rgba(8, 18, 52, 0.55), 0 16px 32px -8px rgba(8, 18, 52, 0.65);
+    --elev-4: 0 8px 16px rgba(8, 18, 52, 0.60), 0 28px 56px -12px rgba(8, 18, 52, 0.75);
 
-    /* Focus ring — gold halo on midnight */
+    /* Focus ring — gold halo on navy */
     --focus-ring: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(43 100% 55% / 0.65);
 
-
-    /* Sidebar - Dark */
-    --sidebar-background: 213 50% 10%;
-    --sidebar-foreground: 210 40% 96%;
+    /* Sidebar — deep navy, slightly darker than content */
+    --sidebar-background: 222 68% 10%;
+    --sidebar-foreground: 220 30% 95%;
     --sidebar-primary: 43 100% 50%;
-    --sidebar-primary-foreground: 213 58% 11%;
-    --sidebar-accent: 213 40% 18%;
-    --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 213 30% 20%;
+    --sidebar-primary-foreground: 222 65% 12%;
+    --sidebar-accent: 222 45% 20%;
+    --sidebar-accent-foreground: 220 30% 95%;
+    --sidebar-border: 222 40% 20%;
     --sidebar-ring: 43 100% 50%;
   }
 }
@@ -194,18 +204,19 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* Light mode — soft warm ambient wash, subtle and premium */
+  /* Light mode — deep navy ambient, consistent with brand */
   body {
     background:
-      radial-gradient(ellipse 80% 50% at 50% -10%, hsla(33, 95%, 50%, 0.07) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 50% at 100% 100%, hsla(220, 30%, 50%, 0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 80% 40% at 50% -5%, hsla(222, 60%, 28%, 0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 100% 100%, hsla(43, 100%, 50%, 0.025) 0%, transparent 50%),
       hsl(var(--background));
   }
 
   .dark body {
-    background: 
-      radial-gradient(ellipse at top right, hsla(213, 58%, 18%, 0.4) 0%, transparent 50%),
-      radial-gradient(ellipse at bottom left, hsla(43, 100%, 50%, 0.05) 0%, transparent 40%),
+    background:
+      radial-gradient(ellipse 70% 50% at 80% 0%,   hsla(222, 65%, 28%, 0.45) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 45% at 10% 100%, hsla(222, 60%, 22%, 0.35) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 35% at 50% 50%,  hsla(43, 100%, 50%, 0.04) 0%, transparent 60%),
       hsl(var(--background));
   }
 }
@@ -356,6 +367,61 @@
     transform: scale(1.1) rotate(5deg);
     color: hsl(43, 100%, 50%);
   }
+
+  /* ─── Clean card (no heavy backdrop-filter) ──────────────────────────────── */
+  .lt-card {
+    @apply relative rounded-2xl border border-border/50 bg-card transition-all duration-200;
+    box-shadow: var(--elev-1);
+  }
+  .lt-card:hover {
+    box-shadow: var(--elev-2);
+    @apply border-border;
+  }
+
+  /* ─── Slide-up animation utility ─────────────────────────────────────────── */
+  @keyframes slide-up-anim {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0);    }
+  }
+  @keyframes bounce-in-anim {
+    0%   { opacity: 0; transform: scale(0.92); }
+    60%  { transform: scale(1.03); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  .slide-up   { animation: slide-up-anim   0.25s ease-out both; }
+  .bounce-in  { animation: bounce-in-anim  0.30s ease-out both; }
+
+  /* ─── Custom scrollbar ────────────────────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 999px; }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.4); }
+
+  /* ─── Gradient text (brand) ───────────────────────────────────────────────── */
+  .brand-text {
+    background: linear-gradient(135deg, hsl(221, 83%, 53%) 0%, hsl(271, 81%, 56%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .dark .brand-text {
+    background: linear-gradient(135deg, hsl(43, 100%, 55%) 0%, hsl(14, 80%, 60%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ─── Module accent borders (left/right handled by RTL) ──────────────────── */
+  .module-tasks     { --mod-color: hsl(var(--module-tasks));     }
+  .module-finance   { --mod-color: hsl(var(--module-finance));   }
+  .module-goals     { --mod-color: hsl(var(--module-goals));     }
+  .module-habits    { --mod-color: hsl(var(--module-habits));    }
+  .module-projects  { --mod-color: hsl(var(--module-projects));  }
+  .module-knowledge { --mod-color: hsl(var(--module-knowledge)); }
+  .module-studio    { --mod-color: hsl(var(--module-studio));    }
+  .module-calendar  { --mod-color: hsl(var(--module-calendar));  }
+  .module-pomodoro  { --mod-color: hsl(var(--module-pomodoro));  }
 
   /* Link underline animation */
   .link-underline {

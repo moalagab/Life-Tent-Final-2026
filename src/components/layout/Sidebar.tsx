@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
-interface NavItem { path: string; icon: React.ElementType; labelKey: string; }
+interface NavItem { path: string; icon: React.ElementType; labelKey: string; activeColor?: string; activeBg?: string; }
 
 interface SidebarContentProps {
   collapsed: boolean;
@@ -40,11 +40,13 @@ interface SidebarContentProps {
   onClose: () => void;
   onToggleCollapse: () => void;
   t: (key: string) => string;
+  userName?: string;
+  userInitials?: string;
 }
 
 const SidebarContent = memo(function SidebarContent({
   collapsed, isMobile, navItems, locationPath, isRTL,
-  onNavClick, onSignOut, onClose, onToggleCollapse, t,
+  onNavClick, onSignOut, onClose, onToggleCollapse, t, userName, userInitials,
 }: SidebarContentProps) {
   return (
     <>
@@ -91,9 +93,9 @@ const SidebarContent = memo(function SidebarContent({
               {isActive && (
                 <div className="absolute top-1/2 -translate-y-1/2 start-0 w-1 h-8 bg-gradient-gold rounded-e-full" />
               )}
-              <item.icon className={cn('w-5 h-5 transition-colors flex-shrink-0', isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground')} />
+              <item.icon className={cn('w-5 h-5 transition-colors flex-shrink-0', isActive ? (item.activeColor || 'text-primary') : 'text-muted-foreground group-hover:text-foreground')} />
               {(!collapsed || isMobile) && (
-                <span className={cn('text-sm font-medium transition-colors', isActive ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground')}>
+                <span className={cn('text-sm font-medium transition-colors', isActive ? 'text-foreground font-semibold' : 'text-muted-foreground group-hover:text-foreground')}>
                   {t(item.labelKey)}
                 </span>
               )}
@@ -107,35 +109,53 @@ const SidebarContent = memo(function SidebarContent({
         })}
       </nav>
 
-      {/* Settings & Collapse */}
-      <div className="p-3 border-t border-sidebar-border mt-auto">
+      {/* Footer — user profile + settings */}
+      <div className="shrink-0 border-t border-sidebar-border/60 p-3 space-y-1">
+        {/* Settings */}
         <NavLink
           to="/settings"
           onClick={onNavClick}
-          className={cn('flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200', 'hover:bg-sidebar-accent group', collapsed && !isMobile && 'justify-center')}
+          className={cn('flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 hover:bg-sidebar-accent group', collapsed && !isMobile && 'justify-center')}
         >
-          <Settings className="w-5 h-5 text-muted-foreground group-hover:text-foreground flex-shrink-0" />
+          <Settings className="w-4.5 h-4.5 text-muted-foreground group-hover:text-foreground flex-shrink-0 w-[18px] h-[18px]" />
           {(!collapsed || isMobile) && (
-            <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground">{t('common.settings')}</span>
+            <span className="text-sm text-muted-foreground group-hover:text-foreground">{t('common.settings')}</span>
           )}
         </NavLink>
 
-        <button
-          onClick={onSignOut}
-          className={cn('flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 w-full mt-1', 'hover:bg-destructive/20 group text-destructive', collapsed && !isMobile && 'justify-center')}
-        >
-          <LogOut className="w-5 h-5 flex-shrink-0" />
-          {(!collapsed || isMobile) && <span className="text-sm font-medium">{t('common.signOut')}</span>}
-        </button>
+        {/* User row */}
+        {(!collapsed || isMobile) ? (
+          <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-sidebar-accent/60">
+            <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center shrink-0">
+              <span className="text-[10px] font-bold text-primary-foreground">{userInitials || '?'}</span>
+            </div>
+            <span className="text-sm font-medium text-foreground flex-1 truncate">{userName || 'User'}</span>
+            <button
+              onClick={onSignOut}
+              className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+              title={t('common.signOut')}
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={onSignOut}
+            className="flex items-center justify-center w-full py-2.5 rounded-xl hover:bg-destructive/15 group"
+          >
+            <LogOut className="w-[18px] h-[18px] text-muted-foreground group-hover:text-destructive" />
+          </button>
+        )}
 
+        {/* Collapse toggle */}
         {!isMobile && (
           <button
             onClick={onToggleCollapse}
             aria-label={collapsed ? t('common.expand') : t('common.collapse')}
-            className={cn('flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 w-full mt-1', 'hover:bg-sidebar-accent group', collapsed && 'justify-center')}
+            className={cn('flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 w-full hover:bg-sidebar-accent group', collapsed && 'justify-center')}
           >
-            <ChevronLeft className={cn('w-5 h-5 text-muted-foreground group-hover:text-foreground transition-transform rtl:-scale-x-100', collapsed && 'rotate-180')} />
-            {!collapsed && <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground">{t('common.collapse')}</span>}
+            <ChevronLeft className={cn('w-4 h-4 text-muted-foreground group-hover:text-foreground transition-transform rtl:-scale-x-100', collapsed && 'rotate-180')} />
+            {!collapsed && <span className="text-xs text-muted-foreground group-hover:text-foreground">{t('common.collapse')}</span>}
           </button>
         )}
       </div>
@@ -154,18 +174,29 @@ export function Sidebar() {
   const isAdmin = useIsAdmin();
 
   const navItems = [
-    { path: '/dashboard', icon: LayoutDashboard, labelKey: 'common.dashboard' },
-    { path: '/projects', icon: FolderKanban, labelKey: 'common.projects' },
-    { path: '/tasks', icon: CheckSquare, labelKey: 'common.tasks' },
-    { path: '/goals', icon: Target, labelKey: 'common.goals' },
-    { path: '/finance', icon: Wallet, labelKey: 'common.finance' },
-    { path: '/knowledge', icon: BookOpen, labelKey: 'common.knowledge' },
-    { path: '/habits', icon: Repeat, labelKey: 'common.habits' },
-    { path: '/calendar', icon: Calendar, labelKey: 'common.calendar' },
-    { path: '/studio', icon: Film, labelKey: 'common.studio' },
-    { path: '/pomodoro', icon: Timer, labelKey: 'common.pomodoro' },
-    ...(isAdmin ? [{ path: '/admin', icon: ShieldCheck, labelKey: 'common.admin' }] : []),
+    { path: '/dashboard',  icon: LayoutDashboard, labelKey: 'common.dashboard',  activeColor: 'text-blue-500',    activeBg: 'bg-blue-500' },
+    { path: '/projects',   icon: FolderKanban,    labelKey: 'common.projects',   activeColor: 'text-purple-500',  activeBg: 'bg-purple-500' },
+    { path: '/tasks',      icon: CheckSquare,     labelKey: 'common.tasks',      activeColor: 'text-blue-500',    activeBg: 'bg-blue-500' },
+    { path: '/goals',      icon: Target,          labelKey: 'common.goals',      activeColor: 'text-amber-500',   activeBg: 'bg-amber-500' },
+    { path: '/finance',    icon: Wallet,          labelKey: 'common.finance',    activeColor: 'text-emerald-500', activeBg: 'bg-emerald-500' },
+    { path: '/knowledge',  icon: BookOpen,        labelKey: 'common.knowledge',  activeColor: 'text-violet-500',  activeBg: 'bg-violet-500' },
+    { path: '/habits',     icon: Repeat,          labelKey: 'common.habits',     activeColor: 'text-green-500',   activeBg: 'bg-green-500' },
+    { path: '/calendar',   icon: Calendar,        labelKey: 'common.calendar',   activeColor: 'text-sky-500',     activeBg: 'bg-sky-500' },
+    { path: '/studio',     icon: Film,            labelKey: 'common.studio',     activeColor: 'text-rose-500',    activeBg: 'bg-rose-500' },
+    { path: '/pomodoro',   icon: Timer,           labelKey: 'common.pomodoro',   activeColor: 'text-orange-500',  activeBg: 'bg-orange-500' },
+    ...(isAdmin ? [{ path: '/admin', icon: ShieldCheck, labelKey: 'common.admin', activeColor: 'text-primary', activeBg: 'bg-primary' }] : []),
   ];
+
+  const fullName = (
+    user?.user_metadata?.full_name
+    || user?.user_metadata?.name
+    || user?.email?.split('@')[0]
+    || ''
+  );
+  const userName = fullName.split(' ')[0] || user?.email?.split('@')[0] || '';
+  const userInitials = fullName
+    ? fullName.split(' ').filter(Boolean).slice(0, 2).map((w: string) => w[0].toUpperCase()).join('')
+    : '?';
 
   const handleSignOut = async () => {
     await signOut();
@@ -186,6 +217,8 @@ export function Sidebar() {
     onSignOut: handleSignOut,
     onClose: () => setMobileOpen(false),
     onToggleCollapse: () => setCollapsed(c => !c),
+    userName,
+    userInitials,
   };
 
   // Mobile sidebar
@@ -223,7 +256,9 @@ export function Sidebar() {
       className={cn(
         'fixed top-0 z-40 h-screen transition-all duration-300 ease-in-out flex flex-col',
         'bg-sidebar',
-        isRTL ? 'right-0 border-s border-sidebar-border/60' : 'left-0 border-e border-sidebar-border/60',
+        isRTL
+          ? 'right-0 border-s border-sidebar-border/40 shadow-[-1px_0_12px_rgba(18,26,52,0.06)]'
+          : 'left-0 border-e border-sidebar-border/40 shadow-[1px_0_12px_rgba(18,26,52,0.06)]',
         collapsed ? 'w-20' : 'w-64'
       )}
     >

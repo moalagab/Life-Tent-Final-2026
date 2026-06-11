@@ -11,15 +11,15 @@ export function ProjectTabs({ activeTab, onTabChange }: ProjectTabsProps) {
   const { t } = useLanguage();
 
   const tabs = [
-    { id: 'projects', label: 'المشاريع', icon: FolderKanban },
-    { id: 'areas', label: 'المجالات', icon: Layers },
-    { id: 'resources', label: 'الموارد', icon: Database },
-    { id: 'archives', label: 'الأرشيف', icon: Archive },
+    { id: 'projects',  label: 'المشاريع', icon: FolderKanban, from: 'from-purple-500', to: 'to-indigo-600', activeBorder: 'border-purple-400/40' },
+    { id: 'areas',     label: 'المجالات', icon: Layers,       from: 'from-sky-500',    to: 'to-blue-600',   activeBorder: 'border-sky-400/40'    },
+    { id: 'resources', label: 'الموارد',  icon: Database,     from: 'from-emerald-500',to: 'to-teal-600',   activeBorder: 'border-emerald-400/40' },
+    { id: 'archives',  label: 'الأرشيف',  icon: Archive,      from: 'from-slate-500',  to: 'to-slate-600',  activeBorder: 'border-slate-400/40'  },
   ];
 
   return (
-    <div className="mb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
-      <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1 sm:flex-wrap">
+    <div className="mb-6">
+      <div className="grid grid-cols-4 gap-3">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -29,14 +29,24 @@ export function ProjectTabs({ activeTab, onTabChange }: ProjectTabsProps) {
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                'flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
+                'flex flex-col items-center justify-center gap-2.5 py-4 px-2 rounded-2xl transition-all duration-200 active:scale-95 border',
                 isActive
-                  ? 'bg-gradient-gold text-primary-foreground shadow-gold-glow-sm'
-                  : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
+                  ? cn('bg-card/80 border-border/50 shadow-sm', tab.activeBorder)
+                  : 'border-transparent bg-muted/30 hover:bg-muted/50',
               )}
             >
-              <Icon className="w-4 h-4" />
-              {tab.label}
+              <div className={cn(
+                'w-11 h-11 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-sm',
+                tab.from, tab.to,
+              )}>
+                <Icon className="w-5 h-5 text-white" strokeWidth={1.8} />
+              </div>
+              <p className={cn(
+                'text-xs font-semibold text-center leading-tight',
+                isActive ? 'text-foreground' : 'text-foreground/70',
+              )}>
+                {tab.label}
+              </p>
             </button>
           );
         })}

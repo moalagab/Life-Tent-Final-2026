@@ -18,11 +18,15 @@ const ALLOWED_ORIGINS = [
   "http://localhost:8081",
   "http://localhost:8082",
   "http://localhost:8083",
+  "https://localhost",
+  "lifetent://localhost",
+  "capacitor://localhost",
+  "ionic://localhost",
 ];
 
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("origin") ?? "";
-  const allowOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  const allowOrigin = !origin || ALLOWED_ORIGINS.includes(origin) ? (origin || "*") : ALLOWED_ORIGINS[0];
   return {
     "Access-Control-Allow-Origin": allowOrigin,
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",

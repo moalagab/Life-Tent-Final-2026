@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS user_subscriptions (
 ALTER TABLE user_subscriptions ENABLE ROW LEVEL SECURITY;
 
 -- User reads own subscription
+DROP POLICY IF EXISTS "users_read_own_user_subscription" ON user_subscriptions;
 CREATE POLICY "users_read_own_user_subscription" ON user_subscriptions
   FOR SELECT USING (
     EXISTS (
@@ -37,6 +38,7 @@ CREATE POLICY "users_read_own_user_subscription" ON user_subscriptions
   );
 
 -- Admin full access
+DROP POLICY IF EXISTS "admin_full_access_user_subscriptions" ON user_subscriptions;
 CREATE POLICY "admin_full_access_user_subscriptions" ON user_subscriptions
   FOR ALL USING (
     EXISTS (
@@ -57,6 +59,7 @@ CREATE TABLE IF NOT EXISTS admin_audit_log (
 
 ALTER TABLE admin_audit_log ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "admin_only_audit_log" ON admin_audit_log;
 CREATE POLICY "admin_only_audit_log" ON admin_audit_log
   FOR ALL USING (
     EXISTS (

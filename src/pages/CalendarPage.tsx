@@ -175,11 +175,18 @@ export default function CalendarPage() {
 
   return (
     <MainLayout>
-      <div className="mb-8">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">{t('calendar.title')}</h1>
-            <p className="text-muted-foreground mt-1">{t('calendar.subtitle')}</p>
+      <div className="mb-5">
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center shadow-sm">
+              <CalendarIcon className="w-5 h-5 text-white" strokeWidth={1.8} />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-foreground leading-tight">{t('calendar.title')}</h1>
+              <p className="text-[11px] text-muted-foreground">
+                {format(currentMonth, 'MMMM yyyy')}
+              </p>
+            </div>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
             setIsDialogOpen(open);
@@ -189,10 +196,10 @@ export default function CalendarPage() {
             }
           }}>
             <DialogTrigger asChild>
-              <Button variant="gold" size="lg">
-                <Plus className="w-5 h-5 me-2" />
-                {t('calendar.newEvent')}
-              </Button>
+              <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold transition-all active:scale-95 shadow-sm">
+                <Plus className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{t('calendar.newEvent')}</span>
+              </button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>

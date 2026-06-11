@@ -40,6 +40,7 @@ CREATE INDEX IF NOT EXISTS user_ai_insights_expires_at_idx
 ALTER TABLE user_ai_insights ENABLE ROW LEVEL SECURITY;
 
 -- Users can only read and write their own insights
+DROP POLICY IF EXISTS "user_own_insights" ON user_ai_insights;
 CREATE POLICY "user_own_insights"
   ON user_ai_insights
   FOR ALL

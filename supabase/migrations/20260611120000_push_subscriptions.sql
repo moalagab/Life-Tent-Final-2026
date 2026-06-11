@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS push_subscriptions (
 
 ALTER TABLE push_subscriptions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users manage own push subscriptions" ON push_subscriptions;
 CREATE POLICY "Users manage own push subscriptions"
   ON push_subscriptions
   FOR ALL
@@ -22,6 +23,7 @@ CREATE POLICY "Users manage own push subscriptions"
   WITH CHECK (auth.uid() = user_id);
 
 -- Service role can read all subscriptions (needed for server-side push sending)
+DROP POLICY IF EXISTS "Service role can read subscriptions" ON push_subscriptions;
 CREATE POLICY "Service role can read subscriptions"
   ON push_subscriptions
   FOR SELECT
@@ -46,6 +48,7 @@ CREATE TABLE IF NOT EXISTS webauthn_credentials (
 
 ALTER TABLE webauthn_credentials ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users manage own webauthn credentials" ON webauthn_credentials;
 CREATE POLICY "Users manage own webauthn credentials"
   ON webauthn_credentials
   FOR ALL
@@ -53,6 +56,7 @@ CREATE POLICY "Users manage own webauthn credentials"
   USING      (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Service role full access webauthn" ON webauthn_credentials;
 CREATE POLICY "Service role full access webauthn"
   ON webauthn_credentials
   FOR ALL
