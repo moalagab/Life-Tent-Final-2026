@@ -1,4 +1,5 @@
 {
+  "alias": ["www.lifetent.online", "lifetent.online", "life-tent-os-892e4657.vercel.app"],
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
   "headers": [
     {
