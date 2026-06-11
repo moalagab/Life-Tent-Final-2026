@@ -8,10 +8,9 @@
  *   4. أهم فرصة اليوم (Top opportunity)
  *   5. توقع اليوم     (Day forecast)
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAIDecisionEngine } from '@/hooks/useAIDecisionEngine';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -164,16 +163,32 @@ export function DailyDecisionCard() {
     analyse, refresh, currentMode,
   } = useAIDecisionEngine();
   const { currentLanguage: lang } = useLanguage();
-  const isMobile = useIsMobile();
-  // Start collapsed on phones so the dashboard isn't dominated by this card
-  const [collapsed, setCollapsed] = useState(isMobile);
 
-  // Auto-analyse on mount
+  // Lazy initializer: read window.innerWidth synchronously so there's no
+  // flip between renders (avoids the isMobile hook's async initialisation).
+  // Also honour a saved user preference.
+  const [collapsed, setCollapsed] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('lt.daily-card.collapsed');
+      if (saved !== null) return JSON.parse(saved) as boolean;
+    } catch { /* ignore */ }
+    return typeof window !== 'undefined' && window.innerWidth < 768;
+  });
+
+  const handleToggle = () => {
+    const next = !collapsed;
+    setCollapsed(next);
+    try { localStorage.setItem('lt.daily-card.collapsed', JSON.stringify(next)); } catch { /* ignore */ }
+  };
+
+  // Auto-analyse once when ready — guard with a ref so it fires exactly once
+  // even if `analyse` reference changes as sub-queries load.
+  const hasAutoStarted = useRef(false);
   useEffect(() => {
-    if (isReady && !result && !isAnalysing) {
-      analyse();
-    }
-  }, [isReady, result, isAnalysing, analyse]);
+    if (!isReady || hasAutoStarted.current) return;
+    hasAutoStarted.current = true;
+    if (!result && !isAnalysing) analyse();
+  }, [isReady]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const today = format(new Date(), lang === 'ar' ? 'EEEE، d MMMM yyyy' : 'EEEE, MMMM d yyyy', {
     locale: lang === 'ar' ? ar : enUS,
@@ -194,24 +209,9 @@ export function DailyDecisionCard() {
          : 'Full Analysis';
   })();
 
-  // ── Loading ──────────────────────────────────────────────────────────────
-  if (!isReady || (isAnalysing && !result)) {
+  // ── Loading — show skeleton until we have a result OR a definitive error ─
+  if (!isReady || isAnalysing || (!result && !error)) {
     return <LoadingSkeleton />;
-  }
-
-  // ── No result yet ────────────────────────────────────────────────────────
-  if (!result && !isAnalysing) {
-    return (
-      <div className="rounded-2xl border border-border bg-card p-6 text-center space-y-3">
-        <Brain className="w-10 h-10 text-primary/40 mx-auto" />
-        <p className="text-sm text-muted-foreground">
-          {lang === 'ar' ? 'اضغط لتوليد قرارات وتحليل يومك' : 'Tap to generate your daily decisions'}
-        </p>
-        <Button size="sm" onClick={() => analyse()} disabled={isAnalysing}>
-          {lang === 'ar' ? 'ابدأ التحليل' : 'Start Analysis'}
-        </Button>
-      </div>
-    );
   }
 
   const decisions       = result?.decisions ?? [];
@@ -253,7 +253,7 @@ export function DailyDecisionCard() {
             <RefreshCw className={cn('w-3.5 h-3.5', isAnalysing && 'animate-spin')} />
           </Button>
           <button
-            onClick={() => setCollapsed(v => !v)}
+            onClick={handleToggle}
             className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
           >
             {collapsed
