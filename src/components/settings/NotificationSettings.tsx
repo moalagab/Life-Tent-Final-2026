@@ -1,7 +1,8 @@
 import { useLanguage } from '@/hooks/useLanguage';
 import { useNotifications } from '@/hooks/useNotifications';
+import { usePushSubscription } from '@/hooks/usePushSubscription';
 import { Switch } from '@/components/ui/switch';
-import { Bell, CalendarDays, CheckSquare, Repeat, AlertCircle, Mail } from 'lucide-react';
+import { Bell, CalendarDays, CheckSquare, Repeat, AlertCircle, Mail, Smartphone } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
@@ -43,6 +44,7 @@ export function getNotificationPrefs(): NotificationPrefs {
 export function NotificationSettings() {
   const { t, currentLanguage: language } = useLanguage();
   const { enabled, enableNotifications, disableNotifications, permission } = useNotifications();
+  const { isSupported: pushSupported, isSubscribed: pushSubscribed, isLoading: pushLoading, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe } = usePushSubscription();
   const [prefs, setPrefs] = useState<NotificationPrefs>(loadPrefs);
   const [emailDraft, setEmailDraft] = useState(prefs.emailAddress);
   const [savingEmail, setSavingEmail] = useState(false);
@@ -124,6 +126,48 @@ export function NotificationSettings() {
           </div>
         ))}
       </div>
+
+      {/* Push Notifications (VAPID) */}
+      {pushSupported && (
+        <div className="p-4 rounded-xl bg-muted/30 border border-border">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                <Smartphone className="w-5 h-5 text-blue-500" />
+              </div>
+              <div>
+                <h4 className="font-medium text-foreground">
+                  {language === 'ar' ? 'إشعارات الجهاز (Push)' : 'Device Push Notifications'}
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  {language === 'ar'
+                    ? 'تلقّ إشعارات حتى عندما يكون التطبيق مغلقاً'
+                    : 'Receive notifications even when the app is closed'}
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={pushSubscribed}
+              disabled={pushLoading || !enabled}
+              onCheckedChange={async (checked) => {
+                if (checked) {
+                  const ok = await pushSubscribe();
+                  if (ok) toast.success(language === 'ar' ? 'تم تفعيل إشعارات الجهاز' : 'Device notifications enabled');
+                  else    toast.error(language === 'ar' ? 'تعذّر تفعيل الإشعارات' : 'Could not enable push notifications');
+                } else {
+                  await pushUnsubscribe();
+                  toast.success(language === 'ar' ? 'تم إيقاف إشعارات الجهاز' : 'Device notifications disabled');
+                }
+              }}
+            />
+          </div>
+          {!import.meta.env.VITE_VAPID_PUBLIC_KEY && (
+            <p className="mt-2 text-xs text-amber-500">
+              {language === 'ar' ? '⚠ VITE_VAPID_PUBLIC_KEY غير مضبوط في .env' : '⚠ VITE_VAPID_PUBLIC_KEY not set in .env'}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Email Notifications */}
       <div className="p-4 rounded-xl bg-muted/30 border border-border space-y-4">

@@ -5,14 +5,26 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Shield, Key, Eye, EyeOff, Loader2, Smartphone, Copy, CheckCircle2, AlertCircle, QrCode } from 'lucide-react';
+import { Shield, Key, Eye, EyeOff, Loader2, Smartphone, Copy, CheckCircle2, AlertCircle, QrCode, Fingerprint, Trash2, Plus, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { useWebAuthn } from '@/hooks/useWebAuthn';
+import { formatDistanceToNow } from 'date-fns';
+import { ar, enUS } from 'date-fns/locale';
 
 export function PrivacySettings() {
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const { user } = useAuth();
+  const {
+    isSupported: webAuthnSupported,
+    isLoading:   webAuthnLoading,
+    error:       webAuthnError,
+    credentials: webAuthnCreds,
+    register:    webAuthnRegister,
+    authenticate: webAuthnAuthenticate,
+    deleteCredential: webAuthnDelete,
+  } = useWebAuthn();
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -286,6 +298,150 @@ export function PrivacySettings() {
             </Button>
           )}
         </div>
+      </div>
+
+      {/* Passkeys / Biometric Authentication */}
+      <div className="p-4 rounded-xl bg-gradient-to-br from-violet-500/10 to-purple-500/10 border border-violet-500/20 space-y-4">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center">
+              <Fingerprint className="w-5 h-5 text-violet-500" />
+            </div>
+            <div>
+              <h4 className="font-medium text-foreground">
+                {currentLanguage === 'ar' ? 'مفاتيح المرور (Passkeys)' : 'Passkeys / Biometrics'}
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                {currentLanguage === 'ar'
+                  ? 'سجّل الدخول ببصمتك أو Face ID بدون كلمة مرور'
+                  : 'Sign in with fingerprint, Face ID, or security key'}
+              </p>
+            </div>
+          </div>
+          {webAuthnCreds.length > 0 && (
+            <span className="text-xs bg-violet-500/20 text-violet-500 px-2 py-1 rounded-full flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3" />
+              {webAuthnCreds.length} {currentLanguage === 'ar' ? 'جهاز' : 'device(s)'}
+            </span>
+          )}
+        </div>
+
+        {/* Not supported */}
+        {!webAuthnSupported && (
+          <div className="flex items-center gap-2 text-sm text-amber-500 bg-amber-500/10 p-3 rounded-lg">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>
+              {currentLanguage === 'ar'
+                ? 'متصفحك لا يدعم Passkeys. استخدم Chrome أو Safari أو Edge.'
+                : 'Your browser does not support Passkeys. Use Chrome, Safari, or Edge.'}
+            </span>
+          </div>
+        )}
+
+        {/* Error */}
+        {webAuthnError && (
+          <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{webAuthnError}</span>
+          </div>
+        )}
+
+        {/* Registered devices list */}
+        {webAuthnCreds.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              {currentLanguage === 'ar' ? 'الأجهزة المسجّلة' : 'Registered devices'}
+            </p>
+            {webAuthnCreds.map((cred) => (
+              <div
+                key={cred.id}
+                className="flex items-center justify-between p-3 rounded-xl bg-background/60 border border-border"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center shrink-0">
+                    <Fingerprint className="w-4 h-4 text-violet-500" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {cred.device_name ?? (currentLanguage === 'ar' ? 'جهاز غير معروف' : 'Unknown device')}
+                    </p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span>
+                        {currentLanguage === 'ar' ? 'مُضاف' : 'Added'}{' '}
+                        {formatDistanceToNow(new Date(cred.created_at), {
+                          addSuffix: true,
+                          locale: currentLanguage === 'ar' ? ar : enUS,
+                        })}
+                      </span>
+                      {cred.last_used_at && (
+                        <>
+                          <span>·</span>
+                          <Clock className="w-3 h-3" />
+                          <span>
+                            {formatDistanceToNow(new Date(cred.last_used_at), {
+                              addSuffix: true,
+                              locale: currentLanguage === 'ar' ? ar : enUS,
+                            })}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={async () => {
+                    await webAuthnDelete(cred.id);
+                    toast.success(currentLanguage === 'ar' ? 'تم حذف الجهاز' : 'Device removed');
+                  }}
+                  className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0"
+                  title={currentLanguage === 'ar' ? 'حذف الجهاز' : 'Remove device'}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Actions */}
+        {webAuthnSupported && (
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={webAuthnLoading}
+              onClick={async () => {
+                const ok = await webAuthnRegister();
+                if (ok) toast.success(currentLanguage === 'ar' ? 'تم تسجيل الجهاز بنجاح' : 'Device registered successfully');
+              }}
+              className="gap-2 border-violet-500/30 hover:border-violet-500/60 hover:bg-violet-500/5"
+            >
+              {webAuthnLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Plus className="w-4 h-4 text-violet-500" />
+              )}
+              {currentLanguage === 'ar' ? 'إضافة جهاز جديد' : 'Add new device'}
+            </Button>
+
+            {webAuthnCreds.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={webAuthnLoading}
+                onClick={async () => {
+                  const ok = await webAuthnAuthenticate();
+                  if (ok) toast.success(currentLanguage === 'ar' ? 'تم التحقق بنجاح ✓' : 'Verified successfully ✓');
+                }}
+                className="gap-2 text-muted-foreground"
+              >
+                <Fingerprint className="w-4 h-4" />
+                {currentLanguage === 'ar' ? 'اختبار المصادقة' : 'Test authentication'}
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Sessions */}

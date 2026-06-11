@@ -35,18 +35,44 @@ function getCorsHeaders(req: Request) {
   };
 }
 
-// ── Auth ──────────────────────────────────────────────────────────────────────
+// ── Auth + Rate Limiting ──────────────────────────────────────────────────────
 
-async function verifyAuth(req: Request): Promise<boolean> {
+// Returns the authenticated user's ID, or null if unauthorized.
+async function verifyAuth(req: Request): Promise<string | null> {
   const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) return false;
+  if (!authHeader?.startsWith("Bearer ")) return null;
   const token = authHeader.replace("Bearer ", "");
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_ANON_KEY") ?? "",
   );
-  const { error } = await supabase.auth.getUser(token);
-  return !error;
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  return error || !user ? null : user.id;
+}
+
+// Returns true if the user is within their rate limit window.
+async function checkRateLimit(
+  userId: string,
+  functionName: string,
+  maxRequests: number,
+  windowSeconds: number,
+): Promise<boolean> {
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+  );
+  const { data, error } = await supabase.rpc("check_rate_limit", {
+    p_user_id:        userId,
+    p_function:       functionName,
+    p_max_requests:   maxRequests,
+    p_window_seconds: windowSeconds,
+  });
+  if (error) {
+    // Fail open — log but don't block if the rate limit check itself fails
+    console.error("Rate limit check error:", error.message);
+    return true;
+  }
+  return (data as number) <= maxRequests;
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -126,6 +152,12 @@ interface AIAction {
   estimated_minutes?: number;
 }
 
+interface DailyTopTask {
+  title: string;
+  why: string;
+  estimated_minutes: number;
+}
+
 // ── Prompt builder ────────────────────────────────────────────────────────────
 
 function buildPrompt(body: RequestBody): string {
@@ -195,7 +227,7 @@ function buildPrompt(body: RequestBody): string {
   return `أنت مساعد ذكاء اصطناعي خبير في الإنتاجية الشخصية وإدارة الوقت والتمويل الشخصي. مهمتك تحليل بيانات المستخدم وتقديم توجيهات دقيقة وقابلة للتنفيذ.
 
 ## قواعد الاستجابة:
-- تحدث بالعربية الفصحى البسيطة فقط
+- تحدث بالعربية المحكية الطبيعية اليومية — لا فصحى رسمية ثقيلة
 - كن صريحاً ومحدداً — لا عمومات أو كلام فارغ
 - اربط كل توصية ببيانات حقيقية من السياق أدناه
 - لا تكرر نفس الفكرة بصياغات مختلفة
@@ -235,6 +267,19 @@ ${tasksSection}
 
 ## المطلوب — أجب بـ JSON فقط، بدون أي نص خارجه:
 {
+  "decisions": [
+    "قرار 1 — صِغه كسؤال اتخاذ قرار فعلي مبني على البيانات، مثل: 'هل تؤجّل مهمة X إلى الغد لتحافظ على طاقتك للمهمة الأهم؟'",
+    "قرار 2 — قرار مختلف النوع (مالي أو عادة أو تفويض)",
+    "قرار 3 — قرار استراتيجي لليوم"
+  ],
+  "top_tasks": [
+    { "title": "عنوان المهمة الأولى من القائمة أعلاه", "why": "سبب كونها الأولى — جملة واحدة مرتبطة بالبيانات", "estimated_minutes": رقم },
+    { "title": "المهمة الثانية", "why": "السبب", "estimated_minutes": رقم },
+    { "title": "المهمة الثالثة", "why": "السبب", "estimated_minutes": رقم }
+  ],
+  "biggest_risk": "الخطر الأكبر اليوم في جملة واحدة — مرتبط ببيانات حقيقية (مهمة متأخرة، فاتورة، عادة هشة...)",
+  "top_opportunity": "أهم فرصة لليوم في جملة واحدة — شيء إيجابي يمكن تحقيقه بناءً على الطاقة والبيانات",
+  "day_forecast": "توقع اليوم في جملتين: كيف سيكون مستوى الإنتاجية والطاقة بناءً على البيانات، وماذا ينتظر المستخدم.",
   "brief": "فقرة واحدة من 3-4 جمل. ابدأ بمؤشر حقيقي من البيانات (إيجابي أو تحدٍّ)، ثم التحليل، ثم رسالة توجيهية واضحة. لا تبدأ بعبارات مثل 'أهلاً' أو 'واضح من البيانات'.",
   "highlight": "إنجاز أو نقطة قوة محددة مستندة للبيانات أعلاه — جملة واحدة.",
   "coaching": "نصيحة تكتيكية واحدة قابلة للتنفيذ الآن — محددة وعملية، مثل: 'ابدأ بمهمة X لأن طاقتك الآن ${profile.energyEstimate}/5'.",
@@ -256,9 +301,31 @@ ${tasksSection}
 
 // ── Fallback responses ────────────────────────────────────────────────────────
 
-function buildFallback(mode: string): {
-  brief: string; highlight: string; coaching: string; energy_tip: string; actions: AIAction[]
-} {
+interface FullAIResponse {
+  brief: string;
+  highlight: string;
+  coaching: string;
+  energy_tip: string;
+  actions: AIAction[];
+  decisions: string[];
+  top_tasks: DailyTopTask[];
+  biggest_risk: string;
+  top_opportunity: string;
+  day_forecast: string;
+}
+
+function buildFallback(mode: string): FullAIResponse {
+  const decisionsFallback = [
+    "هل تبدأ بأصعب مهمة الآن أم تُحضّر ذهنك أولاً بمهمة أسهل؟",
+    "هل تُبقي جلسة التركيز 90 دقيقة أم تقسّمها على بومودور؟",
+    "هل تُفوّض أي مهمة من قائمتك اليوم لتوفير وقتك للأهم؟",
+  ];
+  const topTasksFallback: DailyTopTask[] = [
+    { title: "راجع مهامك وحدد أهم ثلاثة",   why: "الوضوح في البداية يرفع الإنتاجية 40%", estimated_minutes: 10 },
+    { title: "أنجز مهمة واحدة بالكامل",       why: "إنجاز مهمة كاملة يُطلق دوبامين يحفّزك", estimated_minutes: 45 },
+    { title: "تحقق من مواعيد اليوم",           why: "تجنّب المفاجآت والتعارضات الزمنية",      estimated_minutes: 5  },
+  ];
+
   switch (mode) {
     case "morning":
       return {
@@ -266,6 +333,11 @@ function buildFallback(mode: string): {
         highlight: "كل يوم تفتح فيه هذا النظام هو خطوة نحو الانضباط.",
         coaching: "ابدأ بأصعب مهمة في قائمتك الآن — عقلك في أفضل حالاته صباحاً.",
         energy_tip: "اشرب كوب ماء قبل البدء — يُنشّط التركيز والذاكرة العاملة.",
+        decisions: decisionsFallback,
+        top_tasks: topTasksFallback,
+        biggest_risk: "عدم تحديد أولويات واضحة قد يُشتّت طاقتك على مهام ثانوية.",
+        top_opportunity: "الصباح هو أفضل وقت لإنجاز المهمة الأصعب — لا تضيّع هذه النافذة.",
+        day_forecast: "يوم بمستوى طاقة متوسط إلى جيد. ركّز على مهمة أو مهمتين رئيسيتين وحافظ على تدفق العمل.",
         actions: [
           { type: "focus",  title: "حدد مهمتك الأولى",  description: "اختر المهمة الأهم اليوم وابدأ بها مباشرة.", taskId: null, priority: "high",   estimated_minutes: 5  },
           { type: "review", title: "راجع قائمة اليوم",   description: "تأكد أن كل مهمة مجدولة لها وقت محدد.",       taskId: null, priority: "medium", estimated_minutes: 10 },
@@ -277,6 +349,15 @@ function buildFallback(mode: string): {
         highlight: "كل مهمة أنجزتها اليوم هي خطوة حقيقية للأمام.",
         coaching: "قيّم ثلاث مهام لم تنجزها بعد — هل لا تزال ضرورية؟ أجّل ما يمكن تأجيله.",
         energy_tip: "خذ استراحة 10 دقائق من الشاشة — يُعيد تركيز النصف الثاني من اليوم.",
+        decisions: [
+          "هل تُكمل المهام المتبقية أم تُعيد ترتيبها حسب الأهمية الحالية؟",
+          "هل طاقتك تسمح بجلسة تركيز عميق الآن أم أفضل مهام أقل تعقيداً؟",
+          "هل تحتاج تأجيل أي موعد أو التزام لليوم؟",
+        ],
+        top_tasks: topTasksFallback,
+        biggest_risk: "التشتت في النصف الثاني من اليوم بسبب انخفاض الطاقة الطبيعي.",
+        top_opportunity: "إنجاز مهمة واحدة كبيرة في الساعتين القادمتين قبل انخفاض الطاقة.",
+        day_forecast: "الطاقة في تراجع طبيعي بعد الظهر. خصّص المهام المعقدة للآن وأبقِ المراسلات للمساء.",
         actions: [
           { type: "review",     title: "تقييم التقدم",       description: "راجع كم مهمة أنجزتها مقارنة بالخطة الصباحية.", taskId: null, priority: "high",   estimated_minutes: 5 },
           { type: "reschedule", title: "أعد جدولة المتأخرات", description: "انقل المهام غير المنجزة إلى الغد إن لزم.",      taskId: null, priority: "medium", estimated_minutes: 5 },
@@ -288,6 +369,15 @@ function buildFallback(mode: string): {
         highlight: "إغلاق اليوم بوعي هو عادة المنتجين الحقيقيين.",
         coaching: "سجّل ثلاثة أشياء أنجزتها اليوم قبل النوم — يُعزز الحافز الداخلي.",
         energy_tip: "ابتعد عن الشاشات 30 دقيقة قبل النوم للحصول على نوم أعمق.",
+        decisions: [
+          "هل تُعدّ قائمة مهام الغد الآن أم تتركها للصباح؟",
+          "هل تحتاج إضافة مهام لم تنجزها اليوم إلى قائمة الغد؟",
+          "ما الشيء الواحد الذي لو فعلته الغد سيُحسّن مسارك هذا الأسبوع؟",
+        ],
+        top_tasks: topTasksFallback,
+        biggest_risk: "الذهاب للنوم دون تسجيل ما لم ينجز يُفقدك السياق والزخم للغد.",
+        top_opportunity: "الاسترخاء الجيد الليلة يُضاعف إنتاجيتك غداً.",
+        day_forecast: "وقت للتعافي والاستعداد. ركّز على الراحة وإغلاق الحلقات الذهنية المفتوحة.",
         actions: [
           { type: "review", title: "مراجعة نهاية اليوم",    description: "ما الذي أنجزته اليوم؟ ما الذي تأجّل وسببه؟",       taskId: null, priority: "high",   estimated_minutes: 5  },
           { type: "focus",  title: "خطط لمهمة الغد الأولى", description: "حدد الآن أهم مهمة ستبدأ بها صباح الغد.",           taskId: null, priority: "medium", estimated_minutes: 3  },
@@ -300,6 +390,11 @@ function buildFallback(mode: string): {
         highlight: "استمرارك في استخدام النظام هو في حد ذاته عادة إنتاجية.",
         coaching: "حدد النمط الواحد الذي لو غيّرته سيحدث أكبر فرق في إنتاجيتك.",
         energy_tip: "الراحة الجيدة الليلة تصنع يوماً أفضل غداً.",
+        decisions: decisionsFallback,
+        top_tasks: topTasksFallback,
+        biggest_risk: "الاستمرار في نفس الأنماط دون مراجعة يُبطئ نموك.",
+        top_opportunity: "تحليل نمط واحد ضعيف وتغييره يصنع فرقاً كبيراً تراكمياً.",
+        day_forecast: "وقت للتحليل الاستراتيجي. راجع بياناتك وحدد أهم تعديل للأسبوع القادم.",
         actions: [
           { type: "review", title: "تحليل أسبوعي", description: "راجع ما أنجزته هذا الأسبوع وما لم ينجز ولماذا.", taskId: null, priority: "high", estimated_minutes: 15 },
         ],
@@ -309,7 +404,7 @@ function buildFallback(mode: string): {
 
 // ── Response validator ────────────────────────────────────────────────────────
 
-function validateResponse(data: unknown, mode: string): ReturnType<typeof buildFallback> {
+function validateResponse(data: unknown, mode: string): FullAIResponse {
   if (!data || typeof data !== "object") return buildFallback(mode);
   const d = data as Record<string, unknown>;
 
@@ -334,12 +429,42 @@ function validateResponse(data: unknown, mode: string): ReturnType<typeof buildF
     }
   }
 
+  // Validate decisions[]
+  const fallback = buildFallback(mode);
+  const decisions: string[] = [];
+  if (Array.isArray(d.decisions)) {
+    for (const dec of d.decisions) {
+      if (typeof dec === "string" && dec.length > 5) decisions.push(dec);
+    }
+  }
+
+  // Validate top_tasks[]
+  const top_tasks: DailyTopTask[] = [];
+  if (Array.isArray(d.top_tasks)) {
+    for (const t of d.top_tasks) {
+      if (!t || typeof t !== "object") continue;
+      const task = t as Record<string, unknown>;
+      if (typeof task.title === "string" && task.title.length > 2) {
+        top_tasks.push({
+          title:              task.title,
+          why:                typeof task.why === "string" ? task.why : "",
+          estimated_minutes:  typeof task.estimated_minutes === "number" ? task.estimated_minutes : 30,
+        });
+      }
+    }
+  }
+
   return {
     brief,
-    highlight:  typeof d.highlight  === "string" ? d.highlight  : "",
+    highlight:       typeof d.highlight       === "string" ? d.highlight       : "",
     coaching,
-    energy_tip: typeof d.energy_tip === "string" ? d.energy_tip : "",
-    actions:    actions.length > 0 ? actions : buildFallback(mode).actions,
+    energy_tip:      typeof d.energy_tip      === "string" ? d.energy_tip      : "",
+    biggest_risk:    typeof d.biggest_risk    === "string" ? d.biggest_risk    : fallback.biggest_risk,
+    top_opportunity: typeof d.top_opportunity === "string" ? d.top_opportunity : fallback.top_opportunity,
+    day_forecast:    typeof d.day_forecast    === "string" ? d.day_forecast    : fallback.day_forecast,
+    decisions:       decisions.length  > 0 ? decisions  : fallback.decisions,
+    top_tasks:       top_tasks.length  > 0 ? top_tasks  : fallback.top_tasks,
+    actions:         actions.length    > 0 ? actions    : fallback.actions,
   };
 }
 
@@ -355,11 +480,20 @@ Deno.serve(async (req: Request) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  const authenticated = await verifyAuth(req);
-  if (!authenticated) {
+  const userId = await verifyAuth(req);
+  if (!userId) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
+
+  // 50 AI requests per hour per user
+  const withinLimit = await checkRateLimit(userId, "ai-decision-engine", 50, 3600);
+  if (!withinLimit) {
+    return new Response(JSON.stringify({ error: "تجاوزت الحد المسموح من طلبات الذكاء الاصطناعي. يرجى المحاولة بعد ساعة." }), {
+      status: 429,
+      headers: { "Content-Type": "application/json", "Retry-After": "3600", ...corsHeaders },
     });
   }
 

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { useAuth } from './useAuth';
+import { vibrate } from '@/lib/vibrate';
 
 export type Task = Tables<'tasks'>;
 export type TaskInsert = TablesInsert<'tasks'>;
@@ -33,7 +34,7 @@ export function useFocusTasks() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('tasks')
-        .select('*')
+        .select('id, title, status, priority, due_date, is_focus, project_id, completed_at')
         .eq('is_focus', true)
         .neq('status', 'done')
         .order('priority', { ascending: false })
@@ -79,13 +80,15 @@ export function useUpdateTask() {
         .eq('id', id)
         .select()
         .single();
-      
+
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['focus-tasks'] });
+      // Haptic feedback when a task is marked done
+      if (data?.status === 'done') vibrate.success();
     },
   });
 }

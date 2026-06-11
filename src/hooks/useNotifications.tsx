@@ -201,6 +201,20 @@ export function useNotifications() {
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
+  // App Badge API — updates the PWA icon badge with the unread count
+  useEffect(() => {
+    if (!('setAppBadge' in navigator)) return;
+    const nav = navigator as Navigator & {
+      setAppBadge: (count?: number) => Promise<void>;
+      clearAppBadge: () => Promise<void>;
+    };
+    if (unreadCount > 0) {
+      nav.setAppBadge(unreadCount).catch(() => {});
+    } else {
+      nav.clearAppBadge().catch(() => {});
+    }
+  }, [unreadCount]);
+
   return {
     permission,
     enabled,

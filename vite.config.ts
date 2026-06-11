@@ -31,12 +31,44 @@ export default defineConfig(({ mode }) => ({
           { src: "pwa-512x512.png", sizes: "512x512", type: "image/png" },
           { src: "pwa-512x512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
         ],
+        shortcuts: [
+          {
+            name: "مهمة جديدة",
+            short_name: "مهمة",
+            description: "أضف مهمة جديدة بسرعة",
+            url: "/tasks?new=1",
+            icons: [{ src: "pwa-192x192.png", sizes: "192x192" }],
+          },
+          {
+            name: "تسجيل مصروف",
+            short_name: "مصروف",
+            description: "أضف معاملة مالية",
+            url: "/finance?new=expense",
+            icons: [{ src: "pwa-192x192.png", sizes: "192x192" }],
+          },
+          {
+            name: "بومودور",
+            short_name: "تركيز",
+            description: "ابدأ جلسة تركيز",
+            url: "/pomodoro",
+            icons: [{ src: "pwa-192x192.png", sizes: "192x192" }],
+          },
+          {
+            name: "لوحة التحكم",
+            short_name: "الرئيسية",
+            description: "اذهب للوحة التحكم",
+            url: "/dashboard",
+            icons: [{ src: "pwa-192x192.png", sizes: "192x192" }],
+          },
+        ],
       },
       workbox: {
+        // Inject push event handlers into the generated Service Worker
+        importScripts: ['/sw-push.js'],
         // Serve index.html for all SPA navigation (fixes /admin 404 when SW serves stale cache)
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/assets/, /^\/api/],
-        // Cache the app shell
+        navigateFallbackDenylist: [/^\/assets/, /^\/api/, /^\/offline/],
+        // Cache the app shell + offline page
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         runtimeCaching: [
           {

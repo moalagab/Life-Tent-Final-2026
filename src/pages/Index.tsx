@@ -15,6 +15,7 @@ import { FinanceSnapshot } from '@/components/dashboard/FinanceSnapshot';
 import { MorningBrief } from '@/components/dashboard/MorningBrief';
 import { MiddayCheckpoint } from '@/components/dashboard/MiddayCheckpoint';
 import { BehaviorInsights } from '@/components/dashboard/BehaviorInsights';
+import { DailyDecisionCard } from '@/components/dashboard/DailyDecisionCard';
 import {
   LayoutPresetSwitcher,
   type DashboardPreset,
@@ -211,7 +212,10 @@ const Index = () => {
         {/* 2. Attention ribbon */}
         <AttentionStrip />
 
-        {/* 3. Sections per preset, separated by uniform breathing room */}
+        {/* 3. Daily Decision Card — always visible at top */}
+        <DailyDecisionCard />
+
+        {/* 4. Sections per preset, separated by uniform breathing room */}
         <div className="space-y-6 lg:space-y-8">
           {arrangements[preset]}
         </div>

@@ -4,6 +4,8 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { DashboardTopBar } from '@/components/dashboard/DashboardTopBar';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { WifiOff } from 'lucide-react';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -17,8 +19,9 @@ interface MainLayoutProps {
  * meet exactly across the screen as one continuous "command shelf".
  */
 export function MainLayout({ children }: MainLayoutProps) {
-  const { isRTL } = useLanguage();
+  const { isRTL, currentLanguage } = useLanguage();
   const isMobile = useIsMobile();
+  const isOnline = useOnlineStatus();
 
   return (
     <div className="min-h-screen relative bg-background">
@@ -43,6 +46,18 @@ export function MainLayout({ children }: MainLayoutProps) {
         >
           <DashboardTopBar />
         </div>
+
+        {/* Offline banner */}
+        {!isOnline && (
+          <div className="flex items-center justify-center gap-2 px-4 py-2 bg-destructive/90 text-destructive-foreground text-sm font-medium">
+            <WifiOff className="w-4 h-4 shrink-0" />
+            <span>
+              {currentLanguage === 'ar'
+                ? 'أنت غير متصل — يتم عرض البيانات المحفوظة مؤقتاً'
+                : 'You are offline — showing cached data'}
+            </span>
+          </div>
+        )}
 
         <div className="p-4 lg:p-6 max-w-[1440px] mx-auto">{children}</div>
       </main>

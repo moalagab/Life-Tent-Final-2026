@@ -224,13 +224,13 @@ export default function Tasks() {
     <MainLayout>
       <div className="mb-8 animate-fade-in">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-foreground">{t('tasks.title')}</h1>
             <p className="text-muted-foreground mt-1">{t('tasks.subtitle')}</p>
           </div>
-          <Button 
-            onClick={() => openDialogForStatus('todo')} 
+          <Button
+            onClick={() => openDialogForStatus('todo')}
             className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/25"
           >
             <Plus className="w-5 h-5 me-2" />
@@ -239,8 +239,8 @@ export default function Tasks() {
         </div>
 
         {/* Search & Filters */}
-        <div className="flex items-center gap-4 mt-6">
-          <div className="relative flex-1 max-w-md">
+        <div className="flex flex-wrap items-center gap-3 mt-6">
+          <div className="relative w-full sm:flex-1 sm:max-w-md">
             <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
@@ -250,7 +250,7 @@ export default function Tasks() {
               className="w-full ps-10 pe-4 py-2.5 rounded-xl bg-muted/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
             />
           </div>
-          
+
           {/* Category Filter */}
           <div className="flex gap-1 bg-muted/50 rounded-xl p-1">
             <button

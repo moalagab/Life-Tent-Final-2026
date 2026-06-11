@@ -295,7 +295,7 @@ export default function CalendarPage() {
           {/* Weekday Headers */}
           <div className="grid grid-cols-7 gap-1 mb-2">
             {weekDays.map((day) => (
-              <div key={day} className="text-center text-sm text-muted-foreground py-2">
+              <div key={day} className="text-center text-[10px] sm:text-sm text-muted-foreground py-2 truncate px-0.5">
                 {day}
               </div>
             ))}
@@ -319,14 +319,14 @@ export default function CalendarPage() {
                   key={format(day, 'yyyy-MM-dd')}
                   onClick={() => setSelectedDate(day)}
                   className={cn(
-                    'aspect-square p-1 rounded-xl transition-all relative',
+                    'aspect-square p-0.5 sm:p-1 rounded-xl transition-all relative',
                     'hover:bg-muted/50',
                     isSelected && 'bg-primary/10 border border-primary/30',
                     isTodayDate && !isSelected && 'bg-primary/5'
                   )}
                 >
                   <span className={cn(
-                    'text-sm font-medium',
+                    'text-[11px] sm:text-sm font-medium',
                     isSelected && 'text-primary',
                     isTodayDate && !isSelected && 'text-primary',
                     !isSelected && !isTodayDate && 'text-foreground'

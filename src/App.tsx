@@ -7,8 +7,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { OnboardingProvider } from "@/hooks/useOnboarding";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { AdminGuard } from "@/components/admin/AdminGuard";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { queryClient } from "@/lib/queryClient";
+import { PWAUpdatePrompt } from "@/components/PWAUpdatePrompt";
 
 // Eagerly load auth pages (always needed)
 import LandingPage from "./pages/LandingPage";
@@ -47,6 +49,7 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
+          <PWAUpdatePrompt />
           <BrowserRouter>
             <OnboardingProvider>
             <Suspense fallback={<PageLoader />}>
@@ -57,7 +60,7 @@ const App = () => (
                 <Route path="/auth/reset-password"  element={<ResetPassword />} />
 
                 <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-                <Route path="/admin"      element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+                <Route path="/admin"      element={<ProtectedRoute><AdminGuard><AdminDashboard /></AdminGuard></ProtectedRoute>} />
                 <Route path="/dashboard"  element={<ProtectedRoute><Index /></ProtectedRoute>} />
                 <Route path="/projects"   element={<ProtectedRoute><Projects /></ProtectedRoute>} />
                 <Route path="/tasks"      element={<ProtectedRoute><Tasks /></ProtectedRoute>} />

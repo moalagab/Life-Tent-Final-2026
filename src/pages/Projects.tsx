@@ -107,7 +107,7 @@ export default function Projects() {
   return (
     <MainLayout>
       <div className="mb-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-foreground">{t('projects.title')}</h1>
             <p className="text-muted-foreground mt-1">{t('projects.subtitle')}</p>
@@ -119,44 +119,44 @@ export default function Projects() {
         </div>
 
         {/* Search & Actions */}
-        <div className="flex items-center gap-4 mt-6">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <div className="flex flex-wrap items-center gap-3 mt-6">
+          <div className="relative w-full sm:flex-1 sm:max-w-md">
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('projects.searchProjects')}
-              className="w-full pl-10 pr-4 py-2 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="w-full ps-10 pe-4 py-2 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
           </div>
-          <Button 
-            variant={showCRM ? 'default' : 'outline'} 
+          <Button
+            variant={showCRM ? 'default' : 'outline'}
             size="default"
             onClick={() => { setShowCRM(!showCRM); setShowDashboard(false); setShowReports(false); }}
           >
             <Users className="w-4 h-4 me-2" />
             {currentLanguage === 'ar' ? 'CRM' : 'CRM'}
           </Button>
-          <Button 
-            variant={showDashboard ? 'default' : 'outline'} 
+          <Button
+            variant={showDashboard ? 'default' : 'outline'}
             size="default"
             onClick={() => { setShowDashboard(!showDashboard); setShowReports(false); setShowCRM(false); }}
           >
             <LayoutDashboard className="w-4 h-4 me-2" />
-            {currentLanguage === 'ar' ? 'لوحة التحكم' : 'Dashboard'}
+            <span className="hidden sm:inline">{currentLanguage === 'ar' ? 'لوحة التحكم' : 'Dashboard'}</span>
           </Button>
-          <Button 
-            variant={showReports ? 'default' : 'outline'} 
+          <Button
+            variant={showReports ? 'default' : 'outline'}
             size="default"
             onClick={() => { setShowReports(!showReports); setShowDashboard(false); setShowCRM(false); }}
           >
             <BarChart3 className="w-4 h-4 me-2" />
-            {currentLanguage === 'ar' ? 'التقارير' : 'Reports'}
+            <span className="hidden sm:inline">{currentLanguage === 'ar' ? 'التقارير' : 'Reports'}</span>
           </Button>
           <Button variant="outline" size="default">
             <Filter className="w-4 h-4 me-2" />
-            {t('common.filter')}
+            <span className="hidden sm:inline">{t('common.filter')}</span>
           </Button>
         </div>
       </div>

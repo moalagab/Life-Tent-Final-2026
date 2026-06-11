@@ -13,6 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { useTasks } from '@/hooks/useTasks';
 import { useCreatePomodoroSession, usePomodoroStats, useTodaySessions, useWeeklySessions } from '@/hooks/usePomodoro';
+import { useWakeLock } from '@/hooks/useWakeLock';
+import { vibrate } from '@/lib/vibrate';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 type SessionType = 'work' | 'shortBreak' | 'longBreak';
@@ -52,6 +54,7 @@ export default function Pomodoro() {
   const stats = usePomodoroStats();
   const { data: todaySessions } = useTodaySessions();
   const { data: weeklySessions } = useWeeklySessions();
+  const { acquire: acquireWakeLock, release: releaseWakeLock } = useWakeLock();
 
   const incompleteTasks = tasks?.filter(t => t.status !== 'done') || [];
 
@@ -92,7 +95,9 @@ export default function Pomodoro() {
 
   const handleSessionComplete = useCallback(() => {
     setIsRunning(false);
+    releaseWakeLock();
     playSound();
+    vibrate.sessionEnd();
     
     // Save session to database
     createSession.mutate({
@@ -157,7 +162,14 @@ export default function Pomodoro() {
   }, []);
 
   const toggleTimer = () => {
-    setIsRunning(!isRunning);
+    const next = !isRunning;
+    setIsRunning(next);
+    vibrate.tap();
+    if (next && sessionType === 'work') {
+      acquireWakeLock();
+    } else {
+      releaseWakeLock();
+    }
   };
 
   const resetTimer = () => {
@@ -282,7 +294,7 @@ export default function Pomodoro() {
             </div>
 
             {/* Session Type Selector */}
-            <div className="flex justify-center gap-2 mb-8">
+            <div className="flex flex-wrap justify-center gap-2 mb-8">
               {(['work', 'shortBreak', 'longBreak'] as SessionType[]).map((type) => {
                 const config = sessionConfig[type];
                 const Icon = config.icon;
@@ -309,7 +321,7 @@ export default function Pomodoro() {
               currentSession.gradient
             )}>
               <div className="relative inline-flex items-center justify-center">
-                <svg className="w-72 h-72 transform -rotate-90">
+                <svg viewBox="0 0 288 288" className="w-56 h-56 sm:w-72 sm:h-72 transform -rotate-90">
                   <circle
                     cx="144"
                     cy="144"
@@ -331,10 +343,10 @@ export default function Pomodoro() {
                     strokeLinecap="round"
                   />
                 </svg>
-                
+
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <currentSession.icon className={cn('w-8 h-8 mb-2', currentSession.color)} />
-                  <span className={cn('text-7xl font-bold tracking-tight', currentSession.color)}>
+                  <currentSession.icon className={cn('w-7 h-7 sm:w-8 sm:h-8 mb-2', currentSession.color)} />
+                  <span className={cn('text-5xl sm:text-7xl font-bold tracking-tight', currentSession.color)}>
                     {formatTime(timeLeft)}
                   </span>
                   <span className="text-muted-foreground mt-2 text-sm uppercase tracking-wider">
@@ -384,33 +396,33 @@ export default function Pomodoro() {
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-4">
-              <div className="glass-card p-5 text-center group hover:border-primary/30 transition-all">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                  <Flame className="w-6 h-6 text-primary" />
+            <div className="grid grid-cols-3 gap-2 sm:gap-4">
+              <div className="glass-card p-3 sm:p-5 text-center group hover:border-primary/30 transition-all">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:scale-110 transition-transform">
+                  <Flame className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 </div>
-                <p className="text-3xl font-bold text-foreground">{stats.todaySessions}</p>
-                <p className="text-xs text-muted-foreground">{t('pomodoro.todaySessions')}</p>
+                <p className="text-2xl sm:text-3xl font-bold text-foreground">{stats.todaySessions}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">{t('pomodoro.todaySessions')}</p>
               </div>
-              
-              <div className="glass-card p-5 text-center group hover:border-emerald-500/30 transition-all">
-                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                  <Clock className="w-6 h-6 text-emerald-500" />
+
+              <div className="glass-card p-3 sm:p-5 text-center group hover:border-emerald-500/30 transition-all">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:scale-110 transition-transform">
+                  <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500" />
                 </div>
-                <p className="text-3xl font-bold text-foreground">
+                <p className="text-lg sm:text-3xl font-bold text-foreground">
                   {Math.floor(stats.todayMinutes / 60)}h {stats.todayMinutes % 60}m
                 </p>
-                <p className="text-xs text-muted-foreground">{t('pomodoro.todayFocusTime')}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">{t('pomodoro.todayFocusTime')}</p>
               </div>
-              
-              <div className="glass-card p-5 text-center group hover:border-blue-500/30 transition-all">
-                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                  <Target className="w-6 h-6 text-blue-500" />
+
+              <div className="glass-card p-3 sm:p-5 text-center group hover:border-blue-500/30 transition-all">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:scale-110 transition-transform">
+                  <Target className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
                 </div>
-                <p className="text-3xl font-bold text-foreground">
+                <p className="text-2xl sm:text-3xl font-bold text-foreground">
                   {(() => { const n = settings.sessionsBeforeLongBreak > 0 ? settings.sessionsBeforeLongBreak : 4; return n - (completedSessions % n); })()}
                 </p>
-                <p className="text-xs text-muted-foreground">{t('pomodoro.untilLongBreak')}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">{t('pomodoro.untilLongBreak')}</p>
               </div>
             </div>
           </TabsContent>

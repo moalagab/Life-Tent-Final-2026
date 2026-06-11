@@ -44,12 +44,24 @@ export interface AIAction {
   estimated_minutes?: number;
 }
 
+export interface DailyTopTask {
+  title: string;
+  why: string;
+  estimated_minutes: number;
+}
+
 export interface AIDecisionResult {
   brief: string;
   coaching: string;
   energy_tip?: string;
   highlight?: string;
   actions: AIAction[];
+  /** Daily Decision System fields */
+  decisions?: string[];
+  top_tasks?: DailyTopTask[];
+  biggest_risk?: string;
+  top_opportunity?: string;
+  day_forecast?: string;
   computedAt: string;
   mode: AnalysisMode;
 }

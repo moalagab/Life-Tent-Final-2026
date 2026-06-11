@@ -37,16 +37,50 @@ function getCorsHeaders(req: Request) {
   };
 }
 
-async function verifyAuth(req: Request): Promise<boolean> {
+async function verifyAuth(req: Request): Promise<string | null> {
   const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) return false;
+  if (!authHeader?.startsWith("Bearer ")) return null;
   const token = authHeader.replace("Bearer ", "");
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_ANON_KEY") ?? "",
   );
-  const { error } = await supabase.auth.getUser(token);
-  return !error;
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  return error || !user ? null : user.id;
+}
+
+async function checkRateLimit(
+  userId: string,
+  functionName: string,
+  maxRequests: number,
+  windowSeconds: number,
+): Promise<boolean> {
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+  );
+  const { data, error } = await supabase.rpc("check_rate_limit", {
+    p_user_id:        userId,
+    p_function:       functionName,
+    p_max_requests:   maxRequests,
+    p_window_seconds: windowSeconds,
+  });
+  if (error) {
+    console.error("Rate limit check error:", error.message);
+    return true;
+  }
+  return (data as number) <= maxRequests;
+}
+
+// ── HTML escaping — prevents XSS from user-controlled data ───────────────────
+function esc(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 // ── HTML email base ──────────────────────────────────────────────────────────
@@ -110,103 +144,103 @@ function buildEmail(type: NotifType, userName: string, data: Record<string, unkn
   switch (type) {
     case 'task_reminder':
       return {
-        subject: `⏰ تذكير: ${data.taskTitle}`,
+        subject: `⏰ تذكير: ${esc(data.taskTitle)}`,
         title: 'تذكير بمهمة',
-        preheader: `مهمتك "${data.taskTitle}" تستحق انتباهك`,
+        preheader: `مهمتك "${esc(data.taskTitle)}" تستحق انتباهك`,
         body: `
-          <p>مرحباً ${name}،</p>
+          <p>مرحباً ${esc(name)}،</p>
           <div class="card">
-            <h3>${data.taskTitle}</h3>
-            <p>${data.description || ''}</p>
-            ${data.dueDate ? `<p style="margin-top:8px">📅 الاستحقاق: <strong>${data.dueDate}</strong></p>` : ''}
-            ${data.priority ? `<span class="badge badge-warn">${data.priority}</span>` : ''}
+            <h3>${esc(data.taskTitle)}</h3>
+            <p>${esc(data.description)}</p>
+            ${data.dueDate ? `<p style="margin-top:8px">📅 الاستحقاق: <strong>${esc(data.dueDate)}</strong></p>` : ''}
+            ${data.priority ? `<span class="badge badge-warn">${esc(data.priority)}</span>` : ''}
           </div>
-          <a class="btn" href="${data.appUrl || 'https://lifetent.app/tasks'}">فتح التطبيق</a>`,
+          <a class="btn" href="${esc(data.appUrl) || 'https://lifetent.app/tasks'}">فتح التطبيق</a>`,
       };
 
     case 'habit_reminder':
       return {
-        subject: `🔁 حان وقت عادتك: ${data.habitName}`,
+        subject: `🔁 حان وقت عادتك: ${esc(data.habitName)}`,
         title: 'تذكير بالعادة اليومية',
-        preheader: `لا تنسَ عادتك "${data.habitName}" اليوم`,
+        preheader: `لا تنسَ عادتك "${esc(data.habitName)}" اليوم`,
         body: `
-          <p>مرحباً ${name}،</p>
+          <p>مرحباً ${esc(name)}،</p>
           <div class="card">
-            <h3>${data.habitName}</h3>
-            ${data.streak ? `<p>🔥 سلسلتك الحالية: <strong>${data.streak} يوم</strong></p>` : ''}
-            ${data.targetTime ? `<p>⏰ الوقت المستهدف: ${data.targetTime}</p>` : ''}
+            <h3>${esc(data.habitName)}</h3>
+            ${data.streak ? `<p>🔥 سلسلتك الحالية: <strong>${esc(data.streak)} يوم</strong></p>` : ''}
+            ${data.targetTime ? `<p>⏰ الوقت المستهدف: ${esc(data.targetTime)}</p>` : ''}
           </div>
-          <a class="btn" href="${data.appUrl || 'https://lifetent.app/habits'}">تسجيل الإنجاز</a>`,
+          <a class="btn" href="${esc(data.appUrl) || 'https://lifetent.app/habits'}">تسجيل الإنجاز</a>`,
       };
 
     case 'debt_due':
       return {
-        subject: `💳 تذكير سداد: ${data.debtName}`,
+        subject: `💳 تذكير سداد: ${esc(data.debtName)}`,
         title: 'موعد سداد دين',
-        preheader: `موعد سداد "${data.debtName}" قريب`,
+        preheader: `موعد سداد "${esc(data.debtName)}" قريب`,
         body: `
-          <p>مرحباً ${name}،</p>
+          <p>مرحباً ${esc(name)}،</p>
           <div class="card">
-            <h3>${data.debtName}</h3>
-            <p>المبلغ المستحق: <strong>${data.amount} ${data.currency || 'SAR'}</strong></p>
-            <p>📅 تاريخ الاستحقاق: <strong>${data.dueDate}</strong></p>
+            <h3>${esc(data.debtName)}</h3>
+            <p>المبلغ المستحق: <strong>${esc(data.amount)} ${esc(data.currency) || 'SAR'}</strong></p>
+            <p>📅 تاريخ الاستحقاق: <strong>${esc(data.dueDate)}</strong></p>
             ${(data.daysLeft as number) <= 3
-              ? `<span class="badge badge-danger">⚠️ ${data.daysLeft} أيام متبقية</span>`
-              : `<span class="badge badge-warn">📅 ${data.daysLeft} أيام متبقية</span>`}
+              ? `<span class="badge badge-danger">⚠️ ${esc(data.daysLeft)} أيام متبقية</span>`
+              : `<span class="badge badge-warn">📅 ${esc(data.daysLeft)} أيام متبقية</span>`}
           </div>
-          <a class="btn" href="${data.appUrl || 'https://lifetent.app/finance?tab=debts'}">عرض الديون</a>`,
+          <a class="btn" href="${esc(data.appUrl) || 'https://lifetent.app/finance?tab=debts'}">عرض الديون</a>`,
       };
 
     case 'subscription_renewal':
       return {
-        subject: `🔄 تجديد قريب: ${data.subscriptionName}`,
+        subject: `🔄 تجديد قريب: ${esc(data.subscriptionName)}`,
         title: 'موعد تجديد اشتراك',
-        preheader: `اشتراكك في "${data.subscriptionName}" سيُجدَّد قريباً`,
+        preheader: `اشتراكك في "${esc(data.subscriptionName)}" سيُجدَّد قريباً`,
         body: `
-          <p>مرحباً ${name}،</p>
+          <p>مرحباً ${esc(name)}،</p>
           <div class="card">
-            <h3>${data.subscriptionName}</h3>
-            <p>المبلغ: <strong>${data.amount} ${data.currency || 'SAR'}</strong></p>
-            <p>📅 تاريخ التجديد: <strong>${data.renewalDate}</strong></p>
-            <span class="badge badge-warn">${data.daysLeft} أيام</span>
+            <h3>${esc(data.subscriptionName)}</h3>
+            <p>المبلغ: <strong>${esc(data.amount)} ${esc(data.currency) || 'SAR'}</strong></p>
+            <p>📅 تاريخ التجديد: <strong>${esc(data.renewalDate)}</strong></p>
+            <span class="badge badge-warn">${esc(data.daysLeft)} أيام</span>
           </div>
-          <a class="btn" href="${data.appUrl || 'https://lifetent.app/finance?tab=subscriptions'}">عرض الاشتراكات</a>`,
+          <a class="btn" href="${esc(data.appUrl) || 'https://lifetent.app/finance?tab=subscriptions'}">عرض الاشتراكات</a>`,
       };
 
     case 'budget_alert':
       return {
-        subject: `⚠️ تنبيه ميزانية: ${data.categoryName}`,
+        subject: `⚠️ تنبيه ميزانية: ${esc(data.categoryName)}`,
         title: 'تجاوز حد الميزانية',
-        preheader: `اقتربت من حد ميزانية "${data.categoryName}"`,
+        preheader: `اقتربت من حد ميزانية "${esc(data.categoryName)}"`,
         body: `
-          <p>مرحباً ${name}،</p>
+          <p>مرحباً ${esc(name)}،</p>
           <div class="card">
-            <h3>فئة: ${data.categoryName}</h3>
-            <p>المصروف: <strong>${data.spent} ${data.currency || 'SAR'}</strong> من أصل <strong>${data.budget} ${data.currency || 'SAR'}</strong></p>
-            <p>نسبة الاستهلاك: <strong>${data.percent}%</strong></p>
+            <h3>فئة: ${esc(data.categoryName)}</h3>
+            <p>المصروف: <strong>${esc(data.spent)} ${esc(data.currency) || 'SAR'}</strong> من أصل <strong>${esc(data.budget)} ${esc(data.currency) || 'SAR'}</strong></p>
+            <p>نسبة الاستهلاك: <strong>${esc(data.percent)}%</strong></p>
             ${(data.percent as number) >= 100
               ? `<span class="badge badge-danger">تجاوزت الميزانية</span>`
               : `<span class="badge badge-warn">قاربت على النفاد</span>`}
           </div>
-          <a class="btn" href="${data.appUrl || 'https://lifetent.app/finance?tab=budget'}">عرض الميزانية</a>`,
+          <a class="btn" href="${esc(data.appUrl) || 'https://lifetent.app/finance?tab=budget'}">عرض الميزانية</a>`,
       };
 
     case 'goal_progress':
       return {
-        subject: `🎯 تقرير تقدم: ${data.goalTitle}`,
+        subject: `🎯 تقرير تقدم: ${esc(data.goalTitle)}`,
         title: 'تقرير تقدم الأهداف',
-        preheader: `تقرير أسبوعي لهدفك "${data.goalTitle}"`,
+        preheader: `تقرير أسبوعي لهدفك "${esc(data.goalTitle)}"`,
         body: `
-          <p>مرحباً ${name}،</p>
+          <p>مرحباً ${esc(name)}،</p>
           <div class="card">
-            <h3>${data.goalTitle}</h3>
-            <p>نسبة الإنجاز: <strong>${data.progress}%</strong></p>
+            <h3>${esc(data.goalTitle)}</h3>
+            <p>نسبة الإنجاز: <strong>${esc(data.progress)}%</strong></p>
             <div style="background:#2d2d4e;border-radius:99px;height:8px;margin:8px 0">
-              <div style="background:linear-gradient(90deg,#d4a017,#b8860b);width:${data.progress}%;height:100%;border-radius:99px"></div>
+              <div style="background:linear-gradient(90deg,#d4a017,#b8860b);width:${Number(data.progress) || 0}%;height:100%;border-radius:99px"></div>
             </div>
-            ${data.dueDate ? `<p>📅 الموعد النهائي: ${data.dueDate}</p>` : ''}
+            ${data.dueDate ? `<p>📅 الموعد النهائي: ${esc(data.dueDate)}</p>` : ''}
           </div>
-          <a class="btn" href="${data.appUrl || 'https://lifetent.app/goals'}">عرض الأهداف</a>`,
+          <a class="btn" href="${esc(data.appUrl) || 'https://lifetent.app/goals'}">عرض الأهداف</a>`,
       };
 
     case 'backup_complete':
@@ -241,10 +275,18 @@ const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   // ── Authentication check ─────────────────────────────────────────────────
-  const authenticated = await verifyAuth(req);
-  if (!authenticated) {
+  const userId = await verifyAuth(req);
+  if (!userId) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401, headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
+
+  // ── Rate limit: 20 emails per hour per user ───────────────────────────────
+  const withinLimit = await checkRateLimit(userId, "send-notifications", 20, 3600);
+  if (!withinLimit) {
+    return new Response(JSON.stringify({ error: "تجاوزت الحد المسموح من الإشعارات. يرجى المحاولة بعد ساعة." }), {
+      status: 429, headers: { "Content-Type": "application/json", "Retry-After": "3600", ...corsHeaders },
     });
   }
 

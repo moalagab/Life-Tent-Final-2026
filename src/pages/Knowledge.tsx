@@ -204,12 +204,12 @@ export default function Knowledge() {
   return (
     <MainLayout>
       <div className="mb-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-foreground">{t('knowledge.title')}</h1>
             <p className="text-muted-foreground mt-1">{t('knowledge.subtitle')}</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <Button variant="outline" size="lg">
               <Sparkles className="w-5 h-5 me-2" />
               {t('knowledge.aiInsights')}
@@ -349,8 +349,8 @@ export default function Knowledge() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'notes' | 'courses' | 'archived')} className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}>
+        <div className="flex flex-wrap items-center gap-3">
+          <div dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'} className="overflow-x-auto">
           <TabsList>
             <TabsTrigger value="notes" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
@@ -376,14 +376,14 @@ export default function Knowledge() {
           </TabsList>
           </div>
 
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <div className="relative w-full sm:w-auto">
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
               placeholder={t('knowledge.searchNotes')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 w-64"
+              className="ps-10 pe-4 py-2 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 w-full sm:w-64"
             />
           </div>
         </div>

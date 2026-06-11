@@ -30,18 +30,41 @@ function getCorsHeaders(req: Request) {
   };
 }
 
-// ── Auth ──────────────────────────────────────────────────────────────────────
+// ── Auth + Rate Limiting ──────────────────────────────────────────────────────
 
-async function verifyAuth(req: Request): Promise<boolean> {
+async function verifyAuth(req: Request): Promise<string | null> {
   const authHeader = req.headers.get("Authorization") ?? "";
-  if (!authHeader.startsWith("Bearer ")) return false;
+  if (!authHeader.startsWith("Bearer ")) return null;
   const token = authHeader.replace("Bearer ", "");
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_ANON_KEY") ?? "",
   );
-  const { error } = await supabase.auth.getUser(token);
-  return !error;
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  return error || !user ? null : user.id;
+}
+
+async function checkRateLimit(
+  userId: string,
+  functionName: string,
+  maxRequests: number,
+  windowSeconds: number,
+): Promise<boolean> {
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+  );
+  const { data, error } = await supabase.rpc("check_rate_limit", {
+    p_user_id:        userId,
+    p_function:       functionName,
+    p_max_requests:   maxRequests,
+    p_window_seconds: windowSeconds,
+  });
+  if (error) {
+    console.error("Rate limit check error:", error.message);
+    return true;
+  }
+  return (data as number) <= maxRequests;
 }
 
 // ── System prompts ────────────────────────────────────────────────────────────
@@ -183,11 +206,20 @@ Deno.serve(async (req: Request) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const authenticated = await verifyAuth(req);
-  if (!authenticated) {
+  const userId = await verifyAuth(req);
+  if (!userId) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // 30 finance AI requests per hour per user
+  const withinLimit = await checkRateLimit(userId, "finance-ai-assistant", 30, 3600);
+  if (!withinLimit) {
+    return new Response(JSON.stringify({ error: "تجاوزت الحد المسموح من طلبات المساعد المالي. يرجى المحاولة بعد ساعة." }), {
+      status: 429,
+      headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "3600" },
     });
   }
 

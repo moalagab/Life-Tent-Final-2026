@@ -239,12 +239,12 @@ export default function Habits() {
   return (
     <MainLayout>
       <div className="mb-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-foreground">{t('habits.title')}</h1>
             <p className="text-muted-foreground mt-1">{t('habits.subtitle')}</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button 
               variant={showCorrelation ? 'default' : 'outline'} 
               onClick={() => setShowCorrelation(!showCorrelation)}
@@ -412,16 +412,16 @@ export default function Habits() {
                     </DropdownMenu>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-7 gap-1">
                     {weekDates.map((date, i) => {
                       const isCompleted = isHabitCompletedOnDate(habit, date);
                       const dayIndex = date.getDay();
                       // Convert Sunday (0) to last, Monday (1) to first
                       const displayIndex = dayIndex === 0 ? 6 : dayIndex - 1;
-                      
+
                       return (
-                        <div key={i} className="flex-1 text-center">
-                          <span className="text-xs text-muted-foreground block mb-1">
+                        <div key={i} className="text-center min-w-0">
+                          <span className="text-[10px] sm:text-xs text-muted-foreground block mb-1 truncate">
                             {weekDayLabels[displayIndex]}
                           </span>
                           <button
@@ -429,8 +429,8 @@ export default function Habits() {
                             disabled={logHabit.isPending}
                             className={cn(
                               'w-full aspect-square rounded-lg transition-all',
-                              isCompleted 
-                                ? `${habit.color || habitColors[index % habitColors.length]} shadow-lg` 
+                              isCompleted
+                                ? `${habit.color || habitColors[index % habitColors.length]} shadow-lg`
                                 : 'bg-muted/50 hover:bg-muted'
                             )}
                           />
