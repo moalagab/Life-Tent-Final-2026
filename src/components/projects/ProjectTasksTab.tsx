@@ -52,14 +52,12 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
   // Filter tasks for this project
   const projectTasks = useMemo(() => {
     if (!allTasks) return [];
-     
-    return allTasks.filter((task: any) => task.project_id === projectId);
+    return allTasks.filter((task) => task.project_id === projectId);
   }, [allTasks, projectId]);
 
   // Apply filters
   const filteredTasks = useMemo(() => {
-     
-    return projectTasks.filter((task: any) => {
+    return projectTasks.filter((task) => {
       if (statusFilter !== 'all' && task.status !== statusFilter) return false;
       if (priorityFilter !== 'all' && task.priority !== priorityFilter) return false;
       return true;
@@ -78,8 +76,7 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
     if (selectedTasks.length === filteredTasks.length) {
       setSelectedTasks([]);
     } else {
-       
-      setSelectedTasks(filteredTasks.map((t: any) => t.id));
+      setSelectedTasks(filteredTasks.map((t) => t.id));
     }
   };
 
@@ -89,7 +86,7 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
         if (action === 'complete') {
           await updateTask.mutateAsync({ id: taskId, status: 'done' });
         } else if (action === 'archive') {
-           
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           await updateTask.mutateAsync({ id: taskId, archived_at: new Date().toISOString() } as any);
         } else if (action === 'delete') {
           await deleteTask.mutateAsync(taskId);
@@ -113,12 +110,11 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
         title: newTask.title,
         description: newTask.description || null,
 
-        priority: newTask.priority as any,
+        priority: newTask.priority as 'low' | 'medium' | 'high' | 'urgent',
         project_id: projectId,
         kr_id: newTask.kr_id || null,
-        status: 'todo',
-
-      } as any);
+        status: 'todo' as const,
+      });
       toast.success(currentLanguage === 'ar' ? 'تم إنشاء المهمة' : 'Task created');
       setIsCreateOpen(false);
       setNewTask({ title: '', description: '', priority: 'medium', kr_id: '' });
@@ -130,7 +126,7 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
   const handleStatusChange = async (taskId: string, status: string) => {
     try {
 
-      await updateTask.mutateAsync({ id: taskId, status: status as any });
+      await updateTask.mutateAsync({ id: taskId, status: status as 'backlog' | 'todo' | 'in_progress' | 'review' | 'done' });
       toast.success(currentLanguage === 'ar' ? 'تم تحديث الحالة' : 'Status updated');
     } catch (error) {
       toast.error(currentLanguage === 'ar' ? 'حدث خطأ' : 'An error occurred');
@@ -139,8 +135,7 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
 
   const getKrTitle = (krId: string | null) => {
     if (!krId || !keyResults) return null;
-     
-    const kr = keyResults.find((k: any) => k.id === krId);
+    const kr = keyResults.find((k) => k.id === krId);
     return kr?.title;
   };
 
@@ -211,7 +206,7 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
           </div>
         )}
 
-        {filteredTasks.map((task: any) => {
+        {filteredTasks.map((task) => {
           const krTitle = getKrTitle(task.kr_id);
           return (
             <Card key={task.id} className={`transition-all ${task.status === 'done' ? 'opacity-60' : ''}`}>
@@ -335,7 +330,7 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">{currentLanguage === 'ar' ? 'بدون' : 'None'}</SelectItem>
-                    {keyResults?.map((kr: any) => (
+                    {keyResults?.map((kr) => (
                       <SelectItem key={kr.id} value={kr.id}>{kr.title}</SelectItem>
                     ))}
                   </SelectContent>

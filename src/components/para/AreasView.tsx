@@ -284,7 +284,7 @@ export function AreasView() {
               <Label>فترة المراجعة</Label>
               <Select
                 value={formData.review_cadence}
-                onValueChange={(value: any) => setFormData({ ...formData, review_cadence: value })}
+                onValueChange={(value) => setFormData({ ...formData, review_cadence: value as Area['review_cadence'] })}
               >
                 <SelectTrigger>
                   <SelectValue />

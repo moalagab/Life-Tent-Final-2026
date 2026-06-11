@@ -14,7 +14,7 @@ export interface CourseLesson {
   completed_at: string | null;
   notes: string | null;
   video_url: string | null;
-  resources: any;
+  resources: unknown;
   created_at: string;
   updated_at: string;
 }

@@ -69,7 +69,7 @@ export function KanbanBoard({ projectId, tasks, onAddTask }: KanbanBoardProps) {
     try {
       await updateTask.mutateAsync({
         id: draggedTask.id,
-        status: status as any,
+        status: status as 'backlog' | 'todo' | 'in_progress' | 'review' | 'done',
         completed_at: status === 'done' ? new Date().toISOString() : null,
       });
     } catch (error) {

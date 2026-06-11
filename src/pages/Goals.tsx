@@ -13,7 +13,7 @@ import {
   useUpdateGoal, useDeleteGoal, useArchiveGoal, useRestoreGoal,
   useArchivedGoals, useUpdateKeyResult, Goal 
 } from '@/hooks/useGoals';
-import { GoalFormDialog } from '@/components/goals/GoalFormDialog';
+import { GoalFormDialog, GoalFormData } from '@/components/goals/GoalFormDialog';
 import { GoalCard } from '@/components/goals/GoalCard';
 import { GoalAnalytics } from '@/components/goals/GoalAnalytics';
 import { toast } from 'sonner';
@@ -132,7 +132,7 @@ export default function Goals() {
     return filtered;
   }, [goals, selectedCategory, searchQuery]);
 
-  const handleCreateGoal = async (formData: any) => {
+  const handleCreateGoal = async (formData: GoalFormData) => {
     try {
       await createGoal.mutateAsync({
         title: formData.title,
@@ -152,7 +152,7 @@ export default function Goals() {
     }
   };
 
-  const handleUpdateGoal = async (formData: any) => {
+  const handleUpdateGoal = async (formData: GoalFormData) => {
     if (!editingGoal) return;
     
     try {
@@ -512,7 +512,7 @@ export default function Goals() {
         initialData={editingGoal ? {
           title: editingGoal.title,
           description: editingGoal.description || '',
-          perspective: (editingGoal.perspective as any) || 'personal',
+          perspective: editingGoal.perspective || 'personal',
           target_value: editingGoal.target_value?.toString() || '',
           current_value: editingGoal.current_value?.toString() || '0',
           unit: editingGoal.unit || '',

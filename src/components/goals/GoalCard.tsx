@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { 
   Target, MoreHorizontal, TrendingUp, AlertTriangle, CheckCircle2,
   Calendar, FolderKanban, Plus, Trash2, Edit3, ChevronDown, ChevronUp,
@@ -64,7 +64,7 @@ interface GoalCardProps {
   isArchived?: boolean;
 }
 
-const perspectiveConfig: Record<string, { icon: any; color: string; bg: string }> = {
+const perspectiveConfig: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string; bg: string }> = {
   personal: { icon: User, color: 'text-primary', bg: 'bg-primary/10 border-primary/20' },
   financial: { icon: TrendingUp, color: 'text-primary', bg: 'bg-primary/10 border-primary/20' },
   customer: { icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10 border-blue-500/20' },

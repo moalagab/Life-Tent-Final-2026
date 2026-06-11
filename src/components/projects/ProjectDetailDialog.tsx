@@ -66,7 +66,7 @@ export function ProjectDetailDialog({ project, open, onOpenChange }: ProjectDeta
     try {
       await updateProject.mutateAsync({ 
         id: project.id, 
-        phase: newPhase as any,
+        phase: newPhase as 'initiation' | 'planning' | 'execution' | 'monitoring' | 'closing',
         status: newPhase === 'closing' ? 'completed' : project.status
       });
       toast.success(t('projects.projectUpdated'));

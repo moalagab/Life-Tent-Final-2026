@@ -41,7 +41,7 @@ export function PrayerWidget() {
   const { t, currentLanguage } = useLanguage();
   const isAr = currentLanguage === 'ar';
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
-  const [nextPrayer, setNextPrayer] = useState<{ prayer: any; remaining: string } | null>(null);
+  const [nextPrayer, setNextPrayer] = useState<{ prayer: string; remaining: string } | null>(null);
   // Re-evaluate Ramadan status daily so the widget stays correct across midnight
   const [isRamadanPeriod, setIsRamadanPeriod] = useState(isRamadan());
   const [weather, setWeather] = useState<Weather | null>(null);
@@ -121,7 +121,7 @@ export function PrayerWidget() {
       () => setWeatherLoading(false),
       { timeout: 10000, maximumAge: 30 * 60 * 1000 }
     );
-  }, []);
+  }, [isAr]);
 
   if (!prayerTimes || !nextPrayer) return null;
 

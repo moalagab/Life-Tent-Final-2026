@@ -6,7 +6,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday
 import { useState } from 'react';
 import { formatHijriDate } from '@/lib/hijri';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useEvents, useCreateEvent, useUpdateEvent, useDeleteEvent } from '@/hooks/useEvents';
+import { useEvents, useCreateEvent, useUpdateEvent, useDeleteEvent, Event as CalendarEvent } from '@/hooks/useEvents';
 import { useUnifiedCalendarEvents, UnifiedCalendarEvent } from '@/hooks/useUnifiedCalendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -26,7 +26,7 @@ export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [newEvent, setNewEvent] = useState({
     title: '',
     description: '',
@@ -141,7 +141,7 @@ export default function CalendarPage() {
     }
   };
 
-  const handleEditEvent = (event: any) => {
+  const handleEditEvent = (event: CalendarEvent) => {
     setEditingEvent(event);
     setNewEvent({
       title: event.title,

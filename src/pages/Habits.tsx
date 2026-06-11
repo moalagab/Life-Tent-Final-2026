@@ -3,7 +3,7 @@ import { Flame, Plus, TrendingUp, Smile, Frown, Meh, Zap, Moon, Loader2, Edit3, 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useHabitsWithLogs, useCreateHabit, useLogHabit, useUpdateHabit, useDeleteHabit } from '@/hooks/useHabits';
+import { useHabitsWithLogs, useCreateHabit, useLogHabit, useUpdateHabit, useDeleteHabit, Habit } from '@/hooks/useHabits';
 import { useTodayMoodLog, useUpsertMoodLog } from '@/hooks/useMoodLogs';
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -62,7 +62,7 @@ export default function Habits() {
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingHabit, setEditingHabit] = useState<any>(null);
+  const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [newHabit, setNewHabit] = useState({
     name: '',
     icon: '✨',

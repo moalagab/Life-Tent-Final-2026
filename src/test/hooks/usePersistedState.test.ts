@@ -2,7 +2,8 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { usePersistedState } from '@/hooks/usePersistedState';
 
-// Mock useAuth — the hook scopes keys by user ID
+// Mock useAuth — the hook scopes keys by user ID.
+// This also prevents the supabase client (and its heavy generated types) from loading.
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ user: { id: 'test-user-123' } }),
 }));

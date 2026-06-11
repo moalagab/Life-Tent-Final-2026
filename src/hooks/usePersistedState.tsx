@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from './useAuth';
 
 /**
@@ -11,17 +11,21 @@ import { useAuth } from './useAuth';
 export function usePersistedState<T>(key: string, initial: T) {
   const { user } = useAuth();
   const storageKey = `lt.${key}.${user?.id ?? 'anon'}`;
+  // Hold initial in a ref so object/array defaults don't cause re-renders.
+  // The initial value is intentionally only read on mount — callers must not
+  // rely on later changes to `initial` being picked up after mount.
+  const initialRef = useRef(initial);
 
   const read = useCallback((): T => {
-    if (typeof window === 'undefined') return initial;
+    if (typeof window === 'undefined') return initialRef.current;
     try {
       const raw = window.localStorage.getItem(storageKey);
-      if (raw === null) return initial;
+      if (raw === null) return initialRef.current;
       return JSON.parse(raw) as T;
     } catch {
-      return initial;
+      return initialRef.current;
     }
-  }, [storageKey, initial]);
+  }, [storageKey]);
 
   const [value, setValueState] = useState<T>(read);
 

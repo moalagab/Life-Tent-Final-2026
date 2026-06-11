@@ -8,7 +8,7 @@ export interface ArchivedItem {
   title: string;
   description?: string | null;
   archived_at: string;
-  original_data: Record<string, any>;
+  original_data: Record<string, unknown>;
 }
 
 export function useArchivedItems() {

@@ -8,8 +8,8 @@ export interface FinanceAuditLog {
   entity_type: string;
   entity_id: string;
   action: string;
-  old_values: Record<string, any> | null;
-  new_values: Record<string, any> | null;
+  old_values: Record<string, unknown> | null;
+  new_values: Record<string, unknown> | null;
   source: string | null;
   created_at: string;
 }

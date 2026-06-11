@@ -47,6 +47,7 @@ export function useCreateMilestone() {
     mutationFn: async (milestone: { project_id: string; title: string; description?: string; due_date: string; color?: string }) => {
       const { data, error } = await supabase
         .from('project_milestones')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .insert({ ...milestone, user_id: user!.id } as any)
         .select()
         .single();
@@ -67,6 +68,7 @@ export function useUpdateMilestone() {
     mutationFn: async ({ id, ...updates }: { id: string; title?: string; description?: string; due_date?: string; status?: string; completed_at?: string | null }) => {
       const { data, error } = await supabase
         .from('project_milestones')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .update(updates as any)
         .eq('id', id)
         .select()

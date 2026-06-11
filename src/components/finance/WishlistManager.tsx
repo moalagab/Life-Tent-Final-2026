@@ -124,7 +124,7 @@ function ItemForm({
           <label className="text-sm text-muted-foreground mb-1 block">
             {language === 'ar' ? 'الأولوية' : 'Priority'}
           </label>
-          <Select value={formData.priority} onValueChange={(v: any) => setFormData(prev => ({ ...prev, priority: v }))}>
+          <Select value={formData.priority} onValueChange={(v) => setFormData(prev => ({ ...prev, priority: v as WishlistItem['priority'] }))}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="low">{language === 'ar' ? 'منخفض' : 'Low'}</SelectItem>
@@ -468,8 +468,7 @@ export function WishlistManager() {
         linked_sinking_fund_id: formData.linked_sinking_fund_id || null,
         notes: formData.notes || null,
         status: 'pending',
-       
-      } as any);
+      });
       toast.success(language === 'ar' ? 'تمت الإضافة بنجاح' : 'Item added successfully');
       setIsDialogOpen(false);
       resetForm();
@@ -497,8 +496,7 @@ export function WishlistManager() {
         linked_envelope_id: formData.linked_envelope_id || null,
         linked_sinking_fund_id: formData.linked_sinking_fund_id || null,
         notes: formData.notes || null,
-       
-      } as any);
+      });
       toast.success(language === 'ar' ? 'تم التحديث' : 'Updated successfully');
       setIsEditDialogOpen(false);
       setEditingItem(null);
@@ -519,8 +517,7 @@ export function WishlistManager() {
 
   const handleMarkAsPurchased = async (id: string) => {
     try {
-       
-      await updateItem.mutateAsync({ id, status: 'purchased' } as any);
+      await updateItem.mutateAsync({ id, status: 'purchased' as WishlistItem['status'] });
       toast.success(language === 'ar' ? 'تم تسجيل الشراء' : 'Marked as purchased');
     } catch (error) {
       toast.error(language === 'ar' ? 'حدث خطأ' : 'An error occurred');
@@ -529,8 +526,7 @@ export function WishlistManager() {
 
   const handleStartSaving = async (id: string) => {
     try {
-       
-      await updateItem.mutateAsync({ id, status: 'saved_for' } as any);
+      await updateItem.mutateAsync({ id, status: 'saved_for' as WishlistItem['status'] });
       toast.success(language === 'ar' ? 'بدأ التوفير' : 'Started saving');
     } catch (error) {
       toast.error(language === 'ar' ? 'حدث خطأ' : 'An error occurred');

@@ -20,7 +20,7 @@ import { useHabits } from '@/hooks/useHabits';
 
 type GoalPerspective = 'financial' | 'customer' | 'processes' | 'learning' | 'personal';
 
-interface GoalFormData {
+export interface GoalFormData {
   title: string;
   description: string;
   perspective: GoalPerspective;

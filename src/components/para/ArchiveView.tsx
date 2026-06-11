@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useArchivedItems, ArchivedItem } from '@/hooks/useArchive';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +15,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
  
-const typeConfig: Record<ArchivedItem['type'], { label: string; icon: any; color: string }> = {
+const typeConfig: Record<ArchivedItem['type'], { label: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
   project: { label: 'مشروع', icon: FolderKanban, color: 'bg-blue-500' },
   area: { label: 'مجال', icon: Layers, color: 'bg-purple-500' },
   goal: { label: 'هدف', icon: Target, color: 'bg-primary/80' },
@@ -43,8 +43,7 @@ export function ArchiveView() {
   const handleRestore = async (item: ArchivedItem) => {
     try {
       let tableName = '';
-       
-      let updateData: Record<string, any> = {};
+      let updateData: Record<string, unknown> = {};
 
       switch (item.type) {
         case 'project':
@@ -74,7 +73,7 @@ export function ArchiveView() {
       }
 
       const { error } = await supabase
-         
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .from(tableName as any)
         .update(updateData)
         .eq('id', item.id);
@@ -125,7 +124,7 @@ export function ArchiveView() {
       </div>
 
       {/* Type Tabs */}
-      <Tabs value={activeType} onValueChange={(v) => setActiveType(v as any)}>
+      <Tabs value={activeType} onValueChange={(v) => setActiveType(v as ArchivedItem['type'] | 'all')}>
         <TabsList className="bg-muted/50 flex-wrap h-auto p-1">
           <TabsTrigger value="all" className="gap-1">
             الكل

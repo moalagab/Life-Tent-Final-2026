@@ -23,7 +23,7 @@ import { useHabits } from '@/hooks/useHabits';
 type TaskStatus = 'backlog' | 'todo' | 'in_progress' | 'review' | 'done';
 type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 
-interface TaskFormData {
+export interface TaskFormData {
   title: string;
   description: string;
   priority: TaskPriority;
@@ -175,7 +175,7 @@ export function TaskFormDialog({
                     type="button"
                     onClick={() => setFormData({ 
                       ...formData, 
-                      linkedTo: option.value as any,
+                      linkedTo: option.value as typeof formData.linkedTo,
                       project_id: option.value === 'project' ? formData.project_id : null,
                       goalId: option.value === 'goal' ? formData.goalId : undefined,
                       habitId: option.value === 'habit' ? formData.habitId : undefined,
@@ -304,7 +304,7 @@ export function TaskFormDialog({
               </Label>
               <Select
                 value={formData.recurrence}
-                onValueChange={(value: any) => setFormData({ ...formData, recurrence: value })}
+                onValueChange={(value) => setFormData({ ...formData, recurrence: value as typeof formData.recurrence })}
               >
                 <SelectTrigger className="bg-muted/50 border-border/50">
                   <SelectValue />

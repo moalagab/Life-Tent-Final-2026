@@ -48,6 +48,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       });
     return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, authLoading]);
 
   const markComplete = useCallback(async () => {
@@ -78,6 +79,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useOnboarding() {
   const context = useContext(OnboardingContext);
   if (!context) throw new Error('useOnboarding must be used within OnboardingProvider');

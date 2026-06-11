@@ -273,7 +273,7 @@ export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetai
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
         <div className="flex items-center justify-between">
           <TabsList>
             <TabsTrigger value="lessons" className="flex items-center gap-2">

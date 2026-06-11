@@ -11,7 +11,7 @@ import { useProjects } from '@/hooks/useProjects';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { isToday, isPast, parseISO, startOfDay } from 'date-fns';
-import { TaskFormDialog } from '@/components/tasks/TaskFormDialog';
+import { TaskFormDialog, TaskFormData } from '@/components/tasks/TaskFormDialog';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +24,9 @@ import {
 
 type TaskStatus = 'backlog' | 'todo' | 'in_progress' | 'review' | 'done';
 
+const ALLOWED_CATEGORIES = ['all', 'work', 'personal'] as const;
+const ALLOWED_DUE_FILTERS = ['overdue', 'today'] as const;
+
 export default function Tasks() {
   const { t, currentLanguage } = useLanguage();
   const { data: tasks, isLoading } = useTasks();
@@ -31,15 +34,13 @@ export default function Tasks() {
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
-  
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogStatus, setDialogStatus] = useState<TaskStatus>('todo');
   const [searchQuery, setSearchQuery] = useState('');
   const [draggedTask, setDraggedTask] = useState<string | null>(null);
   // Validate URL params with safe fallbacks; ignore unknown values.
-  const ALLOWED_CATEGORIES = ['all', 'work', 'personal'] as const;
-  const ALLOWED_DUE_FILTERS = ['overdue', 'today'] as const;
   const rawCategory = searchParams.get('category');
   const rawDue = searchParams.get('filter');
   const initialCategory = (ALLOWED_CATEGORIES as readonly string[]).includes(rawCategory ?? '')
@@ -63,6 +64,8 @@ export default function Tasks() {
       changed = true;
     }
     if (changed) setSearchParams(next, { replace: true });
+  // rawCategory and rawDue are derived from searchParams; setSearchParams is stable
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rawCategory, rawDue]);
 
   // Open the create-task dialog when ?new=1 is present
@@ -109,8 +112,8 @@ export default function Tasks() {
     }
     if (categoryFilter !== 'all') {
       filtered = filtered.filter(task => 
-        (task as any).category === categoryFilter || 
-        (categoryFilter === 'personal' && !(task as any).category)
+        (task as Record<string, unknown>).category === categoryFilter ||
+        (categoryFilter === 'personal' && !(task as Record<string, unknown>).category)
       );
     }
     if (dueFilter) {
@@ -142,7 +145,7 @@ export default function Tasks() {
     return projects?.find(p => p.id === projectId);
   };
 
-  const handleCreateTask = async (formData: any) => {
+  const handleCreateTask = async (formData: TaskFormData) => {
     try {
       await createTask.mutateAsync({
         title: formData.title,

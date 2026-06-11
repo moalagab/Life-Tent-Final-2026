@@ -35,6 +35,7 @@ function savePrefs(prefs: NotificationPrefs) {
 }
 
 /** Exported so other hooks can read preferences without the Settings UI being mounted */
+// eslint-disable-next-line react-refresh/only-export-components
 export function getNotificationPrefs(): NotificationPrefs {
   return loadPrefs();
 }

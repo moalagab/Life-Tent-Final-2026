@@ -54,6 +54,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 function DefaultFallback({ error, onReset }: { error: Error; onReset: () => void }) {
   const isDev = import.meta.env.DEV;
 

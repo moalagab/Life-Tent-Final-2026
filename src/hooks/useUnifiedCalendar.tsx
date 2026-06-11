@@ -15,7 +15,7 @@ export interface UnifiedCalendarEvent {
   color: string;
   sourceId: string;
   sourceType: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
@@ -125,7 +125,7 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
     const allEvents: UnifiedCalendarEvent[] = [];
 
     // Add scheduled tasks
-    tasks?.forEach((task: any) => {
+    tasks?.forEach((task) => {
       allEvents.push({
         id: `task-${task.id}`,
         type: 'task',
@@ -140,7 +140,7 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
     });
 
     // Add due tasks (as all-day)
-    dueTasks?.forEach((task: any) => {
+    dueTasks?.forEach((task) => {
       allEvents.push({
         id: `due-${task.id}`,
         type: 'task',
@@ -155,7 +155,7 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
     });
 
     // Add events
-    events?.forEach((event: any) => {
+    events?.forEach((event) => {
       allEvents.push({
         id: `event-${event.id}`,
         type: 'event',
@@ -171,7 +171,7 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
     });
 
     // Add milestones
-    milestones?.forEach((milestone: any) => {
+    milestones?.forEach((milestone) => {
       allEvents.push({
         id: `milestone-${milestone.id}`,
         type: 'milestone',
@@ -186,7 +186,7 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
     });
 
     // Add debt payments (generate for each month in range)
-    debts?.forEach((debt: any) => {
+    debts?.forEach((debt) => {
       if (debt.monthly_payment_date) {
         const start = new Date(startDate);
         const end = new Date(endDate);
@@ -211,7 +211,7 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
     });
 
     // Add subscription renewals
-    subscriptions?.forEach((sub: any) => {
+    subscriptions?.forEach((sub) => {
       if (sub.next_billing_date) {
         const billingDate = new Date(sub.next_billing_date);
         if (billingDate >= startDate && billingDate <= endDate) {

@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useSubscriptions, useAccounts } from '@/hooks/useFinance';
+import { useSubscriptions, useAccounts, Subscription } from '@/hooks/useFinance';
 import { useCreateSubscription, useUpdateSubscription, useDeleteSubscription } from '@/hooks/useAdvancedFinance';
 import { useNotifications } from '@/hooks/useNotifications';
 import { toast } from 'sonner';
@@ -206,7 +206,7 @@ export function SubscriptionsManager() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingSub, setEditingSub] = useState<any>(null);
+  const [editingSub, setEditingSub] = useState<Subscription | null>(null);
   const [view, setView] = useState<'list' | 'calendar'>('list');
 
   const [formData, setFormData] = useState({
@@ -382,7 +382,7 @@ export function SubscriptionsManager() {
     }
   };
 
-  const openEditDialog = (sub: any) => {
+  const openEditDialog = (sub: Subscription) => {
     setEditingSub(sub);
     setFormData({
       name: sub.name,

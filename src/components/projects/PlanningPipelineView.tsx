@@ -261,7 +261,7 @@ export function PlanningPipelineView() {
 interface PipelineDetailDialogProps {
   pipeline: PlanningPipeline | null;
   onClose: () => void;
-  onUpdate: (data: Partial<PlanningPipeline> & { id: string }) => Promise<any>;
+  onUpdate: (data: Partial<PlanningPipeline> & { id: string }) => Promise<unknown>;
   onDelete: (id: string) => void;
   onConvert: (pipeline: PlanningPipeline) => void;
   isConverting: boolean;
@@ -274,7 +274,7 @@ function PipelineDetailDialog({ pipeline, onClose, onUpdate, onDelete, onConvert
 
   if (!pipeline) return null;
 
-  const handleFieldChange = async (field: keyof PlanningPipeline, value: any) => {
+  const handleFieldChange = async (field: keyof PlanningPipeline, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 

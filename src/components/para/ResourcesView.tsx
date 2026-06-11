@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useResources, useCreateResource, useUpdateResource, useArchiveResource, useRestoreResource, useDeleteResource, ResourceType } from '@/hooks/useResources';
+import { useResources, useCreateResource, useUpdateResource, useArchiveResource, useRestoreResource, useDeleteResource, ResourceType, Resource } from '@/hooks/useResources';
 import { useActiveAreas } from '@/hooks/useAreas';
 import { useProjects } from '@/hooks/useProjects';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,7 +23,7 @@ import { UnifiedResourcesView } from './UnifiedResourcesView';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 
  
-const resourceTypes: { value: ResourceType; label: string; icon: any }[] = [
+const resourceTypes: { value: ResourceType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { value: 'note', label: 'ملاحظة', icon: FileText },
   { value: 'file', label: 'ملف', icon: File },
   { value: 'link', label: 'رابط', icon: Link2 },
@@ -41,8 +41,7 @@ export function ResourcesView() {
   const [filterAreaId, setFilterAreaId] = useState<string>('');
   const [filterProjectId, setFilterProjectId] = useState<string>('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-   
-  const [editingResource, setEditingResource] = useState<any | null>(null);
+  const [editingResource, setEditingResource] = useState<Resource | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     type: 'note' as ResourceType,
@@ -89,8 +88,7 @@ export function ResourcesView() {
     );
   }
 
-   
-  const filteredResources = resources?.filter((r: any) =>
+  const filteredResources = resources?.filter((r) =>
     r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -110,8 +108,7 @@ export function ResourcesView() {
     setEditingResource(null);
   };
 
-   
-  const handleOpenDialog = (resource?: any) => {
+  const handleOpenDialog = (resource?: Resource) => {
     if (resource) {
       setEditingResource(resource);
       setFormData({
@@ -254,7 +251,7 @@ export function ResourcesView() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">كل المشاريع</SelectItem>
-            {projects?.map((project: any) => (
+            {projects?.map((project) => (
               <SelectItem key={project.id} value={project.id}>{project.title}</SelectItem>
             ))}
           </SelectContent>
@@ -270,7 +267,7 @@ export function ResourcesView() {
       </div>
 
       {/* Type Tabs */}
-      <Tabs value={activeType} onValueChange={(v) => setActiveType(v as any)}>
+      <Tabs value={activeType} onValueChange={(v) => setActiveType(v as ResourceType | 'all')}>
         <TabsList className="bg-muted/50">
           <TabsTrigger value="all">الكل</TabsTrigger>
           {resourceTypes.map((type) => (
@@ -284,7 +281,7 @@ export function ResourcesView() {
         <TabsContent value={activeType} className="mt-4">
           {/* Resources Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredResources?.map((resource: any) => {
+            {filteredResources?.map((resource) => {
               const TypeIcon = getTypeIcon(resource.type);
               return (
                 <Card 
@@ -488,7 +485,7 @@ export function ResourcesView() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">بدون</SelectItem>
-                    {projects?.map((project: any) => (
+                    {projects?.map((project) => (
                       <SelectItem key={project.id} value={project.id}>{project.title}</SelectItem>
                     ))}
                   </SelectContent>

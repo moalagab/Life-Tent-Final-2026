@@ -49,8 +49,8 @@ export function usePomodoroTaskStats() {
       } else {
         statsMap.set(session.task_id, {
           taskId: session.task_id,
-          taskTitle: (session.tasks as any).title,
-          projectTitle: (session.tasks as any).projects?.title || null,
+          taskTitle: (session.tasks as Record<string, unknown>).title as string,
+          projectTitle: ((session.tasks as Record<string, unknown>).projects as Record<string, unknown> | null)?.title as string | null || null,
           totalSessions: 1,
           totalMinutes: session.duration_minutes,
           lastSession: session.completed_at,

@@ -31,34 +31,28 @@ export function ProjectGoalsTab({ projectId }: ProjectGoalsTabProps) {
   const [newKr, setNewKr] = useState({ title: '', target_value: 100, unit: '%' });
 
   // Filter goals for this project
-   
-  const projectGoals = allGoals?.filter((g: any) => g.project_id === projectId) || [];
-   
-  const projectKeyResults = allKeyResults?.filter((kr: any) => 
-     
-    projectGoals.some((g: any) => g.id === kr.goal_id)
+  const projectGoals = allGoals?.filter((g) => g.project_id === projectId) || [];
+  const projectKeyResults = allKeyResults?.filter((kr) =>
+    projectGoals.some((g) => g.id === kr.goal_id)
   ) || [];
 
   // Get tasks linked to a KR
   const getKrTasks = (krId: string) => {
      
-    return allTasks?.filter((t: any) => t.kr_id === krId) || [];
+    return allTasks?.filter((t) => t.kr_id === krId) || [];
   };
 
   // Calculate KR progress
-   
-  const calculateKrProgress = (kr: any) => {
+  const calculateKrProgress = (kr: { target_value: number; current_value: number }) => {
     if (kr.target_value === 0) return 0;
     return Math.min(100, Math.round((kr.current_value / kr.target_value) * 100));
   };
 
   // Calculate goal progress
   const calculateGoalProgress = (goalId: string) => {
-     
-    const goalKrs = projectKeyResults.filter((kr: any) => kr.goal_id === goalId);
+    const goalKrs = projectKeyResults.filter((kr) => kr.goal_id === goalId);
     if (goalKrs.length === 0) return 0;
-     
-    const totalProgress = goalKrs.reduce((sum: number, kr: any) => sum + calculateKrProgress(kr), 0);
+    const totalProgress = goalKrs.reduce((sum: number, kr) => sum + calculateKrProgress(kr), 0);
     return Math.round(totalProgress / goalKrs.length);
   };
 
@@ -122,10 +116,8 @@ export function ProjectGoalsTab({ projectId }: ProjectGoalsTabProps) {
           <p className="text-sm mt-2">{currentLanguage === 'ar' ? 'يمكنك ربط الأهداف بالمشروع من صفحة الأهداف' : 'You can link goals to the project from the Goals page'}</p>
         </div>
       ) : (
-         
-        projectGoals.map((goal: any) => {
-           
-          const goalKrs = projectKeyResults.filter((kr: any) => kr.goal_id === goal.id);
+        projectGoals.map((goal) => {
+          const goalKrs = projectKeyResults.filter((kr) => kr.goal_id === goal.id);
           const progress = calculateGoalProgress(goal.id);
 
           return (
@@ -156,11 +148,10 @@ export function ProjectGoalsTab({ projectId }: ProjectGoalsTabProps) {
               <CardContent className="pt-2">
                 {/* Key Results */}
                 <div className="space-y-3">
-                  {goalKrs.map((kr: any) => {
+                  {goalKrs.map((kr) => {
                     const krProgress = calculateKrProgress(kr);
                     const linkedTasks = getKrTasks(kr.id);
-                     
-                    const nextTask = linkedTasks.find((t: any) => t.status !== 'done');
+                    const nextTask = linkedTasks.find((t) => t.status !== 'done');
 
                     return (
                       <div key={kr.id} className="p-3 bg-muted/30 rounded-lg">

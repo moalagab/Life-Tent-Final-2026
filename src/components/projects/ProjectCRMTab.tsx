@@ -37,13 +37,10 @@ export function ProjectCRMTab({ projectId }: ProjectCRMTabProps) {
 
   // Filter by project
    
-  const projectCustomers = customers?.filter((c: any) => c.project_id === projectId) || [];
-   
-  const customerIds = projectCustomers.map((c: any) => c.id);
-   
-  const projectCases = cases?.filter((c: any) => customerIds.includes(c.customer_id)) || [];
-   
-  const projectComms = communications?.filter((c: any) => customerIds.includes(c.customer_id)) || [];
+  const projectCustomers = customers?.filter((c) => c.project_id === projectId) || [];
+  const customerIds = projectCustomers.map((c) => c.id);
+  const projectCases = cases?.filter((c) => customerIds.includes(c.customer_id)) || [];
+  const projectComms = communications?.filter((c) => customerIds.includes(c.customer_id)) || [];
 
   if (isLoading) {
     return <div className="flex items-center justify-center p-8">جارٍ التحميل...</div>;
@@ -80,7 +77,7 @@ export function ProjectCRMTab({ projectId }: ProjectCRMTabProps) {
             </div>
           ) : (
             <div className="grid gap-4">
-              {projectCustomers.map((customer: any) => (
+              {projectCustomers.map((customer) => (
                 <Card key={customer.id}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
@@ -121,9 +118,8 @@ export function ProjectCRMTab({ projectId }: ProjectCRMTabProps) {
             </div>
           ) : (
             <div className="grid gap-4">
-              {projectCases.map((caseItem: any) => {
-                 
-                const customer = projectCustomers.find((c: any) => c.id === caseItem.customer_id);
+              {projectCases.map((caseItem) => {
+                const customer = projectCustomers.find((c) => c.id === caseItem.customer_id);
                 return (
                   <Card key={caseItem.id}>
                     <CardContent className="p-4">
@@ -156,9 +152,8 @@ export function ProjectCRMTab({ projectId }: ProjectCRMTabProps) {
             </div>
           ) : (
             <div className="space-y-4">
-              {projectComms.map((comm: any) => {
-                 
-                const customer = projectCustomers.find((c: any) => c.id === comm.customer_id);
+              {projectComms.map((comm) => {
+                const customer = projectCustomers.find((c) => c.id === comm.customer_id);
                 return (
                   <Card key={comm.id}>
                     <CardContent className="p-4">

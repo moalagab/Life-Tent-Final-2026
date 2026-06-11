@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useProjects } from '@/hooks/useProjects';
 import { useTasks } from '@/hooks/useTasks';
@@ -451,7 +451,7 @@ export function AdvancedDashboard() {
 }
 
 interface StatCardProps {
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   value: string | number;
   label: string;
   color: string;

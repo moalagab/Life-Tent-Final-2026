@@ -16,7 +16,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useAccounts, useTransactions, useCreateTransaction } from '@/hooks/useFinance';
+import { useAccounts, useTransactions, useCreateTransaction, Transaction } from '@/hooks/useFinance';
 import { useCategories } from '@/hooks/useAdvancedFinance';
 import { useProjects } from '@/hooks/useProjects';
 import { useUpdateTransaction, useDeleteTransaction, useUploadReceipt } from '@/hooks/useTransactionMutations';
@@ -43,7 +43,7 @@ export function TransactionsManager() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
@@ -172,7 +172,7 @@ export function TransactionsManager() {
     }
   };
 
-  const openEditDialog = (tx: any) => {
+  const openEditDialog = (tx: Transaction) => {
     setEditTransaction({
       id: tx.id,
       description: tx.description,

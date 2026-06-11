@@ -193,6 +193,7 @@ export function useUpdateCase() {
     mutationFn: async ({ id, customer, ...updates }: Partial<CustomerCase> & { id: string }) => {
       const { data, error } = await supabase
         .from('customer_cases')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .update(updates as any)
         .eq('id', id)
         .select()

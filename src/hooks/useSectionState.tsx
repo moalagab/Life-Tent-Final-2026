@@ -32,7 +32,7 @@ export function useSectionState(sectionId: string, defaultOpen = true) {
     } catch {
       /* ignore */
     }
-  }, [storageKey]);
+  }, [storageKey, defaultOpen]);
 
   const toggle = useCallback(() => {
     setOpen((prev) => {

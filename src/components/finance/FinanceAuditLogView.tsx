@@ -141,7 +141,7 @@ export function FinanceAuditLogView() {
               </div>
             ) : (
               <div className="space-y-2 max-h-[500px] overflow-y-auto">
-                {activityLogs.map((log: any) => {
+                {activityLogs.map((log) => {
                   const ActionIcon = actionIcons[log.action as keyof typeof actionIcons] || FileText;
                   return (
                     <div key={log.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors">

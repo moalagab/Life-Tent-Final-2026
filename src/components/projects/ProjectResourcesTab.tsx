@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useResources, useCreateResource, useDeleteResource } from '@/hooks/useResources';
+import { useResources, useCreateResource, useDeleteResource, ResourceType } from '@/hooks/useResources';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,8 +36,7 @@ export function ProjectResourcesTab({ projectId }: ProjectResourcesTabProps) {
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newResource, setNewResource] = useState({
-     
-    type: 'note' as any,
+    type: 'note' as ResourceType,
     title: '',
     description: '',
     content: '',
@@ -94,7 +93,7 @@ export function ProjectResourcesTab({ projectId }: ProjectResourcesTabProps) {
 
       {/* Resources Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {allResources?.map((resource: any) => {
+        {allResources?.map((resource) => {
           const TypeIcon = getTypeIcon(resource.type);
           return (
             <Card key={resource.id} className="transition-all hover:shadow-md">
@@ -159,7 +158,7 @@ export function ProjectResourcesTab({ projectId }: ProjectResourcesTabProps) {
           <div className="space-y-4">
             <div>
               <Label>{currentLanguage === 'ar' ? 'النوع' : 'Type'}</Label>
-              <Select value={newResource.type} onValueChange={(v) => setNewResource({ ...newResource, type: v as any })}>
+              <Select value={newResource.type} onValueChange={(v) => setNewResource({ ...newResource, type: v as ResourceType })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
