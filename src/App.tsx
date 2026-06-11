@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +11,8 @@ import { AdminGuard } from "@/components/admin/AdminGuard";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { queryClient } from "@/lib/queryClient";
 import { PWAUpdatePrompt } from "@/components/PWAUpdatePrompt";
+import { useAppLifecycle } from "@/hooks/useAppLifecycle";
+import { isNative } from "@/lib/capacitor";
 
 // Eagerly load auth pages (always needed)
 import LandingPage from "./pages/LandingPage";
@@ -42,11 +44,34 @@ function PageLoader() {
   );
 }
 
+/** Initialises native plugins once on app start */
+function NativeBootstrap() {
+  // Back button + app resume handling
+  useAppLifecycle(() => {
+    queryClient.invalidateQueries();
+  });
+
+  // Hide splash screen + set status bar after first render
+  useEffect(() => {
+    if (!isNative) return;
+
+    Promise.all([
+      import('@capacitor/splash-screen').then(({ SplashScreen }) =>
+        SplashScreen.hide({ fadeOutDuration: 300 })),
+      import('@capacitor/status-bar').then(({ StatusBar, Style }) =>
+        StatusBar.setStyle({ style: Style.Dark })),
+    ]).catch(() => {});
+  }, []);
+
+  return null;
+}
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
+          <NativeBootstrap />
           <Toaster />
           <Sonner />
           <PWAUpdatePrompt />

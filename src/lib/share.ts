@@ -1,7 +1,10 @@
 /**
- * Web Share API wrapper.
- * Falls back to clipboard copy when share is not supported.
+ * share.ts — Share sheet, platform-aware.
+ *
+ * Native (Android/iOS) → @capacitor/share (system share sheet)
+ * Web                  → navigator.share → clipboard fallback
  */
+import { isNative } from './capacitor';
 
 interface ShareData {
   title: string;
@@ -9,29 +12,38 @@ interface ShareData {
   url?: string;
 }
 
-/**
- * Returns true if the native share sheet is available on this device.
- */
 export const canShare = (): boolean =>
-  typeof navigator !== 'undefined' && 'share' in navigator;
+  isNative || (typeof navigator !== 'undefined' && 'share' in navigator);
 
-/**
- * Opens the native share sheet if available, otherwise copies `text` to clipboard.
- * Returns whether the share/copy succeeded.
- */
 export async function shareOrCopy(data: ShareData): Promise<boolean> {
-  if (canShare()) {
+  // ── Native share sheet ────────────────────────────────────────────────────
+  if (isNative) {
+    try {
+      const { Share } = await import('@capacitor/share');
+      await Share.share({
+        title:       data.title,
+        text:        data.text,
+        url:         data.url,
+        dialogTitle: data.title,
+      });
+      return true;
+    } catch (err) {
+      if (err instanceof Error && err.message.includes('cancel')) return false;
+      // fall through to clipboard
+    }
+  }
+
+  // ── Web Share API ─────────────────────────────────────────────────────────
+  if (typeof navigator !== 'undefined' && 'share' in navigator) {
     try {
       await navigator.share(data);
       return true;
     } catch (err) {
-      // User cancelled — not an error
       if (err instanceof Error && err.name === 'AbortError') return false;
-      // Fall through to clipboard
     }
   }
 
-  // Clipboard fallback
+  // ── Clipboard fallback ────────────────────────────────────────────────────
   const text = [data.title, data.text, data.url].filter(Boolean).join('\n');
   try {
     await navigator.clipboard.writeText(text);

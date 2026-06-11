@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Life Tent</string>
+    <string name="title_activity_main">Life Tent</string>
+    <string name="package_name">online.lifetent.app</string>
+    <string name="custom_url_scheme">online.lifetent.app</string>
+</resources>

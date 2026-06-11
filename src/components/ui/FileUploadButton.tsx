@@ -9,10 +9,12 @@
  *   <FileUploadButton bucket="media" accept="image/*" allowCamera onUploaded={...} />
  */
 import { useRef } from 'react';
-import { Paperclip, Camera, Loader2, X } from 'lucide-react';
+import { Paperclip, Camera, Loader2, X, Image } from 'lucide-react';
 import { Button } from './button';
 import { Progress } from './progress';
 import { useFileUpload, type StorageBucket, type UploadedFile } from '@/hooks/useFileUpload';
+import { useNativeCamera } from '@/hooks/useNativeCamera';
+import { isNative } from '@/lib/capacitor';
 import { cn } from '@/lib/utils';
 
 interface FileUploadButtonProps {
@@ -40,6 +42,7 @@ export function FileUploadButton({
   const fileInputRef   = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const acceptTypes    = accept ? accept.split(',').map(s => s.trim()) : undefined;
+  const { takePhoto, pickFromGallery } = useNativeCamera();
 
   const { upload, remove, uploading, progress } = useFileUpload({
     bucket,
@@ -55,6 +58,24 @@ export function FileUploadButton({
     e.target.value = '';
   };
 
+  // Native camera capture
+  const handleNativeCamera = async () => {
+    const photo = await takePhoto();
+    if (!photo) return;
+    const file = new File([photo.blob], `photo_${Date.now()}.${photo.format}`, { type: photo.blob.type });
+    const uploaded = await upload(file);
+    if (uploaded) onUploaded?.(uploaded);
+  };
+
+  // Native gallery picker
+  const handleNativeGallery = async () => {
+    const photo = await pickFromGallery();
+    if (!photo) return;
+    const file = new File([photo.blob], `photo_${Date.now()}.${photo.format}`, { type: photo.blob.type });
+    const uploaded = await upload(file);
+    if (uploaded) onUploaded?.(uploaded);
+  };
+
   const handleRemove = async () => {
     if (!currentFile) return;
     const ok = await remove(currentFile.path);
@@ -62,6 +83,7 @@ export function FileUploadButton({
   };
 
   const showCamera = allowCamera && (accept?.includes('image') ?? false);
+  const useNativeCam = isNative && showCamera;
 
   if (currentFile && !uploading) {
     return (
@@ -111,17 +133,47 @@ export function FileUploadButton({
         </div>
       ) : (
         <>
-          <Button
-            type="button"
-            variant="outline"
-            size={compact ? 'icon' : 'sm'}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <Paperclip className={cn('w-4 h-4', !compact && 'me-2')} />
-            {!compact && (label ?? 'إرفاق ملف')}
-          </Button>
+          {/* File picker — hidden on native if camera shown */}
+          {!useNativeCam && (
+            <Button
+              type="button"
+              variant="outline"
+              size={compact ? 'icon' : 'sm'}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Paperclip className={cn('w-4 h-4', !compact && 'me-2')} />
+              {!compact && (label ?? 'إرفاق ملف')}
+            </Button>
+          )}
 
-          {showCamera && (
+          {/* Native camera buttons */}
+          {useNativeCam && (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                size={compact ? 'icon' : 'sm'}
+                onClick={handleNativeCamera}
+                title="التقاط صورة"
+              >
+                <Camera className={cn('w-4 h-4', !compact && 'me-2')} />
+                {!compact && 'كاميرا'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size={compact ? 'icon' : 'sm'}
+                onClick={handleNativeGallery}
+                title="اختر من المعرض"
+              >
+                <Image className={cn('w-4 h-4', !compact && 'me-2')} />
+                {!compact && 'معرض'}
+              </Button>
+            </>
+          )}
+
+          {/* Web camera capture */}
+          {showCamera && !useNativeCam && (
             <Button
               type="button"
               variant="outline"
