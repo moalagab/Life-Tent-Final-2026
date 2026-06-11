@@ -24,6 +24,8 @@ import { useAutoReminders } from '@/hooks/useAutoReminders';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useSectionState } from '@/hooks/useSectionState';
 import { usePersistedState } from '@/hooks/usePersistedState';
+import { QuickActions } from '@/components/dashboard/QuickActions';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet, Brain } from 'lucide-react';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
@@ -36,6 +38,7 @@ import type { ReactNode } from 'react';
 const Index = () => {
   useAutoReminders();
   const { t } = useLanguage();
+  const isMobile = useIsMobile();
 
   const [preset, setPreset] = usePersistedState<DashboardPreset>(
     'dashboard.preset',
@@ -196,27 +199,43 @@ const Index = () => {
 
   return (
     <MainLayout>
-      <div className="space-y-6 lg:space-y-8 pb-12 animate-fade-in">
-        {/* 1. Greeting + preset switcher on one calm row */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 sm:gap-3 lg:gap-4">
-          <GreetingSlim />
-          <div className="flex items-center gap-2">
-            <span className="hidden lg:inline-flex items-center gap-1 text-[10px] font-mono text-muted-foreground/60">
-              <kbd className="px-1.5 py-0.5 rounded border border-border/50 bg-muted/30">Alt</kbd>
-              <kbd className="px-1.5 py-0.5 rounded border border-border/50 bg-muted/30">1·2·3</kbd>
+      <div className="space-y-5 lg:space-y-8 pb-4 animate-fade-in">
+
+        {/* ── Desktop only: greeting + preset switcher ── */}
+        {!isMobile && (
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 sm:gap-3 lg:gap-4">
+            <GreetingSlim />
+            <div className="flex items-center gap-2">
+              <span className="hidden lg:inline-flex items-center gap-1 text-[10px] font-mono text-muted-foreground/60">
+                <kbd className="px-1.5 py-0.5 rounded border border-border/50 bg-muted/30">Alt</kbd>
+                <kbd className="px-1.5 py-0.5 rounded border border-border/50 bg-muted/30">1·2·3</kbd>
+              </span>
+              <LayoutPresetSwitcher value={preset} onChange={setPreset} />
+            </div>
+          </div>
+        )}
+
+        {/* ── Quick Actions (mobile: horizontal pills, desktop: cards grid) ── */}
+        <QuickActions />
+
+        {/* ── Attention ribbon ── */}
+        <AttentionStrip />
+
+        {/* ── Daily Decision Card ── */}
+        <DailyDecisionCard />
+
+        {/* ── Mobile: preset switcher below the card ── */}
+        {isMobile && (
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">
+              {t('dashboard.layout') || 'التخطيط'}
             </span>
             <LayoutPresetSwitcher value={preset} onChange={setPreset} />
           </div>
-        </div>
+        )}
 
-        {/* 2. Attention ribbon */}
-        <AttentionStrip />
-
-        {/* 3. Daily Decision Card — always visible at top */}
-        <DailyDecisionCard />
-
-        {/* 4. Sections per preset, separated by uniform breathing room */}
-        <div className="space-y-6 lg:space-y-8">
+        {/* ── Sections per preset ── */}
+        <div className="space-y-5 lg:space-y-8">
           {arrangements[preset]}
         </div>
       </div>

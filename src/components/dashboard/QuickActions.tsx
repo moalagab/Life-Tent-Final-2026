@@ -172,7 +172,36 @@ export function QuickActions() {
 
   return (
     <>
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-2 lg:gap-3">
+      {/* ── Mobile: horizontal pill row (Al Rajhi style) ── */}
+      <div className="md:hidden -mx-4 px-4">
+        <div className="flex gap-4 overflow-x-auto scrollbar-none pb-1">
+          {actions.map((action) => (
+            <button
+              key={action.id}
+              onClick={() => handleAction(action.id)}
+              className="flex flex-col items-center gap-2 shrink-0 group active:scale-95 transition-transform"
+            >
+              <div className={cn(
+                'w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-200',
+                action.special
+                  ? 'bg-gradient-to-br from-primary to-violet-500 shadow-lg'
+                  : action.iconBg,
+              )}>
+                <action.icon className={cn(
+                  'w-6 h-6',
+                  action.special ? 'text-white' : action.iconColor,
+                )} strokeWidth={1.8} />
+              </div>
+              <span className="text-[10px] font-medium text-muted-foreground text-center leading-tight max-w-[56px]">
+                {action.label}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Desktop: existing card grid ── */}
+      <div className="hidden md:grid grid-cols-6 gap-2 lg:gap-3">
         {actions.map((action, idx) => (
           <button
             key={action.id}
@@ -189,33 +218,19 @@ export function QuickActions() {
                 : "bg-card/50 border-border/40 hover:border-primary/40 hover:shadow-[0_8px_24px_-12px_hsl(var(--primary)/0.3)]"
             )}
           >
-            {/* Shine sweep on hover */}
             <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
-
-            {/* Background hover tint */}
             {!action.special && (
-              <div className={cn(
-                "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300",
-                action.hoverBg
-              )} />
+              <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300", action.hoverBg)} />
             )}
-
             <div className="relative flex flex-col items-center gap-2 text-center">
               <div className={cn(
                 "w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300",
                 "group-hover:scale-110 group-hover:rotate-3",
                 action.special ? "bg-white/20 backdrop-blur-sm" : action.iconBg
               )}>
-                <action.icon className={cn(
-                  "w-5 h-5 transition-transform duration-300",
-                  action.special ? "text-primary-foreground" : action.iconColor
-                )} />
+                <action.icon className={cn("w-5 h-5 transition-transform duration-300", action.special ? "text-primary-foreground" : action.iconColor)} />
               </div>
-
-              <span className={cn(
-                "text-[11px] font-semibold leading-tight",
-                action.special ? "text-primary-foreground" : "text-foreground"
-              )}>
+              <span className={cn("text-[11px] font-semibold leading-tight", action.special ? "text-primary-foreground" : "text-foreground")}>
                 {action.label}
               </span>
             </div>
