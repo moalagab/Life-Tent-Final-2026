@@ -1,6 +1,6 @@
 import { MainLayout } from '@/components/layout/MainLayout';
-import { 
-  Plus, Filter, Search, MoreHorizontal, Flag, Calendar, Loader2, 
+import {
+  Plus, Filter, Search, MoreHorizontal, Flag, Calendar, Loader2,
   FolderKanban, Target, Sparkles, User, Clock, Trash2, Edit3, GripVertical
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type TaskStatus = 'backlog' | 'todo' | 'in_progress' | 'review' | 'done';
 
@@ -34,12 +35,15 @@ export default function Tasks() {
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
+  const isMobile = useIsMobile();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogStatus, setDialogStatus] = useState<TaskStatus>('todo');
   const [searchQuery, setSearchQuery] = useState('');
   const [draggedTask, setDraggedTask] = useState<string | null>(null);
+  // Mobile: active column tab
+  const [mobileActiveColumn, setMobileActiveColumn] = useState<TaskStatus>('todo');
   // Validate URL params with safe fallbacks; ignore unknown values.
   const rawCategory = searchParams.get('category');
   const rawDue = searchParams.get('filter');
@@ -231,7 +235,7 @@ export default function Tasks() {
           </div>
           <Button
             onClick={() => openDialogForStatus('todo')}
-            className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/25"
+            className="hidden md:inline-flex bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/25"
           >
             <Plus className="w-5 h-5 me-2" />
             {t('tasks.newTask')}
@@ -336,188 +340,338 @@ export default function Tasks() {
         </div>
       )}
 
-      {/* Kanban Board */}
-      <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2">
-        {columns.map((column, colIndex) => {
-          const columnTasks = getTasksByStatus(column.id);
-          
-          return (
-            <div 
-              key={column.id} 
-              className="flex-shrink-0 w-80 animate-fade-in"
-              style={{ animationDelay: `${colIndex * 50}ms` }}
-              onDragOver={handleDragOver}
-              onDrop={() => handleDrop(column.id)}
-            >
-              {/* Column Header */}
-              <div className={cn(
-                'flex items-center justify-between mb-4 p-3 rounded-xl bg-gradient-to-r',
-                column.gradient,
-                isWipLimitReached(column.id) && column.id !== 'backlog' && column.id !== 'done' && 'ring-2 ring-destructive/50'
-              )}>
-                <div className="flex items-center gap-3">
-                  <div className={cn('w-3 h-3 rounded-full shadow-lg', column.color)} />
-                  <span className="font-semibold text-foreground">{column.title}</span>
-                  <Badge 
-                    variant={isWipLimitReached(column.id) && column.id !== 'backlog' && column.id !== 'done' ? 'destructive' : 'secondary'} 
-                    className="text-xs px-2 py-0.5 rounded-full"
+      {/* ── MOBILE VIEW (< md) ─────────────────────────────────────────── */}
+      {isMobile && (
+        <>
+          {/* Sticky column tab bar */}
+          <div className="sticky top-0 z-10 -mx-4 px-4 py-2 bg-background/95 backdrop-blur border-b border-border/50">
+            <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1">
+              {columns.map((column) => {
+                const count = getTasksByStatus(column.id).length;
+                const isActive = mobileActiveColumn === column.id;
+                return (
+                  <button
+                    key={column.id}
+                    onClick={() => setMobileActiveColumn(column.id)}
+                    className={cn(
+                      'flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all',
+                      isActive
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'bg-muted/60 text-muted-foreground hover:text-foreground'
+                    )}
                   >
-                    {columnTasks.length}
-                    {WIP_LIMITS[column.id] < 999 && `/${WIP_LIMITS[column.id]}`}
-                  </Badge>
-                </div>
-                <button 
-                  className={cn(
-                    'p-1.5 rounded-lg hover:bg-background/50 transition-colors',
-                    isWipLimitReached(column.id) && column.id !== 'backlog' && column.id !== 'done' && 'opacity-50 cursor-not-allowed'
-                  )}
-                  onClick={() => !isWipLimitReached(column.id) && openDialogForStatus(column.id)}
-                  disabled={isWipLimitReached(column.id) && column.id !== 'backlog' && column.id !== 'done'}
-                >
-                  <Plus className="w-4 h-4 text-muted-foreground hover:text-foreground transition-colors" />
-                </button>
-              </div>
+                    <div className={cn(
+                      'w-2 h-2 rounded-full',
+                      isActive ? 'bg-primary-foreground/70' : column.color
+                    )} />
+                    {column.title}
+                    <span className={cn(
+                      'text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center',
+                      isActive ? 'bg-primary-foreground/20' : 'bg-background/70'
+                    )}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-              {/* Tasks Container */}
-              <div className="space-y-3 min-h-[200px]">
-                {columnTasks.map((task, taskIndex) => {
-                  const project = getProjectById(task.project_id);
-                  const priority = priorityConfig[task.priority || 'medium'];
-                  
-                  return (
-                    <div
-                      key={task.id}
-                      draggable
-                      onDragStart={() => handleDragStart(task.id)}
-                      className={cn(
-                        'group relative p-4 rounded-xl bg-card/80 backdrop-blur-sm border border-border/50',
-                        'hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5',
-                        'transition-all duration-200 cursor-grab active:cursor-grabbing',
-                        draggedTask === task.id && 'opacity-50 scale-95'
-                      )}
-                      style={{ animationDelay: `${taskIndex * 30}ms` }}
-                    >
-                      {/* Drag Handle */}
-                      <div className="absolute top-2 start-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <GripVertical className="w-4 h-4 text-muted-foreground" />
-                      </div>
+          {/* Mobile task list for the active column */}
+          <div className="mt-4 space-y-3 pb-28">
+            {(() => {
+              const colTasks = getTasksByStatus(mobileActiveColumn);
 
-                      {/* Action Menu */}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button className="absolute top-2 end-2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-muted transition-all">
-                            <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem className="gap-2">
-                            <Edit3 className="w-4 h-4" />
-                            {t('common.edit')}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            className="gap-2 text-destructive focus:text-destructive"
-                            onClick={() => handleDelete(task.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            {t('common.delete')}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-
-                      {/* Task Content */}
-                      <div className="pt-1">
-                        <h4 className="text-sm font-medium text-foreground mb-2 pe-6 group-hover:text-primary transition-colors">
-                          {task.title}
-                        </h4>
-
-                        {task.description && (
-                          <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
-                            {task.description}
-                          </p>
-                        )}
-
-                        {/* Task Meta */}
-                        <div className="flex flex-wrap items-center gap-2 mb-3">
-                          {/* Priority Badge */}
-                          <Badge className={cn('text-xs gap-1 font-medium', priority.class)}>
-                            <Flag className="w-3 h-3" />
-                            {priority.label}
-                          </Badge>
-
-                          {/* Focus Badge */}
-                          {task.is_focus && (
-                            <Badge className="text-xs gap-1 bg-primary/15 text-primary/80">
-                              <Target className="w-3 h-3" />
-                              {currentLanguage === 'ar' ? 'تركيز' : 'Focus'}
-                            </Badge>
-                          )}
-                        </div>
-
-                        {/* Project & Date */}
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          {project ? (
-                            <span className="flex items-center gap-1.5">
-                              <div 
-                                className="w-2 h-2 rounded-full" 
-                                style={{ backgroundColor: project.color || '#6366f1' }}
-                              />
-                              <FolderKanban className="w-3 h-3" />
-                              <span className="truncate max-w-[100px]">{project.title}</span>
-                            </span>
-                          ) : (
-                            <span className="flex items-center gap-1.5">
-                              <User className="w-3 h-3" />
-                              {currentLanguage === 'ar' ? 'شخصي' : 'Personal'}
-                            </span>
-                          )}
-                          
-                          {task.due_date && (
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {format(new Date(task.due_date), 'MMM d')}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Recurrence Indicator */}
-                        {task.recurrence && task.recurrence !== 'none' && (
-                          <div className="mt-2 pt-2 border-t border-border/50">
-                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Clock className="w-3 h-3" />
-                              {task.recurrence === 'daily' && (currentLanguage === 'ar' ? 'يومياً' : 'Daily')}
-                              {task.recurrence === 'weekly' && (currentLanguage === 'ar' ? 'أسبوعياً' : 'Weekly')}
-                              {task.recurrence === 'monthly' && (currentLanguage === 'ar' ? 'شهرياً' : 'Monthly')}
-                              {task.recurrence === 'yearly' && (currentLanguage === 'ar' ? 'سنوياً' : 'Yearly')}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-                
-                {columnTasks.length === 0 && (
-                  <div className="text-center py-12 rounded-xl border-2 border-dashed border-border/50">
+              if (colTasks.length === 0) {
+                return (
+                  <div className="text-center py-16 rounded-2xl border-2 border-dashed border-border/50">
                     <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
                       <Sparkles className="w-6 h-6 text-muted-foreground" />
                     </div>
                     <p className="text-muted-foreground text-sm">{t('tasks.noTasks')}</p>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="mt-2 text-primary"
-                      onClick={() => openDialogForStatus(column.id)}
-                    >
-                      <Plus className="w-4 h-4 me-1" />
-                      {t('common.add')}
-                    </Button>
                   </div>
-                )}
+                );
+              }
+
+              return colTasks.map((task) => {
+                const project = getProjectById(task.project_id);
+                const priority = priorityConfig[task.priority || 'medium'];
+
+                return (
+                  <div
+                    key={task.id}
+                    className="flex items-center gap-3 p-3.5 rounded-xl bg-card border border-border/50 active:scale-[0.98] transition-transform"
+                  >
+                    {/* Priority dot */}
+                    <div className={cn('w-2.5 h-2.5 rounded-full shrink-0', priority.dotColor)} />
+
+                    {/* Main info */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{task.title}</p>
+                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                        {project ? (
+                          <span className="flex items-center gap-1 truncate max-w-[120px]">
+                            <div
+                              className="w-1.5 h-1.5 rounded-full shrink-0"
+                              style={{ backgroundColor: project.color || '#6366f1' }}
+                            />
+                            {project.title}
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1">
+                            <User className="w-3 h-3" />
+                            {currentLanguage === 'ar' ? 'شخصي' : 'Personal'}
+                          </span>
+                        )}
+                        {task.due_date && (
+                          <>
+                            <span>·</span>
+                            <span className="flex items-center gap-0.5">
+                              <Calendar className="w-3 h-3" />
+                              {format(new Date(task.due_date), 'MMM d')}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Priority badge */}
+                    <Badge className={cn('text-[11px] shrink-0 hidden xs:flex gap-1', priority.class)}>
+                      <Flag className="w-2.5 h-2.5" />
+                      {priority.label}
+                    </Badge>
+
+                    {/* Dropdown */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="p-1.5 rounded-lg hover:bg-muted transition-colors shrink-0">
+                          <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-52">
+                        {/* Move to other columns */}
+                        {columns
+                          .filter(c => c.id !== mobileActiveColumn)
+                          .map(c => (
+                            <DropdownMenuItem
+                              key={c.id}
+                              className="gap-2"
+                              onClick={() => handleStatusChange(task.id, c.id)}
+                            >
+                              <div className={cn('w-2 h-2 rounded-full', c.color)} />
+                              {currentLanguage === 'ar' ? 'نقل إلى' : 'Move to'} {c.title}
+                            </DropdownMenuItem>
+                          ))}
+                        <DropdownMenuItem
+                          className="gap-2 text-destructive focus:text-destructive mt-1"
+                          onClick={() => handleDelete(task.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          {t('common.delete')}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                );
+              });
+            })()}
+          </div>
+
+          {/* FAB */}
+          <button
+            onClick={() => openDialogForStatus(mobileActiveColumn)}
+            className="fixed bottom-20 end-4 z-50 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-xl flex items-center justify-center hover:bg-primary/90 active:scale-95 transition-all"
+            aria-label={t('tasks.newTask')}
+          >
+            <Plus className="w-6 h-6" />
+          </button>
+        </>
+      )}
+
+      {/* ── DESKTOP KANBAN (md+) ────────────────────────────────────────── */}
+      {!isMobile && (
+        <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2">
+          {columns.map((column, colIndex) => {
+            const columnTasks = getTasksByStatus(column.id);
+
+            return (
+              <div
+                key={column.id}
+                className="flex-shrink-0 w-80 animate-fade-in"
+                style={{ animationDelay: `${colIndex * 50}ms` }}
+                onDragOver={handleDragOver}
+                onDrop={() => handleDrop(column.id)}
+              >
+                {/* Column Header */}
+                <div className={cn(
+                  'flex items-center justify-between mb-4 p-3 rounded-xl bg-gradient-to-r',
+                  column.gradient,
+                  isWipLimitReached(column.id) && column.id !== 'backlog' && column.id !== 'done' && 'ring-2 ring-destructive/50'
+                )}>
+                  <div className="flex items-center gap-3">
+                    <div className={cn('w-3 h-3 rounded-full shadow-lg', column.color)} />
+                    <span className="font-semibold text-foreground">{column.title}</span>
+                    <Badge
+                      variant={isWipLimitReached(column.id) && column.id !== 'backlog' && column.id !== 'done' ? 'destructive' : 'secondary'}
+                      className="text-xs px-2 py-0.5 rounded-full"
+                    >
+                      {columnTasks.length}
+                      {WIP_LIMITS[column.id] < 999 && `/${WIP_LIMITS[column.id]}`}
+                    </Badge>
+                  </div>
+                  <button
+                    className={cn(
+                      'p-1.5 rounded-lg hover:bg-background/50 transition-colors',
+                      isWipLimitReached(column.id) && column.id !== 'backlog' && column.id !== 'done' && 'opacity-50 cursor-not-allowed'
+                    )}
+                    onClick={() => !isWipLimitReached(column.id) && openDialogForStatus(column.id)}
+                    disabled={isWipLimitReached(column.id) && column.id !== 'backlog' && column.id !== 'done'}
+                  >
+                    <Plus className="w-4 h-4 text-muted-foreground hover:text-foreground transition-colors" />
+                  </button>
+                </div>
+
+                {/* Tasks Container */}
+                <div className="space-y-3 min-h-[200px]">
+                  {columnTasks.map((task, taskIndex) => {
+                    const project = getProjectById(task.project_id);
+                    const priority = priorityConfig[task.priority || 'medium'];
+
+                    return (
+                      <div
+                        key={task.id}
+                        draggable
+                        onDragStart={() => handleDragStart(task.id)}
+                        className={cn(
+                          'group relative p-4 rounded-xl bg-card/80 backdrop-blur-sm border border-border/50',
+                          'hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5',
+                          'transition-all duration-200 cursor-grab active:cursor-grabbing',
+                          draggedTask === task.id && 'opacity-50 scale-95'
+                        )}
+                        style={{ animationDelay: `${taskIndex * 30}ms` }}
+                      >
+                        {/* Drag Handle */}
+                        <div className="absolute top-2 start-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <GripVertical className="w-4 h-4 text-muted-foreground" />
+                        </div>
+
+                        {/* Action Menu */}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button className="absolute top-2 end-2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-muted transition-all">
+                              <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem className="gap-2">
+                              <Edit3 className="w-4 h-4" />
+                              {t('common.edit')}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="gap-2 text-destructive focus:text-destructive"
+                              onClick={() => handleDelete(task.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              {t('common.delete')}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        {/* Task Content */}
+                        <div className="pt-1">
+                          <h4 className="text-sm font-medium text-foreground mb-2 pe-6 group-hover:text-primary transition-colors">
+                            {task.title}
+                          </h4>
+
+                          {task.description && (
+                            <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
+                              {task.description}
+                            </p>
+                          )}
+
+                          {/* Task Meta */}
+                          <div className="flex flex-wrap items-center gap-2 mb-3">
+                            {/* Priority Badge */}
+                            <Badge className={cn('text-xs gap-1 font-medium', priority.class)}>
+                              <Flag className="w-3 h-3" />
+                              {priority.label}
+                            </Badge>
+
+                            {/* Focus Badge */}
+                            {task.is_focus && (
+                              <Badge className="text-xs gap-1 bg-primary/15 text-primary/80">
+                                <Target className="w-3 h-3" />
+                                {currentLanguage === 'ar' ? 'تركيز' : 'Focus'}
+                              </Badge>
+                            )}
+                          </div>
+
+                          {/* Project & Date */}
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            {project ? (
+                              <span className="flex items-center gap-1.5">
+                                <div
+                                  className="w-2 h-2 rounded-full"
+                                  style={{ backgroundColor: project.color || '#6366f1' }}
+                                />
+                                <FolderKanban className="w-3 h-3" />
+                                <span className="truncate max-w-[100px]">{project.title}</span>
+                              </span>
+                            ) : (
+                              <span className="flex items-center gap-1.5">
+                                <User className="w-3 h-3" />
+                                {currentLanguage === 'ar' ? 'شخصي' : 'Personal'}
+                              </span>
+                            )}
+
+                            {task.due_date && (
+                              <span className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                {format(new Date(task.due_date), 'MMM d')}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Recurrence Indicator */}
+                          {task.recurrence && task.recurrence !== 'none' && (
+                            <div className="mt-2 pt-2 border-t border-border/50">
+                              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Clock className="w-3 h-3" />
+                                {task.recurrence === 'daily' && (currentLanguage === 'ar' ? 'يومياً' : 'Daily')}
+                                {task.recurrence === 'weekly' && (currentLanguage === 'ar' ? 'أسبوعياً' : 'Weekly')}
+                                {task.recurrence === 'monthly' && (currentLanguage === 'ar' ? 'شهرياً' : 'Monthly')}
+                                {task.recurrence === 'yearly' && (currentLanguage === 'ar' ? 'سنوياً' : 'Yearly')}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {columnTasks.length === 0 && (
+                    <div className="text-center py-12 rounded-xl border-2 border-dashed border-border/50">
+                      <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                        <Sparkles className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                      <p className="text-muted-foreground text-sm">{t('tasks.noTasks')}</p>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="mt-2 text-primary"
+                        onClick={() => openDialogForStatus(column.id)}
+                      >
+                        <Plus className="w-4 h-4 me-1" />
+                        {t('common.add')}
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Task Form Dialog */}
       <TaskFormDialog

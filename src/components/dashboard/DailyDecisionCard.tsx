@@ -11,6 +11,7 @@
 import { useEffect, useState } from 'react';
 import { useAIDecisionEngine } from '@/hooks/useAIDecisionEngine';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -163,7 +164,9 @@ export function DailyDecisionCard() {
     analyse, refresh, currentMode,
   } = useAIDecisionEngine();
   const { currentLanguage: lang } = useLanguage();
-  const [collapsed, setCollapsed] = useState(false);
+  const isMobile = useIsMobile();
+  // Start collapsed on phones so the dashboard isn't dominated by this card
+  const [collapsed, setCollapsed] = useState(isMobile);
 
   // Auto-analyse on mount
   useEffect(() => {
