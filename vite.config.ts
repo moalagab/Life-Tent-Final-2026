@@ -63,13 +63,15 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       workbox: {
+        // Force new SW to activate immediately — fixes blank page after deployment
+        skipWaiting: true,
+        clientsClaim: true,
         // Inject push event handlers into the generated Service Worker
         importScripts: ['/sw-push.js'],
         // Serve index.html for all SPA navigation
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/assets/, /^\/api/, /^\/offline/],
         // Precache ONLY the app shell (html + css + tiny js entry).
-        // Large JS chunks are runtime-cached on first use — avoids 3 MB download on install.
         globPatterns: ["**/*.{css,html,ico,png,svg,woff2}"],
         // Exclude known heavy chunks from precache entirely
         globIgnores: [
@@ -84,11 +86,12 @@ export default defineConfig(({ mode }) => ({
         ],
         runtimeCaching: [
           {
-            // All JS assets — stale-while-revalidate (fast load, background update)
+            // JS assets — NetworkFirst so new chunks always load after deployment
             urlPattern: /\/assets\/.*\.js$/,
-            handler: "StaleWhileRevalidate",
+            handler: "NetworkFirst",
             options: {
               cacheName: "js-chunks",
+              networkTimeoutSeconds: 10,
               expiration: { maxEntries: 120, maxAgeSeconds: 60 * 60 * 24 * 7 },
               cacheableResponse: { statuses: [0, 200] },
             },
