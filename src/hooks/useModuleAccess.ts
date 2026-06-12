@@ -88,8 +88,8 @@ export function useModuleAccess() {
       return data;
     },
     enabled:        !!user,
-    staleTime:      0,          // always check for fresh data on mount
-    refetchOnMount: true,
+    staleTime:      1000 * 60 * 10, // 10 min — modules change rarely
+    refetchOnMount: 'always',        // still validate on every mount
   });
 
   const { activeModules, maxSlots, daysUntilNextUnlock } = useMemo(() => {
