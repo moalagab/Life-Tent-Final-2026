@@ -1904,6 +1904,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          active_modules: string[] | null
           avatar_url: string | null
           banned_at: string | null
           banned_reason: string | null
@@ -1912,6 +1913,7 @@ export type Database = {
           id: string
           is_admin: boolean | null
           is_banned: boolean | null
+          onboarding_completed: boolean | null
           preferred_language: string | null
           reading_goal_yearly: number | null
           reading_reminder_enabled: boolean | null
@@ -1921,6 +1923,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          active_modules?: string[] | null
           avatar_url?: string | null
           banned_at?: string | null
           banned_reason?: string | null
@@ -1929,6 +1932,7 @@ export type Database = {
           id?: string
           is_admin?: boolean | null
           is_banned?: boolean | null
+          onboarding_completed?: boolean | null
           preferred_language?: string | null
           reading_goal_yearly?: number | null
           reading_reminder_enabled?: boolean | null
@@ -1938,6 +1942,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          active_modules?: string[] | null
           avatar_url?: string | null
           banned_at?: string | null
           banned_reason?: string | null
@@ -1946,6 +1951,7 @@ export type Database = {
           id?: string
           is_admin?: boolean | null
           is_banned?: boolean | null
+          onboarding_completed?: boolean | null
           preferred_language?: string | null
           reading_goal_yearly?: number | null
           reading_reminder_enabled?: boolean | null
