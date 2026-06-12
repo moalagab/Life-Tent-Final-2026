@@ -328,7 +328,7 @@ export default function Habits() {
               <Label>{t('habits.dailyHabits')}</Label>
               <Input
                 value={editingHabit?.name || ''}
-                onChange={(e) => setEditingHabit({ ...editingHabit, name: e.target.value })}
+                onChange={(e) => setEditingHabit(prev => prev ? { ...prev, name: e.target.value } : prev)}
                 placeholder={t('habits.dailyHabits')}
               />
             </div>
@@ -339,7 +339,7 @@ export default function Habits() {
                   <button
                     key={icon}
                     type="button"
-                    onClick={() => setEditingHabit({ ...editingHabit, icon })}
+                    onClick={() => setEditingHabit(prev => prev ? { ...prev, icon } : prev)}
                     className={cn(
                       'text-2xl p-2 rounded-lg transition-all',
                       editingHabit?.icon === icon ? 'bg-primary/20 ring-2 ring-primary' : 'hover:bg-muted'

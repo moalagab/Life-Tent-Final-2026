@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Plus, Filter, Search, Loader2, FolderKanban, BarChart3, LayoutDashboard, Users } from 'lucide-react';
+import { Plus, Search, Loader2, FolderKanban, BarChart3, LayoutDashboard, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useProjects, useUpdateProject, useDeleteProject, Project } from '@/hooks/useProjects';
@@ -10,13 +10,23 @@ import { ProjectTabs } from '@/components/projects/ProjectTabs';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog';
 import { ProjectDetailDialog } from '@/components/projects/ProjectDetailDialog';
-import { ProjectReports } from '@/components/projects/ProjectReports';
 import { ProjectNotifications } from '@/components/projects/ProjectNotifications';
-import { AdvancedDashboard } from '@/components/projects/AdvancedDashboard';
-import { CRMView } from '@/components/crm/CRMView';
-import { AreasView } from '@/components/para/AreasView';
-import { ResourcesView } from '@/components/para/ResourcesView';
-import { ArchiveView } from '@/components/para/ArchiveView';
+
+// Heavy sub-views — lazy-loaded only when the user activates them
+const ProjectReports    = lazy(() => import('@/components/projects/ProjectReports').then(m => ({ default: m.ProjectReports })));
+const AdvancedDashboard = lazy(() => import('@/components/projects/AdvancedDashboard').then(m => ({ default: m.AdvancedDashboard })));
+const CRMView           = lazy(() => import('@/components/crm/CRMView').then(m => ({ default: m.CRMView })));
+const AreasView         = lazy(() => import('@/components/para/AreasView').then(m => ({ default: m.AreasView })));
+const ResourcesView     = lazy(() => import('@/components/para/ResourcesView').then(m => ({ default: m.ResourcesView })));
+const ArchiveView       = lazy(() => import('@/components/para/ArchiveView').then(m => ({ default: m.ArchiveView })));
+
+function TabLoader() {
+  return (
+    <div className="flex items-center justify-center h-40">
+      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+    </div>
+  );
+}
 
 export default function Projects() {
   const { t, currentLanguage } = useLanguage();
@@ -173,7 +183,7 @@ export default function Projects() {
 
       {/* CRM View */}
       {showCRM ? (
-        <CRMView />
+        <Suspense fallback={<TabLoader />}><CRMView /></Suspense>
       ) : (
         <>
           {/* Notifications */}
@@ -182,27 +192,27 @@ export default function Projects() {
           {/* Advanced Dashboard */}
           {showDashboard && (
             <div className="mb-6">
-              <AdvancedDashboard />
+              <Suspense fallback={<TabLoader />}><AdvancedDashboard /></Suspense>
             </div>
           )}
 
           {/* Reports */}
           {showReports && (
             <div className="mb-6">
-              <ProjectReports />
-        </div>
-      )}
+              <Suspense fallback={<TabLoader />}><ProjectReports /></Suspense>
+            </div>
+          )}
 
-      {/* PARA Tabs */}
-      <ProjectTabs activeTab={activeTab} onTabChange={setActiveTab} />
+          {/* PARA Tabs */}
+          <ProjectTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {/* Content based on active tab */}
-      {activeTab === 'areas' ? (
-        <AreasView />
-      ) : activeTab === 'resources' ? (
-        <ResourcesView />
-      ) : activeTab === 'archives' ? (
-        <ArchiveView />
+          {/* Content based on active tab */}
+          {activeTab === 'areas' ? (
+            <Suspense fallback={<TabLoader />}><AreasView /></Suspense>
+          ) : activeTab === 'resources' ? (
+            <Suspense fallback={<TabLoader />}><ResourcesView /></Suspense>
+          ) : activeTab === 'archives' ? (
+            <Suspense fallback={<TabLoader />}><ArchiveView /></Suspense>
       ) : filteredProjects.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2">
           {filteredProjects.map((project) => (

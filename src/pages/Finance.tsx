@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   LayoutDashboard, Wallet, Receipt, PiggyBank,
   CreditCard, RefreshCw, TrendingUp, FileText, Briefcase, Upload,
@@ -159,22 +158,21 @@ export default function Finance() {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as FinanceTab)} className="space-y-6">
-        <div />
-
-        <TabsContent value="dashboard"><FinanceDashboard /></TabsContent>
-        <TabsContent value="accounts"><AccountsManager /></TabsContent>
-        <TabsContent value="transactions"><TransactionsManager /></TabsContent>
-        <TabsContent value="budget"><BudgetManager /></TabsContent>
-        <TabsContent value="wishlist"><WishlistManager /></TabsContent>
-        <TabsContent value="debts"><DebtsManager /></TabsContent>
-        <TabsContent value="subscriptions"><SubscriptionsManager /></TabsContent>
-        <TabsContent value="investments"><InvestmentsManager /></TabsContent>
-        <TabsContent value="projects"><ProjectFinanceManager /></TabsContent>
-        <TabsContent value="reports"><FinanceReports /></TabsContent>
-        <TabsContent value="audit"><FinanceAuditLogView /></TabsContent>
-        <TabsContent value="import"><DataImport /></TabsContent>
-      </Tabs>
+      {/* Render only the active tab — prevents all 13 components from mounting simultaneously */}
+      <div className="mt-4">
+        {activeTab === 'dashboard'     && <FinanceDashboard />}
+        {activeTab === 'accounts'      && <AccountsManager />}
+        {activeTab === 'transactions'  && <TransactionsManager />}
+        {activeTab === 'budget'        && <BudgetManager />}
+        {activeTab === 'wishlist'      && <WishlistManager />}
+        {activeTab === 'debts'         && <DebtsManager />}
+        {activeTab === 'subscriptions' && <SubscriptionsManager />}
+        {activeTab === 'investments'   && <InvestmentsManager />}
+        {activeTab === 'projects'      && <ProjectFinanceManager />}
+        {activeTab === 'reports'       && <FinanceReports />}
+        {activeTab === 'audit'         && <FinanceAuditLogView />}
+        {activeTab === 'import'        && <DataImport />}
+      </div>
 
       {/* AI Assistant */}
       <FinanceAIAssistant />
