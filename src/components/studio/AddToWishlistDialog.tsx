@@ -36,7 +36,7 @@ export function AddToWishlistDialog({ open, onOpenChange, mediaItem }: AddToWish
       await createWishlistItem.mutateAsync({
         name: mediaItem.title,
         description: mediaItem.author ? `${currentLanguage === 'ar' ? 'المؤلف:' : 'Author:'} ${mediaItem.author}` : undefined,
-        category: 'كتب',
+        category: currentLanguage === 'ar' ? 'كتب' : 'Books',
         estimated_price: formData.estimated_price ? parseFloat(formData.estimated_price) : undefined,
         currency: formData.currency,
         priority: formData.priority,

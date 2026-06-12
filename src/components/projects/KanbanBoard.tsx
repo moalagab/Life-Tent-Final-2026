@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useTasks, useUpdateTask, Task } from '@/hooks/useTasks';
 import { cn } from '@/lib/utils';
-import { 
-  CheckCircle, Circle, Clock, AlertCircle, 
-  Flag, MoreHorizontal, Plus, Loader2 
+import { format } from 'date-fns';
+import { ar, enUS } from 'date-fns/locale';
+import {
+  CheckCircle, Circle, Clock, AlertCircle,
+  Flag, MoreHorizontal, Plus, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,21 +24,21 @@ interface KanbanBoardProps {
 
 const COLUMNS = [
   { id: 'backlog', icon: Circle, color: 'text-muted-foreground' },
-  { id: 'todo', icon: Clock, color: 'text-blue-500' },
+  { id: 'todo', icon: Clock, color: 'text-primary' },
   { id: 'in_progress', icon: AlertCircle, color: 'text-warning' },
-  { id: 'review', icon: AlertCircle, color: 'text-purple-500' },
+  { id: 'review', icon: AlertCircle, color: 'text-muted-foreground' },
   { id: 'done', icon: CheckCircle, color: 'text-success' },
 ];
 
 const priorityColors: Record<string, string> = {
-  urgent: 'border-l-destructive bg-destructive/5',
-  high: 'border-l-warning bg-warning/5',
-  medium: 'border-l-blue-500 bg-blue-500/5',
-  low: 'border-l-muted-foreground bg-muted/30',
+  urgent: 'border-s-destructive bg-destructive/5',
+  high: 'border-s-warning bg-warning/5',
+  medium: 'border-s-primary bg-primary/5',
+  low: 'border-s-muted-foreground bg-muted/30',
 };
 
 export function KanbanBoard({ projectId, tasks, onAddTask }: KanbanBoardProps) {
-  const { t, currentLanguage } = useLanguage();
+  const { t, currentLanguage, isRTL } = useLanguage();
   const updateTask = useUpdateTask();
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
 
@@ -149,7 +151,8 @@ interface TaskCardProps {
 }
 
 function TaskCard({ task, onDragStart, isDragging }: TaskCardProps) {
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
+  const dateLocale = currentLanguage === 'ar' ? ar : enUS;
   const priority = task.priority || 'medium';
   
   const priorityLabels: Record<string, string> = {
@@ -164,7 +167,7 @@ function TaskCard({ task, onDragStart, isDragging }: TaskCardProps) {
       draggable
       onDragStart={onDragStart}
       className={cn(
-        'p-3 rounded-lg border-l-4 cursor-grab active:cursor-grabbing transition-all',
+        'p-3 rounded-lg border-s-4 cursor-grab active:cursor-grabbing transition-all',
         priorityColors[priority],
         isDragging && 'opacity-50 scale-95'
       )}
@@ -199,7 +202,7 @@ function TaskCard({ task, onDragStart, isDragging }: TaskCardProps) {
         
         {task.due_date && (
           <span className="text-xs text-muted-foreground">
-            {new Date(task.due_date).toLocaleDateString('ar-SA')}
+            {format(new Date(task.due_date), 'dd MMM', { locale: dateLocale })}
           </span>
         )}
       </div>

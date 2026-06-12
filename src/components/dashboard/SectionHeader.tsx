@@ -1,5 +1,6 @@
 import { ChevronDown, LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface SectionHeaderProps {
   title: string;
@@ -24,6 +25,7 @@ export function SectionHeader({
   onToggle,
   action,
 }: SectionHeaderProps) {
+  const { isRTL } = useLanguage();
   return (
     <div className="flex items-center justify-between gap-3 mb-3 ps-0.5">
       <button
@@ -36,7 +38,10 @@ export function SectionHeader({
         disabled={!collapsible}
       >
         {Icon && <Icon className="w-3.5 h-3.5 text-muted-foreground/70 shrink-0" strokeWidth={2} />}
-        <h3 dir="auto" className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground group-hover:text-foreground transition-colors">
+        <h3 dir="auto" className={cn(
+          'text-[11px] font-semibold text-muted-foreground group-hover:text-foreground transition-colors',
+          !isRTL && 'uppercase tracking-[0.08em]'
+        )}>
           {title}
         </h3>
         {typeof count === 'number' && count > 0 && (

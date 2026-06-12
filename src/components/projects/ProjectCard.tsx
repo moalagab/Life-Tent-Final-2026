@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 import { format } from 'date-fns';
+import { ar, enUS } from 'date-fns/locale';
 import { 
   FolderKanban, Play, Pause, CheckCircle, Archive, 
   MoreHorizontal, Eye, Edit3, Trash2, Target, ListTodo 
@@ -24,10 +25,10 @@ interface ProjectCardProps {
 }
 
 const phaseColors: Record<string, string> = {
-  initiation: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-  planning: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
-  execution: 'bg-primary/10 text-primary border-primary/20',
-  monitoring: 'bg-success/10 text-success border-success/20',
+  initiation: 'bg-primary/10 text-primary border-primary/20',
+  planning: 'bg-warning/10 text-warning border-warning/20',
+  execution: 'bg-success/10 text-success border-success/20',
+  monitoring: 'bg-primary/10 text-primary border-primary/20',
   closing: 'bg-muted text-muted-foreground border-muted',
 };
 
@@ -39,7 +40,8 @@ const statusIcons: Record<string, typeof Play> = {
 };
 
 export function ProjectCard({ project, onView, onEdit, onDelete, onArchive }: ProjectCardProps) {
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
+  const dateLocale = currentLanguage === 'ar' ? ar : enUS;
   
   const status = project.status || 'active';
   const phase = project.phase || 'initiation';
@@ -173,7 +175,7 @@ export function ProjectCard({ project, onView, onEdit, onDelete, onArchive }: Pr
           {t('tasks.title')}
         </span>
         <span>
-          {format(new Date(project.created_at), 'MMM d, yyyy')}
+          {format(new Date(project.created_at), 'dd MMM yyyy', { locale: dateLocale })}
         </span>
       </div>
     </div>

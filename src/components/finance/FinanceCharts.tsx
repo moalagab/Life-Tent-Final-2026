@@ -3,11 +3,13 @@ import { useTransactions } from '@/hooks/useFinance';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { useMemo } from 'react';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import { ar, enUS } from 'date-fns/locale';
 
-const COLORS = ['hsl(var(--primary))', 'hsl(var(--destructive))', 'hsl(var(--success))', '#8884d8', '#82ca9d', '#ffc658'];
+const COLORS = ['hsl(var(--primary))', 'hsl(var(--destructive))', 'hsl(var(--success))', 'hsl(var(--muted-foreground))', 'hsl(var(--warning))', 'hsl(var(--primary) / 0.5)'];
 
 export function FinanceCharts() {
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, currentLanguage } = useLanguage();
+  const locale = currentLanguage === 'ar' ? ar : enUS;
   const { data: transactions } = useTransactions(100);
 
   // Calculate monthly data for the last 6 months
@@ -34,7 +36,7 @@ export function FinanceCharts() {
         .reduce((sum, t) => sum + t.amount, 0);
 
       months.push({
-        month: format(date, 'MMM'),
+        month: format(date, 'MMM', { locale }),
         income,
         expenses,
       });

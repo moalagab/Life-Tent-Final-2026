@@ -21,6 +21,7 @@ import { useReconcileAccount, useReconcileTransactions } from '@/hooks/useAdvanc
 import { useCurrencyConversion, CURRENCIES, getCurrencySymbol } from '@/hooks/useCurrencyConversion';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { ar, enUS } from 'date-fns/locale';
 import type { Account } from '@/hooks/useFinance';
 
 const accountIcons: Record<string, React.ElementType> = {
@@ -34,18 +35,19 @@ const accountIcons: Record<string, React.ElementType> = {
 };
 
 const accountColors: Record<string, string> = {
-  bank: '#3b82f6',
-  checking: '#3b82f6',
-  savings: '#10b981',
-  credit: '#ef4444',
-  wallet: '#f59e0b',
-  investment: '#8b5cf6',
-  cash: '#22c55e',
+  bank: 'hsl(var(--primary))',
+  checking: 'hsl(var(--primary))',
+  savings: 'hsl(var(--success))',
+  credit: 'hsl(var(--destructive))',
+  wallet: 'hsl(var(--warning))',
+  investment: 'hsl(var(--muted-foreground))',
+  cash: 'hsl(var(--success))',
 };
 
 export function AccountsManager() {
   const { t, currentLanguage } = useLanguage();
   const language = currentLanguage;
+  const locale = language === 'ar' ? ar : enUS;
   const { data: accounts, isLoading } = useAccounts();
   const { data: transactions } = useTransactions();
   const createAccount = useCreateAccount();
@@ -349,14 +351,14 @@ export function AccountsManager() {
 
       {/* Account Type Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="flex-wrap h-auto">
-          <TabsTrigger value="all">{language === 'ar' ? 'الكل' : 'All'}</TabsTrigger>
-          <TabsTrigger value="bank">{language === 'ar' ? 'بنوك' : 'Banks'}</TabsTrigger>
-          <TabsTrigger value="savings">{language === 'ar' ? 'توفير' : 'Savings'}</TabsTrigger>
-          <TabsTrigger value="credit">{language === 'ar' ? 'ائتمان' : 'Credit'}</TabsTrigger>
-          <TabsTrigger value="wallet">{language === 'ar' ? 'محافظ' : 'Wallets'}</TabsTrigger>
-          <TabsTrigger value="investment">{language === 'ar' ? 'استثمار' : 'Investment'}</TabsTrigger>
-          <TabsTrigger value="cash">{language === 'ar' ? 'نقد' : 'Cash'}</TabsTrigger>
+        <TabsList className="overflow-x-auto flex-nowrap w-full justify-start h-auto">
+          <TabsTrigger value="all" className="flex-shrink-0">{language === 'ar' ? 'الكل' : 'All'}</TabsTrigger>
+          <TabsTrigger value="bank" className="flex-shrink-0">{language === 'ar' ? 'بنوك' : 'Banks'}</TabsTrigger>
+          <TabsTrigger value="savings" className="flex-shrink-0">{language === 'ar' ? 'توفير' : 'Savings'}</TabsTrigger>
+          <TabsTrigger value="credit" className="flex-shrink-0">{language === 'ar' ? 'ائتمان' : 'Credit'}</TabsTrigger>
+          <TabsTrigger value="wallet" className="flex-shrink-0">{language === 'ar' ? 'محافظ' : 'Wallets'}</TabsTrigger>
+          <TabsTrigger value="investment" className="flex-shrink-0">{language === 'ar' ? 'استثمار' : 'Investment'}</TabsTrigger>
+          <TabsTrigger value="cash" className="flex-shrink-0">{language === 'ar' ? 'نقد' : 'Cash'}</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -364,14 +366,14 @@ export function AccountsManager() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredAccounts?.map((account) => {
           const Icon = accountIcons[account.type] || Wallet;
-          const color = account.color || accountColors[account.type] || '#6366f1';
+          const color = account.color || accountColors[account.type] || 'hsl(var(--primary))';
           const balanceInSAR = convertToSAR(account.balance || 0, account.currency || 'SAR');
           
           return (
             <Card 
               key={account.id} 
               className="glass-card hover:shadow-lg transition-all duration-300 group"
-              style={{ borderLeftColor: color, borderLeftWidth: '4px' }}
+              style={{ borderInlineStartColor: color, borderInlineStartWidth: '4px' }}
             >
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
@@ -393,7 +395,7 @@ export function AccountsManager() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                         <MoreVertical className="w-4 h-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -437,7 +439,7 @@ export function AccountsManager() {
                   )}
                   {account.last_reconciled_at && (
                     <p className="text-xs text-muted-foreground mt-2">
-                      {language === 'ar' ? 'آخر مطابقة:' : 'Last reconciled:'} {format(new Date(account.last_reconciled_at), 'MMM d, yyyy')}
+                      {language === 'ar' ? 'آخر مطابقة:' : 'Last reconciled:'} {format(new Date(account.last_reconciled_at), 'MMM d, yyyy', { locale })}
                     </p>
                   )}
                 </div>
@@ -504,7 +506,7 @@ export function AccountsManager() {
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium">{tx.description}</p>
-                        <p className="text-xs text-muted-foreground">{format(new Date(tx.date), 'MMM d')}</p>
+                        <p className="text-xs text-muted-foreground">{format(new Date(tx.date), 'MMM d', { locale })}</p>
                       </div>
                       <span className={cn(
                         'font-bold text-sm',

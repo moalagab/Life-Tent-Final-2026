@@ -479,7 +479,7 @@ export function TransactionsManager() {
             <p className="text-2xl font-bold text-destructive">-{totals.expense.toLocaleString()} SAR</p>
           </CardContent>
         </Card>
-        <Card className="glass-card border-s-4" style={{ borderLeftColor: totals.net >= 0 ? 'hsl(var(--success))' : 'hsl(var(--destructive))' }}>
+        <Card className="glass-card border-s-4" style={{ borderInlineStartColor: totals.net >= 0 ? 'hsl(var(--success))' : 'hsl(var(--destructive))' }}>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">{language === 'ar' ? 'الصافي' : 'Net'}</p>
             <p className={cn('text-2xl font-bold', totals.net >= 0 ? 'text-success' : 'text-destructive')}>
@@ -600,7 +600,7 @@ export function TransactionsManager() {
               </span>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                     <MoreVertical className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>

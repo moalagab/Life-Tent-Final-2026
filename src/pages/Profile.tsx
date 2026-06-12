@@ -9,9 +9,11 @@ import { useProfile, useUpdateProfile, useUploadAvatar } from '@/hooks/useProfil
 import { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { format } from 'date-fns';
+import { ar, enUS } from 'date-fns/locale';
 
 export default function Profile() {
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const { user } = useAuth();
   const { data: profile, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
@@ -110,7 +112,7 @@ export default function Profile() {
               </Avatar>
               <button
                 onClick={handleAvatarClick}
-                className="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors"
+                className="absolute bottom-0 end-0 w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors"
                 disabled={uploadAvatar.isPending}
               >
                 {uploadAvatar.isPending ? (
@@ -189,16 +191,16 @@ export default function Profile() {
         <div className="glass-card p-6 mt-6">
           <h3 className="font-semibold text-foreground mb-4">{t('profile.accountInfo')}</h3>
           <div className="space-y-3 text-sm">
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-muted-foreground">{t('profile.memberSince')}</span>
-              <span className="text-foreground">
-                {user?.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}
+              <span className="text-foreground" dir="ltr">
+                {user?.created_at ? format(new Date(user.created_at), 'yyyy/MM/dd', { locale: currentLanguage === 'ar' ? ar : enUS }) : '-'}
               </span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-muted-foreground">{t('profile.lastSignIn')}</span>
-              <span className="text-foreground">
-                {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : '-'}
+              <span className="text-foreground" dir="ltr">
+                {user?.last_sign_in_at ? format(new Date(user.last_sign_in_at), 'yyyy/MM/dd HH:mm', { locale: currentLanguage === 'ar' ? ar : enUS }) : '-'}
               </span>
             </div>
           </div>

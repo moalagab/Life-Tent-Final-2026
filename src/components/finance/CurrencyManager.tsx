@@ -16,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { ar, enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 interface FxRate {
@@ -58,6 +59,7 @@ const DEFAULT_RATES: Record<string, number> = {
 export function CurrencyManager() {
   const { currentLanguage } = useLanguage();
   const language = currentLanguage;
+  const locale = language === 'ar' ? ar : enUS;
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -380,7 +382,7 @@ export function CurrencyManager() {
                     {rate.rate.toFixed(4)}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {format(new Date(rate.date), 'MMM d, yyyy')}
+                    {format(new Date(rate.date), 'MMM d, yyyy', { locale })}
                   </p>
                 </div>
               ))}

@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/hooks/useAuth';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { 
   Tent, 
   Target, 
@@ -64,6 +64,17 @@ export default function LandingPage() {
       navigate('/dashboard', { replace: true });
     }
   }, [user, navigate]);
+
+  // Memoize particle positions to prevent re-randomizing on every render
+  const particles = useMemo(() =>
+    Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      delay: `${Math.random() * 5}s`,
+      duration: `${5 + Math.random() * 5}s`,
+    })),
+  []);
 
   const features = [
     {
@@ -226,16 +237,16 @@ export default function LandingPage() {
           <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-gradient-to-tl from-primary/[0.04] to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s', animationDelay: '1s' }} />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-primary/[0.02] to-transparent rounded-full" />
           
-          {/* Floating particles */}
-          {[...Array(20)].map((_, i) => (
+          {/* Floating particles — positions memoized to prevent layout shifts */}
+          {particles.map((p) => (
             <div
-              key={i}
+              key={p.id}
               className="absolute w-1 h-1 bg-primary/10 rounded-full animate-float"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 5}s`,
-                animationDuration: `${5 + Math.random() * 5}s`
+                left: p.left,
+                top: p.top,
+                animationDelay: p.delay,
+                animationDuration: p.duration,
               }}
             />
           ))}
@@ -365,7 +376,7 @@ export default function LandingPage() {
       <section className="py-24 px-4 relative overflow-hidden">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <div className="order-2 lg:order-1">
+            <div className="order-1 lg:order-1">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary mb-6">
                 <Star className="w-4 h-4" />
                 <span className="text-sm font-medium">{t('landing.whyChoose')}</span>
@@ -396,7 +407,7 @@ export default function LandingPage() {
               </div>
             </div>
             
-            <div className="order-1 lg:order-2 relative">
+            <div className="order-2 lg:order-2 relative">
               {/* Stats Cards */}
               <div className="relative">
                 <div className="glass-card p-8 relative z-10">
@@ -433,8 +444,8 @@ export default function LandingPage() {
                 </div>
                 {/* Decorative elements */}
                 <div className="absolute -inset-4 bg-gradient-to-br from-primary/30 via-primary/10 to-transparent rounded-3xl blur-2xl -z-10" />
-                <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-primary/40 to-transparent rounded-full blur-xl" />
-                <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-gradient-to-tr from-primary/30 to-transparent rounded-full blur-xl" />
+                <div className="absolute -top-4 -end-4 w-24 h-24 bg-gradient-to-br from-primary/40 to-transparent rounded-full blur-xl" />
+                <div className="absolute -bottom-4 -start-4 w-32 h-32 bg-gradient-to-tr from-primary/30 to-transparent rounded-full blur-xl" />
               </div>
             </div>
           </div>
@@ -530,7 +541,7 @@ export default function LandingPage() {
               </a>
             </div>
             
-            <div className="flex flex-col items-center md:items-end gap-3">
+            <div className="flex flex-col items-center md:items-end rtl:md:items-start gap-3">
               <div className="flex items-center gap-3">
                 <Button 
                   variant="ghost" 

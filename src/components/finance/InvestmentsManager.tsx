@@ -27,6 +27,7 @@ import {
 } from '@/hooks/useAdvancedFinance';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { ar, enUS } from 'date-fns/locale';
 import { PieChart as RechartsPie, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { cn } from '@/lib/utils';
 
@@ -55,6 +56,7 @@ const ZAKAT_RATE = 0.025; // 2.5%
 export function InvestmentsManager() {
   const { t, currentLanguage } = useLanguage();
   const language = currentLanguage;
+  const locale = language === 'ar' ? ar : enUS;
   const { data: portfolios, isLoading: portfoliosLoading } = useInvestmentPortfolios();
   const { data: assets } = useInvestmentAssets();
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null);
@@ -668,7 +670,7 @@ export function InvestmentsManager() {
 
       {/* Smart Alerts Bar */}
       {(priceAlerts.length > 0 || rebalancingSuggestions.length > 0) && (
-        <div className="glass-card p-4 border-l-4 border-l-primary">
+        <div className="glass-card p-4 border-s-4 border-s-primary">
           <div className="flex items-center gap-2 mb-3">
             <Bell className="w-5 h-5 text-primary animate-pulse" />
             <h3 className="font-semibold">{language === 'ar' ? 'تنبيهات ذكية' : 'Smart Alerts'}</h3>
@@ -782,19 +784,19 @@ export function InvestmentsManager() {
           </CardContent>
         </Card>
 
-        <Card className="glass-card border-l-4 border-l-green-600">
+        <Card className="glass-card border-s-4 border-s-success">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">
                   {language === 'ar' ? 'الزكاة المستحقة' : 'Zakat Due'}
                 </p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-2xl font-bold text-success">
                   {metrics.zakatAmount.toLocaleString(undefined, { maximumFractionDigits: 0 })} SAR
                 </p>
               </div>
-              <div className="w-10 h-10 rounded-xl bg-green-600/10 flex items-center justify-center">
-                <Calculator className="w-5 h-5 text-green-600" />
+              <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
+                <Calculator className="w-5 h-5 text-success" />
               </div>
             </div>
           </CardContent>
@@ -1063,7 +1065,7 @@ export function InvestmentsManager() {
                       {tx.type === 'buy' || tx.type === 'deposit' ? '+' : '-'}{tx.total_amount.toLocaleString()} SAR
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {format(new Date(tx.date), 'MMM d, yyyy')}
+                      {format(new Date(tx.date), 'MMM d, yyyy', { locale })}
                     </p>
                   </div>
                 </div>

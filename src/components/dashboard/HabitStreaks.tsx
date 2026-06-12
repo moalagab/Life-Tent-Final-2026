@@ -88,8 +88,8 @@ export function HabitStreaks() {
   const habitColors = [
     { bg: 'bg-primary', light: 'bg-primary/20' },
     { bg: 'bg-success', light: 'bg-success/20' },
-    { bg: 'bg-blue-500', light: 'bg-blue-500/20' },
-    { bg: 'bg-purple-500', light: 'bg-purple-500/20' },
+    { bg: 'bg-warning', light: 'bg-warning/20' },
+    { bg: 'bg-destructive', light: 'bg-destructive/20' },
   ];
 
   if (isLoading) {
@@ -156,7 +156,7 @@ export function HabitStreaks() {
                   )}
 
                   {/* Action Buttons */}
-                  <div className="absolute top-1.5 start-1.5 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute top-1.5 start-1.5 flex gap-0.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={(e) => { e.stopPropagation(); setEditingHabit({ id: habit.id, name: habit.name }); }}
                       className="p-1 rounded bg-background/80 hover:bg-background transition-colors"
@@ -174,7 +174,7 @@ export function HabitStreaks() {
                   {/* Habit Icon */}
                   <div className={cn(
                     'w-8 h-8 rounded-lg flex items-center justify-center text-base mb-2',
-                    completed ? 'bg-white/20' : colorConfig.light
+                    completed ? 'bg-primary-foreground/20' : colorConfig.light
                   )}>
                     {habit.icon || '✨'}
                   </div>
@@ -182,15 +182,15 @@ export function HabitStreaks() {
                   {/* Habit Name */}
                   <p className={cn(
                     'text-xs font-medium truncate',
-                    completed ? 'text-white' : 'text-foreground'
+                    completed ? 'text-primary-foreground' : 'text-foreground'
                   )}>
                     {habit.name}
                   </p>
                   
                   {/* Streak */}
                   <div className="flex items-center gap-1 mt-1">
-                    <Flame className={cn('w-3 h-3', completed ? 'text-white/70' : 'text-destructive')} />
-                    <span className={cn('text-[10px] font-medium', completed ? 'text-white/70' : 'text-muted-foreground')}>
+                    <Flame className={cn('w-3 h-3', completed ? 'text-primary-foreground/70' : 'text-destructive')} />
+                    <span className={cn('text-[10px] font-medium', completed ? 'text-primary-foreground/70' : 'text-muted-foreground')}>
                       {streak} {t('habits.dayStreak')}
                     </span>
                   </div>

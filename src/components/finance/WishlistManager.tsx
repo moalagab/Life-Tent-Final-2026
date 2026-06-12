@@ -574,7 +574,7 @@ export function WishlistManager() {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'urgent': return 'bg-destructive text-destructive-foreground';
-      case 'high': return 'bg-orange-500 text-white';
+      case 'high': return 'bg-warning text-warning-foreground';
       case 'medium': return 'bg-primary text-primary-foreground';
       case 'low': return 'bg-muted text-muted-foreground';
       default: return 'bg-muted text-muted-foreground';
@@ -662,12 +662,12 @@ export function WishlistManager() {
         </div>
         <div className="glass-card p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Star className="w-4 h-4 text-orange-500" />
+            <Star className="w-4 h-4 text-warning" />
             <span className="text-sm text-muted-foreground">
               {language === 'ar' ? 'عاجل/مهم' : 'Urgent/High'}
             </span>
           </div>
-          <p className="text-2xl font-bold text-orange-500">
+          <p className="text-2xl font-bold text-warning">
             {pendingItems.filter(i => i.priority === 'urgent' || i.priority === 'high').length}
           </p>
         </div>

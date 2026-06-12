@@ -15,6 +15,7 @@ import { useAccounts, useTransactions, useMonthlyStats, useSubscriptions } from 
 import { useDebts, useInvestmentPortfolios, useInvestmentHoldings } from '@/hooks/useAdvancedFinance';
 import { cn } from '@/lib/utils';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import { ar, enUS } from 'date-fns/locale';
 import { 
   LineChart, Line, BarChart, Bar, PieChart as RechartsPie, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart
@@ -32,6 +33,7 @@ const COLORS = [
 export function FinanceReports() {
   const { currentLanguage } = useLanguage();
   const language = currentLanguage;
+  const locale = language === 'ar' ? ar : enUS;
   const [period, setPeriod] = useState('6m');
 
   const { data: accounts, isLoading: accountsLoading } = useAccounts();
@@ -91,7 +93,7 @@ export function FinanceReports() {
         .reduce((sum, t) => sum + t.amount, 0);
 
       months.push({
-        month: format(date, 'MMM'),
+        month: format(date, 'MMM', { locale }),
         income,
         expenses,
         net: income - expenses,
@@ -603,7 +605,7 @@ export function FinanceReports() {
                       <div>
                         <p className="font-medium text-foreground">{s.name}</p>
                         <p className="text-sm text-muted-foreground">
-                          {s.billing_cycle} • {language === 'ar' ? 'التجديد' : 'Renews'}: {format(new Date(s.next_billing_date), 'MMM d')}
+                          {s.billing_cycle} • {language === 'ar' ? 'التجديد' : 'Renews'}: {format(new Date(s.next_billing_date), 'MMM d', { locale })}
                         </p>
                       </div>
                       <span className="font-semibold text-foreground">{s.amount} SAR</span>

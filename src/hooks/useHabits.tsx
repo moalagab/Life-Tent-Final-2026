@@ -171,12 +171,34 @@ export function useDeleteHabit() {
         .from('habits')
         .delete()
         .eq('id', id);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['habits'] });
       queryClient.invalidateQueries({ queryKey: ['habits-with-logs'] });
     },
+  });
+}
+
+/** Fetches habit logs for the past 365 days — used by the yearly contribution graph. */
+export function useYearlyHabitLogs() {
+  const { user } = useAuth();
+  const yearAgo = subDays(new Date(), 364);
+
+  return useQuery({
+    queryKey: ['habit-logs-yearly', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('habit_logs')
+        .select('completed_at')
+        .gte('completed_at', format(yearAgo, 'yyyy-MM-dd'))
+        .order('completed_at', { ascending: true });
+
+      if (error) throw error;
+      return data as { completed_at: string }[];
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000, // 5 min cache
   });
 }

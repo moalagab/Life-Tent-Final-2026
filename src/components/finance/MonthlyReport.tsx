@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
-const COLORS = ['hsl(var(--primary))', 'hsl(var(--success))', 'hsl(var(--destructive))', '#8b5cf6', '#f59e0b', '#06b6d4'];
+const COLORS = ['hsl(var(--primary))', 'hsl(var(--success))', 'hsl(var(--destructive))', 'hsl(var(--muted-foreground))', 'hsl(var(--warning))', 'hsl(var(--primary) / 0.5)'];
 
 export function MonthlyReport() {
   const { t, currentLanguage } = useLanguage();

@@ -139,6 +139,7 @@ export function usePomodoroStats() {
 }
 
 function getDailyBreakdown(sessions: PomodoroSession[]) {
+  // Keep English abbreviations; component applies bilingual mapping via tickFormatter
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const today = new Date();
   const result = [];
@@ -147,7 +148,7 @@ function getDailyBreakdown(sessions: PomodoroSession[]) {
     const date = new Date(today);
     date.setDate(date.getDate() - i);
     date.setHours(0, 0, 0, 0);
-    
+
     const nextDate = new Date(date);
     nextDate.setDate(nextDate.getDate() + 1);
 
@@ -164,7 +165,7 @@ function getDailyBreakdown(sessions: PomodoroSession[]) {
       date: date.toLocaleDateString(),
       minutes,
       sessions: sessionsCount,
-      hours: Math.round(minutes / 60 * 10) / 10,
+      hours: Math.round((minutes / 60) * 10) / 10,
     });
   }
 

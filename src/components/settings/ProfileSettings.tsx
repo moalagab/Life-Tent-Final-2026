@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useProfile, useUpdateProfile, useUploadAvatar } from '@/hooks/useProfile';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, Camera, User, Mail, Clock, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { ar, enUS } from 'date-fns/locale';
 
 const timezones = [
   { value: 'Asia/Riyadh', label: 'الرياض (GMT+3)' },
@@ -21,11 +22,12 @@ const timezones = [
 ];
 
 export function ProfileSettings() {
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const { user } = useAuth();
   const { data: profile, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
   const uploadAvatar = useUploadAvatar();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [fullName, setFullName] = useState('');
   const [timezone, setTimezone] = useState('Asia/Riyadh');
   const [isUploading, setIsUploading] = useState(false);
@@ -70,6 +72,10 @@ export function ProfileSettings() {
     }
   };
 
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center p-8">
@@ -81,32 +87,54 @@ export function ProfileSettings() {
   return (
     <div className="space-y-6">
       {/* Avatar Section */}
-      <div className="flex items-center gap-6 p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
-        <div className="relative group">
+      <div className="flex items-center gap-6 p-4 rounded-xl bg-primary/5 border border-primary/20">
+        <div className="relative group shrink-0">
           <Avatar className="w-24 h-24 ring-4 ring-background shadow-xl">
             <AvatarImage src={profile?.avatar_url || ''} />
             <AvatarFallback className="bg-primary/10 text-primary text-2xl">
-              <User className="w-10 h-10" />
+              {fullName ? getInitials(fullName) : <User className="w-10 h-10" />}
             </AvatarFallback>
           </Avatar>
-          <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+          {/* Desktop hover overlay */}
+          <label className="absolute inset-0 sm:flex hidden items-center justify-center bg-black/50 rounded-full sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer transition-opacity">
             {isUploading ? (
-              <Loader2 className="w-6 h-6 animate-spin text-white" />
+              <Loader2 className="w-6 h-6 animate-spin text-primary-foreground" />
             ) : (
-              <Camera className="w-6 h-6 text-white" />
+              <Camera className="w-6 h-6 text-primary-foreground" />
             )}
-            <input 
-              type="file" 
-              accept="image/*" 
-              className="hidden" 
-              onChange={handleAvatarChange} 
-              disabled={isUploading} 
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarChange}
+              disabled={isUploading}
             />
           </label>
+          {/* Mobile always-visible camera button */}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className="absolute bottom-0 end-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex sm:hidden items-center justify-center shadow-lg"
+          >
+            {isUploading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Camera className="w-4 h-4" />
+            )}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarChange}
+            disabled={isUploading}
+          />
         </div>
-        <div>
-          <h4 className="font-semibold text-foreground">{fullName || t('auth.fullName')}</h4>
-          <p className="text-sm text-muted-foreground">{user?.email}</p>
+        <div className="min-w-0">
+          <h4 className="font-semibold text-foreground truncate">{fullName || t('auth.fullName')}</h4>
+          <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
           <p className="text-xs text-muted-foreground mt-1">{t('profile.clickToChange')}</p>
         </div>
       </div>
@@ -168,14 +196,14 @@ export function ProfileSettings() {
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <p className="text-muted-foreground">{t('profile.memberSince')}</p>
-            <p className="font-medium text-foreground">
-              {user?.created_at ? format(new Date(user.created_at), 'yyyy/MM/dd') : '-'}
+            <p className="font-medium text-foreground" dir="ltr">
+              {user?.created_at ? format(new Date(user.created_at), 'yyyy/MM/dd', { locale: currentLanguage === 'ar' ? ar : enUS }) : '-'}
             </p>
           </div>
           <div>
             <p className="text-muted-foreground">{t('profile.lastSignIn')}</p>
-            <p className="font-medium text-foreground">
-              {user?.last_sign_in_at ? format(new Date(user.last_sign_in_at), 'yyyy/MM/dd HH:mm') : '-'}
+            <p className="font-medium text-foreground" dir="ltr">
+              {user?.last_sign_in_at ? format(new Date(user.last_sign_in_at), 'yyyy/MM/dd HH:mm', { locale: currentLanguage === 'ar' ? ar : enUS }) : '-'}
             </p>
           </div>
         </div>

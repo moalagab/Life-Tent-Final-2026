@@ -628,7 +628,7 @@ export function DebtsManager() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-card p-4 border-l-4 border-l-destructive">
+        <div className="glass-card p-4 border-s-4 border-s-destructive">
           <div className="flex items-center gap-2 mb-2">
             <ArrowDownRight className="w-5 h-5 text-destructive" />
             <span className="text-sm font-medium text-muted-foreground">
@@ -640,7 +640,7 @@ export function DebtsManager() {
             {debtsFromMe.length} {language === 'ar' ? 'ديون نشطة' : 'active debts'}
           </p>
         </div>
-        <div className="glass-card p-4 border-l-4 border-l-success">
+        <div className="glass-card p-4 border-s-4 border-s-success">
           <div className="flex items-center gap-2 mb-2">
             <ArrowUpRight className="w-5 h-5 text-success" />
             <span className="text-sm font-medium text-muted-foreground">
@@ -652,7 +652,7 @@ export function DebtsManager() {
             {debtsToMe.length} {language === 'ar' ? 'مستحقات' : 'receivables'}
           </p>
         </div>
-        <div className="glass-card p-4 border-l-4 border-l-primary">
+        <div className="glass-card p-4 border-s-4 border-s-primary">
           <div className="flex items-center gap-2 mb-2">
             <Calendar className="w-5 h-5 text-primary" />
             <span className="text-sm font-medium text-muted-foreground">{t('finance.monthlyPayments')}</span>
@@ -662,12 +662,12 @@ export function DebtsManager() {
             {language === 'ar' ? 'الحد الأدنى الشهري' : 'minimum monthly'}
           </p>
         </div>
-        <div className="glass-card p-4 border-l-4 border-l-green-500">
+        <div className="glass-card p-4 border-s-4 border-s-success">
           <div className="flex items-center gap-2 mb-2">
-            <Target className="w-5 h-5 text-green-500" />
+            <Target className="w-5 h-5 text-success" />
             <span className="text-sm font-medium text-muted-foreground">{t('finance.paidOff')}</span>
           </div>
-          <p className="text-2xl font-bold text-green-500">
+          <p className="text-2xl font-bold text-success">
             {debts?.filter(d => d.status === 'closed').length || 0}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
@@ -704,7 +704,7 @@ export function DebtsManager() {
               <div key={debt.id} className={cn(
                 "glass-card p-5 transition-all duration-300 hover:shadow-lg",
                 isOverdue && "border-destructive/50 bg-destructive/5",
-                isNearDue && !isOverdue && "border-orange-500/50 bg-orange-500/5"
+                isNearDue && !isOverdue && "border-warning/50 bg-warning/5"
               )}>
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -733,7 +733,7 @@ export function DebtsManager() {
                       </Badge>
                     )}
                     {isNearDue && !isOverdue && (
-                      <Badge variant="outline" className="border-orange-500 text-orange-500">
+                      <Badge variant="outline" className="border-warning text-warning">
                         <Calendar className="w-3 h-3 me-1" />
                         {daysUntilDue} {language === 'ar' ? 'يوم' : 'days'}
                       </Badge>
@@ -790,7 +790,7 @@ export function DebtsManager() {
                       <p className={cn(
                         "font-semibold text-sm",
                         isOverdue && "text-destructive",
-                        isNearDue && !isOverdue && "text-orange-500"
+                        isNearDue && !isOverdue && "text-warning"
                       )}>
                         {debt.end_date ? format(new Date(debt.end_date), 'MMM d, yyyy', { locale }) : '-'}
                       </p>

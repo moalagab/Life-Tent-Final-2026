@@ -18,7 +18,7 @@ import {
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 
-const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+const COLORS = ['hsl(var(--success))', 'hsl(var(--primary))', 'hsl(var(--warning))', 'hsl(var(--destructive))', 'hsl(var(--muted-foreground))', 'hsl(var(--primary) / 0.5)'];
 
 interface StatCardProps {
   title: string;
@@ -290,21 +290,21 @@ export function FinanceDashboard() {
                       borderRadius: '8px'
                     }} 
                   />
-                  <Area 
-                    type="monotone" 
-                    dataKey="income" 
+                  <Area
+                    type="monotone"
+                    dataKey="income"
                     stackId="1"
-                    stroke="#10b981" 
-                    fill="#10b981" 
+                    stroke="hsl(var(--success))"
+                    fill="hsl(var(--success))"
                     fillOpacity={0.6}
                     name={language === 'ar' ? 'الدخل' : 'Income'}
                   />
-                  <Area 
-                    type="monotone" 
-                    dataKey="expenses" 
+                  <Area
+                    type="monotone"
+                    dataKey="expenses"
                     stackId="2"
-                    stroke="#ef4444" 
-                    fill="#ef4444" 
+                    stroke="hsl(var(--destructive))"
+                    fill="hsl(var(--destructive))"
                     fillOpacity={0.6}
                     name={language === 'ar' ? 'المصروفات' : 'Expenses'}
                   />

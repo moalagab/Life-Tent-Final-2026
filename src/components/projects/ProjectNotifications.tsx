@@ -29,7 +29,7 @@ export function ProjectNotifications({ onProjectClick }: ProjectNotificationsPro
 
   const colorMap = {
     warning: 'bg-warning/10 text-warning border-warning/20',
-    info: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    info: 'bg-primary/10 text-primary border-primary/20',
     success: 'bg-success/10 text-success border-success/20',
   };
 

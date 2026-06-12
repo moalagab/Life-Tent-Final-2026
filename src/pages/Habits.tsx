@@ -3,33 +3,18 @@ import { Flame, Plus, TrendingUp, Smile, Frown, Meh, Zap, Moon, Loader2, Edit3, 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useHabitsWithLogs, useCreateHabit, useLogHabit, useUpdateHabit, useDeleteHabit, Habit } from '@/hooks/useHabits';
+import { useHabitsWithLogs, useCreateHabit, useLogHabit, useUpdateHabit, useDeleteHabit, useYearlyHabitLogs, Habit } from '@/hooks/useHabits';
 import { useTodayMoodLog, useUpsertMoodLog } from '@/hooks/useMoodLogs';
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { format, subDays, isSameDay } from 'date-fns';
+import { format, subDays, isSameDay, startOfDay, addDays } from 'date-fns';
 import { Slider } from '@/components/ui/slider';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoodHabitCorrelation } from '@/components/habits/MoodHabitCorrelation';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
-
-// Generate mock contribution data for the year (will be replaced with real data later)
-const generateContributionData = () => {
-  const data = [];
-  for (let week = 0; week < 52; week++) {
-    const weekData = [];
-    for (let day = 0; day < 7; day++) {
-      weekData.push(Math.random() > 0.3 ? Math.floor(Math.random() * 4) + 1 : 0);
-    }
-    data.push(weekData);
-  }
-  return data;
-};
-
-const contributionData = generateContributionData();
 
 const getContributionColor = (level: number) => {
   switch (level) {
@@ -42,11 +27,12 @@ const getContributionColor = (level: number) => {
   }
 };
 
-const habitColors = ['bg-primary', 'bg-success', 'bg-purple-500', 'bg-blue-500', 'bg-emerald-500', 'bg-orange-500'];
+const habitColors = ['bg-primary', 'bg-success', 'bg-warning', 'bg-destructive', 'bg-muted-foreground', 'bg-primary/70'];
 
 export default function Habits() {
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const { data: habits, isLoading } = useHabitsWithLogs();
+  const { data: yearlyLogs } = useYearlyHabitLogs();
   const { data: todayMood } = useTodayMoodLog();
   const createHabit = useCreateHabit();
   const logHabit = useLogHabit();
@@ -226,6 +212,28 @@ export default function Habits() {
     return streak;
   };
 
+  // Build real contribution data from Supabase logs
+  const contributionData = (() => {
+    const logDates = new Set((yearlyLogs || []).map(l => l.completed_at));
+    const totalHabits = habits?.length || 1;
+    const today = startOfDay(new Date());
+    const startDay = subDays(today, 363); // 52 weeks × 7 days = 364 days
+    const weeks: number[][] = [];
+    for (let w = 0; w < 52; w++) {
+      const week: number[] = [];
+      for (let d = 0; d < 7; d++) {
+        const date = addDays(startDay, w * 7 + d);
+        const dateStr = format(date, 'yyyy-MM-dd');
+        // Count how many habit-log entries exist for that date
+        const count = (yearlyLogs || []).filter(l => l.completed_at === dateStr).length;
+        const level = count === 0 ? 0 : Math.min(4, Math.ceil((count / totalHabits) * 4));
+        week.push(level);
+      }
+      weeks.push(week);
+    }
+    return weeks;
+  })();
+
   if (isLoading) {
     return (
       <MainLayout>
@@ -283,7 +291,7 @@ export default function Habits() {
                   />
                 </div>
                 <div>
-                  <Label>Icon</Label>
+                  <Label>{t('habits.icon')}</Label>
                   <div className="flex gap-2 flex-wrap mt-2">
                     {['📚', '🏋️', '🧘', '💧', '📖', '🎯', '💪', '🏃', '🧠', '✍️'].map(icon => (
                       <button
@@ -333,7 +341,7 @@ export default function Habits() {
               />
             </div>
             <div>
-              <Label>Icon</Label>
+              <Label>{t('habits.icon')}</Label>
               <div className="flex gap-2 flex-wrap mt-2">
                 {['📚', '🏋️', '🧘', '💧', '📖', '🎯', '💪', '🏃', '🧠', '✍️'].map(icon => (
                   <button
@@ -365,9 +373,9 @@ export default function Habits() {
             <div className="flex items-center gap-3">
               {/* Streak Badges */}
               {getTotalStreak() >= 7 && (
-                <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-gradient-to-r from-primary/20/20 to-orange-500/20 border border-primary/20">
+                <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-gradient-to-r from-warning/20 to-warning/10 border border-warning/30">
                   <span className="text-xs">🔥</span>
-                  <span className="text-xs font-medium text-primary">
+                  <span className="text-xs font-medium text-warning">
                     {getTotalStreak() >= 30 ? '🏆' : getTotalStreak() >= 14 ? '⭐' : '🎯'}
                   </span>
                 </div>
@@ -513,7 +521,7 @@ export default function Habits() {
             <div>
               <p className="text-sm text-muted-foreground mb-3">{t('habits.sleepQuality')}</p>
               <div className="flex items-center gap-3">
-                <Moon className="w-4 h-4 text-purple-500" />
+                <Moon className="w-4 h-4 text-muted-foreground" />
                 <Slider
                   value={[sleepQuality]}
                   onValueChange={handleSleepChange}
@@ -556,7 +564,7 @@ export default function Habits() {
                       'w-3 h-3 rounded-sm transition-colors',
                       getContributionColor(level)
                     )}
-                    title={`${level} habits completed`}
+                    title={currentLanguage === 'ar' ? `${level} عادات مكتملة` : `${level} habits completed`}
                   />
                 ))}
               </div>

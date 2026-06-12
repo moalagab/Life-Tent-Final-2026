@@ -195,10 +195,10 @@ export function PrivacySettings() {
   return (
     <div className="space-y-6">
       {/* Password Change */}
-      <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
+      <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
-            <Key className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+            <Key className="w-5 h-5 text-primary" />
           </div>
           <div>
             <h4 className="font-medium text-foreground">{t('settings.changePassword')}</h4>
@@ -255,11 +255,11 @@ export function PrivacySettings() {
       </div>
 
       {/* Two-Factor Authentication */}
-      <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20">
+      <div className="p-4 rounded-xl bg-success/10 border border-success/20">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-              <Shield className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            <div className="w-10 h-10 rounded-xl bg-success/20 flex items-center justify-center">
+              <Shield className="w-5 h-5 text-success" />
             </div>
             <div>
               <h4 className="font-medium text-foreground">{t('settings.twoFactor')}</h4>
@@ -268,7 +268,7 @@ export function PrivacySettings() {
           </div>
           {twoFactorEnabled ? (
             <div className="flex items-center gap-2">
-              <span className="text-xs bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded-full flex items-center gap-1">
+              <span className="text-xs bg-success/20 text-success px-2 py-1 rounded-full flex items-center gap-1">
                 <CheckCircle2 className="w-3 h-3" />
                 {t('settings.active')}
               </span>
@@ -454,8 +454,8 @@ export function PrivacySettings() {
               <p className="text-sm font-medium text-foreground">{t('settings.currentSession')}</p>
               <p className="text-xs text-muted-foreground">{user?.email}</p>
             </div>
-            <span className="text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded-full flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs bg-success/10 text-success px-2 py-1 rounded-full flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
               {t('settings.active')}
             </span>
           </div>
@@ -467,7 +467,7 @@ export function PrivacySettings() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-emerald-500" />
+              <Shield className="w-5 h-5 text-success" />
               {t('settings.setupTwoFactor')}
             </DialogTitle>
             <DialogDescription>
@@ -509,7 +509,7 @@ export function PrivacySettings() {
                   onClick={copySecret}
                   className="shrink-0"
                 >
-                  {copied ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                  {copied ? <CheckCircle2 className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
                 </Button>
               </div>
             </div>

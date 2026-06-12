@@ -13,9 +13,9 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { 
+import {
   Target, ListTodo, LayoutGrid, Eye, DollarSign,
-  FolderKanban, Calendar, Loader2, ArrowRight, Archive,
+  FolderKanban, Calendar, Loader2, ArrowRight, ArrowLeft, Archive,
   Play, Pause, CheckCircle, TrendingUp, StickyNote, Users, Database
 } from 'lucide-react';
 
@@ -36,7 +36,7 @@ interface ProjectDetailDialogProps {
 const phaseSteps = ['initiation', 'planning', 'execution', 'monitoring', 'closing'];
 
 export function ProjectDetailDialog({ project, open, onOpenChange }: ProjectDetailDialogProps) {
-  const { t, currentLanguage } = useLanguage();
+  const { t, currentLanguage, isRTL } = useLanguage();
   const { data: allTasks } = useTasks();
   const updateProject = useUpdateProject();
   const [activeTab, setActiveTab] = useState('overview');
@@ -124,32 +124,32 @@ export function ProjectDetailDialog({ project, open, onOpenChange }: ProjectDeta
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
-          <TabsList className="grid w-full grid-cols-7 shrink-0">
-            <TabsTrigger value="overview" className="flex items-center gap-1">
+          <TabsList className="w-full flex overflow-x-auto shrink-0 gap-0.5 h-auto p-1">
+            <TabsTrigger value="overview" className="flex items-center gap-1 flex-shrink-0 px-3 py-2">
               <Eye className="w-4 h-4" />
               <span className="hidden sm:inline">نظرة</span>
             </TabsTrigger>
-            <TabsTrigger value="tasks" className="flex items-center gap-1">
+            <TabsTrigger value="tasks" className="flex items-center gap-1 flex-shrink-0 px-3 py-2">
               <ListTodo className="w-4 h-4" />
               <span className="hidden sm:inline">مهام</span>
             </TabsTrigger>
-            <TabsTrigger value="goals" className="flex items-center gap-1">
+            <TabsTrigger value="goals" className="flex items-center gap-1 flex-shrink-0 px-3 py-2">
               <Target className="w-4 h-4" />
               <span className="hidden sm:inline">أهداف</span>
             </TabsTrigger>
-            <TabsTrigger value="resources" className="flex items-center gap-1">
+            <TabsTrigger value="resources" className="flex items-center gap-1 flex-shrink-0 px-3 py-2">
               <Database className="w-4 h-4" />
               <span className="hidden sm:inline">موارد</span>
             </TabsTrigger>
-            <TabsTrigger value="crm" className="flex items-center gap-1">
+            <TabsTrigger value="crm" className="flex items-center gap-1 flex-shrink-0 px-3 py-2">
               <Users className="w-4 h-4" />
               <span className="hidden sm:inline">CRM</span>
             </TabsTrigger>
-            <TabsTrigger value="okrs" className="flex items-center gap-1">
+            <TabsTrigger value="okrs" className="flex items-center gap-1 flex-shrink-0 px-3 py-2">
               <TrendingUp className="w-4 h-4" />
               <span className="hidden sm:inline">OKRs</span>
             </TabsTrigger>
-            <TabsTrigger value="kanban" className="flex items-center gap-1">
+            <TabsTrigger value="kanban" className="flex items-center gap-1 flex-shrink-0 px-3 py-2">
               <LayoutGrid className="w-4 h-4" />
               <span className="hidden sm:inline">كانبان</span>
             </TabsTrigger>
@@ -178,7 +178,9 @@ export function ProjectDetailDialog({ project, open, onOpenChange }: ProjectDeta
                         {phaseLabels[phase]}
                       </button>
                       {index < phaseSteps.length - 1 && (
-                        <ArrowRight className="w-4 h-4 text-muted-foreground mx-1 shrink-0" />
+                        isRTL
+                          ? <ArrowLeft className="w-4 h-4 text-muted-foreground mx-1 shrink-0" />
+                          : <ArrowRight className="w-4 h-4 text-muted-foreground mx-1 shrink-0" />
                       )}
                     </div>
                   ))}

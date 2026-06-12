@@ -17,6 +17,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTransactions, useMonthlyStats } from '@/hooks/useFinance';
 import { toast } from 'sonner';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
+import { ar, enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 interface ClosedPeriod {
@@ -34,6 +35,7 @@ interface ClosedPeriod {
 export function MonthlyClose() {
   const { currentLanguage } = useLanguage();
   const language = currentLanguage;
+  const locale = language === 'ar' ? ar : enUS;
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { data: transactions } = useTransactions(1000);
@@ -203,7 +205,7 @@ export function MonthlyClose() {
     return {
       month: date.getMonth(),
       year: date.getFullYear(),
-      label: format(date, 'MMMM yyyy'),
+      label: format(date, 'MMMM yyyy', { locale }),
     };
   });
 
@@ -256,7 +258,7 @@ export function MonthlyClose() {
                     <SelectContent>
                       {Array.from({ length: 12 }, (_, i) => (
                         <SelectItem key={i} value={i.toString()}>
-                          {format(new Date(2024, i, 1), 'MMMM')}
+                          {format(new Date(2024, i, 1), 'MMMM', { locale })}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -454,10 +456,10 @@ export function MonthlyClose() {
                     </div>
                     <div>
                       <p className="font-medium text-foreground">
-                        {format(new Date(period.year, period.month, 1), 'MMMM yyyy')}
+                        {format(new Date(period.year, period.month, 1), 'MMMM yyyy', { locale })}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {language === 'ar' ? 'تم الإقفال' : 'Closed'}: {format(new Date(period.closed_at), 'MMM d, yyyy')}
+                        {language === 'ar' ? 'تم الإقفال' : 'Closed'}: {format(new Date(period.closed_at), 'MMM d, yyyy', { locale })}
                       </p>
                     </div>
                   </div>

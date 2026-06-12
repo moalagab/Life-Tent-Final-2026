@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useOnboarding } from '@/hooks/useOnboarding';
+import { useLanguage } from '@/hooks/useLanguage';
 import { Tent } from 'lucide-react';
 
 interface ProtectedRouteProps {
@@ -11,6 +12,7 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading: authLoading } = useAuth();
   const { isCompleted, loading: onboardingLoading } = useOnboarding();
+  const { t } = useLanguage();
   const location = useLocation();
 
   if (authLoading || onboardingLoading) {
@@ -20,7 +22,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl glass-card gold-glow mb-4 animate-pulse">
             <Tent className="w-8 h-8 text-primary" />
           </div>
-          <p className="text-muted-foreground">جاري التحميل...</p>
+          <p className="text-muted-foreground">{t('common.loading')}</p>
         </div>
       </div>
     );

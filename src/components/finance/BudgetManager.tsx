@@ -69,7 +69,7 @@ export function BudgetManager() {
   const [newEnvelope, setNewEnvelope] = useState({
     name: '',
     target_amount: '',
-    color: '#10b981',
+    color: 'hsl(var(--success))',
   });
 
   const [newFund, setNewFund] = useState({
@@ -131,7 +131,7 @@ export function BudgetManager() {
       });
       toast.success(language === 'ar' ? 'تم إنشاء المظروف' : 'Envelope created');
       setIsEnvelopeDialogOpen(false);
-      setNewEnvelope({ name: '', target_amount: '', color: '#10b981' });
+      setNewEnvelope({ name: '', target_amount: '', color: 'hsl(var(--success))' });
     } catch (error) {
       toast.error(t('common.error'));
     }
@@ -252,7 +252,7 @@ export function BudgetManager() {
       toast.success(language === 'ar' ? 'تم تحديث المظروف' : 'Envelope updated');
       setIsEditEnvelopeDialogOpen(false);
       setSelectedEnvelope(null);
-      setNewEnvelope({ name: '', target_amount: '', color: '#10b981' });
+      setNewEnvelope({ name: '', target_amount: '', color: 'hsl(var(--success))' });
     } catch (error) {
       toast.error(t('common.error'));
     }
@@ -282,7 +282,7 @@ export function BudgetManager() {
     setNewEnvelope({
       name: envelope.name,
       target_amount: (envelope.target_amount || 0).toString(),
-      color: envelope.color || '#10b981',
+      color: envelope.color || 'hsl(var(--success))',
     });
     setIsEditEnvelopeDialogOpen(true);
   };
@@ -428,11 +428,11 @@ export function BudgetManager() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="budgets">{language === 'ar' ? 'الميزانيات' : 'Budgets'}</TabsTrigger>
-          <TabsTrigger value="envelopes">{language === 'ar' ? 'المظاريف' : 'Envelopes'}</TabsTrigger>
-          <TabsTrigger value="sinkingFunds">{language === 'ar' ? 'صناديق الادخار' : 'Sinking Funds'}</TabsTrigger>
-          <TabsTrigger value="forecast">{language === 'ar' ? 'التوقعات' : 'Forecast'}</TabsTrigger>
+        <TabsList className="overflow-x-auto flex-nowrap w-full justify-start h-auto">
+          <TabsTrigger value="budgets" className="flex-shrink-0">{language === 'ar' ? 'الميزانيات' : 'Budgets'}</TabsTrigger>
+          <TabsTrigger value="envelopes" className="flex-shrink-0">{language === 'ar' ? 'المظاريف' : 'Envelopes'}</TabsTrigger>
+          <TabsTrigger value="sinkingFunds" className="flex-shrink-0">{language === 'ar' ? 'صناديق الادخار' : 'Sinking Funds'}</TabsTrigger>
+          <TabsTrigger value="forecast" className="flex-shrink-0">{language === 'ar' ? 'التوقعات' : 'Forecast'}</TabsTrigger>
         </TabsList>
 
         {/* Budgets Tab */}
@@ -612,13 +612,13 @@ export function BudgetManager() {
                 <div 
                   key={envelope.id} 
                   className="glass-card p-5 group"
-                  style={{ borderTopColor: envelope.color || '#10b981', borderTopWidth: '3px' }}
+                  style={{ borderTopColor: envelope.color || 'hsl(var(--success))', borderTopWidth: '3px' }}
                 >
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-semibold">{envelope.name}</h4>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="ghost" size="icon" className="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -758,7 +758,7 @@ export function BudgetManager() {
                     <h4 className="font-semibold">{fund.name}</h4>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="ghost" size="icon" className="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>

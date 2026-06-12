@@ -82,17 +82,13 @@ export function FinanceSnapshot() {
         <StatRow
           label={t('finance.netWorth')}
           value={`SAR ${netWorth.toLocaleString()}`}
-          change={netWorth > 0 ? '+12.5%' : undefined}
-          trend="up"
           icon={<Wallet className="w-4.5 h-4.5 text-primary" />}
           iconBg="bg-primary/10"
         />
-        
+
         <StatRow
           label={t('finance.monthlyExpenses')}
           value={`SAR ${monthlyExpenses.toLocaleString()}`}
-          change={monthlyExpenses > 0 ? '-5.2%' : undefined}
-          trend="down"
           icon={<CreditCard className="w-4.5 h-4.5 text-destructive" />}
           iconBg="bg-destructive/10"
         />
