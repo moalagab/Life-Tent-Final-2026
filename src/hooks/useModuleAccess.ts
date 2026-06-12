@@ -118,10 +118,24 @@ export function useModuleAccess() {
   /** True when the user has earned a new slot but hasn't used it yet. */
   const canUnlockMore = activeModules.length > 0 && activeModules.length < maxSlots;
 
-  /** Returns true for utility tools and any module the user has unlocked. */
+  /**
+   * Returns true when a module should be visible in navigation.
+   *
+   * Fallback rules (in order):
+   *  1. Utility tools (ALWAYS_ON) → always visible
+   *  2. Still loading → show everything (avoids flash of hidden modules)
+   *  3. activeModules populated → show only those the user unlocked
+   *  4. activeModules empty after load → show everything (data fetch failed
+   *     or user pre-dates progressive disclosure; never leave user stranded)
+   */
   const isModuleActive = useCallback(
-    (module: string) => ALWAYS_ON.has(module) || activeModules.includes(module),
-    [activeModules],
+    (module: string) => {
+      if (ALWAYS_ON.has(module)) return true;
+      if (isLoading) return true;
+      if (activeModules.length === 0) return true; // safe fallback
+      return activeModules.includes(module);
+    },
+    [activeModules, isLoading],
   );
 
   const { mutateAsync: unlockModule } = useMutation({
