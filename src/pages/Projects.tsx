@@ -1,6 +1,6 @@
 import { useState, lazy, Suspense } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Plus, Search, Loader2, FolderKanban, BarChart3, LayoutDashboard, Users } from 'lucide-react';
+import { Plus, Filter, Search, Loader2, FolderKanban, BarChart3, LayoutDashboard, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useProjects, useUpdateProject, useDeleteProject, Project } from '@/hooks/useProjects';
