@@ -5,6 +5,19 @@ import "./index.css";
 import "./i18n";
 import { ThemeProvider } from "./hooks/useTheme";
 import { initMonitoring, connectMonitoringAdapter } from "./lib/monitoring";
+import { registerSW } from "virtual:pwa-register";
+
+// ── PWA Service Worker registration ─────────────────────────────────────────
+// autoUpdate: SW installs silently; prompts user to reload when new version ready
+registerSW({
+  onNeedRefresh() {
+    // Notify the user a new version is available (toast shown in App via store)
+    window.dispatchEvent(new CustomEvent("pwa:update-available"));
+  },
+  onOfflineReady() {
+    console.info("[SW] App ready for offline use");
+  },
+});
 
 // ── Monitoring (Web Vitals) — runs immediately, lightweight ─────────────────
 initMonitoring();
