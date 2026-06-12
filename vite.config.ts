@@ -74,16 +74,18 @@ export default defineConfig(({ mode }) => ({
         navigateFallbackDenylist: [/^\/assets/, /^\/api/, /^\/offline/],
         // Precache ONLY the app shell (html + css + tiny js entry).
         globPatterns: ["**/*.{css,html,ico,png,svg,woff2}"],
-        // Exclude known heavy chunks from precache entirely
+        // Exclude heavy on-demand chunks from precache
         globIgnores: [
           "**/jspdf*",
           "**/html2canvas*",
           "**/vendor-charts*",
+          "**/vendor-reactflow*",
           "**/purify*",
           "**/Knowledge*",
           "**/Finance*",
           "**/Projects*",
           "**/Studio*",
+          "**/Goals*",
         ],
         runtimeCaching: [
           {
@@ -156,6 +158,8 @@ export default defineConfig(({ mode }) => ({
             "@radix-ui/react-slider",
           ],
           "vendor-charts": ["recharts"],
+          "vendor-reactflow": ["reactflow"],
+          "vendor-pdf": ["jspdf", "html2canvas"],
           "vendor-forms": ["react-hook-form", "@hookform/resolvers", "zod"],
           "vendor-i18n": ["i18next", "react-i18next"],
           "vendor-dates": ["date-fns"],

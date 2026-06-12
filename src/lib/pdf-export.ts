@@ -1,5 +1,3 @@
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { format } from 'date-fns';
 
 interface PDFExportOptions {
@@ -13,6 +11,11 @@ export async function exportToPDF(elementId: string, options: PDFExportOptions):
   if (!element) {
     throw new Error(`Element with id "${elementId}" not found`);
   }
+
+  const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+    import('html2canvas'),
+    import('jspdf'),
+  ]);
 
   // Create canvas from element
   const canvas = await html2canvas(element, {
@@ -28,7 +31,7 @@ export async function exportToPDF(elementId: string, options: PDFExportOptions):
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
   
   const pdf = new jsPDF('p', 'mm', 'a4');
-  
+
   // Add header
   pdf.setFontSize(18);
   pdf.setTextColor(40, 40, 40);
@@ -63,11 +66,12 @@ export async function exportToPDF(elementId: string, options: PDFExportOptions):
   pdf.save(`${options.filename}_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
 }
 
-export function generateCourseNotesPDF(data: {
+export async function generateCourseNotesPDF(data: {
   courseTitle: string;
   notes: Array<{ title: string; content: string | null; note_type: string | null; is_important: boolean | null }>;
   lessons?: Array<{ title: string; is_completed: boolean | null }>;
 }) {
+  const { default: jsPDF } = await import('jspdf');
   const pdf = new jsPDF('p', 'mm', 'a4');
   const pageWidth = 210;
   const pageHeight = 297;
@@ -203,7 +207,7 @@ export function generateCourseNotesPDF(data: {
   pdf.save(`${safeFilename}_notes_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
 }
 
-export function generateFinanceReportPDF(data: {
+export async function generateFinanceReportPDF(data: {
   netWorth: number;
   income: number;
   expenses: number;
@@ -213,6 +217,7 @@ export function generateFinanceReportPDF(data: {
   categories?: Array<{ name: string; amount: number }>;
   debts?: Array<{ name: string; remaining: number }>;
 }) {
+  const { default: jsPDF } = await import('jspdf');
   const pdf = new jsPDF('p', 'mm', 'a4');
   const pageWidth = 210;
   let y = 20;

@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { 
-  ArrowLeft, BookOpen, GraduationCap, Plus, Check, Clock, FileText, 
+import { useState, lazy, Suspense } from 'react';
+import {
+  ArrowLeft, BookOpen, GraduationCap, Plus, Check, Clock, FileText,
   Lightbulb, Play, Trash2, Edit3, MoreVertical, Star, RotateCcw,
   ChevronDown, ChevronUp, ExternalLink, Loader2, Download, Network
 } from 'lucide-react';
-import { CourseMindMap } from './CourseMindMap';
+const CourseMindMap = lazy(() => import('./CourseMindMap').then(m => ({ default: m.CourseMindMap })));
 import { generateCourseNotesPDF } from '@/lib/pdf-export';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -627,14 +627,16 @@ export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetai
           )}
         </TabsContent>
 
-        {/* Mind Map Tab */}
+        {/* Mind Map Tab — reactflow loaded on demand */}
         <TabsContent value="mindmap" className="mt-4">
-          <CourseMindMap
-            course={course}
-            lessons={lessons}
-            notes={notes}
-            flashcards={flashcards}
-          />
+          <Suspense fallback={<div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>}>
+            <CourseMindMap
+              course={course}
+              lessons={lessons}
+              notes={notes}
+              flashcards={flashcards}
+            />
+          </Suspense>
         </TabsContent>
       </Tabs>
 
