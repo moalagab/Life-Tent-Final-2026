@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useArchivedItems, ArchivedItem } from '@/hooks/useArchive';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Search, Archive, RotateCcw, FolderKanban, Layers, Target, CheckSquare, Database, Users, MoreVertical } from 'lucide-react';
 import { format } from 'date-fns';
@@ -123,88 +121,88 @@ export function ArchiveView() {
         />
       </div>
 
-      {/* Type Tabs */}
-      <Tabs value={activeType} onValueChange={(v) => setActiveType(v as ArchivedItem['type'] | 'all')}>
-        <TabsList className="bg-muted/50 flex-wrap h-auto p-1">
-          <TabsTrigger value="all" className="gap-1">
-            الكل
-            <Badge variant="secondary" className="text-xs ml-1">
-              {archivedItems?.length || 0}
-            </Badge>
-          </TabsTrigger>
-          {Object.entries(typeConfig).map(([type, config]) => {
-            const count = groupedByType?.[type as ArchivedItem['type']]?.length || 0;
-            if (count === 0) return null;
+      {/* Type filter pills */}
+      <div className="flex flex-nowrap gap-1.5 overflow-x-auto pb-1">
+        <button
+          onClick={() => setActiveType('all')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
+            activeType === 'all' ? 'bg-primary text-primary-foreground' : 'bg-muted/60 text-muted-foreground hover:bg-muted'
+          }`}
+        >
+          الكل
+          <span className="bg-white/20 px-1 rounded-full">{archivedItems?.length || 0}</span>
+        </button>
+        {Object.entries(typeConfig).map(([type, config]) => {
+          const count = groupedByType?.[type as ArchivedItem['type']]?.length || 0;
+          if (count === 0) return null;
+          return (
+            <button
+              key={type}
+              onClick={() => setActiveType(type as ArchivedItem['type'])}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
+                activeType === type ? 'bg-primary text-primary-foreground' : 'bg-muted/60 text-muted-foreground hover:bg-muted'
+              }`}
+            >
+              <config.icon className="w-3.5 h-3.5" />
+              {config.label}
+              <span className="bg-white/20 px-1 rounded-full">{count}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {filteredItems?.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">
+          <Archive className="w-12 h-12 mx-auto mb-4 opacity-50" />
+          <p>لا توجد عناصر مؤرشفة</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredItems?.map((item) => {
+            const config = typeConfig[item.type];
+            const Icon = config.icon;
             return (
-              <TabsTrigger key={type} value={type} className="gap-1">
-                <config.icon className="w-4 h-4" />
-                {config.label}
-                <Badge variant="secondary" className="text-xs ml-1">{count}</Badge>
-              </TabsTrigger>
+              <div
+                key={`${item.type}-${item.id}`}
+                className="rounded-2xl border border-border/50 bg-card/50 p-4 space-y-2 relative overflow-hidden opacity-75 hover:opacity-100 transition-opacity"
+              >
+                <div className={`absolute top-0 left-0 right-0 h-1 rounded-t-2xl ${config.color}`} />
+                <div className="flex items-start justify-between pt-1">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-muted/60`}>
+                      <Icon className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm line-clamp-1">{item.title}</p>
+                      <Badge variant="outline" className="text-xs mt-0.5">{config.label}</Badge>
+                    </div>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleRestore(item)}>
+                        <RotateCcw className="w-4 h-4 ml-2" />
+                        استعادة
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                {item.description && (
+                  <p className="text-sm text-muted-foreground line-clamp-2">{item.description}</p>
+                )}
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>تمت الأرشفة</span>
+                  <span>{format(new Date(item.archived_at), 'dd MMM yyyy', { locale: ar })}</span>
+                </div>
+              </div>
             );
           })}
-        </TabsList>
-
-        <TabsContent value={activeType} className="mt-4">
-          {filteredItems?.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <Archive className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>لا توجد عناصر مؤرشفة</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredItems?.map((item) => {
-                const config = typeConfig[item.type];
-                const Icon = config.icon;
-                return (
-                  <Card key={`${item.type}-${item.id}`} className="relative overflow-hidden opacity-75 hover:opacity-100 transition-opacity">
-                    <div className={`absolute top-0 left-0 right-0 h-1 ${config.color}`} />
-                    <CardHeader className="pb-2">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-10 h-10 rounded-lg ${config.color} bg-opacity-20 flex items-center justify-center`}>
-                            <Icon className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <CardTitle className="text-base line-clamp-1">{item.title}</CardTitle>
-                            <Badge variant="outline" className="text-xs mt-1">
-                              {config.label}
-                            </Badge>
-                          </div>
-                        </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleRestore(item)}>
-                              <RotateCcw className="w-4 h-4 ml-2" />
-                              استعادة
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      {item.description && (
-                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                          {item.description}
-                        </p>
-                      )}
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>تمت الأرشفة</span>
-                        <span>{format(new Date(item.archived_at), 'dd MMM yyyy', { locale: ar })}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
     </div>
   );
 }

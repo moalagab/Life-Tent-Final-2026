@@ -80,7 +80,7 @@ function DebtForm({
         <Label className="text-sm font-medium">
           {language === 'ar' ? 'نوع الدين' : 'Debt Type'}
         </Label>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Button
             type="button"
             variant={newDebt.debt_type === 'from_me' ? 'destructive' : 'outline'}
@@ -150,7 +150,7 @@ function DebtForm({
           <CreditCard className="w-4 h-4" />
           {language === 'ar' ? 'المبالغ' : 'Amounts'}
         </h4>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <Label className="text-xs font-medium">
               {language === 'ar' ? 'المبلغ الإجمالي' : 'Total Amount'} <span className="text-destructive">*</span>
@@ -216,7 +216,7 @@ function DebtForm({
           <Calendar className="w-4 h-4" />
           {language === 'ar' ? 'تفاصيل السداد' : 'Payment Details'}
         </h4>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <Label className="text-xs font-medium">
               {language === 'ar' ? 'القسط الشهري' : 'Monthly Payment'}
@@ -250,7 +250,7 @@ function DebtForm({
             </Select>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <Label className="text-xs font-medium">
               {language === 'ar' ? 'الحد الأدنى للسداد' : 'Minimum Payment'}
@@ -280,7 +280,7 @@ function DebtForm({
       </div>
 
       {/* Dates Section */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <Label className="text-sm font-medium">
             {language === 'ar' ? 'تاريخ البداية' : 'Start Date'}
@@ -602,7 +602,7 @@ export function DebtsManager() {
           setIsDialogOpen(open);
           if (!open) resetForm();
         }}>
-          <DialogContent className="max-w-lg" onOpenAutoFocus={(e) => e.preventDefault()}>
+          <DialogContent className="sm:max-w-lg max-h-[92svh] overflow-y-auto" onOpenAutoFocus={(e) => e.preventDefault()}>
             <DialogHeader>
               <DialogTitle>{language === 'ar' ? 'إضافة دين جديد' : 'Add New Debt'}</DialogTitle>
               <DialogDescription>
@@ -976,7 +976,7 @@ export function DebtsManager() {
           resetForm();
         }
       }}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="sm:max-w-lg max-h-[92svh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{language === 'ar' ? 'تعديل الدين' : 'Edit Debt'}</DialogTitle>
             <DialogDescription>

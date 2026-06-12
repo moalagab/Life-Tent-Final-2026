@@ -91,7 +91,7 @@ function ItemForm({
         rows={2}
       />
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="text-sm text-muted-foreground mb-1 block">
             {language === 'ar' ? 'السعر التقريبي' : 'Estimated Price'}
@@ -119,7 +119,7 @@ function ItemForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="text-sm text-muted-foreground mb-1 block">
             {language === 'ar' ? 'الأولوية' : 'Priority'}
@@ -177,7 +177,7 @@ function ItemForm({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="text-sm text-muted-foreground mb-1 block">
             {language === 'ar' ? 'تاريخ الهدف' : 'Target Date'}
@@ -619,7 +619,7 @@ export function WishlistManager() {
               {language === 'ar' ? 'إضافة عنصر' : 'Add Item'}
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="sm:max-w-lg max-h-[92svh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {language === 'ar' ? 'إضافة عنصر جديد' : 'Add New Item'}
@@ -770,7 +770,7 @@ export function WishlistManager() {
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="sm:max-w-lg max-h-[92svh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {language === 'ar' ? 'تعديل العنصر' : 'Edit Item'}

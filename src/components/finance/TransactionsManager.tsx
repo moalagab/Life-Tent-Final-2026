@@ -304,7 +304,7 @@ export function TransactionsManager() {
                 {language === 'ar' ? 'إضافة عملية' : 'Add Transaction'}
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-md max-h-[92svh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{language === 'ar' ? 'إضافة عملية جديدة' : 'Add New Transaction'}</DialogTitle>
                 <DialogDescription>
@@ -312,7 +312,7 @@ export function TransactionsManager() {
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 mt-4">
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <Button
                     type="button"
                     variant={newTransaction.type === 'expense' ? 'destructive' : 'outline'}
@@ -339,6 +339,7 @@ export function TransactionsManager() {
                     placeholder={language === 'ar' ? 'مثال: مشتريات السوبرماركت' : 'e.g., Grocery shopping'}
                     value={newTransaction.description}
                     onChange={(e) => { const v = e.target.value; setNewTransaction(prev => ({ ...prev, description: v })); }}
+                    className="bg-muted/50 border-border/50"
                     dir="auto"
                   />
                 </div>

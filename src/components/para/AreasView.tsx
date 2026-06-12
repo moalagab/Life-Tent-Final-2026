@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAreas, useCreateArea, useUpdateArea, useArchiveArea, useRestoreArea, useDeleteArea, Area } from '@/hooks/useAreas';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ResponsiveSheet } from '@/components/ui/responsive-sheet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -166,77 +165,71 @@ export function AreasView() {
       {/* Areas Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {areas?.map((area) => (
-          <Card 
-            key={area.id} 
-            className={`relative overflow-hidden transition-all duration-200 hover:shadow-lg ${
+          <div
+            key={area.id}
+            className={`rounded-2xl border border-border/50 bg-card/50 p-4 space-y-2 relative overflow-hidden transition-all duration-200 hover:shadow-lg ${
               area.status === 'archived' ? 'opacity-60' : ''
             }`}
           >
-            <div 
-              className="absolute top-0 left-0 right-0 h-1"
+            <div
+              className="absolute top-0 left-0 right-0 h-1 rounded-t-2xl"
               style={{ backgroundColor: area.color || '#6366f1' }}
             />
-            <CardHeader className="pb-2">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  <div 
-                    className="w-10 h-10 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: `${area.color}20` }}
-                  >
-                    <Layers className="w-5 h-5" style={{ color: area.color || '#6366f1' }} />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">{area.name}</CardTitle>
-                    {area.status === 'archived' && (
-                      <Badge variant="secondary" className="mt-1">مؤرشف</Badge>
-                    )}
-                  </div>
+            <div className="flex items-start justify-between pt-1">
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: `${area.color}20` }}
+                >
+                  <Layers className="w-5 h-5" style={{ color: area.color || '#6366f1' }} />
                 </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreVertical className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleOpenDialog(area)}>
-                      <Pencil className="w-4 h-4 ml-2" />
-                      تعديل
-                    </DropdownMenuItem>
-                    {area.status === 'active' ? (
-                      <DropdownMenuItem onClick={() => handleArchive(area.id)}>
-                        <Archive className="w-4 h-4 ml-2" />
-                        أرشفة
-                      </DropdownMenuItem>
-                    ) : (
-                      <DropdownMenuItem onClick={() => handleRestore(area.id)}>
-                        <RotateCcw className="w-4 h-4 ml-2" />
-                        استعادة
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem 
-                      onClick={() => setDeleteId(area.id)}
-                      className="text-destructive"
-                    >
-                      <Trash2 className="w-4 h-4 ml-2" />
-                      حذف
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <div>
+                  <p className="font-semibold text-base">{area.name}</p>
+                  {area.status === 'archived' && (
+                    <Badge variant="secondary" className="mt-1 text-xs">مؤرشف</Badge>
+                  )}
+                </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              {area.description && (
-                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                  {area.description}
-                </p>
-              )}
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Calendar className="w-3 h-3" />
-                <span>مراجعة: {cadenceOptions.find(c => c.value === area.review_cadence)?.label}</span>
-              </div>
-            </CardContent>
-          </Card>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreVertical className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => handleOpenDialog(area)}>
+                    <Pencil className="w-4 h-4 ml-2" />
+                    تعديل
+                  </DropdownMenuItem>
+                  {area.status === 'active' ? (
+                    <DropdownMenuItem onClick={() => handleArchive(area.id)}>
+                      <Archive className="w-4 h-4 ml-2" />
+                      أرشفة
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem onClick={() => handleRestore(area.id)}>
+                      <RotateCcw className="w-4 h-4 ml-2" />
+                      استعادة
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem
+                    onClick={() => setDeleteId(area.id)}
+                    className="text-destructive"
+                  >
+                    <Trash2 className="w-4 h-4 ml-2" />
+                    حذف
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            {area.description && (
+              <p className="text-sm text-muted-foreground line-clamp-2">{area.description}</p>
+            )}
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Calendar className="w-3 h-3" />
+              <span>مراجعة: {cadenceOptions.find(c => c.value === area.review_cadence)?.label}</span>
+            </div>
+          </div>
         ))}
       </div>
 
@@ -255,76 +248,77 @@ export function AreasView() {
       )}
 
       {/* Create/Edit Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>{editingArea ? 'تعديل المجال' : 'مجال جديد'}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>الاسم</Label>
-              <Input
-                dir="auto"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="مثال: الصحة، العمل، العائلة..."
-              />
-            </div>
-            <div>
-              <Label>الوصف</Label>
-              <Textarea
-                dir="auto"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="وصف مختصر للمجال..."
-                rows={3}
-              />
-            </div>
-            <div>
-              <Label>فترة المراجعة</Label>
-              <Select
-                value={formData.review_cadence}
-                onValueChange={(value) => setFormData({ ...formData, review_cadence: value as Area['review_cadence'] })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {cadenceOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>اللون</Label>
-              <div className="flex gap-2 mt-2">
-                {colorOptions.map((color) => (
-                  <button
-                    key={color}
-                    type="button"
-                    className={`w-8 h-8 rounded-full transition-all ${
-                      formData.color === color ? 'ring-2 ring-offset-2 ring-primary' : ''
-                    }`}
-                    style={{ backgroundColor: color }}
-                    onClick={() => setFormData({ ...formData, color })}
-                  />
+      <ResponsiveSheet
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        title={editingArea ? 'تعديل المجال' : 'مجال جديد'}
+      >
+        <div className="space-y-4 pb-4">
+          <div>
+            <Label className="text-xs font-semibold text-muted-foreground">الاسم</Label>
+            <Input
+              dir="auto"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="مثال: الصحة، العمل، العائلة..."
+              className="bg-muted/50 border-border/50 mt-1"
+            />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold text-muted-foreground">الوصف</Label>
+            <Textarea
+              dir="auto"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="وصف مختصر للمجال..."
+              rows={3}
+              className="bg-muted/50 border-border/50 mt-1 resize-none"
+            />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold text-muted-foreground">فترة المراجعة</Label>
+            <Select
+              value={formData.review_cadence}
+              onValueChange={(value) => setFormData({ ...formData, review_cadence: value as Area['review_cadence'] })}
+            >
+              <SelectTrigger className="bg-muted/50 border-border/50 mt-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {cadenceOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
                 ))}
-              </div>
-            </div>
-            <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                إلغاء
-              </Button>
-              <Button onClick={handleSubmit} disabled={createArea.isPending || updateArea.isPending}>
-                {editingArea ? 'تحديث' : 'إنشاء'}
-              </Button>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="text-xs font-semibold text-muted-foreground">اللون</Label>
+            <div className="flex gap-2 mt-2 flex-wrap">
+              {colorOptions.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  className={`w-8 h-8 rounded-full transition-all active:scale-95 ${
+                    formData.color === color ? 'ring-2 ring-offset-2 ring-primary scale-110' : ''
+                  }`}
+                  style={{ backgroundColor: color }}
+                  onClick={() => setFormData({ ...formData, color })}
+                />
+              ))}
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+          <div className="flex gap-2 pt-2">
+            <Button variant="outline" className="flex-1" onClick={() => setIsDialogOpen(false)}>
+              إلغاء
+            </Button>
+            <Button className="flex-1" onClick={handleSubmit} disabled={createArea.isPending || updateArea.isPending}>
+              {editingArea ? 'تحديث' : 'إنشاء'}
+            </Button>
+          </div>
+        </div>
+      </ResponsiveSheet>
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>

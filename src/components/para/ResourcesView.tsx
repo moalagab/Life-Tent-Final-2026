@@ -3,18 +3,16 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useResources, useCreateResource, useUpdateResource, useArchiveResource, useRestoreResource, useDeleteResource, ResourceType, Resource } from '@/hooks/useResources';
 import { useActiveAreas } from '@/hooks/useAreas';
 import { useProjects } from '@/hooks/useProjects';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ResponsiveSheet } from '@/components/ui/responsive-sheet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, MoreVertical, Pencil, Archive, RotateCcw, Trash2, FileText, Link2, Film, BookOpen, File, ExternalLink, Search, Database, LayoutGrid } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -266,133 +264,134 @@ export function ResourcesView() {
         </div>
       </div>
 
-      {/* Type Tabs */}
-      <Tabs value={activeType} onValueChange={(v) => setActiveType(v as ResourceType | 'all')}>
-        <TabsList className="bg-muted/50">
-          <TabsTrigger value="all">الكل</TabsTrigger>
-          {resourceTypes.map((type) => (
-            <TabsTrigger key={type.value} value={type.value}>
-              <type.icon className="w-4 h-4 ml-1" />
-              {type.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      {/* Type filter pills */}
+      <div className="flex flex-nowrap gap-1.5 overflow-x-auto pb-1">
+        <button
+          onClick={() => setActiveType('all')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
+            activeType === 'all' ? 'bg-primary text-primary-foreground' : 'bg-muted/60 text-muted-foreground hover:bg-muted'
+          }`}
+        >
+          الكل
+        </button>
+        {resourceTypes.map((type) => (
+          <button
+            key={type.value}
+            onClick={() => setActiveType(type.value)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
+              activeType === type.value ? 'bg-primary text-primary-foreground' : 'bg-muted/60 text-muted-foreground hover:bg-muted'
+            }`}
+          >
+            <type.icon className="w-3.5 h-3.5" />
+            {type.label}
+          </button>
+        ))}
+      </div>
 
-        <TabsContent value={activeType} className="mt-4">
-          {/* Resources Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredResources?.map((resource) => {
-              const TypeIcon = getTypeIcon(resource.type);
-              return (
-                <Card 
-                  key={resource.id} 
-                  className={`relative overflow-hidden transition-all duration-200 hover:shadow-lg ${
-                    resource.status === 'archived' ? 'opacity-60' : ''
-                  }`}
-                >
-                  <CardHeader className="pb-2">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-                          <TypeIcon className="w-5 h-5 text-muted-foreground" />
-                        </div>
-                        <div>
-                          <CardTitle className="text-base line-clamp-1">{resource.title}</CardTitle>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline" className="text-xs">
-                              {resourceTypes.find(t => t.value === resource.type)?.label}
-                            </Badge>
-                            {resource.status === 'archived' && (
-                              <Badge variant="secondary">مؤرشف</Badge>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {resource.source_url && (
-                            <DropdownMenuItem onClick={() => window.open(resource.source_url, '_blank')}>
-                              <ExternalLink className="w-4 h-4 ml-2" />
-                              فتح الرابط
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuItem onClick={() => handleOpenDialog(resource)}>
-                            <Pencil className="w-4 h-4 ml-2" />
-                            تعديل
-                          </DropdownMenuItem>
-                          {resource.status === 'active' ? (
-                            <DropdownMenuItem onClick={() => handleArchive(resource.id)}>
-                              <Archive className="w-4 h-4 ml-2" />
-                              أرشفة
-                            </DropdownMenuItem>
-                          ) : (
-                            <DropdownMenuItem onClick={() => handleRestore(resource.id)}>
-                              <RotateCcw className="w-4 h-4 ml-2" />
-                              استعادة
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuItem 
-                            onClick={() => setDeleteId(resource.id)}
-                            className="text-destructive"
-                          >
-                            <Trash2 className="w-4 h-4 ml-2" />
-                            حذف
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+      {/* Resources Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredResources?.map((resource) => {
+          const TypeIcon = getTypeIcon(resource.type);
+          return (
+            <div
+              key={resource.id}
+              className={`rounded-2xl border border-border/50 bg-card/50 p-4 space-y-2 transition-all duration-200 hover:shadow-lg ${
+                resource.status === 'archived' ? 'opacity-60' : ''
+              }`}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-xl bg-muted/60 flex items-center justify-center">
+                    <TypeIcon className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm line-clamp-1">{resource.title}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <Badge variant="outline" className="text-xs">
+                        {resourceTypes.find(t => t.value === resource.type)?.label}
+                      </Badge>
+                      {resource.status === 'archived' && (
+                        <Badge variant="secondary" className="text-xs">مؤرشف</Badge>
+                      )}
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    {resource.description && (
-                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                        {resource.description}
-                      </p>
+                  </div>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                      <MoreVertical className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {resource.source_url && (
+                      <DropdownMenuItem onClick={() => window.open(resource.source_url, '_blank')}>
+                        <ExternalLink className="w-4 h-4 ml-2" />
+                        فتح الرابط
+                      </DropdownMenuItem>
                     )}
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {resource.tags?.slice(0, 3).map((tag: string) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{resource.areas?.name || resource.projects?.title || ''}</span>
-                      <span>{format(new Date(resource.updated_at), 'dd MMM', { locale: ar })}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-
-          {filteredResources?.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              <Database className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>لا توجد موارد</p>
-              <Button 
-                variant="outline" 
-                className="mt-4"
-                onClick={() => handleOpenDialog()}
-              >
-                أضف أول مورد
-              </Button>
+                    <DropdownMenuItem onClick={() => handleOpenDialog(resource)}>
+                      <Pencil className="w-4 h-4 ml-2" />
+                      تعديل
+                    </DropdownMenuItem>
+                    {resource.status === 'active' ? (
+                      <DropdownMenuItem onClick={() => handleArchive(resource.id)}>
+                        <Archive className="w-4 h-4 ml-2" />
+                        أرشفة
+                      </DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem onClick={() => handleRestore(resource.id)}>
+                        <RotateCcw className="w-4 h-4 ml-2" />
+                        استعادة
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem
+                      onClick={() => setDeleteId(resource.id)}
+                      className="text-destructive"
+                    >
+                      <Trash2 className="w-4 h-4 ml-2" />
+                      حذف
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              {resource.description && (
+                <p className="text-sm text-muted-foreground line-clamp-2">{resource.description}</p>
+              )}
+              <div className="flex flex-wrap gap-1">
+                {resource.tags?.slice(0, 3).map((tag: string) => (
+                  <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
+                ))}
+              </div>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>{resource.areas?.name || resource.projects?.title || ''}</span>
+                <span>{format(new Date(resource.updated_at), 'dd MMM', { locale: ar })}</span>
+              </div>
             </div>
-          )}
-        </TabsContent>
-      </Tabs>
+          );
+        })}
+      </div>
 
-      {/* Create/Edit Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editingResource ? 'تعديل المورد' : 'مورد جديد'}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
+      {filteredResources?.length === 0 && (
+        <div className="text-center py-12 text-muted-foreground">
+          <Database className="w-12 h-12 mx-auto mb-4 opacity-50" />
+          <p>لا توجد موارد</p>
+          <Button
+            variant="outline"
+            className="mt-4"
+            onClick={() => handleOpenDialog()}
+          >
+            أضف أول مورد
+          </Button>
+        </div>
+      )}
+
+      {/* Create/Edit Sheet */}
+      <ResponsiveSheet
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        title={editingResource ? 'تعديل المورد' : 'مورد جديد'}
+      >
+          <div className="space-y-4 pb-4">
             <div>
               <Label>النوع</Label>
               <Select
@@ -456,7 +455,7 @@ export function ResourcesView() {
                 />
               </div>
             )}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label>المجال</Label>
                 <Select
@@ -520,17 +519,16 @@ export function ResourcesView() {
                 ))}
               </div>
             </div>
-            <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <div className="flex gap-2 pt-2">
+              <Button variant="outline" className="flex-1" onClick={() => setIsDialogOpen(false)}>
                 إلغاء
               </Button>
-              <Button onClick={handleSubmit} disabled={createResource.isPending || updateResource.isPending}>
+              <Button className="flex-1" onClick={handleSubmit} disabled={createResource.isPending || updateResource.isPending}>
                 {editingResource ? 'تحديث' : 'إنشاء'}
               </Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+      </ResponsiveSheet>
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ResponsiveSheet } from '@/components/ui/responsive-sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -103,23 +103,22 @@ export function GoalFormDialog({
     { value: 'learning', label: t('goals.category.learning'), icon: GraduationCap, color: 'bg-purple-500' },
   ];
 
+  const titleNode = (
+    <div className="flex items-center gap-3">
+      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shrink-0">
+        <Target className="w-5 h-5 text-primary" />
+      </div>
+      <div>
+        <span className="block font-bold">{isEditing ? t('goals.editGoal') : t('goals.newObjective')}</span>
+        <span className="text-xs font-normal text-muted-foreground">
+          {currentLanguage === 'ar' ? 'حدد هدفك وتتبع تقدمك' : 'Define your goal and track progress'}
+        </span>
+      </div>
+    </div>
+  );
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-              <Target className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <span className="block">{isEditing ? t('goals.editGoal') : t('goals.newObjective')}</span>
-              <span className="text-xs font-normal text-muted-foreground">
-                {currentLanguage === 'ar' ? 'حدد هدفك وتتبع تقدمك' : 'Define your goal and track progress'}
-              </span>
-            </div>
-          </DialogTitle>
-        </DialogHeader>
-        
+    <ResponsiveSheet open={open} onOpenChange={onOpenChange} title={titleNode}>
         <div className="space-y-5 mt-4">
           {/* Title */}
           <div className="space-y-2">
@@ -176,7 +175,7 @@ export function GoalFormDialog({
           </div>
 
           {/* Target & Current Value */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2">
             <div className="space-y-2">
               <Label className="text-sm font-medium">{t('goals.targetValue')}</Label>
               <Input
@@ -209,7 +208,7 @@ export function GoalFormDialog({
           </div>
 
           {/* Dates */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-sm font-medium flex items-center gap-2">
                 <CalendarIcon className="w-4 h-4" />
@@ -344,7 +343,6 @@ export function GoalFormDialog({
             )}
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+    </ResponsiveSheet>
   );
 }

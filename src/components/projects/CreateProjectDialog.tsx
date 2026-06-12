@@ -1,15 +1,15 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useCreateProject } from '@/hooks/useProjects';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { ResponsiveSheet } from '@/components/ui/responsive-sheet';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Loader2, Target, Eye, DollarSign } from 'lucide-react';
+import { Loader2, FolderKanban } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface CreateProjectDialogProps {
   open: boolean;
@@ -24,34 +24,22 @@ const colorOptions = [
   '#EC4899', '#EF4444', '#F97316', '#06B6D4'
 ];
 
+const EMPTY = {
+  title: '', description: '', phase: 'initiation' as ProjectPhase,
+  para_category: 'project' as ParaCategory, color: '#FFB400', vision: '',
+  investment_notes: '', expected_roi: '', risk_level: 'medium',
+  due_date: '', start_date: '', scope: '', outputs: '', owner: '', risks: '',
+};
+
 export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogProps) {
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
+  const ar = currentLanguage === 'ar';
   const createProject = useCreateProject();
-  
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    phase: 'initiation' as ProjectPhase,
-    para_category: 'project' as ParaCategory,
-    color: '#FFB400',
-    vision: '',
-    investment_notes: '',
-    expected_roi: '',
-    risk_level: 'medium',
-    due_date: '',
-    start_date: '',
-    scope: '',
-    outputs: '',
-    owner: '',
-    risks: '',
-  });
+  const [formData, setFormData] = useState({ ...EMPTY });
+  const set = (patch: Partial<typeof EMPTY>) => setFormData(p => ({ ...p, ...patch }));
 
   const handleSubmit = async () => {
-    if (!formData.title.trim()) {
-      toast.error(t('common.fillAllFields'));
-      return;
-    }
-    
+    if (!formData.title.trim()) { toast.error(t('common.fillAllFields')); return; }
     try {
       await createProject.mutateAsync({
         title: formData.title,
@@ -72,265 +60,144 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
       });
       toast.success(t('projects.projectAdded'));
       onOpenChange(false);
-      setFormData({
-        title: '',
-        description: '',
-        phase: 'initiation',
-        para_category: 'project',
-        color: '#FFB400',
-        vision: '',
-        investment_notes: '',
-        expected_roi: '',
-        risk_level: 'medium',
-        due_date: '',
-        start_date: '',
-        scope: '',
-        outputs: '',
-        owner: '',
-        risks: '',
-      });
-    } catch (error) {
-      toast.error(t('common.error'));
-    }
+      setFormData({ ...EMPTY });
+    } catch { toast.error(t('common.error')); }
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Target className="w-5 h-5 text-primary" />
-            {t('projects.newProject')}
-          </DialogTitle>
-          <DialogDescription>
-            {t('projects.subtitle')}
-          </DialogDescription>
-        </DialogHeader>
-        
-        <Tabs defaultValue="basic" className="mt-4">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="basic">الأساسيات</TabsTrigger>
-            <TabsTrigger value="scope">النطاق</TabsTrigger>
-            <TabsTrigger value="vision">الرؤية</TabsTrigger>
-            <TabsTrigger value="investment">الاستثمار</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="basic" className="space-y-4 mt-4">
-            <div>
-              <Label>{t('projects.title')}</Label>
-              <Input
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="اسم المشروع"
-              />
-            </div>
-            
-            <div>
-              <Label>الوصف</Label>
-              <Textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="وصف المشروع"
-                rows={3}
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>التصنيف (PARA)</Label>
-                <Select
-                  value={formData.para_category}
-                  onValueChange={(value: ParaCategory) => setFormData({ ...formData, para_category: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="project">{t('common.projects')}</SelectItem>
-                    <SelectItem value="area">{t('projects.areas')}</SelectItem>
-                    <SelectItem value="resource">{t('projects.resources')}</SelectItem>
-                    <SelectItem value="archive">{t('projects.archives')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label>المرحلة (PMP)</Label>
-                <Select
-                  value={formData.phase}
-                  onValueChange={(value: ProjectPhase) => setFormData({ ...formData, phase: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="initiation">{t('projects.phase.initiation')}</SelectItem>
-                    <SelectItem value="planning">{t('projects.phase.planning')}</SelectItem>
-                    <SelectItem value="execution">{t('projects.phase.execution')}</SelectItem>
-                    <SelectItem value="monitoring">{t('projects.phase.monitoring')}</SelectItem>
-                    <SelectItem value="closing">{t('projects.phase.closing')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>تاريخ البدء</Label>
-                <Input
-                  type="date"
-                  value={formData.start_date}
-                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label>تاريخ الاستحقاق</Label>
-                <Input
-                  type="date"
-                  value={formData.due_date}
-                  onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-                />
-              </div>
-            </div>
-            
-            <div>
-              <Label>المالك</Label>
-              <Input
-                value={formData.owner}
-                onChange={(e) => setFormData({ ...formData, owner: e.target.value })}
-                placeholder="اسم مالك المشروع"
-              />
-            </div>
-            
-            <div>
-              <Label>اللون</Label>
-              <div className="flex gap-2 mt-2">
-                {colorOptions.map((color) => (
-                  <button
-                    key={color}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, color })}
-                    className={`w-8 h-8 rounded-full transition-all ${
-                      formData.color === color ? 'ring-2 ring-offset-2 ring-primary scale-110' : ''
-                    }`}
-                    style={{ backgroundColor: color }}
-                  />
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="scope" className="space-y-4 mt-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-              <Target className="w-4 h-4" />
-              <span>حدد نطاق المشروع ومخرجاته والمخاطر المحتملة</span>
-            </div>
-            
-            <div>
-              <Label>نطاق المشروع</Label>
-              <Textarea
-                value={formData.scope}
-                onChange={(e) => setFormData({ ...formData, scope: e.target.value })}
-                placeholder="ما هو نطاق هذا المشروع؟ ما الذي يشمله وما الذي لا يشمله؟"
-                rows={3}
-              />
-            </div>
-            
-            <div>
-              <Label>المخرجات المتوقعة</Label>
-              <Textarea
-                value={formData.outputs}
-                onChange={(e) => setFormData({ ...formData, outputs: e.target.value })}
-                placeholder="ما هي المخرجات والتسليمات المتوقعة؟"
-                rows={3}
-              />
-            </div>
-            
-            <div>
-              <Label>المخاطر المحتملة</Label>
-              <Textarea
-                value={formData.risks}
-                onChange={(e) => setFormData({ ...formData, risks: e.target.value })}
-                placeholder="ما هي المخاطر المحتملة وكيف يمكن التعامل معها؟"
-                rows={3}
-              />
-            </div>
-          </TabsContent>
+  const SectionLabel = ({ children }: { children: React.ReactNode }) => (
+    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70 mt-5 mb-2">{children}</p>
+  );
 
-          <TabsContent value="vision" className="space-y-4 mt-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-              <Eye className="w-4 h-4" />
-              <span>حدد رؤية واضحة للمشروع - أين تريد أن تصل؟</span>
-            </div>
-            
-            <div>
-              <Label>الرؤية</Label>
-              <Textarea
-                value={formData.vision}
-                onChange={(e) => setFormData({ ...formData, vision: e.target.value })}
-                placeholder="ما هي الرؤية النهائية لهذا المشروع؟"
-                rows={4}
-              />
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="investment" className="space-y-4 mt-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-              <DollarSign className="w-4 h-4" />
-              <span>حدد الاستثمار المطلوب والعائد المتوقع</span>
-            </div>
-            
-            <div>
-              <Label>ملاحظات الاستثمار</Label>
-              <Textarea
-                value={formData.investment_notes}
-                onChange={(e) => setFormData({ ...formData, investment_notes: e.target.value })}
-                placeholder="ما هي الموارد المطلوبة؟"
-                rows={3}
-              />
-            </div>
-            
-            <div>
-              <Label>العائد المتوقع (ROI)</Label>
-              <Input
-                value={formData.expected_roi}
-                onChange={(e) => setFormData({ ...formData, expected_roi: e.target.value })}
-                placeholder="مثال: 200% خلال سنة"
-              />
-            </div>
-            
-            <div>
-              <Label>مستوى المخاطرة</Label>
-              <Select
-                value={formData.risk_level}
-                onValueChange={(value) => setFormData({ ...formData, risk_level: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">منخفض</SelectItem>
-                  <SelectItem value="medium">متوسط</SelectItem>
-                  <SelectItem value="high">عالي</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </TabsContent>
-        </Tabs>
-        
-        <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t('common.cancel')}
-          </Button>
-          <Button onClick={handleSubmit} disabled={createProject.isPending}>
-            {createProject.isPending ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              t('common.save')
-            )}
+  const titleNode = (
+    <div className="flex items-center gap-3">
+      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/5 flex items-center justify-center shrink-0">
+        <FolderKanban className="w-5 h-5 text-purple-500" />
+      </div>
+      <div>
+        <span className="block font-bold">{t('projects.newProject')}</span>
+        <span className="text-xs font-normal text-muted-foreground">{t('projects.subtitle')}</span>
+      </div>
+    </div>
+  );
+
+  return (
+    <ResponsiveSheet open={open} onOpenChange={onOpenChange} title={titleNode}>
+      <div className="space-y-3 pb-4">
+        {/* Basics */}
+        <SectionLabel>{ar ? 'الأساسيات' : 'Basics'}</SectionLabel>
+
+        <div className="space-y-1.5">
+          <Label className="text-xs font-semibold text-muted-foreground">{t('projects.title')}</Label>
+          <Input value={formData.title} onChange={(e) => set({ title: e.target.value })}
+            placeholder={ar ? 'اسم المشروع' : 'Project name'}
+            className="bg-muted/50 border-border/50" dir="auto" />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label className="text-xs font-semibold text-muted-foreground">{ar ? 'الوصف' : 'Description'}</Label>
+          <Textarea value={formData.description} onChange={(e) => set({ description: e.target.value })}
+            placeholder={ar ? 'وصف المشروع' : 'Project description'} rows={2}
+            className="bg-muted/50 border-border/50 resize-none" dir="auto" />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-muted-foreground">{ar ? 'التصنيف (PARA)' : 'Category (PARA)'}</Label>
+            <Select value={formData.para_category} onValueChange={(v: ParaCategory) => set({ para_category: v })}>
+              <SelectTrigger className="bg-muted/50 border-border/50"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="project">{t('common.projects')}</SelectItem>
+                <SelectItem value="area">{t('projects.areas')}</SelectItem>
+                <SelectItem value="resource">{t('projects.resources')}</SelectItem>
+                <SelectItem value="archive">{t('projects.archives')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-muted-foreground">{ar ? 'المرحلة (PMP)' : 'Phase (PMP)'}</Label>
+            <Select value={formData.phase} onValueChange={(v: ProjectPhase) => set({ phase: v })}>
+              <SelectTrigger className="bg-muted/50 border-border/50"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="initiation">{t('projects.phase.initiation')}</SelectItem>
+                <SelectItem value="planning">{t('projects.phase.planning')}</SelectItem>
+                <SelectItem value="execution">{t('projects.phase.execution')}</SelectItem>
+                <SelectItem value="monitoring">{t('projects.phase.monitoring')}</SelectItem>
+                <SelectItem value="closing">{t('projects.phase.closing')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-muted-foreground">{ar ? 'تاريخ البدء' : 'Start Date'}</Label>
+            <Input type="date" value={formData.start_date} onChange={(e) => set({ start_date: e.target.value })} className="bg-muted/50 border-border/50" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-muted-foreground">{ar ? 'تاريخ الاستحقاق' : 'Due Date'}</Label>
+            <Input type="date" value={formData.due_date} onChange={(e) => set({ due_date: e.target.value })} className="bg-muted/50 border-border/50" />
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label className="text-xs font-semibold text-muted-foreground">{ar ? 'المالك' : 'Owner'}</Label>
+          <Input value={formData.owner} onChange={(e) => set({ owner: e.target.value })}
+            placeholder={ar ? 'اسم مالك المشروع' : 'Project owner'} className="bg-muted/50 border-border/50" />
+        </div>
+
+        {/* Color */}
+        <div className="space-y-2">
+          <Label className="text-xs font-semibold text-muted-foreground">{ar ? 'اللون' : 'Color'}</Label>
+          <div className="flex gap-2 flex-wrap">
+            {colorOptions.map(c => (
+              <button key={c} type="button" onClick={() => set({ color: c })}
+                className={cn('w-8 h-8 rounded-full transition-all active:scale-95', formData.color === c && 'ring-2 ring-offset-2 ring-primary scale-110')}
+                style={{ backgroundColor: c }} />
+            ))}
+          </div>
+        </div>
+
+        {/* Scope */}
+        <SectionLabel>{ar ? 'النطاق' : 'Scope'}</SectionLabel>
+        <Textarea value={formData.scope} onChange={(e) => set({ scope: e.target.value })}
+          placeholder={ar ? 'نطاق المشروع...' : 'Project scope...'} rows={2}
+          className="bg-muted/50 border-border/50 resize-none" dir="auto" />
+        <Textarea value={formData.outputs} onChange={(e) => set({ outputs: e.target.value })}
+          placeholder={ar ? 'المخرجات المتوقعة...' : 'Expected outputs...'} rows={2}
+          className="bg-muted/50 border-border/50 resize-none" dir="auto" />
+
+        {/* Vision */}
+        <SectionLabel>{ar ? 'الرؤية' : 'Vision'}</SectionLabel>
+        <Textarea value={formData.vision} onChange={(e) => set({ vision: e.target.value })}
+          placeholder={ar ? 'الرؤية النهائية للمشروع...' : 'Final project vision...'} rows={2}
+          className="bg-muted/50 border-border/50 resize-none" dir="auto" />
+
+        {/* Investment */}
+        <SectionLabel>{ar ? 'الاستثمار' : 'Investment'}</SectionLabel>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Input value={formData.expected_roi} onChange={(e) => set({ expected_roi: e.target.value })}
+            placeholder={ar ? 'العائد المتوقع (ROI)' : 'Expected ROI'} className="bg-muted/50 border-border/50" />
+          <Select value={formData.risk_level} onValueChange={(v) => set({ risk_level: v })}>
+            <SelectTrigger className="bg-muted/50 border-border/50"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="low">{ar ? 'منخفض' : 'Low'}</SelectItem>
+              <SelectItem value="medium">{ar ? 'متوسط' : 'Medium'}</SelectItem>
+              <SelectItem value="high">{ar ? 'عالي' : 'High'}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <Textarea value={formData.investment_notes} onChange={(e) => set({ investment_notes: e.target.value })}
+          placeholder={ar ? 'ملاحظات الاستثمار...' : 'Investment notes...'} rows={2}
+          className="bg-muted/50 border-border/50 resize-none" dir="auto" />
+
+        {/* Actions */}
+        <div className="flex gap-2 pt-2">
+          <Button variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>{t('common.cancel')}</Button>
+          <Button className="flex-1 h-11 font-semibold" onClick={handleSubmit} disabled={createProject.isPending}>
+            {createProject.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.save')}
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </ResponsiveSheet>
   );
 }

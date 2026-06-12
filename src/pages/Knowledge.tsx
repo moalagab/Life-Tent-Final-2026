@@ -225,7 +225,7 @@ export default function Knowledge() {
                     <span className="hidden sm:inline">{t('knowledge.newNote')}</span>
                   </button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="sm:max-w-lg max-h-[92svh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>{t('knowledge.newNote')}</DialogTitle>
                   </DialogHeader>
@@ -234,17 +234,20 @@ export default function Knowledge() {
                       placeholder={t('knowledge.noteTitle')}
                       value={newNote.title}
                       onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
+                      className="bg-muted/50 border-border/50"
                     />
                     <Textarea
                       placeholder={t('knowledge.noteContent')}
                       value={newNote.content}
                       onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
                       rows={5}
+                      className="bg-muted/50 border-border/50 resize-none"
                     />
                     <Input
                       placeholder={t('knowledge.tags')}
                       value={newNote.tags}
                       onChange={(e) => setNewNote({ ...newNote, tags: e.target.value })}
+                      className="bg-muted/50 border-border/50"
                     />
                     
                     {/* Link to Project */}
@@ -313,7 +316,7 @@ export default function Knowledge() {
                     <span className="hidden sm:inline">{t('knowledge.newCourse')}</span>
                   </button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="sm:max-w-lg max-h-[92svh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>{t('knowledge.newCourse')}</DialogTitle>
                   </DialogHeader>
@@ -322,22 +325,26 @@ export default function Knowledge() {
                       placeholder={t('knowledge.courseTitle')}
                       value={newCourse.title}
                       onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })}
+                      className="bg-muted/50 border-border/50"
                     />
                     <Textarea
                       placeholder={currentLanguage === 'ar' ? 'وصف الدورة (اختياري)' : 'Course description (optional)'}
                       value={newCourse.description}
                       onChange={(e) => setNewCourse({ ...newCourse, description: e.target.value })}
                       rows={3}
+                      className="bg-muted/50 border-border/50 resize-none"
                     />
                     <Input
                       placeholder={t('knowledge.platform')}
                       value={newCourse.platform}
                       onChange={(e) => setNewCourse({ ...newCourse, platform: e.target.value })}
+                      className="bg-muted/50 border-border/50"
                     />
                     <Input
                       placeholder={t('knowledge.url')}
                       value={newCourse.url}
                       onChange={(e) => setNewCourse({ ...newCourse, url: e.target.value })}
+                      className="bg-muted/50 border-border/50"
                     />
                     <Button onClick={handleCreateCourse} className="w-full" disabled={createCourse.isPending}>
                       {createCourse.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.add')}

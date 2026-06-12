@@ -359,7 +359,7 @@ export function InvestmentsManager() {
                 {language === 'ar' ? 'محفظة' : 'Portfolio'}
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-md max-h-[92svh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{language === 'ar' ? 'إنشاء محفظة' : 'Create Portfolio'}</DialogTitle>
               </DialogHeader>
@@ -401,7 +401,7 @@ export function InvestmentsManager() {
                 {language === 'ar' ? 'أصل' : 'Asset'}
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-md max-h-[92svh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{language === 'ar' ? 'إضافة أصل' : 'Add Asset'}</DialogTitle>
               </DialogHeader>
@@ -452,7 +452,7 @@ export function InvestmentsManager() {
                 {language === 'ar' ? 'حيازة' : 'Holding'}
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-lg max-h-[92svh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{language === 'ar' ? 'إضافة حيازة' : 'Add Holding'}</DialogTitle>
               </DialogHeader>
@@ -471,7 +471,7 @@ export function InvestmentsManager() {
                   </SelectContent>
                 </Select>
                 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <Label>{language === 'ar' ? 'الكمية' : 'Quantity'}</Label>
                     <Input
@@ -490,7 +490,7 @@ export function InvestmentsManager() {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <Label>{language === 'ar' ? 'السعر الحالي' : 'Current Price'}</Label>
                     <Input
@@ -511,7 +511,7 @@ export function InvestmentsManager() {
 
                 <div className="p-3 rounded-lg bg-muted/50 space-y-3">
                   <h4 className="font-medium text-sm">{language === 'ar' ? 'تنبيهات السعر' : 'Price Alerts'}</h4>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <div>
                       <Label className="text-xs">{language === 'ar' ? 'سعر الدخول' : 'Entry Target'}</Label>
                       <Input
@@ -577,7 +577,7 @@ export function InvestmentsManager() {
                 {language === 'ar' ? 'عملية' : 'Transaction'}
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-md max-h-[92svh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{language === 'ar' ? 'تسجيل عملية' : 'Record Transaction'}</DialogTitle>
               </DialogHeader>
@@ -610,7 +610,7 @@ export function InvestmentsManager() {
                     <SelectItem value="withdrawal">{language === 'ar' ? 'سحب' : 'Withdrawal'}</SelectItem>
                   </SelectContent>
                 </Select>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
                     type="number"
                     placeholder={language === 'ar' ? 'الكمية' : 'Quantity'}
@@ -849,7 +849,7 @@ export function InvestmentsManager() {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-4 gap-4 mt-4 pt-4 border-t border-border/50 text-sm">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4 pt-4 border-t border-border/50 text-sm">
                   <div>
                     <p className="text-muted-foreground">{language === 'ar' ? 'الكمية' : 'Qty'}</p>
                     <p className="font-medium">{h.quantity}</p>
