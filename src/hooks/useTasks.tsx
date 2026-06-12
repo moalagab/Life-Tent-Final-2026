@@ -36,7 +36,7 @@ export function useFocusTasks() {
         .from('tasks')
         .select('id, title, status, priority, due_date, is_focus, project_id, completed_at')
         .eq('is_focus', true)
-        .neq('status', 'done')
+        .in('status', ['backlog', 'todo', 'in_progress', 'review'])
         .order('priority', { ascending: false })
         .limit(5);
       

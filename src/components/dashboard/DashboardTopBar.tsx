@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo } from 'react';
-import { Search, Plus, Command, Sun, Moon, Globe, type LucideIcon } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Search, Plus, Command, Sun, Moon, Globe, type LucideIcon, Loader2 } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -42,6 +42,16 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
+import { useGlobalSearch } from '@/hooks/useGlobalSearch';
+import { useDebounce } from '@/hooks/useDebounce';
+
+const RESULT_ICONS: Record<string, LucideIcon> = {
+  task:        CheckSquare,
+  project:     FolderKanban,
+  goal:        Target,
+  note:        FileText,
+  transaction: Wallet,
+};
 
 type CommandGroupKey = 'navigate' | 'create' | 'filters' | 'jump';
 
@@ -67,6 +77,9 @@ export function DashboardTopBar() {
   // Persist palette open state and last-used filter id, per user
   const [searchOpen, setSearchOpen] = usePersistedState<boolean>('palette.open', false);
   const [lastFilterId, setLastFilterId] = usePersistedState<string | null>('palette.lastFilter', null);
+  const [query, setQuery] = useState('');
+  const debouncedQuery = useDebounce(query, 300);
+  const { data: searchResults = [], isFetching: searching } = useGlobalSearch(debouncedQuery);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -174,18 +187,18 @@ export function DashboardTopBar() {
             size="icon"
             onClick={toggleLanguage}
             className="h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground"
-            title={isAr ? 'English' : 'العربية'}
+            aria-label={isAr ? 'Switch to English' : 'التبديل إلى العربية'}
           >
-            <Globe className="w-4 h-4" />
+            <Globe className="w-4 h-4" aria-hidden="true" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
             className="h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground"
-            title={theme === 'dark' ? (isAr ? 'المظهر الفاتح' : 'Light mode') : (isAr ? 'المظهر الداكن' : 'Dark mode')}
+            aria-label={theme === 'dark' ? (isAr ? 'تفعيل المظهر الفاتح' : 'Switch to light mode') : (isAr ? 'تفعيل المظهر الداكن' : 'Switch to dark mode')}
           >
-            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            {theme === 'dark' ? <Sun className="w-4 h-4" aria-hidden="true" /> : <Moon className="w-4 h-4" aria-hidden="true" />}
           </Button>
         </div>
 
@@ -213,10 +226,47 @@ export function DashboardTopBar() {
         <NotificationCenter />
       </div>
 
-      <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
-        <CommandInput placeholder={isAr ? 'ابحث في الأقسام، الفلاتر والإجراءات…' : 'Search sections, filters and actions…'} />
+      <CommandDialog open={searchOpen} onOpenChange={(v) => { setSearchOpen(v); if (!v) setQuery(''); }}>
+        <CommandInput
+          placeholder={isAr ? 'ابحث في المهام، المشاريع، الأهداف…' : 'Search tasks, projects, goals…'}
+          value={query}
+          onValueChange={setQuery}
+        />
         <CommandList>
-          <CommandEmpty>{isAr ? 'لا توجد نتائج' : 'No results.'}</CommandEmpty>
+          <CommandEmpty>
+            {searching
+              ? <span className="flex items-center justify-center gap-2 text-muted-foreground"><Loader2 className="w-3.5 h-3.5 animate-spin" />{isAr ? 'جارٍ البحث…' : 'Searching…'}</span>
+              : (isAr ? 'لا توجد نتائج' : 'No results.')}
+          </CommandEmpty>
+
+          {/* ── Live data results ── */}
+          {searchResults.length > 0 && (
+            <>
+              <CommandGroup heading={isAr ? 'نتائج البحث' : 'Results'}>
+                {searchResults.map(result => {
+                  const Icon = RESULT_ICONS[result.type] ?? Search;
+                  return (
+                    <CommandItem
+                      key={`result-${result.id}`}
+                      value={`result ${result.label} ${result.type}`}
+                      onSelect={() => { go(result.path); setQuery(''); }}
+                    >
+                      <Icon className="w-4 h-4 me-2 text-muted-foreground" />
+                      <span className="flex-1 truncate">{result.label}</span>
+                      {result.sublabel && (
+                        <span className="text-[11px] text-muted-foreground/60 ms-2 truncate max-w-[80px]">
+                          {result.sublabel}
+                        </span>
+                      )}
+                      <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/60 rtl:-scale-x-100 shrink-0" />
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+              <CommandSeparator />
+            </>
+          )}
+
           {lastFilter && (
             <>
               <CommandGroup heading={isAr ? 'الأخير' : 'Recent'}>

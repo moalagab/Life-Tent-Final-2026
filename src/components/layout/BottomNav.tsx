@@ -13,6 +13,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/hooks/useAuth';
+import { useModuleAccess } from '@/hooks/useModuleAccess';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 
 /* ── Regular tabs — same style, equal flex-1 ─────────────────────────────── */
@@ -181,11 +182,16 @@ export function BottomNav() {
   const { currentLanguage } = useLanguage();
   const { signOut } = useAuth();
   const navigate = useNavigate();
+  const { isModuleActive } = useModuleAccess();
   const [moreOpen, setMoreOpen] = useState(false);
   const isAr = currentLanguage === 'ar';
 
+  // Filter primary tabs and services grid to active modules only
+  const activeSideTabs = SIDE_TABS.filter(t => isModuleActive(t.path.slice(1)));
+  const activeServices = SERVICES.filter(s => isModuleActive(s.path.slice(1)));
+
   const isHomeActive = pathname === '/dashboard';
-  const isMoreActive = ALL_MORE.some(item => pathname === item.path);
+  const isMoreActive = [...activeServices, ...ACCOUNT_ITEMS].some(item => pathname === item.path);
 
   return (
     <>
@@ -193,8 +199,8 @@ export function BottomNav() {
       {/* 5 slots: Tasks | Finance | HOME↑ | Projects | More */}
       <nav className="fixed bottom-0 inset-x-0 z-50 h-[68px] bg-background/96 backdrop-blur-xl border-t border-border/40 flex items-end justify-around px-1 pb-2 overflow-visible">
 
-        {/* Slots 1–2: Tasks, Finance */}
-        {SIDE_TABS.slice(0, 2).map(item => (
+        {/* Slots 1–2: first two active modules (left of HOME) */}
+        {activeSideTabs.slice(0, 2).map(item => (
           <TabBtn key={item.path} item={item} active={pathname === item.path} isAr={isAr} />
         ))}
 
@@ -221,8 +227,8 @@ export function BottomNav() {
           </span>
         </NavLink>
 
-        {/* Slot 4: Projects */}
-        {SIDE_TABS.slice(2).map(item => (
+        {/* Slot 4: third active module (right of HOME), if any */}
+        {activeSideTabs.slice(2, 3).map(item => (
           <TabBtn key={item.path} item={item} active={pathname === item.path} isAr={isAr} />
         ))}
 
@@ -230,6 +236,8 @@ export function BottomNav() {
         <button
           onClick={() => setMoreOpen(true)}
           className="flex flex-col items-center gap-0.5 py-1 flex-1 min-w-0"
+          aria-label={isAr ? 'المزيد من الخدمات' : 'More services'}
+          aria-haspopup="dialog"
         >
           <div className={cn(
             'flex items-center justify-center w-11 h-7 rounded-full transition-all duration-200',
@@ -268,7 +276,7 @@ export function BottomNav() {
                 {isAr ? 'جميع الخدمات' : 'All Services'}
               </h2>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                {isAr ? `${SERVICES.length} وحدة متكاملة` : `${SERVICES.length} integrated modules`}
+                {isAr ? `${activeServices.length} وحدة نشطة` : `${activeServices.length} active modules`}
               </p>
             </div>
             <button
@@ -284,7 +292,7 @@ export function BottomNav() {
 
             {/* ── Main modules grid ── */}
             <div className="grid grid-cols-3 gap-3">
-              {SERVICES.map(item => {
+              {activeServices.map(item => {
                 const active = pathname === item.path;
                 return (
                   <button

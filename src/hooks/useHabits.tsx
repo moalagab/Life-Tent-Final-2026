@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { useAuth } from './useAuth';
 import { format, subDays } from 'date-fns';
+import { vibrate } from '@/lib/vibrate';
 
 export type Habit = Tables<'habits'>;
 export type HabitInsert = TablesInsert<'habits'>;
@@ -131,7 +132,8 @@ export function useLogHabit() {
         return { action: 'added' };
       }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      if (data.action === 'added') vibrate.success();
       queryClient.invalidateQueries({ queryKey: ['habits-with-logs'] });
       queryClient.invalidateQueries({ queryKey: ['habit-logs'] });
     },

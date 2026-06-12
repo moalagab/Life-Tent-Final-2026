@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
 import { MobileHeader } from './MobileHeader';
@@ -6,8 +6,10 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { DashboardTopBar } from '@/components/dashboard/DashboardTopBar';
-import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { useOfflineQueue } from '@/hooks/useOfflineQueue';
+import { useToast } from '@/hooks/use-toast';
 import { WifiOff } from 'lucide-react';
+import { ModuleUnlockSheet } from '@/components/modules/ModuleUnlockSheet';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -16,10 +18,26 @@ interface MainLayoutProps {
 export function MainLayout({ children }: MainLayoutProps) {
   const { isRTL, currentLanguage } = useLanguage();
   const isMobile = useIsMobile();
-  const isOnline = useOnlineStatus();
+  const { toast } = useToast();
+  const { isOnline, conflicts, clearConflicts } = useOfflineQueue();
+
+  // Show a toast when offline mutations were discarded due to server conflicts
+  useEffect(() => {
+    if (conflicts.length === 0) return;
+    toast({
+      title: currentLanguage === 'ar' ? 'تعارض في البيانات' : 'Sync conflict',
+      description: currentLanguage === 'ar'
+        ? `${conflicts.length} تعديل أُجري أثناء الانقطاع تم تجاهله — النظام يحتفظ بأحدث نسخة من الخادم.`
+        : `${conflicts.length} offline edit(s) discarded — server version is newer.`,
+      variant: 'destructive',
+    });
+    clearConflicts();
+  }, [conflicts, clearConflicts, currentLanguage, toast]);
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Progressive module unlock prompt */}
+      <ModuleUnlockSheet />
       {/* Ambient background glow — subtle, navy-tinted */}
       <div className="fixed inset-0 -z-10 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] via-transparent to-transparent" />

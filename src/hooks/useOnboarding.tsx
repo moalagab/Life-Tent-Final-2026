@@ -6,16 +6,17 @@ export type FocusArea = 'tasks' | 'projects' | 'finance' | 'habits' | 'goals' | 
 export type DashboardPreset = 'focus' | 'finance' | 'execution';
 
 export interface OnboardingData {
-  displayName: string;
-  focusAreas: FocusArea[];
-  preset: DashboardPreset;
+  displayName:  string;
+  /** The single module the user chose as their starting point. */
+  firstModule:  FocusArea;
+  preset:       DashboardPreset;
 }
 
 interface OnboardingContextType {
   isCompleted: boolean;
-  loading: boolean;
+  loading:     boolean;
   completeOnboarding: (data: OnboardingData) => void;
-  skipOnboarding: () => void;
+  skipOnboarding:     () => void;
 }
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
@@ -23,9 +24,9 @@ const OnboardingContext = createContext<OnboardingContextType | undefined>(undef
 export function OnboardingProvider({ children }: { children: ReactNode }) {
   const { user, loading: authLoading } = useAuth();
   const [isCompleted, setIsCompleted] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading,     setLoading]     = useState(true);
 
-  // Check Supabase DB (persists across devices/browsers)
+  // Check Supabase DB — persists across devices/browsers
   useEffect(() => {
     if (authLoading) return;
     if (!user) { setIsCompleted(false); setLoading(false); return; }
@@ -39,7 +40,6 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       .then(({ data, error }) => {
         if (cancelled) return;
         // null row or query error → treat as completed (don't block existing users)
-        // false → new user who hasn't done onboarding yet
         if (error || data === null) {
           setIsCompleted(true);
         } else {
@@ -51,21 +51,22 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, authLoading]);
 
-  const markComplete = useCallback(async () => {
+  const markComplete = useCallback(async (firstModule?: FocusArea) => {
     if (!user) return;
     await supabase
       .from('profiles')
-      .update({ onboarding_completed: true })
+      .update({
+        onboarding_completed: true,
+        ...(firstModule ? { active_modules: [firstModule] } : {}),
+      })
       .eq('user_id', user.id);
     setIsCompleted(true);
   }, [user]);
 
   const completeOnboarding = useCallback((data: OnboardingData) => {
-    if (data.focusAreas.length > 0)
-      localStorage.setItem('onboarding_focus_areas', JSON.stringify(data.focusAreas));
-    if (data.preset)
-      localStorage.setItem('dashboard_preset', data.preset);
-    markComplete();
+    // Persist dashboard preset in localStorage (UI preference, not critical data)
+    if (data.preset) localStorage.setItem('dashboard_preset', data.preset);
+    markComplete(data.firstModule);
   }, [markComplete]);
 
   const skipOnboarding = useCallback(() => {

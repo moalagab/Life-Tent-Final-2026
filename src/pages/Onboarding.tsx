@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { Tent, CheckCircle, ArrowLeft, ArrowRight, Sparkles, Sun, Moon, Globe, LayoutDashboard, ListTodo, FolderKanban, Wallet, Flame, Target, BookOpen } from 'lucide-react';
+import {
+  Tent, CheckCircle, ArrowLeft, ArrowRight, Sparkles,
+  Sun, Moon, Globe, LayoutDashboard,
+  ListTodo, FolderKanban, Wallet, Flame, Target, BookOpen,
+  Lock,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useOnboarding, FocusArea, DashboardPreset } from '@/hooks/useOnboarding';
@@ -13,61 +18,110 @@ import { cn } from '@/lib/utils';
 
 const TOTAL_STEPS = 5;
 
-// ─── Focus area cards ────────────────────────────────────────────────────────
+// ─── Module cards ─────────────────────────────────────────────────────────────
 
-interface AreaCard {
-  id: FocusArea;
-  icon: React.ReactNode;
+interface ModuleCard {
+  id:      FocusArea;
+  icon:    React.ReactNode;
   labelAr: string;
   labelEn: string;
-  descAr: string;
-  descEn: string;
+  descAr:  string;
+  descEn:  string;
+  color:   string; // tailwind text color for active state
 }
 
-const AREA_CARDS: AreaCard[] = [
-  { id: 'tasks',     icon: <ListTodo className="w-6 h-6" />,     labelAr: 'المهام',     labelEn: 'Tasks',     descAr: 'تنظيم مهامك اليومية', descEn: 'Organize your daily tasks' },
-  { id: 'projects',  icon: <FolderKanban className="w-6 h-6" />, labelAr: 'المشاريع',   labelEn: 'Projects',  descAr: 'تتبع مشاريعك ولوحات كانبان', descEn: 'Track projects & kanban boards' },
-  { id: 'finance',   icon: <Wallet className="w-6 h-6" />,       labelAr: 'المالية',    labelEn: 'Finance',   descAr: 'ميزانيات ومصروفات وتقارير', descEn: 'Budgets, expenses & reports' },
-  { id: 'habits',    icon: <Flame className="w-6 h-6" />,        labelAr: 'العادات',    labelEn: 'Habits',    descAr: 'بناء عادات يومية متسقة', descEn: 'Build consistent daily habits' },
-  { id: 'goals',     icon: <Target className="w-6 h-6" />,       labelAr: 'الأهداف',   labelEn: 'Goals',     descAr: 'أهداف OKR وخطط طويلة المدى', descEn: 'OKR goals & long-term plans' },
-  { id: 'knowledge', icon: <BookOpen className="w-6 h-6" />,     labelAr: 'المعرفة',   labelEn: 'Knowledge', descAr: 'ملاحظات ومصادر وقاعدة بيانات', descEn: 'Notes, resources & knowledge base' },
+const MODULE_CARDS: ModuleCard[] = [
+  {
+    id:      'tasks',
+    icon:    <ListTodo className="w-6 h-6" />,
+    labelAr: 'المهام',
+    labelEn: 'Tasks',
+    descAr:  'قائمة المهام اليومية والتركيز',
+    descEn:  'Daily to-dos & focus list',
+    color:   'text-blue-500',
+  },
+  {
+    id:      'habits',
+    icon:    <Flame className="w-6 h-6" />,
+    labelAr: 'العادات',
+    labelEn: 'Habits',
+    descAr:  'بناء عادات يومية متسقة',
+    descEn:  'Build consistent daily habits',
+    color:   'text-green-500',
+  },
+  {
+    id:      'finance',
+    icon:    <Wallet className="w-6 h-6" />,
+    labelAr: 'المالية',
+    labelEn: 'Finance',
+    descAr:  'ميزانيات ومصروفات وتقارير',
+    descEn:  'Budgets, expenses & reports',
+    color:   'text-emerald-500',
+  },
+  {
+    id:      'projects',
+    icon:    <FolderKanban className="w-6 h-6" />,
+    labelAr: 'المشاريع',
+    labelEn: 'Projects',
+    descAr:  'تتبع المشاريع ولوحات كانبان',
+    descEn:  'Track projects & kanban boards',
+    color:   'text-purple-500',
+  },
+  {
+    id:      'goals',
+    icon:    <Target className="w-6 h-6" />,
+    labelAr: 'الأهداف',
+    labelEn: 'Goals',
+    descAr:  'أهداف OKR وخطط طويلة المدى',
+    descEn:  'OKR goals & long-term plans',
+    color:   'text-amber-500',
+  },
+  {
+    id:      'knowledge',
+    icon:    <BookOpen className="w-6 h-6" />,
+    labelAr: 'المعرفة',
+    labelEn: 'Knowledge',
+    descAr:  'ملاحظات ومصادر وقاعدة بيانات',
+    descEn:  'Notes, resources & knowledge base',
+    color:   'text-violet-500',
+  },
 ];
 
 // ─── Dashboard preset cards ───────────────────────────────────────────────────
 
 interface PresetCard {
-  id: DashboardPreset;
+  id:      DashboardPreset;
   labelAr: string;
   labelEn: string;
-  descAr: string;
-  descEn: string;
-  areas: string[];
+  descAr:  string;
+  descEn:  string;
+  areas:   string[];
 }
 
 const PRESET_CARDS: PresetCard[] = [
   {
-    id: 'focus',
+    id:      'focus',
     labelAr: 'التركيز',
     labelEn: 'Focus',
-    descAr: 'مهام وعادات وأهداف في المقدمة',
-    descEn: 'Tasks, habits & goals front and center',
-    areas: ['tasks', 'habits', 'goals'],
+    descAr:  'مهام وعادات وأهداف في المقدمة',
+    descEn:  'Tasks, habits & goals front and center',
+    areas:   ['tasks', 'habits', 'goals'],
   },
   {
-    id: 'finance',
+    id:      'finance',
     labelAr: 'المالية',
     labelEn: 'Finance',
-    descAr: 'لوحة مالية شاملة مع تقارير',
-    descEn: 'Full financial dashboard with reports',
-    areas: ['finance', 'projects', 'goals'],
+    descAr:  'لوحة مالية شاملة مع تقارير',
+    descEn:  'Full financial dashboard with reports',
+    areas:   ['finance', 'projects', 'goals'],
   },
   {
-    id: 'execution',
+    id:      'execution',
     labelAr: 'التنفيذ',
     labelEn: 'Execution',
-    descAr: 'مشاريع ومهام وأدوات الإنتاجية',
-    descEn: 'Projects, tasks & productivity tools',
-    areas: ['projects', 'tasks', 'knowledge'],
+    descAr:  'مشاريع ومهام وأدوات الإنتاجية',
+    descEn:  'Projects, tasks & productivity tools',
+    areas:   ['projects', 'tasks', 'knowledge'],
   },
 ];
 
@@ -81,7 +135,7 @@ function ProgressBar({ step }: { step: number }) {
           key={i}
           className={cn(
             'h-1.5 flex-1 rounded-full transition-all duration-500',
-            i < step ? 'bg-primary' : 'bg-border'
+            i < step ? 'bg-primary' : 'bg-border',
           )}
         />
       ))}
@@ -154,7 +208,7 @@ function StepAppearance({ isRTL }: { isRTL: boolean }) {
                 'p-4 rounded-xl border-2 transition-all duration-200 text-center',
                 currentLanguage === lang
                   ? 'border-primary bg-primary/10 text-primary'
-                  : 'border-border bg-secondary/40 text-foreground hover:border-primary/50'
+                  : 'border-border bg-secondary/40 text-foreground hover:border-primary/50',
               )}
             >
               <div className="text-2xl mb-1">{lang === 'ar' ? '🇸🇦' : '🇺🇸'}</div>
@@ -179,7 +233,7 @@ function StepAppearance({ isRTL }: { isRTL: boolean }) {
                 'p-4 rounded-xl border-2 transition-all duration-200 text-center',
                 theme === t
                   ? 'border-primary bg-primary/10 text-primary'
-                  : 'border-border bg-secondary/40 text-foreground hover:border-primary/50'
+                  : 'border-border bg-secondary/40 text-foreground hover:border-primary/50',
               )}
             >
               <div className="flex justify-center mb-1">
@@ -198,48 +252,69 @@ function StepAppearance({ isRTL }: { isRTL: boolean }) {
   );
 }
 
-// ─── Step 3: Focus Areas ──────────────────────────────────────────────────────
+// ─── Step 3: First Module — single-select ────────────────────────────────────
 
-function StepFocusAreas({ selected, onToggle, isRTL }: { selected: FocusArea[]; onToggle: (id: FocusArea) => void; isRTL: boolean }) {
+function StepFirstModule({
+  selected,
+  onSelect,
+  isRTL,
+}: {
+  selected: FocusArea | null;
+  onSelect: (id: FocusArea) => void;
+  isRTL:    boolean;
+}) {
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-5 animate-fade-in">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-foreground mb-2">
-          {isRTL ? 'ما الذي تريد تتبعه؟' : 'What do you want to track?'}
+          {isRTL ? 'ابدأ بخطوة واحدة' : 'Start with one thing'}
         </h2>
-        <p className="text-muted-foreground text-sm">
-          {isRTL ? 'اختر واحداً أو أكثر — يمكن تغييره لاحقاً' : 'Pick one or more — you can change this later'}
+        <p className="text-muted-foreground text-sm leading-relaxed">
+          {isRTL
+            ? 'اختر وحدة واحدة للبدء — ستفتح وحدات إضافية بعد أسبوع'
+            : 'Pick one module to focus on — more unlock after a week'}
         </p>
       </div>
+
       <div className="grid grid-cols-2 gap-3">
-        {AREA_CARDS.map((area) => {
-          const isSelected = selected.includes(area.id);
+        {MODULE_CARDS.map((card) => {
+          const isSelected = selected === card.id;
           return (
             <button
-              key={area.id}
-              onClick={() => onToggle(area.id)}
+              key={card.id}
+              onClick={() => onSelect(card.id)}
               className={cn(
                 'p-4 rounded-xl border-2 transition-all duration-200 text-start relative',
                 isSelected
                   ? 'border-primary bg-primary/10'
-                  : 'border-border bg-secondary/40 hover:border-primary/50'
+                  : 'border-border bg-secondary/40 hover:border-primary/50',
               )}
             >
               {isSelected && (
                 <CheckCircle className="w-4 h-4 text-primary absolute top-2.5 end-2.5" />
               )}
-              <div className={cn('mb-2', isSelected ? 'text-primary' : 'text-muted-foreground')}>
-                {area.icon}
+              <div className={cn('mb-2', isSelected ? card.color : 'text-muted-foreground')}>
+                {card.icon}
               </div>
               <div className="font-semibold text-foreground text-sm">
-                {isRTL ? area.labelAr : area.labelEn}
+                {isRTL ? card.labelAr : card.labelEn}
               </div>
               <div className="text-xs text-muted-foreground mt-0.5">
-                {isRTL ? area.descAr : area.descEn}
+                {isRTL ? card.descAr : card.descEn}
               </div>
             </button>
           );
         })}
+      </div>
+
+      {/* Progression hint */}
+      <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-secondary/60 border border-border/50">
+        <Lock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+        <p className="text-xs text-muted-foreground">
+          {isRTL
+            ? 'الوحدات الأخرى ستُفتح تدريجياً بعد أسبوع وأسبوعين'
+            : 'Other modules unlock gradually after week 1 and week 2'}
+        </p>
       </div>
     </div>
   );
@@ -269,12 +344,12 @@ function StepPreset({ selected, onSelect, isRTL }: { selected: DashboardPreset; 
                 'w-full p-4 rounded-xl border-2 transition-all duration-200 text-start flex items-center gap-4',
                 isSelected
                   ? 'border-primary bg-primary/10'
-                  : 'border-border bg-secondary/40 hover:border-primary/50'
+                  : 'border-border bg-secondary/40 hover:border-primary/50',
               )}
             >
               <div className={cn(
                 'w-10 h-10 rounded-lg flex items-center justify-center shrink-0',
-                isSelected ? 'bg-primary/20 text-primary' : 'bg-secondary text-muted-foreground'
+                isSelected ? 'bg-primary/20 text-primary' : 'bg-secondary text-muted-foreground',
               )}>
                 <LayoutDashboard className="w-5 h-5" />
               </div>
@@ -299,7 +374,9 @@ function StepPreset({ selected, onSelect, isRTL }: { selected: DashboardPreset; 
 
 // ─── Step 5: All Done ─────────────────────────────────────────────────────────
 
-function StepDone({ name, isRTL }: { name: string; isRTL: boolean }) {
+function StepDone({ name, firstModule, isRTL }: { name: string; firstModule: FocusArea | null; isRTL: boolean }) {
+  const moduleCard = MODULE_CARDS.find(m => m.id === firstModule);
+
   return (
     <div className="text-center space-y-6 animate-fade-in">
       <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 mb-2">
@@ -313,7 +390,7 @@ function StepDone({ name, isRTL }: { name: string; isRTL: boolean }) {
         </h2>
         <p className="text-muted-foreground max-w-xs mx-auto">
           {isRTL
-            ? 'تم إعداد مساحتك الشخصية. حان وقت الانطلاق.'
+            ? 'مساحتك الشخصية جاهزة. حان وقت الانطلاق.'
             : 'Your personal workspace is ready. Time to get started.'}
         </p>
       </div>
@@ -322,13 +399,27 @@ function StepDone({ name, isRTL }: { name: string; isRTL: boolean }) {
           <CheckCircle className="w-4 h-4 text-primary" />
           <span>{isRTL ? 'اللغة والمظهر تم ضبطهما' : 'Language & theme configured'}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <CheckCircle className="w-4 h-4 text-primary" />
-          <span>{isRTL ? 'مجالات التركيز محددة' : 'Focus areas selected'}</span>
-        </div>
+        {moduleCard && (
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-primary" />
+            <span>
+              {isRTL
+                ? `بدأت بـ ${moduleCard.labelAr}`
+                : `Starting with ${moduleCard.labelEn}`}
+            </span>
+          </div>
+        )}
         <div className="flex items-center gap-2">
           <CheckCircle className="w-4 h-4 text-primary" />
           <span>{isRTL ? 'تخطيط اللوحة جاهز' : 'Dashboard layout ready'}</span>
+        </div>
+        <div className="flex items-center gap-2 mt-1 px-3 py-1.5 rounded-lg bg-secondary/60 border border-border/40">
+          <Lock className="w-3 h-3 text-muted-foreground/70 shrink-0" />
+          <span className="text-xs text-muted-foreground/80">
+            {isRTL
+              ? 'وحدات أخرى ستُفتح بعد 7 و14 يوماً'
+              : 'More modules unlock after 7 & 14 days'}
+          </span>
         </div>
       </div>
     </div>
@@ -344,27 +435,19 @@ export default function Onboarding() {
   const { user } = useAuth();
   const isRTL = currentLanguage === 'ar';
 
-  const [step, setStep] = useState(1);
-  const [name, setName] = useState(
-    user?.user_metadata?.full_name ?? ''
-  );
-  const [focusAreas, setFocusAreas] = useState<FocusArea[]>(['tasks', 'goals']);
-  const [preset, setPreset] = useState<DashboardPreset>('focus');
+  const [step,        setStep]        = useState(1);
+  const [name,        setName]        = useState(user?.user_metadata?.full_name ?? '');
+  const [firstModule, setFirstModule] = useState<FocusArea | null>(null);
+  const [preset,      setPreset]      = useState<DashboardPreset>('focus');
 
-  // If already completed, redirect immediately (must use <Navigate> not navigate() in render)
+  // If already completed, redirect immediately
   if (isCompleted) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  const toggleArea = (id: FocusArea) => {
-    setFocusAreas((prev) =>
-      prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]
-    );
-  };
-
   const canProceed = () => {
     if (step === 1) return name.trim().length >= 1;
-    if (step === 3) return focusAreas.length >= 1;
+    if (step === 3) return firstModule !== null;
     return true;
   };
 
@@ -372,24 +455,18 @@ export default function Onboarding() {
     if (step < TOTAL_STEPS) {
       setStep((s) => s + 1);
     } else {
-      completeOnboarding({ displayName: name.trim(), focusAreas, preset });
+      completeOnboarding({
+        displayName: name.trim(),
+        firstModule: firstModule ?? 'tasks',
+        preset,
+      });
       navigate('/dashboard', { replace: true });
     }
   };
 
-  const handleBack = () => {
-    if (step > 1) setStep((s) => s - 1);
-  };
-
-  const handleSkip = () => {
-    skipOnboarding();
-    navigate('/dashboard', { replace: true });
-  };
-
-  const nextLabel = () => {
-    if (step === TOTAL_STEPS) return isRTL ? 'ابدأ الآن' : 'Get Started';
-    return isRTL ? 'التالي' : 'Next';
-  };
+  const handleBack  = () => { if (step > 1) setStep((s) => s - 1); };
+  const handleSkip  = () => { skipOnboarding(); navigate('/dashboard', { replace: true }); };
+  const nextLabel   = () => step === TOTAL_STEPS ? (isRTL ? 'ابدأ الآن' : 'Get Started') : (isRTL ? 'التالي' : 'Next');
 
   return (
     <div
@@ -404,25 +481,19 @@ export default function Onboarding() {
       </div>
 
       <div className="w-full max-w-md relative z-10">
-        {/* Card */}
         <div className="glass-card p-8 backdrop-blur-xl border border-border/50">
           <ProgressBar step={step} />
 
-          {/* Step content */}
-          {step === 1 && <StepWelcome name={name} onNameChange={setName} isRTL={isRTL} />}
+          {step === 1 && <StepWelcome   name={name} onNameChange={setName} isRTL={isRTL} />}
           {step === 2 && <StepAppearance isRTL={isRTL} />}
-          {step === 3 && <StepFocusAreas selected={focusAreas} onToggle={toggleArea} isRTL={isRTL} />}
-          {step === 4 && <StepPreset selected={preset} onSelect={setPreset} isRTL={isRTL} />}
-          {step === 5 && <StepDone name={name} isRTL={isRTL} />}
+          {step === 3 && <StepFirstModule selected={firstModule} onSelect={setFirstModule} isRTL={isRTL} />}
+          {step === 4 && <StepPreset     selected={preset} onSelect={setPreset} isRTL={isRTL} />}
+          {step === 5 && <StepDone       name={name} firstModule={firstModule} isRTL={isRTL} />}
 
           {/* Navigation */}
           <div className="flex items-center justify-between mt-8 gap-3">
             {step > 1 ? (
-              <Button
-                variant="ghost"
-                onClick={handleBack}
-                className="gap-2"
-              >
+              <Button variant="ghost" onClick={handleBack} className="gap-2">
                 {isRTL ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
                 {isRTL ? 'السابق' : 'Back'}
               </Button>
@@ -446,7 +517,6 @@ export default function Onboarding() {
             </Button>
           </div>
 
-          {/* Step counter */}
           <p className="text-center text-xs text-muted-foreground mt-4">
             {isRTL ? `${step} من ${TOTAL_STEPS}` : `${step} of ${TOTAL_STEPS}`}
           </p>

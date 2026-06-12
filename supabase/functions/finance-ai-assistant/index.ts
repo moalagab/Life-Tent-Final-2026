@@ -54,9 +54,10 @@ async function checkRateLimit(
   maxRequests: number,
   windowSeconds: number,
 ): Promise<boolean> {
+  // Must use service_role key — the RPC has REVOKE EXECUTE FROM anon
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY") ?? "",
   );
   const { data, error } = await supabase.rpc("check_rate_limit", {
     p_user_id:        userId,

@@ -138,7 +138,7 @@ function useRawTasks() {
       const { data, error } = await supabase
         .from('tasks')
         .select('id, title, priority, due_date, status, is_focus, completed_at')
-        .neq('status', 'done')
+        .in('status', ['backlog', 'todo', 'in_progress', 'review'])
         .order('due_date', { ascending: true });
       if (error) throw error;
       return data ?? [];

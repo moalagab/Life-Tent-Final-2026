@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Sunrise, Zap, RefreshCw, AlertTriangle,
   CheckCircle2, Clock, ArrowRight, Sparkles,
-  Battery, ChevronDown, ChevronUp,
+  Battery, ChevronDown, ChevronUp, TrendingUp,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAIDecisionEngine } from '@/hooks/useAIDecisionEngine';
@@ -30,6 +30,7 @@ const ACTION_ICONS: Record<AIAction['type'], React.ElementType> = {
   review:     AlertTriangle,
   habit:      CheckCircle2,
   energy:     Battery,
+  finance:    TrendingUp,
 };
 
 const ACTION_COLORS: Record<AIAction['priority'], string> = {

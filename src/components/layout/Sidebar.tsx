@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useIsAdmin } from '@/hooks/useAdmin';
+import { useModuleAccess } from '@/hooks/useModuleAccess';
 import {
   LayoutDashboard,
   FolderKanban,
@@ -172,8 +173,9 @@ export function Sidebar() {
   const { t, isRTL } = useLanguage();
   const isMobile = useIsMobile();
   const isAdmin = useIsAdmin();
+  const { isModuleActive } = useModuleAccess();
 
-  const navItems = [
+  const allNavItems = [
     { path: '/dashboard',  icon: LayoutDashboard, labelKey: 'common.dashboard',  activeColor: 'text-blue-500',    activeBg: 'bg-blue-500' },
     { path: '/projects',   icon: FolderKanban,    labelKey: 'common.projects',   activeColor: 'text-purple-500',  activeBg: 'bg-purple-500' },
     { path: '/tasks',      icon: CheckSquare,     labelKey: 'common.tasks',      activeColor: 'text-blue-500',    activeBg: 'bg-blue-500' },
@@ -186,6 +188,12 @@ export function Sidebar() {
     { path: '/pomodoro',   icon: Timer,           labelKey: 'common.pomodoro',   activeColor: 'text-orange-500',  activeBg: 'bg-orange-500' },
     ...(isAdmin ? [{ path: '/admin', icon: ShieldCheck, labelKey: 'common.admin', activeColor: 'text-primary', activeBg: 'bg-primary' }] : []),
   ];
+
+  // Only show modules the user has unlocked (utility tools + admin always shown)
+  const navItems = allNavItems.filter(item => {
+    const module = item.path.slice(1); // '/tasks' → 'tasks'
+    return module === 'admin' || isModuleActive(module);
+  });
 
   const fullName = (
     user?.user_metadata?.full_name

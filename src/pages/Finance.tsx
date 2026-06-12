@@ -68,20 +68,42 @@ export default function Finance() {
   useRealtimeSubscription({ table: 'transactions', queryKey: TRANSACTIONS_QUERY_KEY });
   useRealtimeSubscription({ table: 'accounts', queryKey: ACCOUNTS_QUERY_KEY });
 
-  const tabs = [
-    { id: 'dashboard', label: t('finance.dashboard'), icon: Gauge },
-    { id: 'accounts', label: t('finance.accounts'), icon: Wallet },
-    { id: 'transactions', label: t('finance.transactions'), icon: Receipt },
-    { id: 'budget', label: t('finance.budgets'), icon: PiggyBank },
-    { id: 'wishlist', label: t('finance.wishlist'), icon: ShoppingBag },
-    { id: 'debts', label: t('finance.debts'), icon: CreditCard },
-    { id: 'subscriptions', label: t('finance.subscriptions'), icon: RefreshCw },
-    { id: 'investments', label: t('finance.investments'), icon: TrendingUp },
-    { id: 'projects', label: t('finance.projectFinance'), icon: Briefcase },
-    { id: 'reports', label: t('finance.reports'), icon: FileText },
-    { id: 'audit', label: t('finance.auditLog'), icon: History },
-    { id: 'import', label: t('finance.dataImport'), icon: Upload },
-  ];
+  // ── Grouped tab structure — reduces cognitive load on mobile ─────────────────
+  const TAB_GROUPS = [
+    {
+      labelAr: 'أعمال يومية',
+      labelEn: 'Day-to-Day',
+      color:   'from-emerald-500 to-teal-600',
+      tabs: [
+        { id: 'dashboard',    label: t('finance.dashboard'),    icon: Gauge    },
+        { id: 'accounts',     label: t('finance.accounts'),     icon: Wallet   },
+        { id: 'transactions', label: t('finance.transactions'), icon: Receipt  },
+        { id: 'budget',       label: t('finance.budgets'),      icon: PiggyBank },
+      ],
+    },
+    {
+      labelAr: 'التخطيط',
+      labelEn: 'Planning',
+      color:   'from-blue-500 to-indigo-600',
+      tabs: [
+        { id: 'wishlist',     label: t('finance.wishlist'),     icon: ShoppingBag },
+        { id: 'debts',        label: t('finance.debts'),        icon: CreditCard  },
+        { id: 'subscriptions',label: t('finance.subscriptions'),icon: RefreshCw   },
+        { id: 'investments',  label: t('finance.investments'),  icon: TrendingUp  },
+      ],
+    },
+    {
+      labelAr: 'متقدم',
+      labelEn: 'Advanced',
+      color:   'from-violet-500 to-purple-600',
+      tabs: [
+        { id: 'projects', label: t('finance.projectFinance'), icon: Briefcase },
+        { id: 'reports',  label: t('finance.reports'),        icon: FileText  },
+        { id: 'audit',    label: t('finance.auditLog'),       icon: History   },
+        { id: 'import',   label: t('finance.dataImport'),     icon: Upload    },
+      ],
+    },
+  ] as const;
 
   return (
     <MainLayout>
@@ -97,28 +119,43 @@ export default function Finance() {
           </div>
         </div>
 
-        {/* Pill tabs — horizontal scroll */}
-        <div className="overflow-x-auto -mx-1 px-1 pb-1">
-          <div className="inline-flex gap-1.5 min-w-max">
-            {tabs.map(tab => {
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as FinanceTab)}
-                  className={cn(
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 active:scale-95',
-                    isActive
-                      ? 'bg-emerald-500 text-white shadow-sm'
-                      : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
-                  )}
-                >
-                  <tab.icon className="w-3.5 h-3.5" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
+        {/* Grouped tab navigation — 3 sections of 4 pills each */}
+        <div className="space-y-2">
+          {TAB_GROUPS.map(group => {
+            const groupActive = group.tabs.some(t => t.id === activeTab);
+            return (
+              <div key={group.labelEn} className="space-y-1.5">
+                {/* Group label */}
+                <p className={cn(
+                  'text-[10px] font-bold uppercase tracking-widest px-0.5 transition-colors',
+                  groupActive ? 'text-foreground' : 'text-muted-foreground/60',
+                )}>
+                  {isRTL ? group.labelAr : group.labelEn}
+                </p>
+                {/* Pill row */}
+                <div className="flex flex-wrap gap-1.5">
+                  {group.tabs.map(tab => {
+                    const isActive = activeTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id as FinanceTab)}
+                        className={cn(
+                          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 active:scale-95',
+                          isActive
+                            ? `bg-gradient-to-r ${group.color} text-white shadow-sm`
+                            : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground',
+                        )}
+                      >
+                        <tab.icon className="w-3.5 h-3.5" />
+                        {tab.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

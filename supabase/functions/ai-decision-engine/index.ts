@@ -65,9 +65,10 @@ async function checkRateLimit(
   maxRequests: number,
   windowSeconds: number,
 ): Promise<boolean> {
+  // Must use service_role key — the RPC has REVOKE EXECUTE FROM anon
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY") ?? "",
   );
   const { data, error } = await supabase.rpc("check_rate_limit", {
     p_user_id:        userId,
@@ -222,7 +223,7 @@ function buildPrompt(body: RequestBody): string {
     ? topTasks.map((t, i) =>
         `${i + 1}. "${t.title}" — نقاط: ${t.adaptiveScore}/100 — إجراء: ${t.action}${t.estimatedMinutes ? ` — تقدير: ${t.estimatedMinutes} دقيقة` : ""}${t.suggestedTime ? ` — وقت مقترح: ${t.suggestedTime}` : ""}`
       ).join("\n")
-    : "✅ لا توجد مهام معلقة — أنجز ${doneToday} مهمة اليوم!";
+    : `✅ لا توجد مهام معلقة — أنجز ${doneToday} مهمة اليوم!`;
 
   const completedTodayLine = profile.completedToday !== undefined
     ? `- أُنجز اليوم: ${profile.completedToday} مهمة`

@@ -56,6 +56,9 @@ export function useAdmin() {
   }, []);
 
   // ── Ban / Unban ────────────────────────────────────────────────────────────
+  // Uses admin_set_user_banned() SECURITY DEFINER RPC — direct UPDATE on
+  // profiles is blocked by the enforce_admin_flag_protection trigger.
+  // The function handles audit logging internally.
 
   const banUser = useCallback(async (
     userId: string,   // auth.users.id (= profiles.user_id)
@@ -64,23 +67,12 @@ export function useAdmin() {
     setLoading(true);
     setError(null);
     try {
-      const { error: upErr } = await supabase
-        .from('profiles')
-        .update({
-          is_banned:     true,
-          banned_at:     new Date().toISOString(),
-          banned_reason: reason,
-        })
-        .eq('user_id', userId);
-      if (upErr) throw upErr;
-
-      const { data: { user } } = await supabase.auth.getUser();
-      await supabase.from('admin_audit_log').insert({
-        admin_user_id:  user?.id,
-        action:         'ban_user',
-        target_user_id: userId,
-        details:        { reason },
+      const { error: rpcErr } = await supabase.rpc('admin_set_user_banned', {
+        p_target_user_id: userId,
+        p_is_banned:      true,
+        p_reason:         reason,
       });
+      if (rpcErr) throw rpcErr;
       return true;
     } catch (e) {
       setError(e instanceof Error ? e.message : 'خطأ في حظر المستخدم');
@@ -94,22 +86,39 @@ export function useAdmin() {
     setLoading(true);
     setError(null);
     try {
-      const { error: upErr } = await supabase
-        .from('profiles')
-        .update({ is_banned: false, banned_at: null, banned_reason: null })
-        .eq('user_id', userId);
-      if (upErr) throw upErr;
-
-      const { data: { user } } = await supabase.auth.getUser();
-      await supabase.from('admin_audit_log').insert({
-        admin_user_id:  user?.id,
-        action:         'unban_user',
-        target_user_id: userId,
-        details:        {},
+      const { error: rpcErr } = await supabase.rpc('admin_set_user_banned', {
+        p_target_user_id: userId,
+        p_is_banned:      false,
+        p_reason:         null,
       });
+      if (rpcErr) throw rpcErr;
       return true;
     } catch (e) {
       setError(e instanceof Error ? e.message : 'خطأ في رفع الحظر');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // ── Grant / Revoke Admin ───────────────────────────────────────────────────
+  // Uses admin_set_user_admin() SECURITY DEFINER RPC.
+
+  const setUserAdmin = useCallback(async (
+    userId:  string,
+    isAdmin: boolean,
+  ): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { error: rpcErr } = await supabase.rpc('admin_set_user_admin', {
+        p_target_user_id: userId,
+        p_is_admin:       isAdmin,
+      });
+      if (rpcErr) throw rpcErr;
+      return true;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'خطأ في تعديل صلاحية المسؤول');
       return false;
     } finally {
       setLoading(false);
@@ -149,7 +158,7 @@ export function useAdmin() {
     }
   }, []);
 
-  return { loading, error, getStats, getUsers, banUser, unbanUser, updateSubscription };
+  return { loading, error, getStats, getUsers, banUser, unbanUser, setUserAdmin, updateSubscription };
 }
 
 // ── Lightweight admin-check hook ──────────────────────────────────────────────
