@@ -25,7 +25,7 @@ export const ALWAYS_ON = new Set([
 ]);
 
 /** Full module pool — granted to existing users who pre-date progressive disclosure. */
-const ALL_MODULES = ['tasks', 'projects', 'finance', 'habits', 'goals', 'knowledge'] as const;
+export const ALL_MODULES = ['tasks', 'projects', 'finance', 'habits', 'goals', 'knowledge'] as const;
 
 const SLOT_SCHEDULE = [
   { minDays: 14, slots: 3 },
@@ -53,40 +53,50 @@ export function useModuleAccess() {
     queryKey: ['module-access', user?.id],
     queryFn: async () => {
       if (!user) return null;
+
+      // select('*') guarantees all columns — including active_modules
+      // and onboarding_completed added by migration.
       const { data, error } = await supabase
         .from('profiles')
-        .select('active_modules, created_at, onboarding_completed')
+        .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
-      if (error) throw error;
 
-      // Defensive backfill: existing users who completed onboarding before
-      // progressive disclosure was introduced have active_modules = [].
-      // Silently grant all modules so they don't lose access.
-      if (
-        data &&
-        data.onboarding_completed === true &&
-        (!data.active_modules || data.active_modules.length === 0)
-      ) {
-        const allModules = [...ALL_MODULES];
+      if (error) {
+        console.error('[useModuleAccess] query error:', error);
+        throw error;
+      }
+
+      if (!data) {
+        console.warn('[useModuleAccess] no profile for user', user.id);
+        return null;
+      }
+
+      // Defensive backfill: if active_modules is empty (user pre-dates
+      // progressive disclosure, or onboarding path didn't set it),
+      // grant all modules immediately.
+      const currentModules = data.active_modules ?? [];
+      if (currentModules.length === 0) {
+        const allModules = [...ALL_MODULES] as string[];
         await supabase
           .from('profiles')
-          .update({ active_modules: allModules })
+          .update({ active_modules: allModules, onboarding_completed: true })
           .eq('user_id', user.id);
         return { ...data, active_modules: allModules };
       }
 
       return data;
     },
-    enabled:   !!user,
-    staleTime: 1000 * 60 * 5,
+    enabled:        !!user,
+    staleTime:      0,          // always check for fresh data on mount
+    refetchOnMount: true,
   });
 
   const { activeModules, maxSlots, daysUntilNextUnlock } = useMemo(() => {
     if (!data) {
       return {
-        activeModules:      [] as string[],
-        maxSlots:           1,
+        activeModules:       [] as string[],
+        maxSlots:            1,
         daysUntilNextUnlock: null as number | null,
       };
     }

@@ -24,20 +24,13 @@ export function PWAUpdatePrompt() {
 
   useEffect(() => {
     if (!needRefresh) return;
+    // Auto-apply the new service worker immediately so users always run
+    // the latest version without having to manually click an update button.
+    updateServiceWorker(true);
+  }, [needRefresh, updateServiceWorker]);
 
-    const msg = currentLanguage === 'ar'
-      ? 'يتوفر تحديث جديد للتطبيق'
-      : 'A new version is available';
-    const actionLabel = currentLanguage === 'ar' ? 'تحديث الآن' : 'Update now';
-
-    toast(msg, {
-      duration: Infinity,
-      action: {
-        label: actionLabel,
-        onClick: () => updateServiceWorker(true),
-      },
-    });
-  }, [needRefresh, currentLanguage, updateServiceWorker]);
+  // Suppress unused-variable warning — kept for future use
+  void currentLanguage;
 
   return null;
 }
