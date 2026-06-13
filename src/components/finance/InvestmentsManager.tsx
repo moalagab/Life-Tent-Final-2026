@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
@@ -344,16 +343,16 @@ export function InvestmentsManager() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">
+          <h2 className="text-lg font-bold text-foreground leading-tight">
             {language === 'ar' ? 'الاستثمارات' : 'Investments'}
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-[11px] text-muted-foreground">
             {language === 'ar' ? 'إدارة محفظتك الاستثمارية باحترافية' : 'Manage your investment portfolio professionally'}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Dialog open={isPortfolioDialogOpen} onOpenChange={setIsPortfolioDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
@@ -698,7 +697,7 @@ export function InvestmentsManager() {
       )}
 
       {/* KPIs Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         <Card className="glass-card">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -803,17 +802,45 @@ export function InvestmentsManager() {
         </Card>
       </div>
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4" dir={language === 'ar' ? 'rtl' as const : 'ltr' as const}>
-          <TabsTrigger value="holdings">{language === 'ar' ? 'الحيازات' : 'Holdings'}</TabsTrigger>
-          <TabsTrigger value="allocation">{language === 'ar' ? 'التوزيع' : 'Allocation'}</TabsTrigger>
-          <TabsTrigger value="rebalance">{language === 'ar' ? 'إعادة التوازن' : 'Rebalance'}</TabsTrigger>
-          <TabsTrigger value="transactions">{language === 'ar' ? 'العمليات' : 'Transactions'}</TabsTrigger>
-        </TabsList>
+      {/* Goals-style 4-column tab nav */}
+      {(() => {
+        const INV_TABS = [
+          { id: 'holdings',     label: language === 'ar' ? 'الحيازات'       : 'Holdings',     icon: Wallet,     from: 'from-emerald-500', to: 'to-teal-600',   activeBorder: 'border-emerald-400/40' },
+          { id: 'allocation',   label: language === 'ar' ? 'التوزيع'        : 'Allocation',   icon: PieChart,   from: 'from-violet-500',  to: 'to-purple-600', activeBorder: 'border-violet-400/40'  },
+          { id: 'rebalance',    label: language === 'ar' ? 'التوازن'        : 'Rebalance',    icon: RefreshCw,  from: 'from-amber-500',   to: 'to-orange-500', activeBorder: 'border-amber-400/40'   },
+          { id: 'transactions', label: language === 'ar' ? 'العمليات'       : 'Transactions', icon: DollarSign, from: 'from-blue-500',    to: 'to-indigo-500', activeBorder: 'border-blue-400/40'    },
+        ] as const;
+        return (
+          <div className="grid grid-cols-4 gap-2">
+            {INV_TABS.map(tab => {
+              const isActive = activeTab === tab.id;
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    'flex flex-col items-center justify-center gap-2 py-3 px-1 rounded-2xl transition-all duration-200 active:scale-95 border',
+                    isActive
+                      ? cn('bg-card/80 border-border/50 shadow-sm', tab.activeBorder)
+                      : 'border-transparent bg-muted/30 hover:bg-muted/50',
+                  )}
+                >
+                  <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-sm', tab.from, tab.to)}>
+                    <Icon className="w-[18px] h-[18px] text-white" strokeWidth={1.8} />
+                  </div>
+                  <p className={cn('text-[10px] font-semibold text-center leading-tight', isActive ? 'text-foreground' : 'text-foreground/60')}>
+                    {tab.label}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        );
+      })()}
 
         {/* Holdings Tab */}
-        <TabsContent value="holdings" className="space-y-4 mt-6">
+        {activeTab === 'holdings' && <div className="space-y-4 mt-6">
           {holdings?.map(h => {
             const currentPrice = h.current_price || h.avg_cost;
             const value = h.quantity * currentPrice;
@@ -892,10 +919,10 @@ export function InvestmentsManager() {
               <p className="text-muted-foreground">{language === 'ar' ? 'لا توجد حيازات' : 'No holdings yet'}</p>
             </div>
           )}
-        </TabsContent>
+        </div>}
 
         {/* Allocation Tab */}
-        <TabsContent value="allocation" className="mt-6">
+        {activeTab === 'allocation' && <div className="mt-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="glass-card">
               <CardHeader>
@@ -964,14 +991,14 @@ export function InvestmentsManager() {
           
           <div className="mt-4 p-4 rounded-lg bg-muted/30 text-sm text-muted-foreground">
             <AlertTriangle className="w-4 h-4 inline me-2" />
-            {language === 'ar' 
+            {language === 'ar'
               ? 'هذا النظام للتتبع والتحليل فقط وليس نصيحة استثمارية.'
               : 'This system is for tracking and analysis only, not investment advice.'}
           </div>
-        </TabsContent>
+        </div>}
 
         {/* Rebalance Tab */}
-        <TabsContent value="rebalance" className="mt-6">
+        {activeTab === 'rebalance' && <div className="mt-6">
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
@@ -1031,10 +1058,10 @@ export function InvestmentsManager() {
               )}
             </CardContent>
           </Card>
-        </TabsContent>
+        </div>}
 
         {/* Transactions Tab */}
-        <TabsContent value="transactions" className="space-y-4 mt-6">
+        {activeTab === 'transactions' && <div className="space-y-4 mt-6">
           {transactions?.map(tx => {
             const asset = assets?.find(a => a.id === tx.asset_id);
             
@@ -1085,8 +1112,7 @@ export function InvestmentsManager() {
               <p className="text-muted-foreground">{language === 'ar' ? 'لا توجد عمليات' : 'No transactions yet'}</p>
             </div>
           )}
-        </TabsContent>
-      </Tabs>
+        </div>}
     </div>
   );
 }

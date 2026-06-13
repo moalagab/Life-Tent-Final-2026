@@ -226,10 +226,7 @@ const Index = () => {
 
         {/* ── Mobile: preset switcher below the card ── */}
         {isMobile && (
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">
-              {t('dashboard.layout') || 'التخطيط'}
-            </span>
+          <div className="flex items-center justify-end">
             <LayoutPresetSwitcher value={preset} onChange={setPreset} />
           </div>
         )}

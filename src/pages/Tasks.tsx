@@ -1,7 +1,8 @@
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
   Plus, Filter, Search, MoreHorizontal, Flag, Calendar, Loader2,
-  FolderKanban, Target, Sparkles, User, Clock, Trash2, Edit3, GripVertical
+  FolderKanban, Target, Sparkles, User, Clock, Trash2, Edit3, GripVertical,
+  Layers, Briefcase
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -249,61 +250,67 @@ export default function Tasks() {
           </button>
         </div>
 
-        {/* Search & Filters */}
-        <div className="flex flex-wrap items-center gap-3 mt-6">
-          <div className="relative w-full sm:flex-1 sm:max-w-md">
-            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t('tasks.searchTasks')}
-              className="w-full ps-10 pe-4 py-2.5 rounded-xl bg-muted/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
-            />
-          </div>
-
-          {/* Category Filter */}
-          <div className="flex gap-1 bg-muted/50 rounded-xl p-1">
-            <button
-              onClick={() => setCategoryFilter('all')}
-              className={cn(
-                'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
-                categoryFilter === 'all' 
-                  ? 'bg-background text-foreground shadow-sm' 
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              {currentLanguage === 'ar' ? 'الكل' : 'All'}
-            </button>
-            <button
-              onClick={() => setCategoryFilter('work')}
-              className={cn(
-                'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
-                categoryFilter === 'work' 
-                  ? 'bg-primary text-primary-foreground shadow-sm' 
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              {currentLanguage === 'ar' ? 'عمل' : 'Work'}
-            </button>
-            <button
-              onClick={() => setCategoryFilter('personal')}
-              className={cn(
-                'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
-                categoryFilter === 'personal' 
-                  ? 'bg-success text-success-foreground shadow-sm' 
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              {currentLanguage === 'ar' ? 'شخصي' : 'Personal'}
-            </button>
-          </div>
-          
-          <Button variant="outline" className="gap-2 rounded-xl">
-            <Filter className="w-4 h-4" />
-            {t('common.filter')}
-          </Button>
+        {/* Search */}
+        <div className="relative mt-6">
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t('tasks.searchTasks')}
+            className="w-full ps-10 pe-4 py-2.5 rounded-xl bg-muted/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+          />
         </div>
+
+        {/* Category Filter — Goals-style 3-column card grid */}
+        {(() => {
+          const CATS = [
+            { id: 'all'      as const, label: currentLanguage === 'ar' ? 'الكل'   : 'All',      icon: Layers,    from: 'from-slate-500',   to: 'to-gray-600',   activeBorder: 'border-slate-400/40'   },
+            { id: 'work'     as const, label: currentLanguage === 'ar' ? 'عمل'    : 'Work',     icon: Briefcase, from: 'from-blue-500',    to: 'to-indigo-600', activeBorder: 'border-blue-400/40'    },
+            { id: 'personal' as const, label: currentLanguage === 'ar' ? 'شخصي'   : 'Personal', icon: User,      from: 'from-emerald-500', to: 'to-green-600',  activeBorder: 'border-emerald-400/40' },
+          ] as const;
+          return (
+            <div className="grid grid-cols-3 gap-2 mt-3">
+              {CATS.map(cat => {
+                const isActive = categoryFilter === cat.id;
+                const Icon = cat.icon;
+                const count = cat.id === 'all'
+                  ? (tasks?.filter(tk => tk.status !== 'done').length ?? 0)
+                  : (tasks?.filter(tk => tk.status !== 'done' && (
+                      cat.id === 'personal'
+                        ? !(tk as Record<string, unknown>).category
+                        : (tk as Record<string, unknown>).category === cat.id
+                    )).length ?? 0);
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setCategoryFilter(cat.id)}
+                    className={cn(
+                      'relative flex flex-col items-center justify-center gap-1.5 py-3 px-1 rounded-2xl transition-all duration-200 active:scale-95 border',
+                      isActive
+                        ? cn('bg-card/80 border-border/50 shadow-sm', cat.activeBorder)
+                        : 'border-transparent bg-muted/30 hover:bg-muted/50',
+                    )}
+                  >
+                    <div className="relative">
+                      <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-sm', cat.from, cat.to)}>
+                        <Icon className="w-[18px] h-[18px] text-white" strokeWidth={1.8} />
+                      </div>
+                      {count > 0 && (
+                        <span className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[9px] font-bold px-1 shadow">
+                          {count}
+                        </span>
+                      )}
+                    </div>
+                    <p className={cn('text-[10px] font-semibold text-center leading-tight', isActive ? 'text-foreground' : 'text-foreground/60')}>
+                      {cat.label}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          );
+        })()}
 
         {/* Active deep-link filter banner */}
         {dueFilter && (

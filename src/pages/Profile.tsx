@@ -64,7 +64,8 @@ export default function Profile() {
       await uploadAvatar.mutateAsync(file);
       toast.success(t('profile.avatarUpdated'));
     } catch (error) {
-      toast.error(t('common.error'));
+      const msg = error instanceof Error ? error.message : String(error);
+      toast.error(msg || t('common.error'));
     }
   };
 
