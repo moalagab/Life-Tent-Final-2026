@@ -25,96 +25,95 @@
 @layer base {
   :root {
     /* ============================================
-       Light Mode — Life Tent OS Premium
-       Apple-grade clarity · Deep Navy identity
-       Zero warm tints — pure cool neutrals
+       Life Tent Light — warm navy+gold brand
+       Warm cream surfaces · Navy structure · Gold action
        ============================================ */
 
-    /* Surfaces */
-    --background: 220 18% 97%;            /* #F4F5F8 — cool off-white */
-    --foreground: 222 30% 9%;             /* near-black */
+    /* Surfaces — warm light neutrals */
+    --background: 40 20% 97%;             /* #F7F6F2 — warm cream base */
+    --foreground: 227 61% 18%;            /* #121E4A — deep navy text */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 30% 9%;
+    --card: 0 0% 100%;                    /* #FFFFFF — white cards */
+    --card-foreground: 227 61% 18%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 30% 9%;
+    --popover-foreground: 227 61% 18%;
 
-    /* Primary — Life Tent brand identity: deep navy */
-    --primary: 222 60% 28%;              /* #1B2F6B — deep navy */
+    /* Primary — brand navy (structural: icons, links, nav) */
+    --primary: 225 60% 28%;               /* #1B2F6B */
     --primary-foreground: 0 0% 100%;
 
-    /* Module semantic colors — per Life Tent design SKILL */
-    --module-tasks:     221 83% 53%;   /* #2563EB blue */
-    --module-finance:   152 64% 40%;   /* #10B981 emerald */
-    --module-goals:     38 92% 50%;    /* #F59E0B amber */
-    --module-habits:    160 84% 39%;   /* emerald-green */
-    --module-projects:  271 81% 56%;   /* #A855F7 purple */
-    --module-knowledge: 258 90% 66%;   /* violet */
-    --module-studio:    338 90% 60%;   /* rose */
-    --module-calendar:  199 89% 48%;   /* sky */
-    --module-pomodoro:  4 86% 58%;     /* red-orange */
+    /* Module semantic colors */
+    --module-tasks:     221 83% 53%;
+    --module-finance:   152 64% 40%;
+    --module-goals:     38 92% 50%;
+    --module-habits:    160 84% 39%;
+    --module-projects:  271 81% 56%;
+    --module-knowledge: 258 90% 66%;
+    --module-studio:    338 90% 60%;
+    --module-calendar:  199 89% 48%;
+    --module-pomodoro:  4 86% 58%;
 
     /* Neutral scale */
-    --secondary: 220 16% 95%;
-    --secondary-foreground: 220 20% 20%;
+    --secondary: 40 12% 94%;              /* #F2F0EA — warm canvas */
+    --secondary-foreground: 225 50% 28%;
 
-    --muted: 220 14% 93%;
-    --muted-foreground: 220 12% 46%;
+    --muted: 38 15% 90%;                  /* #ECE8DF — card muted */
+    --muted-foreground: 220 20% 50%;      /* #667798 — muted text */
 
-    --accent: 220 14% 91%;
-    --accent-foreground: 222 30% 12%;
+    --accent: 38 12% 92%;
+    --accent-foreground: 225 55% 22%;
 
     /* Status */
-    --destructive: 0 70% 42%;
+    --destructive: 6 50% 44%;             /* #A94438 */
     --destructive-foreground: 0 0% 100%;
 
-    --success: 152 64% 25%;
+    --success: 145 50% 26%;               /* #21643D */
     --success-foreground: 0 0% 100%;
 
-    --warning: 25 70% 38%;               /* muted terracotta — warm but not gold */
+    --warning: 36 79% 30%;                /* #8A5A10 */
     --warning-foreground: 0 0% 100%;
 
     /* Lines & focus */
-    --border: 220 14% 87%;
-    --input: 220 14% 91%;
-    --ring: 222 60% 35%;
+    --border: 38 18% 83%;                 /* #DDD7CB — warm beige border */
+    --input: 38 15% 90%;                  /* #ECE8DF */
+    --ring: 44 81% 50%;                   /* #E7B21A — gold focus ring */
 
     --radius: 1rem;
 
-    /* Glass */
-    --glass-bg: rgba(255, 255, 255, 0.84);
-    --glass-bg-hover: rgba(255, 255, 255, 0.92);
-    --glass-bg-active: rgba(255, 255, 255, 0.97);
-    --glass-bg-disabled: rgba(255, 255, 255, 0.50);
-    --glass-border: rgba(20, 30, 60, 0.07);
-    --glass-border-hover: rgba(20, 30, 60, 0.11);
-    --glass-border-active: hsla(222, 60%, 35%, 0.30);
-    --glass-border-disabled: rgba(20, 30, 60, 0.04);
-    --glass-blur: 48px;
+    /* Glass — opaque white cards on warm canvas */
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-bg-hover: rgba(255, 255, 255, 1.0);
+    --glass-bg-active: rgba(255, 255, 255, 1.0);
+    --glass-bg-disabled: rgba(255, 255, 255, 0.60);
+    --glass-border: rgba(18, 30, 74, 0.08);
+    --glass-border-hover: rgba(18, 30, 74, 0.14);
+    --glass-border-active: rgba(231, 178, 26, 0.45);
+    --glass-border-disabled: rgba(18, 30, 74, 0.04);
+    --glass-blur: 12px;
 
-    /* Elevation — Apple-grade micro-depth */
-    --elev-1: 0 1px 2px rgba(18, 26, 52, 0.05);
-    --elev-2: 0 2px 8px rgba(18, 26, 52, 0.07), 0 1px 2px rgba(18, 26, 52, 0.04);
-    --elev-3: 0 4px 20px rgba(18, 26, 52, 0.09), 0 2px 6px rgba(18, 26, 52, 0.04);
-    --elev-4: 0 8px 36px rgba(18, 26, 52, 0.11), 0 3px 10px rgba(18, 26, 52, 0.05);
+    /* Elevation — card-sm / card-md from spec */
+    --elev-1: 0 4px 12px rgba(18, 30, 74, 0.05);
+    --elev-2: 0 10px 24px rgba(18, 30, 74, 0.08);
+    --elev-3: 0 16px 40px rgba(18, 30, 74, 0.10);
+    --elev-4: 0 24px 56px rgba(18, 30, 74, 0.12);
 
-    /* Focus ring */
-    --focus-ring: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(222 60% 35% / 0.50);
+    /* Focus ring — gold halo */
+    --focus-ring: 0 0 0 2px hsl(var(--background)), 0 0 0 4px rgba(231, 178, 26, 0.50);
 
-    /* Gradients — navy, NO gold */
-    --gradient-gold: linear-gradient(135deg, hsl(222 60% 32%) 0%, hsl(222 55% 22%) 100%);
-    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.93) 0%, rgba(244,245,248,0.65) 100%);
+    /* Gradients */
+    --gradient-gold: linear-gradient(135deg, #E7B21A 0%, #C79512 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(247,246,242,0.80) 100%);
 
-    /* Sidebar */
-    --sidebar-background: 220 20% 99%;
-    --sidebar-foreground: 222 25% 15%;
-    --sidebar-primary: 222 60% 28%;
+    /* Sidebar — very light warm */
+    --sidebar-background: 40 20% 99%;
+    --sidebar-foreground: 225 55% 20%;
+    --sidebar-primary: 225 60% 28%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 14% 94%;
-    --sidebar-accent-foreground: 222 28% 12%;
-    --sidebar-border: 220 14% 90%;
-    --sidebar-ring: 222 60% 35%;
+    --sidebar-accent: 38 14% 94%;
+    --sidebar-accent-foreground: 225 50% 22%;
+    --sidebar-border: 38 16% 88%;
+    --sidebar-ring: 44 81% 50%;
   }
 
   .dark {
@@ -204,11 +203,10 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* Light mode — deep navy ambient, consistent with brand */
+  /* Light mode — warm cream base, barely-there navy hint at top */
   body {
     background:
-      radial-gradient(ellipse 80% 40% at 50% -5%, hsla(222, 60%, 28%, 0.05) 0%, transparent 60%),
-      radial-gradient(ellipse 50% 40% at 100% 100%, hsla(43, 100%, 50%, 0.025) 0%, transparent 50%),
+      radial-gradient(ellipse 70% 25% at 50% -5%, rgba(27, 47, 107, 0.04) 0%, transparent 55%),
       hsl(var(--background));
   }
 
@@ -444,7 +442,7 @@
   }
 
   .gold-text {
-    background: var(--gradient-gold);
+    background: linear-gradient(135deg, #E7B21A 0%, #C79512 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
