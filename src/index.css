@@ -118,26 +118,26 @@
   }
 
   .dark {
-    /* Deep Navy Glass Design System — brand hue 222 (#1B2F6B identity) */
-    --background: 222 65% 12%;
+    /* Deep Navy Glass Design System — #1B2F6B as background (225 60% 26%) */
+    --background: 225 60% 26%;          /* #1B2F6B — vibrant navy */
     --foreground: 220 30% 95%;
 
-    --card: 222 55% 17%;
+    --card: 225 55% 32%;                /* +6% lightness above bg */
     --card-foreground: 220 30% 95%;
 
-    --popover: 222 60% 11%;
+    --popover: 225 62% 20%;             /* darker for dropdowns/menus */
     --popover-foreground: 220 30% 95%;
 
-    --primary: 43 100% 50%;
-    --primary-foreground: 222 65% 12%;
+    --primary: 43 100% 50%;             /* gold — unchanged */
+    --primary-foreground: 225 60% 12%;  /* dark navy on gold */
 
-    --secondary: 222 40% 22%;
+    --secondary: 225 48% 36%;
     --secondary-foreground: 220 30% 92%;
 
-    --muted: 222 35% 22%;
-    --muted-foreground: 222 18% 58%;
+    --muted: 225 42% 35%;
+    --muted-foreground: 222 20% 65%;
 
-    --accent: 222 40% 24%;
+    --accent: 225 45% 38%;
     --accent-foreground: 220 30% 95%;
 
     --destructive: 14 80% 54%;
@@ -147,40 +147,40 @@
     --success-foreground: 210 40% 98%;
 
     --warning: 43 100% 50%;
-    --warning-foreground: 222 65% 12%;
+    --warning-foreground: 225 60% 12%;
 
-    --border: 222 35% 26%;
-    --input: 222 35% 22%;
+    --border: 225 40% 42%;
+    --input: 225 42% 36%;
     --ring: 43 100% 50%;
 
-    /* Glass — navy-glass state tokens */
-    --glass-bg: rgba(255, 255, 255, 0.06);
-    --glass-bg-hover: rgba(255, 255, 255, 0.10);
-    --glass-bg-active: rgba(255, 255, 255, 0.14);
-    --glass-bg-disabled: rgba(255, 255, 255, 0.03);
-    --glass-border: rgba(255, 255, 255, 0.12);
-    --glass-border-hover: rgba(255, 255, 255, 0.20);
+    /* Glass — stronger whites to pop on lighter navy */
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-bg-hover: rgba(255, 255, 255, 0.13);
+    --glass-bg-active: rgba(255, 255, 255, 0.17);
+    --glass-bg-disabled: rgba(255, 255, 255, 0.04);
+    --glass-border: rgba(255, 255, 255, 0.16);
+    --glass-border-hover: rgba(255, 255, 255, 0.26);
     --glass-border-active: hsla(43, 100%, 55%, 0.45);
-    --glass-border-disabled: rgba(255, 255, 255, 0.05);
+    --glass-border-disabled: rgba(255, 255, 255, 0.06);
     --glass-blur: 20px;
 
-    /* Elevation scale — navy depth */
-    --elev-1: 0 1px 2px rgba(8, 18, 52, 0.40), 0 1px 3px -1px rgba(8, 18, 52, 0.35);
-    --elev-2: 0 2px 6px rgba(8, 18, 52, 0.45), 0 8px 20px -6px rgba(8, 18, 52, 0.50);
-    --elev-3: 0 4px 12px rgba(8, 18, 52, 0.55), 0 16px 32px -8px rgba(8, 18, 52, 0.65);
-    --elev-4: 0 8px 16px rgba(8, 18, 52, 0.60), 0 28px 56px -12px rgba(8, 18, 52, 0.75);
+    /* Elevation — tuned for mid-tone navy */
+    --elev-1: 0 1px 2px rgba(5, 12, 38, 0.30), 0 1px 3px -1px rgba(5, 12, 38, 0.25);
+    --elev-2: 0 2px 6px rgba(5, 12, 38, 0.35), 0 8px 20px -6px rgba(5, 12, 38, 0.40);
+    --elev-3: 0 4px 12px rgba(5, 12, 38, 0.45), 0 16px 32px -8px rgba(5, 12, 38, 0.55);
+    --elev-4: 0 8px 16px rgba(5, 12, 38, 0.50), 0 28px 56px -12px rgba(5, 12, 38, 0.65);
 
     /* Focus ring — gold halo on navy */
     --focus-ring: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(43 100% 55% / 0.65);
 
-    /* Sidebar — deep navy, slightly darker than content */
-    --sidebar-background: 222 68% 10%;
+    /* Sidebar — darker than content */
+    --sidebar-background: 225 65% 18%;
     --sidebar-foreground: 220 30% 95%;
     --sidebar-primary: 43 100% 50%;
-    --sidebar-primary-foreground: 222 65% 12%;
-    --sidebar-accent: 222 45% 20%;
+    --sidebar-primary-foreground: 225 60% 12%;
+    --sidebar-accent: 225 52% 30%;
     --sidebar-accent-foreground: 220 30% 95%;
-    --sidebar-border: 222 40% 20%;
+    --sidebar-border: 225 48% 30%;
     --sidebar-ring: 43 100% 50%;
   }
 }
@@ -214,9 +214,7 @@
 
   .dark body {
     background:
-      radial-gradient(ellipse 70% 50% at 80% 0%,   hsla(222, 65%, 28%, 0.45) 0%, transparent 55%),
-      radial-gradient(ellipse 60% 45% at 10% 100%, hsla(222, 60%, 22%, 0.35) 0%, transparent 55%),
-      radial-gradient(ellipse 50% 35% at 50% 50%,  hsla(43, 100%, 50%, 0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 65% 45% at 75% -5%, hsla(225, 65%, 42%, 0.22) 0%, transparent 58%),
       hsl(var(--background));
   }
 }
@@ -237,7 +235,6 @@
   }
 
   .glass-card:hover {
-    transform: translateY(-2px);
     background: var(--glass-bg-hover);
     border-color: var(--glass-border-hover);
     box-shadow: var(--elev-3);
@@ -246,7 +243,6 @@
   .glass-card:active,
   .glass-card[data-state="active"],
   .glass-card.is-active {
-    transform: translateY(-1px);
     background: var(--glass-bg-active);
     border-color: var(--glass-border-active);
     box-shadow: var(--elev-2);
@@ -325,10 +321,10 @@
   }
 
   .interactive-card:hover {
-    transform: translateY(-4px) scale(1.01);
-    box-shadow: 
-      0 20px 40px rgba(0, 0, 0, 0.15),
-      0 0 0 1px hsla(43, 100%, 50%, 0.2);
+    transform: translateY(-2px);
+    box-shadow:
+      0 12px 28px rgba(0, 0, 0, 0.10),
+      0 0 0 1px hsla(43, 100%, 50%, 0.15);
   }
 
   .interactive-card::after {
@@ -510,7 +506,6 @@
     box-shadow:
       0 1px 0 hsl(var(--primary) / 0.15) inset,
       0 20px 50px -20px hsl(var(--primary) / 0.25);
-    transform: translateY(-2px);
   }
 
   .dark .bento-cell {

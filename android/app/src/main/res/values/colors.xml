@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Light mode primary: deep navy #1D3672 -->
-    <color name="colorPrimary">#1D3672</color>
-    <!-- Status bar / dark mode background: #0B1733 -->
-    <color name="colorPrimaryDark">#0B1733</color>
-    <!-- Accent: gold #FFB700 -->
+    <color name="colorPrimary">#1B2F6B</color>
+    <color name="colorPrimaryDark">#152349</color>
     <color name="colorAccent">#FFB700</color>
-    <!-- Dark background for splash -->
-    <color name="colorBackground">#0B1733</color>
+    <color name="colorBackground">#1B2F6B</color>
 </resources>
