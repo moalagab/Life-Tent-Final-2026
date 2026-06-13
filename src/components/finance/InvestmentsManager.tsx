@@ -358,15 +358,15 @@ export function InvestmentsManager() {
           </div>
         </div>
 
-        {/* Action bar — 4 styled quick-add pills */}
+        {/* Action bar — 4 monochromatic quick-add cards */}
         <div className="grid grid-cols-4 gap-2">
           <Dialog open={isPortfolioDialogOpen} onOpenChange={setIsPortfolioDialogOpen}>
             <DialogTrigger asChild>
-              <button className="flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-2xl bg-muted/40 border border-border/40 hover:bg-muted/60 active:scale-95 transition-all">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
-                  <Briefcase className="w-[15px] h-[15px] text-white" strokeWidth={1.8} />
+              <button className="flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-2xl bg-muted/40 border border-border/40 hover:bg-primary/5 hover:border-primary/30 active:scale-95 transition-all">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Plus className="w-[15px] h-[15px] text-primary" strokeWidth={2.2} />
                 </div>
-                <span className="text-[10px] font-semibold text-foreground/70">{language === 'ar' ? 'محفظة' : 'Portfolio'}</span>
+                <span className="flex flex-col items-center leading-tight"><span className="text-[8.5px] text-foreground/50">{language === 'ar' ? 'إضافة' : 'Add'}</span><span className="text-[10px] font-bold text-foreground/80">{language === 'ar' ? 'محفظة' : 'Portfolio'}</span></span>
               </button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md max-h-[92svh] overflow-y-auto">
@@ -406,11 +406,11 @@ export function InvestmentsManager() {
 
           <Dialog open={isAssetDialogOpen} onOpenChange={setIsAssetDialogOpen}>
             <DialogTrigger asChild>
-              <button className="flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-2xl bg-muted/40 border border-border/40 hover:bg-muted/60 active:scale-95 transition-all">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm">
-                  <BarChart3 className="w-[15px] h-[15px] text-white" strokeWidth={1.8} />
+              <button className="flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-2xl bg-muted/40 border border-border/40 hover:bg-primary/5 hover:border-primary/30 active:scale-95 transition-all">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Plus className="w-[15px] h-[15px] text-primary" strokeWidth={2.2} />
                 </div>
-                <span className="text-[10px] font-semibold text-foreground/70">{language === 'ar' ? 'أصل' : 'Asset'}</span>
+                <span className="flex flex-col items-center leading-tight"><span className="text-[8.5px] text-foreground/50">{language === 'ar' ? 'إضافة' : 'Add'}</span><span className="text-[10px] font-bold text-foreground/80">{language === 'ar' ? 'أصل' : 'Asset'}</span></span>
               </button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md max-h-[92svh] overflow-y-auto">
@@ -459,11 +459,11 @@ export function InvestmentsManager() {
 
           <Dialog open={isHoldingDialogOpen} onOpenChange={setIsHoldingDialogOpen}>
             <DialogTrigger asChild>
-              <button className="flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-2xl bg-muted/40 border border-border/40 hover:bg-muted/60 active:scale-95 transition-all">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-sm">
-                  <Coins className="w-[15px] h-[15px] text-white" strokeWidth={1.8} />
+              <button className="flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-2xl bg-muted/40 border border-border/40 hover:bg-primary/5 hover:border-primary/30 active:scale-95 transition-all">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Plus className="w-[15px] h-[15px] text-primary" strokeWidth={2.2} />
                 </div>
-                <span className="text-[10px] font-semibold text-foreground/70">{language === 'ar' ? 'حيازة' : 'Holding'}</span>
+                <span className="flex flex-col items-center leading-tight"><span className="text-[8.5px] text-foreground/50">{language === 'ar' ? 'إضافة' : 'Add'}</span><span className="text-[10px] font-bold text-foreground/80">{language === 'ar' ? 'حيازة' : 'Holding'}</span></span>
               </button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-lg max-h-[92svh] overflow-y-auto">
@@ -586,11 +586,11 @@ export function InvestmentsManager() {
 
           <Dialog open={isTransactionDialogOpen} onOpenChange={setIsTransactionDialogOpen}>
             <DialogTrigger asChild>
-              <button className="flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-2xl bg-primary/10 border border-primary/30 hover:bg-primary/15 active:scale-95 transition-all">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-sm">
-                  <DollarSign className="w-[15px] h-[15px] text-white" strokeWidth={1.8} />
+              <button className="flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-2xl bg-muted/40 border border-border/40 hover:bg-primary/5 hover:border-primary/30 active:scale-95 transition-all">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Plus className="w-[15px] h-[15px] text-primary" strokeWidth={2.2} />
                 </div>
-                <span className="text-[10px] font-semibold text-primary">{language === 'ar' ? 'عملية' : 'Transaction'}</span>
+                <span className="flex flex-col items-center leading-tight"><span className="text-[8.5px] text-foreground/50">{language === 'ar' ? 'إضافة' : 'Add'}</span><span className="text-[10px] font-bold text-foreground/80">{language === 'ar' ? 'عملية' : 'Txn'}</span></span>
               </button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md max-h-[92svh] overflow-y-auto">
