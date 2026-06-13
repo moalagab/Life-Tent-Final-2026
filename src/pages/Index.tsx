@@ -37,7 +37,7 @@ import type { ReactNode } from 'react';
  */
 const Index = () => {
   useAutoReminders();
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const isMobile = useIsMobile();
 
   const [preset, setPreset] = usePersistedState<DashboardPreset>(
@@ -63,12 +63,14 @@ const Index = () => {
     return () => window.removeEventListener('keydown', handler);
   }, [setPreset, t]);
 
-  const overview = useSectionState('overview', true);
+  const overview = useSectionState('overview', false);
   const activeWork = useSectionState('active-work', true);
-  const rhythm = useSectionState('rhythm', true);
-  const finance = useSectionState('finance', true);
+  const rhythm = useSectionState('rhythm', false);
+  const finance = useSectionState('finance', false);
   const library = useSectionState('library', false);
-  const aiSection = useSectionState('ai-intelligence', true);
+  const aiSection = useSectionState('ai-intelligence', false);
+
+  const isAr = currentLanguage === 'ar';
 
   // ---- Section renderers ----
   const sectionOverview = (
@@ -79,6 +81,7 @@ const Index = () => {
         collapsible
         open={overview.open}
         onToggle={overview.toggle}
+        summary={isAr ? 'صافي الثروة · الإنفاق الشهري · المهام اليوم' : 'Net Worth · Monthly Burn · Tasks Today'}
       />
       {overview.open && <KpiStrip />}
     </section>
@@ -92,6 +95,7 @@ const Index = () => {
         collapsible
         open={activeWork.open}
         onToggle={activeWork.toggle}
+        summary={isAr ? 'المشاريع · المهام · الأحداث القادمة' : 'Projects · Tasks · Upcoming Events'}
       />
       {activeWork.open && (
         <>
@@ -119,6 +123,7 @@ const Index = () => {
         collapsible
         open={rhythm.open}
         onToggle={rhythm.toggle}
+        summary={isAr ? 'الصلاة · العادات · الأهداف' : 'Prayer · Habits · Goals'}
       />
       {rhythm.open && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 items-stretch">
@@ -138,6 +143,7 @@ const Index = () => {
         collapsible
         open={finance.open}
         onToggle={finance.toggle}
+        summary={isAr ? 'الحسابات · الإيرادات · المصروفات' : 'Accounts · Income · Expenses'}
       />
       {finance.open && (
         <div className="grid grid-cols-1 gap-3 lg:gap-4">
@@ -155,6 +161,7 @@ const Index = () => {
         collapsible
         open={library.open}
         onToggle={library.toggle}
+        summary={isAr ? 'المعرفة · الاستوديو الإبداعي' : 'Knowledge · Creative Studio'}
       />
       {library.open && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4 animate-fade-in items-stretch">
@@ -168,19 +175,18 @@ const Index = () => {
   const sectionAI = (
     <section key="ai-intelligence">
       <SectionHeader
-        title="الذكاء الاصطناعي"
+        title={isAr ? 'الذكاء الاصطناعي' : 'AI Intelligence'}
         icon={Brain}
         collapsible
         open={aiSection.open}
         onToggle={aiSection.toggle}
+        summary={isAr ? 'إحاطة الصباح · نقطة التحقق · رؤى السلوك' : 'Morning Brief · Midday Check · Behavior Insights'}
       />
       {aiSection.open && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4 items-start">
-          {/* Morning brief spans 2 cols */}
           <div className="lg:col-span-2 min-w-0">
             <MorningBrief />
           </div>
-          {/* Right column: midday + behavior */}
           <div className="space-y-3 lg:space-y-4 min-w-0">
             <MiddayCheckpoint />
             <BehaviorInsights />
@@ -192,9 +198,9 @@ const Index = () => {
 
   // ---- Preset arrangements ----
   const arrangements: Record<DashboardPreset, ReactNode[]> = {
-    focus: [sectionAI, sectionRhythm, sectionActiveWork, sectionOverview, sectionFinance, sectionLibrary],
-    finance: [sectionOverview, sectionFinance, sectionActiveWork, sectionRhythm, sectionAI, sectionLibrary],
-    execution: [sectionAI, sectionOverview, sectionActiveWork, sectionRhythm, sectionFinance, sectionLibrary],
+    focus:     [sectionAI, sectionRhythm, sectionActiveWork, sectionOverview, sectionFinance, sectionLibrary],
+    finance:   [sectionOverview, sectionFinance, sectionActiveWork, sectionRhythm, sectionAI, sectionLibrary],
+    execution: [sectionActiveWork, sectionOverview, sectionRhythm, sectionFinance, sectionAI, sectionLibrary],
   };
 
   return (
