@@ -13,6 +13,7 @@ import { queryClient } from "@/lib/queryClient";
 import { PWAUpdatePrompt } from "@/components/PWAUpdatePrompt";
 import { useAppLifecycle } from "@/hooks/useAppLifecycle";
 import { isNative } from "@/lib/capacitor";
+import { useTheme } from "@/hooks/useTheme";
 
 // Lazy-load all pages — nothing is eagerly bundled into the critical path
 const LandingPage     = lazy(() => import("./pages/LandingPage"));
@@ -44,22 +45,34 @@ function PageLoader() {
 
 /** Initialises native plugins once on app start */
 function NativeBootstrap() {
+  const { theme } = useTheme();
+
   // Back button + app resume handling
   useAppLifecycle(() => {
     queryClient.invalidateQueries();
   });
 
-  // Hide splash screen + set status bar after first render
+  // Hide splash screen on first render
   useEffect(() => {
     if (!isNative) return;
-
-    Promise.all([
-      import('@capacitor/splash-screen').then(({ SplashScreen }) =>
-        SplashScreen.hide({ fadeOutDuration: 300 })),
-      import('@capacitor/status-bar').then(({ StatusBar, Style }) =>
-        StatusBar.setStyle({ style: Style.Dark })),
-    ]).catch(() => {});
+    import('@capacitor/splash-screen').then(({ SplashScreen }) =>
+      SplashScreen.hide({ fadeOutDuration: 300 })
+    ).catch(() => {});
   }, []);
+
+  // Sync StatusBar style + background with current theme
+  useEffect(() => {
+    if (!isNative) return;
+    import('@capacitor/status-bar').then(({ StatusBar, Style }) => {
+      if (theme === 'dark') {
+        StatusBar.setStyle({ style: Style.Dark });
+        StatusBar.setBackgroundColor({ color: '#0B1733' });
+      } else {
+        StatusBar.setStyle({ style: Style.Light });
+        StatusBar.setBackgroundColor({ color: '#F4F5F8' });
+      }
+    }).catch(() => {});
+  }, [theme]);
 
   return null;
 }

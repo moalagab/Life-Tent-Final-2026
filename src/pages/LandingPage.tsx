@@ -209,10 +209,10 @@ export default function LandingPage() {
             >
               <Languages className="w-5 h-5" />
             </Button>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => navigate('/auth')}
-              className="hidden sm:flex hover:bg-primary/10 transition-colors"
+              className="hover:bg-primary/10 transition-colors"
             >
               {t('landing.signIn')}
             </Button>
