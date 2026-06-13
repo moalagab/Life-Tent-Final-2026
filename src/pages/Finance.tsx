@@ -72,34 +72,34 @@ export default function Finance() {
     {
       labelAr: 'أعمال يومية',
       labelEn: 'Day-to-Day',
-      color:   'from-emerald-500 to-teal-600',
+      activeBorder: 'border-emerald-400/40',
       tabs: [
-        { id: 'dashboard',    label: t('finance.dashboard'),    icon: Gauge    },
-        { id: 'accounts',     label: t('finance.accounts'),     icon: Wallet   },
-        { id: 'transactions', label: t('finance.transactions'), icon: Receipt  },
-        { id: 'budget',       label: t('finance.budgets'),      icon: PiggyBank },
+        { id: 'dashboard',    label: t('finance.dashboard'),    icon: Gauge,     from: 'from-emerald-500', to: 'to-teal-600'     },
+        { id: 'accounts',     label: t('finance.accounts'),     icon: Wallet,    from: 'from-green-500',   to: 'to-emerald-600'  },
+        { id: 'transactions', label: t('finance.transactions'), icon: Receipt,   from: 'from-blue-500',    to: 'to-blue-600'     },
+        { id: 'budget',       label: t('finance.budgets'),      icon: PiggyBank, from: 'from-amber-500',   to: 'to-orange-500'   },
       ],
     },
     {
       labelAr: 'التخطيط',
       labelEn: 'Planning',
-      color:   'from-blue-500 to-indigo-600',
+      activeBorder: 'border-blue-400/40',
       tabs: [
-        { id: 'wishlist',     label: t('finance.wishlist'),     icon: ShoppingBag },
-        { id: 'debts',        label: t('finance.debts'),        icon: CreditCard  },
-        { id: 'subscriptions',label: t('finance.subscriptions'),icon: RefreshCw   },
-        { id: 'investments',  label: t('finance.investments'),  icon: TrendingUp  },
+        { id: 'wishlist',      label: t('finance.wishlist'),      icon: ShoppingBag, from: 'from-pink-500',   to: 'to-rose-500'    },
+        { id: 'debts',         label: t('finance.debts'),         icon: CreditCard,  from: 'from-red-500',    to: 'to-rose-600'    },
+        { id: 'subscriptions', label: t('finance.subscriptions'), icon: RefreshCw,   from: 'from-cyan-500',   to: 'to-blue-500'    },
+        { id: 'investments',   label: t('finance.investments'),   icon: TrendingUp,  from: 'from-violet-500', to: 'to-purple-600'  },
       ],
     },
     {
       labelAr: 'متقدم',
       labelEn: 'Advanced',
-      color:   'from-violet-500 to-purple-600',
+      activeBorder: 'border-violet-400/40',
       tabs: [
-        { id: 'projects', label: t('finance.projectFinance'), icon: Briefcase },
-        { id: 'reports',  label: t('finance.reports'),        icon: FileText  },
-        { id: 'audit',    label: t('finance.auditLog'),       icon: History   },
-        { id: 'import',   label: t('finance.dataImport'),     icon: Upload    },
+        { id: 'projects', label: t('finance.projectFinance'), icon: Briefcase, from: 'from-indigo-500', to: 'to-blue-600'   },
+        { id: 'reports',  label: t('finance.reports'),        icon: FileText,  from: 'from-slate-500',  to: 'to-gray-600'   },
+        { id: 'audit',    label: t('finance.auditLog'),       icon: History,   from: 'from-yellow-500', to: 'to-amber-500'  },
+        { id: 'import',   label: t('finance.dataImport'),     icon: Upload,    from: 'from-teal-500',   to: 'to-green-500'  },
       ],
     },
   ] as const;
@@ -118,36 +118,47 @@ export default function Finance() {
           </div>
         </div>
 
-        {/* Grouped tab navigation — 3 sections of 4 pills each */}
-        <div className="space-y-2">
+        {/* Grouped tab navigation — Goals-style card grid */}
+        <div className="space-y-3">
           {TAB_GROUPS.map(group => {
             const groupActive = group.tabs.some(t => t.id === activeTab);
             return (
-              <div key={group.labelEn} className="space-y-1.5">
+              <div key={group.labelEn} className="space-y-2">
                 {/* Group label */}
                 <p className={cn(
                   'text-[10px] font-bold uppercase tracking-widest px-0.5 transition-colors',
-                  groupActive ? 'text-foreground' : 'text-muted-foreground/60',
+                  groupActive ? 'text-foreground' : 'text-muted-foreground/50',
                 )}>
                   {isRTL ? group.labelAr : group.labelEn}
                 </p>
-                {/* Pill row */}
-                <div className="flex flex-wrap gap-1.5">
+                {/* Card grid — 4 columns */}
+                <div className="grid grid-cols-4 gap-2">
                   {group.tabs.map(tab => {
                     const isActive = activeTab === tab.id;
+                    const Icon = tab.icon;
                     return (
                       <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as FinanceTab)}
                         className={cn(
-                          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 active:scale-95',
+                          'flex flex-col items-center justify-center gap-2 py-3 px-1 rounded-2xl transition-all duration-200 active:scale-95 border',
                           isActive
-                            ? `bg-gradient-to-r ${group.color} text-white shadow-sm`
-                            : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground',
+                            ? cn('bg-card/80 border-border/50 shadow-sm', group.activeBorder)
+                            : 'border-transparent bg-muted/30 hover:bg-muted/50',
                         )}
                       >
-                        <tab.icon className="w-3.5 h-3.5" />
-                        {tab.label}
+                        <div className={cn(
+                          'w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-sm',
+                          tab.from, tab.to,
+                        )}>
+                          <Icon className="w-4.5 h-4.5 text-white w-[18px] h-[18px]" strokeWidth={1.8} />
+                        </div>
+                        <p className={cn(
+                          'text-[10px] font-semibold text-center leading-tight',
+                          isActive ? 'text-foreground' : 'text-foreground/60',
+                        )}>
+                          {tab.label}
+                        </p>
                       </button>
                     );
                   })}

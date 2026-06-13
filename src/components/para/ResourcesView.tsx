@@ -13,20 +13,29 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Plus, MoreVertical, Pencil, Archive, RotateCcw, Trash2, FileText, Link2, Film, BookOpen, File, ExternalLink, Search, Database, LayoutGrid, Filter } from 'lucide-react';
+import { Plus, MoreVertical, Pencil, Archive, RotateCcw, Trash2, FileText, Link2, Film, BookOpen, File, ExternalLink, Search, Database, LayoutGrid, Filter, Layers } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { UnifiedResourcesView } from './UnifiedResourcesView';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 
-const resourceTypes: { value: ResourceType; label: string; icon: React.ComponentType<{ className?: string }>; color: string }[] = [
-  { value: 'note',     label: 'ملاحظة', icon: FileText, color: 'text-blue-500'    },
-  { value: 'file',     label: 'ملف',     icon: File,     color: 'text-purple-500'  },
-  { value: 'link',     label: 'رابط',    icon: Link2,    color: 'text-cyan-500'    },
-  { value: 'course',   label: 'دورة',    icon: BookOpen, color: 'text-amber-500'   },
-  { value: 'media',    label: 'وسائط',   icon: Film,     color: 'text-pink-500'    },
-  { value: 'document', label: 'مستند',   icon: FileText, color: 'text-green-500'   },
+const resourceTypes: {
+  value: ResourceType;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  color: string;
+  from: string;
+  to: string;
+  activeBorder: string;
+}[] = [
+  { value: 'note',     label: 'ملاحظة', icon: FileText, color: 'text-blue-500',   from: 'from-blue-500',   to: 'to-blue-600',    activeBorder: 'border-blue-400/40'   },
+  { value: 'file',     label: 'ملف',     icon: File,     color: 'text-purple-500', from: 'from-purple-500', to: 'to-violet-600',  activeBorder: 'border-purple-400/40' },
+  { value: 'link',     label: 'رابط',    icon: Link2,    color: 'text-cyan-500',   from: 'from-cyan-500',   to: 'to-blue-500',    activeBorder: 'border-cyan-400/40'   },
+  { value: 'course',   label: 'دورة',    icon: BookOpen, color: 'text-amber-500',  from: 'from-amber-500',  to: 'to-orange-500',  activeBorder: 'border-amber-400/40'  },
+  { value: 'media',    label: 'وسائط',   icon: Film,     color: 'text-pink-500',   from: 'from-pink-500',   to: 'to-rose-500',    activeBorder: 'border-pink-400/40'   },
+  { value: 'document', label: 'مستند',   icon: FileText, color: 'text-green-500',  from: 'from-green-500',  to: 'to-emerald-600', activeBorder: 'border-green-400/40'  },
 ];
 
 export function ResourcesView() {
@@ -238,32 +247,100 @@ export function ResourcesView() {
         </div>
       )}
 
-      {/* Type filter pills */}
-      <div className="flex flex-nowrap gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
-        <button
-          onClick={() => setActiveType('all')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
-            activeType === 'all'
-              ? 'bg-primary text-primary-foreground shadow-sm'
-              : 'bg-muted/60 text-muted-foreground hover:bg-muted'
-          }`}
-        >
-          الكل
-        </button>
-        {resourceTypes.map((type) => (
-          <button
-            key={type.value}
-            onClick={() => setActiveType(type.value)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
-              activeType === type.value
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'bg-muted/60 text-muted-foreground hover:bg-muted'
-            }`}
-          >
-            <type.icon className="w-3.5 h-3.5" />
-            {type.label}
-          </button>
-        ))}
+      {/* Type filter — Goals-style card grid (4 + 3) */}
+      <div className="space-y-2">
+        <div className="grid grid-cols-4 gap-2">
+          {/* "الكل" card */}
+          {(() => {
+            const isSelected = activeType === 'all';
+            const totalCount = resources?.length ?? 0;
+            return (
+              <button
+                onClick={() => setActiveType('all')}
+                className={cn(
+                  'flex flex-col items-center justify-center gap-2 py-3 px-1 rounded-2xl transition-all duration-200 active:scale-95 border',
+                  isSelected
+                    ? 'bg-card/80 border-border/50 shadow-sm border-primary/30'
+                    : 'border-transparent bg-muted/30 hover:bg-muted/50',
+                )}
+              >
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-slate-500 to-gray-600 shadow-sm relative">
+                  <Layers className="w-[18px] h-[18px] text-white" strokeWidth={1.8} />
+                  {totalCount > 0 && (
+                    <span className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-background text-foreground text-[10px] font-bold flex items-center justify-center border border-border/50 shadow-sm">
+                      {totalCount}
+                    </span>
+                  )}
+                </div>
+                <p className={cn('text-[10px] font-semibold text-center leading-tight', isSelected ? 'text-foreground' : 'text-foreground/60')}>
+                  الكل
+                </p>
+              </button>
+            );
+          })()}
+          {/* First 3 type cards */}
+          {resourceTypes.slice(0, 3).map((type) => {
+            const isSelected = activeType === type.value;
+            const count = resources?.filter(r => r.type === type.value).length ?? 0;
+            const Icon = type.icon;
+            return (
+              <button
+                key={type.value}
+                onClick={() => setActiveType(type.value)}
+                className={cn(
+                  'flex flex-col items-center justify-center gap-2 py-3 px-1 rounded-2xl transition-all duration-200 active:scale-95 border',
+                  isSelected
+                    ? cn('bg-card/80 border-border/50 shadow-sm', type.activeBorder)
+                    : 'border-transparent bg-muted/30 hover:bg-muted/50',
+                )}
+              >
+                <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-sm relative', type.from, type.to)}>
+                  <Icon className="w-[18px] h-[18px] text-white" strokeWidth={1.8} />
+                  {count > 0 && (
+                    <span className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-background text-foreground text-[10px] font-bold flex items-center justify-center border border-border/50 shadow-sm">
+                      {count}
+                    </span>
+                  )}
+                </div>
+                <p className={cn('text-[10px] font-semibold text-center leading-tight', isSelected ? 'text-foreground' : 'text-foreground/60')}>
+                  {type.label}
+                </p>
+              </button>
+            );
+          })}
+        </div>
+        {/* Second row — remaining 3 types */}
+        <div className="grid grid-cols-3 gap-2">
+          {resourceTypes.slice(3).map((type) => {
+            const isSelected = activeType === type.value;
+            const count = resources?.filter(r => r.type === type.value).length ?? 0;
+            const Icon = type.icon;
+            return (
+              <button
+                key={type.value}
+                onClick={() => setActiveType(type.value)}
+                className={cn(
+                  'flex flex-col items-center justify-center gap-2 py-3 px-1 rounded-2xl transition-all duration-200 active:scale-95 border',
+                  isSelected
+                    ? cn('bg-card/80 border-border/50 shadow-sm', type.activeBorder)
+                    : 'border-transparent bg-muted/30 hover:bg-muted/50',
+                )}
+              >
+                <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-sm relative', type.from, type.to)}>
+                  <Icon className="w-[18px] h-[18px] text-white" strokeWidth={1.8} />
+                  {count > 0 && (
+                    <span className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-background text-foreground text-[10px] font-bold flex items-center justify-center border border-border/50 shadow-sm">
+                      {count}
+                    </span>
+                  )}
+                </div>
+                <p className={cn('text-[10px] font-semibold text-center leading-tight', isSelected ? 'text-foreground' : 'text-foreground/60')}>
+                  {type.label}
+                </p>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Resources Grid */}
