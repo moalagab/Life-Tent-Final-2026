@@ -343,22 +343,31 @@ export function InvestmentsManager() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-lg font-bold text-foreground leading-tight">
-            {language === 'ar' ? 'الاستثمارات' : 'Investments'}
-          </h2>
-          <p className="text-[11px] text-muted-foreground">
-            {language === 'ar' ? 'إدارة محفظتك الاستثمارية باحترافية' : 'Manage your investment portfolio professionally'}
-          </p>
+      <div className="space-y-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-sm shrink-0">
+            <TrendingUp className="w-5 h-5 text-white" strokeWidth={1.8} />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-foreground leading-tight">
+              {language === 'ar' ? 'الاستثمارات' : 'Investments'}
+            </h2>
+            <p className="text-[11px] text-muted-foreground">
+              {language === 'ar' ? 'إدارة محفظتك الاستثمارية باحترافية' : 'Manage your investment portfolio professionally'}
+            </p>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+
+        {/* Action bar — 4 styled quick-add pills */}
+        <div className="grid grid-cols-4 gap-2">
           <Dialog open={isPortfolioDialogOpen} onOpenChange={setIsPortfolioDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Plus className="w-4 h-4 me-2" />
-                {language === 'ar' ? 'محفظة' : 'Portfolio'}
-              </Button>
+              <button className="flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-2xl bg-muted/40 border border-border/40 hover:bg-muted/60 active:scale-95 transition-all">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
+                  <Briefcase className="w-[15px] h-[15px] text-white" strokeWidth={1.8} />
+                </div>
+                <span className="text-[10px] font-semibold text-foreground/70">{language === 'ar' ? 'محفظة' : 'Portfolio'}</span>
+              </button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md max-h-[92svh] overflow-y-auto">
               <DialogHeader>
@@ -397,10 +406,12 @@ export function InvestmentsManager() {
 
           <Dialog open={isAssetDialogOpen} onOpenChange={setIsAssetDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Plus className="w-4 h-4 me-2" />
-                {language === 'ar' ? 'أصل' : 'Asset'}
-              </Button>
+              <button className="flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-2xl bg-muted/40 border border-border/40 hover:bg-muted/60 active:scale-95 transition-all">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm">
+                  <BarChart3 className="w-[15px] h-[15px] text-white" strokeWidth={1.8} />
+                </div>
+                <span className="text-[10px] font-semibold text-foreground/70">{language === 'ar' ? 'أصل' : 'Asset'}</span>
+              </button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md max-h-[92svh] overflow-y-auto">
               <DialogHeader>
@@ -448,10 +459,12 @@ export function InvestmentsManager() {
 
           <Dialog open={isHoldingDialogOpen} onOpenChange={setIsHoldingDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Plus className="w-4 h-4 me-2" />
-                {language === 'ar' ? 'حيازة' : 'Holding'}
-              </Button>
+              <button className="flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-2xl bg-muted/40 border border-border/40 hover:bg-muted/60 active:scale-95 transition-all">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-sm">
+                  <Coins className="w-[15px] h-[15px] text-white" strokeWidth={1.8} />
+                </div>
+                <span className="text-[10px] font-semibold text-foreground/70">{language === 'ar' ? 'حيازة' : 'Holding'}</span>
+              </button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-lg max-h-[92svh] overflow-y-auto">
               <DialogHeader>
@@ -573,10 +586,12 @@ export function InvestmentsManager() {
 
           <Dialog open={isTransactionDialogOpen} onOpenChange={setIsTransactionDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="gold">
-                <DollarSign className="w-4 h-4 me-2" />
-                {language === 'ar' ? 'عملية' : 'Transaction'}
-              </Button>
+              <button className="flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-2xl bg-primary/10 border border-primary/30 hover:bg-primary/15 active:scale-95 transition-all">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-sm">
+                  <DollarSign className="w-[15px] h-[15px] text-white" strokeWidth={1.8} />
+                </div>
+                <span className="text-[10px] font-semibold text-primary">{language === 'ar' ? 'عملية' : 'Transaction'}</span>
+              </button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md max-h-[92svh] overflow-y-auto">
               <DialogHeader>
@@ -650,22 +665,63 @@ export function InvestmentsManager() {
         </div>
       </div>
 
-      {/* Portfolio Selector */}
+      {/* Portfolio Selector — compact chip row */}
       {portfolios && portfolios.length > 0 && (
         <div className="flex gap-2 flex-wrap">
           {portfolios.map(p => (
-            <Button
+            <button
               key={p.id}
-              variant={selectedPortfolioId === p.id ? 'default' : 'outline'}
-              size="sm"
               onClick={() => setSelectedPortfolioId(p.id)}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all active:scale-95',
+                selectedPortfolioId === p.id
+                  ? 'bg-card border-border/60 shadow-sm text-foreground'
+                  : 'bg-muted/30 border-transparent text-muted-foreground hover:bg-muted/50'
+              )}
             >
-              <Wallet className="w-4 h-4 me-2" />
+              <Wallet className="w-3.5 h-3.5" />
               {p.name}
-            </Button>
+            </button>
           ))}
         </div>
       )}
+
+      {/* Goals-style 4-column tab nav — placed ABOVE KPIs */}
+      {(() => {
+        const INV_TABS = [
+          { id: 'holdings',     label: language === 'ar' ? 'الحيازات'  : 'Holdings',     icon: Wallet,     from: 'from-emerald-500', to: 'to-teal-600',   activeBorder: 'border-emerald-400/40' },
+          { id: 'allocation',   label: language === 'ar' ? 'التوزيع'   : 'Allocation',   icon: PieChart,   from: 'from-violet-500',  to: 'to-purple-600', activeBorder: 'border-violet-400/40'  },
+          { id: 'rebalance',    label: language === 'ar' ? 'التوازن'   : 'Rebalance',    icon: RefreshCw,  from: 'from-amber-500',   to: 'to-orange-500', activeBorder: 'border-amber-400/40'   },
+          { id: 'transactions', label: language === 'ar' ? 'العمليات'  : 'Transactions', icon: DollarSign, from: 'from-blue-500',    to: 'to-indigo-500', activeBorder: 'border-blue-400/40'    },
+        ] as const;
+        return (
+          <div className="grid grid-cols-4 gap-2">
+            {INV_TABS.map(tab => {
+              const isActive = activeTab === tab.id;
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    'flex flex-col items-center justify-center gap-2 py-3 px-1 rounded-2xl transition-all duration-200 active:scale-95 border',
+                    isActive
+                      ? cn('bg-card/80 border-border/50 shadow-sm', tab.activeBorder)
+                      : 'border-transparent bg-muted/30 hover:bg-muted/50',
+                  )}
+                >
+                  <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-sm', tab.from, tab.to)}>
+                    <Icon className="w-[18px] h-[18px] text-white" strokeWidth={1.8} />
+                  </div>
+                  <p className={cn('text-[10px] font-semibold text-center leading-tight', isActive ? 'text-foreground' : 'text-foreground/60')}>
+                    {tab.label}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        );
+      })()}
 
       {/* Smart Alerts Bar */}
       {(priceAlerts.length > 0 || rebalancingSuggestions.length > 0) && (
@@ -801,43 +857,6 @@ export function InvestmentsManager() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Goals-style 4-column tab nav */}
-      {(() => {
-        const INV_TABS = [
-          { id: 'holdings',     label: language === 'ar' ? 'الحيازات'       : 'Holdings',     icon: Wallet,     from: 'from-emerald-500', to: 'to-teal-600',   activeBorder: 'border-emerald-400/40' },
-          { id: 'allocation',   label: language === 'ar' ? 'التوزيع'        : 'Allocation',   icon: PieChart,   from: 'from-violet-500',  to: 'to-purple-600', activeBorder: 'border-violet-400/40'  },
-          { id: 'rebalance',    label: language === 'ar' ? 'التوازن'        : 'Rebalance',    icon: RefreshCw,  from: 'from-amber-500',   to: 'to-orange-500', activeBorder: 'border-amber-400/40'   },
-          { id: 'transactions', label: language === 'ar' ? 'العمليات'       : 'Transactions', icon: DollarSign, from: 'from-blue-500',    to: 'to-indigo-500', activeBorder: 'border-blue-400/40'    },
-        ] as const;
-        return (
-          <div className="grid grid-cols-4 gap-2">
-            {INV_TABS.map(tab => {
-              const isActive = activeTab === tab.id;
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    'flex flex-col items-center justify-center gap-2 py-3 px-1 rounded-2xl transition-all duration-200 active:scale-95 border',
-                    isActive
-                      ? cn('bg-card/80 border-border/50 shadow-sm', tab.activeBorder)
-                      : 'border-transparent bg-muted/30 hover:bg-muted/50',
-                  )}
-                >
-                  <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-sm', tab.from, tab.to)}>
-                    <Icon className="w-[18px] h-[18px] text-white" strokeWidth={1.8} />
-                  </div>
-                  <p className={cn('text-[10px] font-semibold text-center leading-tight', isActive ? 'text-foreground' : 'text-foreground/60')}>
-                    {tab.label}
-                  </p>
-                </button>
-              );
-            })}
-          </div>
-        );
-      })()}
 
         {/* Holdings Tab */}
         {activeTab === 'holdings' && <div className="space-y-4 mt-6">
