@@ -13,34 +13,34 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Plus, MoreVertical, Pencil, Archive, RotateCcw, Trash2, FileText, Link2, Film, BookOpen, File, ExternalLink, Search, Database, LayoutGrid } from 'lucide-react';
+import { Plus, MoreVertical, Pencil, Archive, RotateCcw, Trash2, FileText, Link2, Film, BookOpen, File, ExternalLink, Search, Database, LayoutGrid, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { UnifiedResourcesView } from './UnifiedResourcesView';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 
- 
-const resourceTypes: { value: ResourceType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { value: 'note', label: 'ملاحظة', icon: FileText },
-  { value: 'file', label: 'ملف', icon: File },
-  { value: 'link', label: 'رابط', icon: Link2 },
-  { value: 'course', label: 'دورة', icon: BookOpen },
-  { value: 'media', label: 'وسائط', icon: Film },
-  { value: 'document', label: 'مستند', icon: FileText },
+const resourceTypes: { value: ResourceType; label: string; icon: React.ComponentType<{ className?: string }>; color: string }[] = [
+  { value: 'note',     label: 'ملاحظة', icon: FileText, color: 'text-blue-500'    },
+  { value: 'file',     label: 'ملف',     icon: File,     color: 'text-purple-500'  },
+  { value: 'link',     label: 'رابط',    icon: Link2,    color: 'text-cyan-500'    },
+  { value: 'course',   label: 'دورة',    icon: BookOpen, color: 'text-amber-500'   },
+  { value: 'media',    label: 'وسائط',   icon: Film,     color: 'text-pink-500'    },
+  { value: 'document', label: 'مستند',   icon: FileText, color: 'text-green-500'   },
 ];
 
 export function ResourcesView() {
   const { t } = useLanguage();
-  const [showArchived, setShowArchived] = useState(false);
-  const [showUnified, setShowUnified] = useState(false);
-  const [activeType, setActiveType] = useState<ResourceType | 'all'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterAreaId, setFilterAreaId] = useState<string>('');
+  const [showArchived,    setShowArchived]    = useState(false);
+  const [showUnified,     setShowUnified]     = useState(false);
+  const [showFilters,     setShowFilters]     = useState(false);
+  const [activeType,      setActiveType]      = useState<ResourceType | 'all'>('all');
+  const [searchQuery,     setSearchQuery]     = useState('');
+  const [filterAreaId,    setFilterAreaId]    = useState<string>('');
   const [filterProjectId, setFilterProjectId] = useState<string>('');
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDialogOpen,    setIsDialogOpen]    = useState(false);
   const [editingResource, setEditingResource] = useState<Resource | null>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteId,        setDeleteId]        = useState<string | null>(null);
   const [formData, setFormData] = useState({
     type: 'note' as ResourceType,
     title: '',
@@ -53,10 +53,9 @@ export function ResourcesView() {
   });
   const [tagInput, setTagInput] = useState('');
 
-  // Realtime subscription
   useRealtimeSubscription({ table: 'resources', queryKey: ['resources'] });
 
-  const { data: areas } = useActiveAreas();
+  const { data: areas }    = useActiveAreas();
   const { data: projects } = useProjects();
   const { data: resources, isLoading } = useResources({
     type: activeType === 'all' ? undefined : activeType,
@@ -65,21 +64,18 @@ export function ResourcesView() {
     includeArchived: showArchived,
   });
 
-  const createResource = useCreateResource();
-  const updateResource = useUpdateResource();
+  const createResource  = useCreateResource();
+  const updateResource  = useUpdateResource();
   const archiveResource = useArchiveResource();
   const restoreResource = useRestoreResource();
-  const deleteResource = useDeleteResource();
+  const deleteResource  = useDeleteResource();
 
-  // If showing unified view
   if (showUnified) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-5">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-foreground">الموارد الموحدة</h2>
-          <Button variant="outline" onClick={() => setShowUnified(false)}>
-            العودة للعرض العادي
-          </Button>
+          <h2 className="text-xl font-bold text-foreground">الموارد الموحدة</h2>
+          <Button variant="outline" size="sm" onClick={() => setShowUnified(false)}>العودة</Button>
         </div>
         <UnifiedResourcesView />
       </div>
@@ -92,16 +88,7 @@ export function ResourcesView() {
   );
 
   const resetForm = () => {
-    setFormData({
-      type: 'note',
-      title: '',
-      description: '',
-      content: '',
-      source_url: '',
-      area_id: '',
-      project_id: '',
-      tags: [],
-    });
+    setFormData({ type: 'note', title: '', description: '', content: '', source_url: '', area_id: '', project_id: '', tags: [] });
     setTagInput('');
     setEditingResource(null);
   };
@@ -137,18 +124,13 @@ export function ResourcesView() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.title.trim()) {
-      toast.error('العنوان مطلوب');
-      return;
-    }
-
+    if (!formData.title.trim()) { toast.error('العنوان مطلوب'); return; }
     try {
       const payload = {
         ...formData,
-        area_id: formData.area_id || null,
+        area_id:    formData.area_id    || null,
         project_id: formData.project_id || null,
       };
-
       if (editingResource) {
         await updateResource.mutateAsync({ id: editingResource.id, ...payload });
         toast.success('تم تحديث المورد بنجاح');
@@ -158,118 +140,112 @@ export function ResourcesView() {
       }
       setIsDialogOpen(false);
       resetForm();
-    } catch (error) {
-      toast.error('حدث خطأ');
-    }
+    } catch { toast.error('حدث خطأ'); }
   };
 
   const handleArchive = async (id: string) => {
-    try {
-      await archiveResource.mutateAsync(id);
-      toast.success('تم أرشفة المورد');
-    } catch (error) {
-      toast.error('حدث خطأ');
-    }
+    try { await archiveResource.mutateAsync(id); toast.success('تم أرشفة المورد'); }
+    catch { toast.error('حدث خطأ'); }
   };
 
   const handleRestore = async (id: string) => {
-    try {
-      await restoreResource.mutateAsync(id);
-      toast.success('تم استعادة المورد');
-    } catch (error) {
-      toast.error('حدث خطأ');
-    }
+    try { await restoreResource.mutateAsync(id); toast.success('تم استعادة المورد'); }
+    catch { toast.error('حدث خطأ'); }
   };
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    try {
-      await deleteResource.mutateAsync(deleteId);
-      toast.success('تم حذف المورد');
-      setDeleteId(null);
-    } catch (error) {
-      toast.error('حدث خطأ');
-    }
+    try { await deleteResource.mutateAsync(deleteId); toast.success('تم حذف المورد'); setDeleteId(null); }
+    catch { toast.error('حدث خطأ'); }
   };
 
-  const getTypeIcon = (type: ResourceType) => {
-    const typeInfo = resourceTypes.find(t => t.value === type);
-    return typeInfo?.icon || FileText;
-  };
+  const getTypeInfo = (type: ResourceType) => resourceTypes.find(t => t.value === type) ?? resourceTypes[0];
 
   if (isLoading) {
-    return <div className="flex items-center justify-center p-8">جارٍ التحميل...</div>;
+    return (
+      <div className="space-y-4 animate-pulse">
+        {[1, 2, 3].map(i => <div key={i} className="h-28 rounded-2xl bg-muted/40" />)}
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">الموارد (Resources)</h2>
-          <p className="text-muted-foreground">ملاحظات، ملفات، روابط، دورات، ووسائط</p>
+          <h2 className="text-xl font-bold text-foreground">الموارد</h2>
+          <p className="text-sm text-muted-foreground">ملاحظات، ملفات، روابط، دورات، ووسائط</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowUnified(true)}>
-            <LayoutGrid className="w-4 h-4 ml-2" />
-            عرض موحد
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)} className="gap-2">
+            <Filter className="w-4 h-4" />
+            <span className="hidden sm:inline">فلاتر</span>
           </Button>
-          <Button onClick={() => handleOpenDialog()} className="bg-gradient-gold text-primary-foreground">
-            <Plus className="w-4 h-4 ml-2" />
+          <Button variant="outline" size="sm" onClick={() => setShowUnified(true)} className="gap-2">
+            <LayoutGrid className="w-4 h-4" />
+            <span className="hidden sm:inline">موحد</span>
+          </Button>
+          <Button variant="gold" size="sm" onClick={() => handleOpenDialog()} className="gap-2">
+            <Plus className="w-4 h-4" />
             مورد جديد
           </Button>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-4">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="بحث في الموارد..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pr-10"
-          />
-        </div>
-        <Select value={filterAreaId} onValueChange={setFilterAreaId}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="كل المجالات" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">كل المجالات</SelectItem>
-            {areas?.map((area) => (
-              <SelectItem key={area.id} value={area.id}>{area.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={filterProjectId} onValueChange={setFilterProjectId}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="كل المشاريع" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">كل المشاريع</SelectItem>
-            {projects?.map((project) => (
-              <SelectItem key={project.id} value={project.id}>{project.title}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <div className="flex items-center gap-2">
-          <Switch
-            id="show-archived-resources"
-            checked={showArchived}
-            onCheckedChange={setShowArchived}
-          />
-          <Label htmlFor="show-archived-resources">إظهار المؤرشف</Label>
-        </div>
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input
+          placeholder="بحث في الموارد..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pr-10 bg-muted/50 border-border/50"
+        />
       </div>
 
+      {/* Advanced Filters (collapsible) */}
+      {showFilters && (
+        <div className="glass-card p-4 space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Select value={filterAreaId} onValueChange={setFilterAreaId}>
+              <SelectTrigger className="bg-muted/50 border-border/50">
+                <SelectValue placeholder="كل المجالات" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">كل المجالات</SelectItem>
+                {areas?.map((area) => (
+                  <SelectItem key={area.id} value={area.id}>{area.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterProjectId} onValueChange={setFilterProjectId}>
+              <SelectTrigger className="bg-muted/50 border-border/50">
+                <SelectValue placeholder="كل المشاريع" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">كل المشاريع</SelectItem>
+                {projects?.map((project) => (
+                  <SelectItem key={project.id} value={project.id}>{project.title}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch id="show-archived-resources" checked={showArchived} onCheckedChange={setShowArchived} />
+            <Label htmlFor="show-archived-resources" className="text-xs cursor-pointer">إظهار المؤرشف</Label>
+          </div>
+        </div>
+      )}
+
       {/* Type filter pills */}
-      <div className="flex flex-nowrap gap-1.5 overflow-x-auto pb-1">
+      <div className="flex flex-nowrap gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
         <button
           onClick={() => setActiveType('all')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
-            activeType === 'all' ? 'bg-primary text-primary-foreground' : 'bg-muted/60 text-muted-foreground hover:bg-muted'
+            activeType === 'all'
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'bg-muted/60 text-muted-foreground hover:bg-muted'
           }`}
         >
           الكل
@@ -279,7 +255,9 @@ export function ResourcesView() {
             key={type.value}
             onClick={() => setActiveType(type.value)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
-              activeType === type.value ? 'bg-primary text-primary-foreground' : 'bg-muted/60 text-muted-foreground hover:bg-muted'
+              activeType === type.value
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'bg-muted/60 text-muted-foreground hover:bg-muted'
             }`}
           >
             <type.icon className="w-3.5 h-3.5" />
@@ -289,29 +267,30 @@ export function ResourcesView() {
       </div>
 
       {/* Resources Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {filteredResources?.map((resource) => {
-          const TypeIcon = getTypeIcon(resource.type);
+          const typeInfo = getTypeInfo(resource.type);
+          const TypeIcon = typeInfo.icon;
           return (
             <div
               key={resource.id}
-              className={`rounded-2xl border border-border/50 bg-card/50 p-4 space-y-2 transition-all duration-200 hover:shadow-lg ${
-                resource.status === 'archived' ? 'opacity-60' : ''
+              className={`glass-card p-4 space-y-2.5 transition-all duration-200 ${
+                resource.status === 'archived' ? 'opacity-50' : ''
               }`}
             >
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-xl bg-muted/60 flex items-center justify-center">
-                    <TypeIcon className="w-5 h-5 text-muted-foreground" />
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-muted/60 flex items-center justify-center shrink-0">
+                    <TypeIcon className={`w-5 h-5 ${typeInfo.color}`} />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="font-semibold text-sm line-clamp-1">{resource.title}</p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <Badge variant="outline" className="text-xs">
-                        {resourceTypes.find(t => t.value === resource.type)?.label}
+                    <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                      <Badge variant="outline" className="text-xs py-0">
+                        {typeInfo.label}
                       </Badge>
                       {resource.status === 'archived' && (
-                        <Badge variant="secondary" className="text-xs">مؤرشف</Badge>
+                        <Badge variant="secondary" className="text-xs py-0">مؤرشف</Badge>
                       )}
                     </div>
                   </div>
@@ -325,45 +304,45 @@ export function ResourcesView() {
                   <DropdownMenuContent align="end">
                     {resource.source_url && (
                       <DropdownMenuItem onClick={() => window.open(resource.source_url, '_blank')}>
-                        <ExternalLink className="w-4 h-4 ml-2" />
-                        فتح الرابط
+                        <ExternalLink className="w-4 h-4 ml-2" />فتح الرابط
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem onClick={() => handleOpenDialog(resource)}>
-                      <Pencil className="w-4 h-4 ml-2" />
-                      تعديل
+                      <Pencil className="w-4 h-4 ml-2" />تعديل
                     </DropdownMenuItem>
                     {resource.status === 'active' ? (
                       <DropdownMenuItem onClick={() => handleArchive(resource.id)}>
-                        <Archive className="w-4 h-4 ml-2" />
-                        أرشفة
+                        <Archive className="w-4 h-4 ml-2" />أرشفة
                       </DropdownMenuItem>
                     ) : (
                       <DropdownMenuItem onClick={() => handleRestore(resource.id)}>
-                        <RotateCcw className="w-4 h-4 ml-2" />
-                        استعادة
+                        <RotateCcw className="w-4 h-4 ml-2" />استعادة
                       </DropdownMenuItem>
                     )}
-                    <DropdownMenuItem
-                      onClick={() => setDeleteId(resource.id)}
-                      className="text-destructive"
-                    >
-                      <Trash2 className="w-4 h-4 ml-2" />
-                      حذف
+                    <DropdownMenuItem onClick={() => setDeleteId(resource.id)} className="text-destructive">
+                      <Trash2 className="w-4 h-4 ml-2" />حذف
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
+
               {resource.description && (
-                <p className="text-sm text-muted-foreground line-clamp-2">{resource.description}</p>
+                <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">{resource.description}</p>
               )}
-              <div className="flex flex-wrap gap-1">
-                {resource.tags?.slice(0, 3).map((tag: string) => (
-                  <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
-                ))}
-              </div>
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>{resource.areas?.name || resource.projects?.title || ''}</span>
+
+              {resource.tags && resource.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {resource.tags.slice(0, 3).map((tag: string) => (
+                    <Badge key={tag} variant="secondary" className="text-xs py-0">{tag}</Badge>
+                  ))}
+                  {resource.tags.length > 3 && (
+                    <Badge variant="secondary" className="text-xs py-0">+{resource.tags.length - 3}</Badge>
+                  )}
+                </div>
+              )}
+
+              <div className="flex items-center justify-between text-xs text-muted-foreground pt-0.5 border-t border-border/30">
+                <span className="truncate max-w-[60%]">{resource.areas?.name || resource.projects?.title || '—'}</span>
                 <span>{format(new Date(resource.updated_at), 'dd MMM', { locale: ar })}</span>
               </div>
             </div>
@@ -372,162 +351,163 @@ export function ResourcesView() {
       </div>
 
       {filteredResources?.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
-          <Database className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>لا توجد موارد</p>
-          <Button
-            variant="outline"
-            className="mt-4"
-            onClick={() => handleOpenDialog()}
-          >
-            أضف أول مورد
+        <div className="text-center py-16 text-muted-foreground">
+          <div className="w-16 h-16 rounded-2xl bg-muted/40 flex items-center justify-center mx-auto mb-4">
+            <Database className="w-8 h-8 opacity-40" />
+          </div>
+          <p className="font-medium mb-1">لا توجد موارد</p>
+          <p className="text-xs mb-4">أضف ملاحظات، روابط، ملفات، أو دورات</p>
+          <Button variant="outline" size="sm" onClick={() => handleOpenDialog()}>
+            <Plus className="w-4 h-4 ml-1" />أضف أول مورد
           </Button>
         </div>
       )}
 
-      {/* Create/Edit Sheet */}
+      {/* Create / Edit Sheet */}
       <ResponsiveSheet
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         title={editingResource ? 'تعديل المورد' : 'مورد جديد'}
       >
-          <div className="space-y-4 pb-4">
+        <div className="space-y-4 pb-4">
+          <div>
+            <Label className="text-xs font-semibold text-muted-foreground">النوع</Label>
+            <Select
+              value={formData.type}
+              onValueChange={(v: ResourceType) => setFormData({ ...formData, type: v })}
+            >
+              <SelectTrigger className="bg-muted/50 border-border/50 mt-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {resourceTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    <div className="flex items-center gap-2">
+                      <type.icon className={`w-4 h-4 ${type.color}`} />
+                      {type.label}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="text-xs font-semibold text-muted-foreground">العنوان</Label>
+            <Input
+              dir="auto"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              placeholder="عنوان المورد..."
+              className="bg-muted/50 border-border/50 mt-1"
+            />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold text-muted-foreground">الوصف</Label>
+            <Textarea
+              dir="auto"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="وصف مختصر..."
+              rows={2}
+              className="bg-muted/50 border-border/50 mt-1 resize-none"
+            />
+          </div>
+          {(formData.type === 'link' || formData.type === 'course') && (
             <div>
-              <Label>النوع</Label>
+              <Label className="text-xs font-semibold text-muted-foreground">الرابط</Label>
+              <Input
+                type="url"
+                value={formData.source_url}
+                onChange={(e) => setFormData({ ...formData, source_url: e.target.value })}
+                placeholder="https://..."
+                className="bg-muted/50 border-border/50 mt-1"
+              />
+            </div>
+          )}
+          {(formData.type === 'note' || formData.type === 'document') && (
+            <div>
+              <Label className="text-xs font-semibold text-muted-foreground">المحتوى</Label>
+              <Textarea
+                dir="auto"
+                value={formData.content}
+                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                placeholder="محتوى المورد..."
+                rows={4}
+                className="bg-muted/50 border-border/50 mt-1 resize-none"
+              />
+            </div>
+          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs font-semibold text-muted-foreground">المجال</Label>
               <Select
-                value={formData.type}
-                onValueChange={(value: ResourceType) => setFormData({ ...formData, type: value })}
+                value={formData.area_id || 'none'}
+                onValueChange={(v) => setFormData({ ...formData, area_id: v === 'none' ? '' : v })}
               >
-                <SelectTrigger>
-                  <SelectValue />
+                <SelectTrigger className="bg-muted/50 border-border/50 mt-1">
+                  <SelectValue placeholder="اختر مجال" />
                 </SelectTrigger>
                 <SelectContent>
-                  {resourceTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      <div className="flex items-center gap-2">
-                        <type.icon className="w-4 h-4" />
-                        {type.label}
-                      </div>
-                    </SelectItem>
+                  <SelectItem value="none">بدون</SelectItem>
+                  {areas?.map((area) => (
+                    <SelectItem key={area.id} value={area.id}>{area.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label>العنوان</Label>
-              <Input
-                dir="auto"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="عنوان المورد..."
-              />
-            </div>
-            <div>
-              <Label>الوصف</Label>
-              <Textarea
-                dir="auto"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="وصف مختصر..."
-                rows={2}
-              />
-            </div>
-            {(formData.type === 'link' || formData.type === 'course') && (
-              <div>
-                <Label>الرابط</Label>
-                <Input
-                  type="url"
-                  value={formData.source_url}
-                  onChange={(e) => setFormData({ ...formData, source_url: e.target.value })}
-                  placeholder="https://..."
-                />
-              </div>
-            )}
-            {(formData.type === 'note' || formData.type === 'document') && (
-              <div>
-                <Label>المحتوى</Label>
-                <Textarea
-                  dir="auto"
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  placeholder="محتوى المورد..."
-                  rows={4}
-                />
-              </div>
-            )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label>المجال</Label>
-                <Select
-                  value={formData.area_id || 'none'}
-                  onValueChange={(value) => setFormData({ ...formData, area_id: value === 'none' ? '' : value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="اختر مجال" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">بدون</SelectItem>
-                    {areas?.map((area) => (
-                      <SelectItem key={area.id} value={area.id}>{area.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>المشروع</Label>
-                <Select
-                  value={formData.project_id || 'none'}
-                  onValueChange={(value) => setFormData({ ...formData, project_id: value === 'none' ? '' : value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="اختر مشروع" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">بدون</SelectItem>
-                    {projects?.map((project) => (
-                      <SelectItem key={project.id} value={project.id}>{project.title}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div>
-              <Label>الوسوم</Label>
-              <div className="flex gap-2 mb-2">
-                <Input
-                  dir="auto"
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
-                  placeholder="أضف وسم..."
-                  className="flex-1"
-                />
-                <Button type="button" variant="outline" onClick={handleAddTag}>
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {formData.tags.map((tag) => (
-                  <Badge 
-                    key={tag} 
-                    variant="secondary"
-                    className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
-                    onClick={() => handleRemoveTag(tag)}
-                  >
-                    {tag} ×
-                  </Badge>
-                ))}
-              </div>
-            </div>
-            <div className="flex gap-2 pt-2">
-              <Button variant="outline" className="flex-1" onClick={() => setIsDialogOpen(false)}>
-                إلغاء
-              </Button>
-              <Button className="flex-1" onClick={handleSubmit} disabled={createResource.isPending || updateResource.isPending}>
-                {editingResource ? 'تحديث' : 'إنشاء'}
-              </Button>
+              <Label className="text-xs font-semibold text-muted-foreground">المشروع</Label>
+              <Select
+                value={formData.project_id || 'none'}
+                onValueChange={(v) => setFormData({ ...formData, project_id: v === 'none' ? '' : v })}
+              >
+                <SelectTrigger className="bg-muted/50 border-border/50 mt-1">
+                  <SelectValue placeholder="اختر مشروع" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">بدون</SelectItem>
+                  {projects?.map((project) => (
+                    <SelectItem key={project.id} value={project.id}>{project.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
+          <div>
+            <Label className="text-xs font-semibold text-muted-foreground">الوسوم</Label>
+            <div className="flex gap-2 mt-1 mb-2">
+              <Input
+                dir="auto"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+                placeholder="أضف وسم واضغط Enter..."
+                className="flex-1 bg-muted/50 border-border/50"
+              />
+              <Button type="button" variant="outline" size="icon" onClick={handleAddTag}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {formData.tags.map((tag) => (
+                <Badge
+                  key={tag}
+                  variant="secondary"
+                  className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                  onClick={() => handleRemoveTag(tag)}
+                >
+                  {tag} ×
+                </Badge>
+              ))}
+            </div>
+          </div>
+          <div className="flex gap-2 pt-2">
+            <Button variant="outline" className="flex-1" onClick={() => setIsDialogOpen(false)}>إلغاء</Button>
+            <Button variant="gold" className="flex-1" onClick={handleSubmit} disabled={createResource.isPending || updateResource.isPending}>
+              {editingResource ? 'تحديث' : 'إنشاء'}
+            </Button>
+          </div>
+        </div>
       </ResponsiveSheet>
 
       {/* Delete Confirmation */}
@@ -535,15 +515,11 @@ export function ResourcesView() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
-            <AlertDialogDescription>
-              سيتم حذف هذا المورد نهائياً. لا يمكن التراجع عن هذا الإجراء.
-            </AlertDialogDescription>
+            <AlertDialogDescription>سيتم حذف هذا المورد نهائياً. لا يمكن التراجع.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>إلغاء</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
-              حذف
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">حذف</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

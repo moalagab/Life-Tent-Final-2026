@@ -12,31 +12,39 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
- 
-const typeConfig: Record<ArchivedItem['type'], { label: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
-  project: { label: 'مشروع', icon: FolderKanban, color: 'bg-blue-500' },
-  area: { label: 'مجال', icon: Layers, color: 'bg-purple-500' },
-  goal: { label: 'هدف', icon: Target, color: 'bg-primary/80' },
-  task: { label: 'مهمة', icon: CheckSquare, color: 'bg-green-500' },
-  resource: { label: 'مورد', icon: Database, color: 'bg-cyan-500' },
-  customer: { label: 'عميل', icon: Users, color: 'bg-pink-500' },
+const typeConfig: Record<
+  ArchivedItem['type'],
+  { label: string; icon: React.ComponentType<{ className?: string }>; bar: string; iconColor: string }
+> = {
+  project:  { label: 'مشروع', icon: FolderKanban, bar: 'bg-blue-500',    iconColor: 'text-blue-500'    },
+  area:     { label: 'مجال',   icon: Layers,       bar: 'bg-purple-500',  iconColor: 'text-purple-500'  },
+  goal:     { label: 'هدف',    icon: Target,       bar: 'bg-primary',     iconColor: 'text-primary'     },
+  task:     { label: 'مهمة',   icon: CheckSquare,  bar: 'bg-green-500',   iconColor: 'text-green-500'   },
+  resource: { label: 'مورد',   icon: Database,     bar: 'bg-cyan-500',    iconColor: 'text-cyan-500'    },
+  customer: { label: 'عميل',   icon: Users,        bar: 'bg-pink-500',    iconColor: 'text-pink-500'    },
 };
 
 export function ArchiveView() {
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeType, setActiveType] = useState<ArchivedItem['type'] | 'all'>('all');
+  const [activeType, setActiveType]   = useState<ArchivedItem['type'] | 'all'>('all');
   const queryClient = useQueryClient();
 
   const { data: archivedItems, isLoading } = useArchivedItems();
 
   const filteredItems = archivedItems?.filter((item) => {
-    const matchesSearch = 
+    const matchesSearch =
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = activeType === 'all' || item.type === activeType;
     return matchesSearch && matchesType;
   });
+
+  const groupedByType = filteredItems?.reduce((acc, item) => {
+    if (!acc[item.type]) acc[item.type] = [];
+    acc[item.type].push(item);
+    return acc;
+  }, {} as Record<ArchivedItem['type'], ArchivedItem[]>);
 
   const handleRestore = async (item: ArchivedItem) => {
     try {
@@ -44,30 +52,12 @@ export function ArchiveView() {
       let updateData: Record<string, unknown> = {};
 
       switch (item.type) {
-        case 'project':
-          tableName = 'projects';
-          updateData = { para_category: 'project', archived_at: null };
-          break;
-        case 'area':
-          tableName = 'areas';
-          updateData = { status: 'active', archived_at: null };
-          break;
-        case 'goal':
-          tableName = 'goals';
-          updateData = { is_active: true, archived_at: null };
-          break;
-        case 'task':
-          tableName = 'tasks';
-          updateData = { archived_at: null };
-          break;
-        case 'resource':
-          tableName = 'resources';
-          updateData = { status: 'active', archived_at: null };
-          break;
-        case 'customer':
-          tableName = 'customers';
-          updateData = { archived_at: null };
-          break;
+        case 'project':  tableName = 'projects';   updateData = { para_category: 'project', archived_at: null }; break;
+        case 'area':     tableName = 'areas';       updateData = { status: 'active', archived_at: null };         break;
+        case 'goal':     tableName = 'goals';       updateData = { is_active: true, archived_at: null };          break;
+        case 'task':     tableName = 'tasks';       updateData = { archived_at: null };                           break;
+        case 'resource': tableName = 'resources';   updateData = { status: 'active', archived_at: null };         break;
+        case 'customer': tableName = 'customers';   updateData = { archived_at: null };                           break;
       }
 
       const { error } = await supabase
@@ -81,100 +71,115 @@ export function ArchiveView() {
       toast.success('تم استعادة العنصر بنجاح');
       queryClient.invalidateQueries({ queryKey: ['archived-items'] });
       queryClient.invalidateQueries({ queryKey: [tableName] });
-    } catch (error) {
+    } catch {
       toast.error('حدث خطأ في استعادة العنصر');
     }
   };
 
-  const groupedByType = filteredItems?.reduce((acc, item) => {
-    if (!acc[item.type]) acc[item.type] = [];
-    acc[item.type].push(item);
-    return acc;
-  }, {} as Record<ArchivedItem['type'], ArchivedItem[]>);
-
   if (isLoading) {
-    return <div className="flex items-center justify-center p-8">جارٍ التحميل...</div>;
+    return (
+      <div className="space-y-4 animate-pulse">
+        {[1, 2, 3].map(i => <div key={i} className="h-28 rounded-2xl bg-muted/40" />)}
+      </div>
+    );
   }
 
+  const totalCount = archivedItems?.length ?? 0;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">الأرشيف (Archive)</h2>
-          <p className="text-muted-foreground">جميع العناصر المؤرشفة من كافة أقسام النظام</p>
+          <h2 className="text-xl font-bold text-foreground">الأرشيف</h2>
+          <p className="text-sm text-muted-foreground">جميع العناصر المؤرشفة من كافة أقسام النظام</p>
         </div>
-        <Badge variant="outline" className="text-lg px-4 py-2">
-          <Archive className="w-4 h-4 ml-2" />
-          {archivedItems?.length || 0} عنصر
-        </Badge>
+        <div className="flex items-center gap-2 bg-muted/50 rounded-xl px-3 py-2 self-start sm:self-auto">
+          <Archive className="w-4 h-4 text-muted-foreground" />
+          <span className="text-sm font-semibold">{totalCount}</span>
+          <span className="text-xs text-muted-foreground">عنصر</span>
+        </div>
       </div>
 
       {/* Search */}
-      <div className="relative max-w-md">
+      <div className="relative">
         <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           placeholder="بحث في الأرشيف..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pr-10"
+          className="pr-10 bg-muted/50 border-border/50"
         />
       </div>
 
       {/* Type filter pills */}
-      <div className="flex flex-nowrap gap-1.5 overflow-x-auto pb-1">
+      <div className="flex flex-nowrap gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
         <button
           onClick={() => setActiveType('all')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
-            activeType === 'all' ? 'bg-primary text-primary-foreground' : 'bg-muted/60 text-muted-foreground hover:bg-muted'
+            activeType === 'all'
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'bg-muted/60 text-muted-foreground hover:bg-muted'
           }`}
         >
           الكل
-          <span className="bg-white/20 px-1 rounded-full">{archivedItems?.length || 0}</span>
+          <span className={`px-1.5 py-0.5 rounded-full text-xs ${activeType === 'all' ? 'bg-white/20' : 'bg-muted'}`}>
+            {totalCount}
+          </span>
         </button>
-        {Object.entries(typeConfig).map(([type, config]) => {
-          const count = groupedByType?.[type as ArchivedItem['type']]?.length || 0;
+        {(Object.entries(typeConfig) as [ArchivedItem['type'], typeof typeConfig[keyof typeof typeConfig]][]).map(([type, config]) => {
+          const count = groupedByType?.[type]?.length ?? 0;
           if (count === 0) return null;
           return (
             <button
               key={type}
-              onClick={() => setActiveType(type as ArchivedItem['type'])}
+              onClick={() => setActiveType(type)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
-                activeType === type ? 'bg-primary text-primary-foreground' : 'bg-muted/60 text-muted-foreground hover:bg-muted'
+                activeType === type
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'bg-muted/60 text-muted-foreground hover:bg-muted'
               }`}
             >
               <config.icon className="w-3.5 h-3.5" />
               {config.label}
-              <span className="bg-white/20 px-1 rounded-full">{count}</span>
+              <span className={`px-1.5 py-0.5 rounded-full text-xs ${activeType === type ? 'bg-white/20' : 'bg-muted'}`}>
+                {count}
+              </span>
             </button>
           );
         })}
       </div>
 
+      {/* Empty state */}
       {filteredItems?.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <Archive className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>لا توجد عناصر مؤرشفة</p>
+        <div className="text-center py-16 text-muted-foreground">
+          <div className="w-16 h-16 rounded-2xl bg-muted/40 flex items-center justify-center mx-auto mb-4">
+            <Archive className="w-8 h-8 opacity-40" />
+          </div>
+          <p className="font-medium mb-1">لا توجد عناصر مؤرشفة</p>
+          <p className="text-xs">العناصر التي تؤرشفها ستظهر هنا</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {filteredItems?.map((item) => {
             const config = typeConfig[item.type];
             const Icon = config.icon;
             return (
               <div
                 key={`${item.type}-${item.id}`}
-                className="rounded-2xl border border-border/50 bg-card/50 p-4 space-y-2 relative overflow-hidden opacity-75 hover:opacity-100 transition-opacity"
+                className="glass-card relative overflow-hidden p-4 space-y-2.5 opacity-70 hover:opacity-100 transition-opacity duration-200"
               >
-                <div className={`absolute top-0 left-0 right-0 h-1 rounded-t-2xl ${config.color}`} />
-                <div className="flex items-start justify-between pt-1">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-muted/60`}>
-                      <Icon className="w-5 h-5 text-muted-foreground" />
+                {/* color bar */}
+                <div className={`absolute top-0 inset-x-0 h-0.5 rounded-t-2xl ${config.bar}`} />
+
+                <div className="flex items-start justify-between gap-2 pt-1">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-muted/60 flex items-center justify-center shrink-0">
+                      <Icon className={`w-5 h-5 ${config.iconColor}`} />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <p className="font-semibold text-sm line-clamp-1">{item.title}</p>
-                      <Badge variant="outline" className="text-xs mt-0.5">{config.label}</Badge>
+                      <Badge variant="outline" className="text-xs mt-0.5 py-0">{config.label}</Badge>
                     </div>
                   </div>
                   <DropdownMenu>
@@ -185,17 +190,18 @@ export function ArchiveView() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => handleRestore(item)}>
-                        <RotateCcw className="w-4 h-4 ml-2" />
-                        استعادة
+                        <RotateCcw className="w-4 h-4 ml-2" />استعادة
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
+
                 {item.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-2">{item.description}</p>
+                  <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">{item.description}</p>
                 )}
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>تمت الأرشفة</span>
+
+                <div className="flex items-center justify-between text-xs text-muted-foreground pt-0.5 border-t border-border/30">
+                  <span>مؤرشف</span>
                   <span>{format(new Date(item.archived_at), 'dd MMM yyyy', { locale: ar })}</span>
                 </div>
               </div>

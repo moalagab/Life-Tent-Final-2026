@@ -17,43 +17,43 @@ import { AreasDashboard } from './AreasDashboard';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 
 const colorOptions = [
-  '#6366f1', '#8b5cf6', '#ec4899', '#ef4444', '#f97316', 
-  '#eab308', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6'
+  '#1D3672', '#2563EB', '#7C3AED', '#A855F7',
+  '#EC4899', '#EF4444', '#F59E0B', '#10B981',
+  '#14B8A6', '#06B6D4',
 ];
 
 const cadenceOptions = [
-  { value: 'weekly', label: 'أسبوعي' },
-  { value: 'monthly', label: 'شهري' },
+  { value: 'weekly',    label: 'أسبوعي' },
+  { value: 'monthly',   label: 'شهري' },
   { value: 'quarterly', label: 'ربع سنوي' },
-  { value: 'yearly', label: 'سنوي' },
+  { value: 'yearly',    label: 'سنوي' },
 ];
 
 export function AreasView() {
   const { t } = useLanguage();
-  const [showArchived, setShowArchived] = useState(false);
+  const [showArchived, setShowArchived]   = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingArea, setEditingArea] = useState<Area | null>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen]   = useState(false);
+  const [editingArea, setEditingArea]     = useState<Area | null>(null);
+  const [deleteId, setDeleteId]           = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    color: '#6366f1',
+    color: '#1D3672',
     review_cadence: 'monthly' as string,
   });
 
-  // Realtime subscription
   useRealtimeSubscription({ table: 'areas', queryKey: ['areas'] });
 
   const { data: areas, isLoading } = useAreas(showArchived);
-  const createArea = useCreateArea();
-  const updateArea = useUpdateArea();
+  const createArea  = useCreateArea();
+  const updateArea  = useUpdateArea();
   const archiveArea = useArchiveArea();
   const restoreArea = useRestoreArea();
-  const deleteArea = useDeleteArea();
+  const deleteArea  = useDeleteArea();
 
   const resetForm = () => {
-    setFormData({ name: '', description: '', color: '#6366f1', review_cadence: 'monthly' });
+    setFormData({ name: '', description: '', color: '#1D3672', review_cadence: 'monthly' });
     setEditingArea(null);
   };
 
@@ -63,7 +63,7 @@ export function AreasView() {
       setFormData({
         name: area.name,
         description: area.description || '',
-        color: area.color || '#6366f1',
+        color: area.color || '#1D3672',
         review_cadence: area.review_cadence || 'monthly',
       });
     } else {
@@ -73,11 +73,7 @@ export function AreasView() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.name.trim()) {
-      toast.error('الاسم مطلوب');
-      return;
-    }
-
+    if (!formData.name.trim()) { toast.error('الاسم مطلوب'); return; }
     try {
       if (editingArea) {
         await updateArea.mutateAsync({ id: editingArea.id, ...formData });
@@ -88,103 +84,90 @@ export function AreasView() {
       }
       setIsDialogOpen(false);
       resetForm();
-    } catch (error) {
-      toast.error('حدث خطأ');
-    }
+    } catch { toast.error('حدث خطأ'); }
   };
 
   const handleArchive = async (id: string) => {
-    try {
-      await archiveArea.mutateAsync(id);
-      toast.success('تم أرشفة المجال');
-    } catch (error) {
-      toast.error('حدث خطأ');
-    }
+    try { await archiveArea.mutateAsync(id); toast.success('تم أرشفة المجال'); }
+    catch { toast.error('حدث خطأ'); }
   };
 
   const handleRestore = async (id: string) => {
-    try {
-      await restoreArea.mutateAsync(id);
-      toast.success('تم استعادة المجال');
-    } catch (error) {
-      toast.error('حدث خطأ');
-    }
+    try { await restoreArea.mutateAsync(id); toast.success('تم استعادة المجال'); }
+    catch { toast.error('حدث خطأ'); }
   };
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    try {
-      await deleteArea.mutateAsync(deleteId);
-      toast.success('تم حذف المجال');
-      setDeleteId(null);
-    } catch (error) {
-      toast.error('حدث خطأ');
-    }
+    try { await deleteArea.mutateAsync(deleteId); toast.success('تم حذف المجال'); setDeleteId(null); }
+    catch { toast.error('حدث خطأ'); }
   };
 
   if (isLoading) {
-    return <div className="flex items-center justify-center p-8">جارٍ التحميل...</div>;
+    return (
+      <div className="space-y-4 animate-pulse">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="h-28 rounded-2xl bg-muted/40" />
+        ))}
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">المجالات (Areas)</h2>
-          <p className="text-muted-foreground">المسؤوليات المستمرة التي تحتاج صيانة دائمة</p>
+          <h2 className="text-xl font-bold text-foreground">المجالات</h2>
+          <p className="text-sm text-muted-foreground">المسؤوليات المستمرة التي تحتاج صيانة دائمة</p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Switch
-              id="show-archived"
-              checked={showArchived}
-              onCheckedChange={setShowArchived}
-            />
-            <Label htmlFor="show-archived">إظهار المؤرشف</Label>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2 bg-muted/50 rounded-xl px-3 py-1.5">
+            <Switch id="show-archived" checked={showArchived} onCheckedChange={setShowArchived} />
+            <Label htmlFor="show-archived" className="text-xs cursor-pointer">المؤرشف</Label>
           </div>
-          <Button 
+          <Button
             variant={showDashboard ? 'default' : 'outline'}
+            size="sm"
             onClick={() => setShowDashboard(!showDashboard)}
+            className="gap-2"
           >
-            <BarChart3 className="w-4 h-4 ml-2" />
-            لوحة التحكم
+            <BarChart3 className="w-4 h-4" />
+            <span className="hidden sm:inline">لوحة التحكم</span>
           </Button>
-          <Button onClick={() => handleOpenDialog()} className="bg-gradient-gold text-primary-foreground">
-            <Plus className="w-4 h-4 ml-2" />
+          <Button variant="gold" size="sm" onClick={() => handleOpenDialog()} className="gap-2">
+            <Plus className="w-4 h-4" />
             مجال جديد
           </Button>
         </div>
       </div>
 
-      {/* Areas Dashboard */}
-      {showDashboard && (
-        <AreasDashboard />
-      )}
+      {showDashboard && <AreasDashboard />}
 
-      {/* Areas Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {areas?.map((area) => (
           <div
             key={area.id}
-            className={`rounded-2xl border border-border/50 bg-card/50 p-4 space-y-2 relative overflow-hidden transition-all duration-200 hover:shadow-lg ${
-              area.status === 'archived' ? 'opacity-60' : ''
+            className={`glass-card relative overflow-hidden p-4 space-y-3 transition-all duration-200 ${
+              area.status === 'archived' ? 'opacity-50' : ''
             }`}
           >
+            {/* color bar */}
             <div
-              className="absolute top-0 left-0 right-0 h-1 rounded-t-2xl"
-              style={{ backgroundColor: area.color || '#6366f1' }}
+              className="absolute top-0 inset-x-0 h-0.5 rounded-t-2xl"
+              style={{ backgroundColor: area.color || '#1D3672' }}
             />
             <div className="flex items-start justify-between pt-1">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3 min-w-0">
                 <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ backgroundColor: `${area.color}20` }}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: `${area.color || '#1D3672'}20` }}
                 >
-                  <Layers className="w-5 h-5" style={{ color: area.color || '#6366f1' }} />
+                  <Layers className="w-5 h-5" style={{ color: area.color || '#1D3672' }} />
                 </div>
-                <div>
-                  <p className="font-semibold text-base">{area.name}</p>
+                <div className="min-w-0">
+                  <p className="font-semibold text-sm leading-tight line-clamp-1">{area.name}</p>
                   {area.status === 'archived' && (
                     <Badge variant="secondary" className="mt-1 text-xs">مؤرشف</Badge>
                   )}
@@ -192,62 +175,56 @@ export function AreasView() {
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
                     <MoreVertical className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => handleOpenDialog(area)}>
-                    <Pencil className="w-4 h-4 ml-2" />
-                    تعديل
+                    <Pencil className="w-4 h-4 ml-2" />تعديل
                   </DropdownMenuItem>
                   {area.status === 'active' ? (
                     <DropdownMenuItem onClick={() => handleArchive(area.id)}>
-                      <Archive className="w-4 h-4 ml-2" />
-                      أرشفة
+                      <Archive className="w-4 h-4 ml-2" />أرشفة
                     </DropdownMenuItem>
                   ) : (
                     <DropdownMenuItem onClick={() => handleRestore(area.id)}>
-                      <RotateCcw className="w-4 h-4 ml-2" />
-                      استعادة
+                      <RotateCcw className="w-4 h-4 ml-2" />استعادة
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem
-                    onClick={() => setDeleteId(area.id)}
-                    className="text-destructive"
-                  >
-                    <Trash2 className="w-4 h-4 ml-2" />
-                    حذف
+                  <DropdownMenuItem onClick={() => setDeleteId(area.id)} className="text-destructive">
+                    <Trash2 className="w-4 h-4 ml-2" />حذف
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
+
             {area.description && (
-              <p className="text-sm text-muted-foreground line-clamp-2">{area.description}</p>
+              <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">{area.description}</p>
             )}
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Calendar className="w-3 h-3" />
-              <span>مراجعة: {cadenceOptions.find(c => c.value === area.review_cadence)?.label}</span>
+
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Calendar className="w-3 h-3 shrink-0" />
+              <span>{cadenceOptions.find(c => c.value === area.review_cadence)?.label ?? 'شهري'}</span>
             </div>
           </div>
         ))}
       </div>
 
       {areas?.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
-          <Layers className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>لا توجد مجالات حتى الآن</p>
-          <Button 
-            variant="outline" 
-            className="mt-4"
-            onClick={() => handleOpenDialog()}
-          >
-            أنشئ أول مجال
+        <div className="text-center py-16 text-muted-foreground">
+          <div className="w-16 h-16 rounded-2xl bg-muted/40 flex items-center justify-center mx-auto mb-4">
+            <Layers className="w-8 h-8 opacity-40" />
+          </div>
+          <p className="font-medium mb-1">لا توجد مجالات حتى الآن</p>
+          <p className="text-xs mb-4">أنشئ مجالاً لتتبع مسؤولياتك المستمرة</p>
+          <Button variant="outline" size="sm" onClick={() => handleOpenDialog()}>
+            <Plus className="w-4 h-4 ml-1" />أنشئ أول مجال
           </Button>
         </div>
       )}
 
-      {/* Create/Edit Dialog */}
+      {/* Create / Edit Sheet */}
       <ResponsiveSheet
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
@@ -279,16 +256,14 @@ export function AreasView() {
             <Label className="text-xs font-semibold text-muted-foreground">فترة المراجعة</Label>
             <Select
               value={formData.review_cadence}
-              onValueChange={(value) => setFormData({ ...formData, review_cadence: value as Area['review_cadence'] })}
+              onValueChange={(v) => setFormData({ ...formData, review_cadence: v as Area['review_cadence'] })}
             >
               <SelectTrigger className="bg-muted/50 border-border/50 mt-1">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {cadenceOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
+                {cadenceOptions.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -301,7 +276,7 @@ export function AreasView() {
                   key={color}
                   type="button"
                   className={`w-8 h-8 rounded-full transition-all active:scale-95 ${
-                    formData.color === color ? 'ring-2 ring-offset-2 ring-primary scale-110' : ''
+                    formData.color === color ? 'ring-2 ring-offset-2 ring-primary scale-110' : 'hover:scale-105'
                   }`}
                   style={{ backgroundColor: color }}
                   onClick={() => setFormData({ ...formData, color })}
@@ -310,10 +285,8 @@ export function AreasView() {
             </div>
           </div>
           <div className="flex gap-2 pt-2">
-            <Button variant="outline" className="flex-1" onClick={() => setIsDialogOpen(false)}>
-              إلغاء
-            </Button>
-            <Button className="flex-1" onClick={handleSubmit} disabled={createArea.isPending || updateArea.isPending}>
+            <Button variant="outline" className="flex-1" onClick={() => setIsDialogOpen(false)}>إلغاء</Button>
+            <Button variant="gold" className="flex-1" onClick={handleSubmit} disabled={createArea.isPending || updateArea.isPending}>
               {editingArea ? 'تحديث' : 'إنشاء'}
             </Button>
           </div>
@@ -325,15 +298,11 @@ export function AreasView() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
-            <AlertDialogDescription>
-              سيتم حذف هذا المجال نهائياً. لا يمكن التراجع عن هذا الإجراء.
-            </AlertDialogDescription>
+            <AlertDialogDescription>سيتم حذف هذا المجال نهائياً. لا يمكن التراجع.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>إلغاء</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
-              حذف
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">حذف</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
