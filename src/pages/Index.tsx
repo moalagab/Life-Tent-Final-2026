@@ -2,7 +2,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { GreetingSlim } from '@/components/dashboard/GreetingSlim';
 import { AttentionStrip } from '@/components/dashboard/AttentionStrip';
 import { KpiStrip } from '@/components/dashboard/KpiStrip';
-import { SectionHeader } from '@/components/dashboard/SectionHeader';
+import { DashboardSection } from '@/components/dashboard/DashboardSection';
 import { ProjectsOverview } from '@/components/dashboard/ProjectsOverview';
 import { FocusTasks } from '@/components/dashboard/FocusTasks';
 import { UpcomingEvents } from '@/components/dashboard/UpcomingEvents';
@@ -75,124 +75,116 @@ const Index = () => {
   // ---- Section renderers ----
   const sectionOverview = (
     <section key="overview">
-      <SectionHeader
+      <DashboardSection
         title={t('dashboard.overview')}
         icon={Sparkles}
-        collapsible
+        from="from-amber-400"
+        to="to-orange-500"
         open={overview.open}
         onToggle={overview.toggle}
         summary={isAr ? 'صافي الثروة · الإنفاق الشهري · المهام اليوم' : 'Net Worth · Monthly Burn · Tasks Today'}
-      />
-      {overview.open && <KpiStrip />}
+      >
+        <KpiStrip />
+      </DashboardSection>
     </section>
   );
 
   const sectionActiveWork = (
     <section key="active-work">
-      <SectionHeader
+      <DashboardSection
         title={t('dashboard.activeWork')}
         icon={Activity}
-        collapsible
+        from="from-blue-500"
+        to="to-indigo-600"
         open={activeWork.open}
         onToggle={activeWork.toggle}
         summary={isAr ? 'المشاريع · المهام · الأحداث القادمة' : 'Projects · Tasks · Upcoming Events'}
-      />
-      {activeWork.open && (
+      >
         <>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4 items-stretch">
-            <div className="lg:col-span-2 min-w-0">
-              <ProjectsOverview />
-            </div>
-            <div className="min-w-0 space-y-3 lg:space-y-4">
-              <FocusTasks />
-            </div>
+            <div className="lg:col-span-2 min-w-0"><ProjectsOverview /></div>
+            <div className="min-w-0 space-y-3 lg:space-y-4"><FocusTasks /></div>
           </div>
-          <div className="mt-3 lg:mt-4">
-            <UpcomingEvents />
-          </div>
+          <div className="mt-3 lg:mt-4"><UpcomingEvents /></div>
         </>
-      )}
+      </DashboardSection>
     </section>
   );
 
   const sectionRhythm = (
     <section key="rhythm">
-      <SectionHeader
+      <DashboardSection
         title={t('dashboard.rhythm')}
         icon={LayoutGrid}
-        collapsible
+        from="from-emerald-500"
+        to="to-teal-600"
         open={rhythm.open}
         onToggle={rhythm.toggle}
         summary={isAr ? 'الصلاة · العادات · الأهداف' : 'Prayer · Habits · Goals'}
-      />
-      {rhythm.open && (
+      >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 items-stretch">
           <div className="min-w-0"><PrayerWidget /></div>
           <div className="min-w-0"><HabitStreaks /></div>
           <div className="min-w-0 sm:col-span-2 lg:col-span-1"><GoalProgress /></div>
         </div>
-      )}
+      </DashboardSection>
     </section>
   );
 
   const sectionFinance = (
     <section key="finance">
-      <SectionHeader
+      <DashboardSection
         title={t('dashboard.financeSnapshot')}
         icon={Wallet}
-        collapsible
+        from="from-green-500"
+        to="to-emerald-600"
         open={finance.open}
         onToggle={finance.toggle}
         summary={isAr ? 'الحسابات · الإيرادات · المصروفات' : 'Accounts · Income · Expenses'}
-      />
-      {finance.open && (
-        <div className="grid grid-cols-1 gap-3 lg:gap-4">
-          <FinanceSnapshot />
-        </div>
-      )}
+      >
+        <FinanceSnapshot />
+      </DashboardSection>
     </section>
   );
 
   const sectionLibrary = (
     <section key="library">
-      <SectionHeader
+      <DashboardSection
         title={t('dashboard.libraryKnowledge')}
         icon={BookOpen}
-        collapsible
+        from="from-sky-500"
+        to="to-blue-600"
         open={library.open}
         onToggle={library.toggle}
         summary={isAr ? 'المعرفة · الاستوديو الإبداعي' : 'Knowledge · Creative Studio'}
-      />
-      {library.open && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4 animate-fade-in items-stretch">
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4 items-stretch">
           <div className="min-w-0"><KnowledgeWidget /></div>
           <div className="min-w-0"><StudioWidget /></div>
         </div>
-      )}
+      </DashboardSection>
     </section>
   );
 
   const sectionAI = (
     <section key="ai-intelligence">
-      <SectionHeader
+      <DashboardSection
         title={isAr ? 'الذكاء الاصطناعي' : 'AI Intelligence'}
         icon={Brain}
-        collapsible
+        from="from-violet-500"
+        to="to-purple-600"
         open={aiSection.open}
         onToggle={aiSection.toggle}
         summary={isAr ? 'إحاطة الصباح · نقطة التحقق · رؤى السلوك' : 'Morning Brief · Midday Check · Behavior Insights'}
-      />
-      {aiSection.open && (
+      >
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4 items-start">
-          <div className="lg:col-span-2 min-w-0">
-            <MorningBrief />
-          </div>
+          <div className="lg:col-span-2 min-w-0"><MorningBrief /></div>
           <div className="space-y-3 lg:space-y-4 min-w-0">
             <MiddayCheckpoint />
             <BehaviorInsights />
           </div>
         </div>
-      )}
+      </DashboardSection>
     </section>
   );
 
@@ -238,7 +230,7 @@ const Index = () => {
         )}
 
         {/* ── Sections per preset ── */}
-        <div className="space-y-5 lg:space-y-8">
+        <div className="space-y-3">
           {arrangements[preset]}
         </div>
       </div>
