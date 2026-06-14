@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { User, Bell, Globe, Shield, Palette, Database, ChevronDown, ChevronUp, Settings as SettingsIcon } from 'lucide-react';
+import { User, Bell, Globe, Shield, Palette, Database, ChevronDown, Brain, Settings as SettingsIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 import { ProfileSettings } from '@/components/settings/ProfileSettings';
@@ -9,8 +9,9 @@ import { PrivacySettings } from '@/components/settings/PrivacySettings';
 import { DataSyncSettings } from '@/components/settings/DataSyncSettings';
 import { NotificationSettings } from '@/components/settings/NotificationSettings';
 import { LanguageSettings } from '@/components/settings/LanguageSettings';
+import { AISettings } from '@/components/settings/AISettings';
 
-type SectionId = 'profile' | 'notifications' | 'language' | 'appearance' | 'privacy' | 'data';
+type SectionId = 'profile' | 'notifications' | 'language' | 'appearance' | 'privacy' | 'data' | 'ai';
 
 export default function Settings() {
   const { t } = useLanguage();
@@ -52,12 +53,19 @@ export default function Settings() {
       description: t('settings.privacyDesc'),
       gradient: 'from-red-500/20 to-rose-500/20'
     },
-    { 
-      id: 'data', 
-      label: t('settings.dataSync'), 
-      icon: Database, 
+    {
+      id: 'data',
+      label: t('settings.dataSync'),
+      icon: Database,
       description: t('settings.dataSyncDesc'),
       gradient: 'from-indigo-500/20 to-violet-500/20'
+    },
+    {
+      id: 'ai',
+      label: 'الذكاء الاصطناعي',
+      icon: Brain,
+      description: 'محرك القرار الذكي، الكاش، وإعدادات التحليل',
+      gradient: 'from-violet-500/20 to-purple-500/20'
     },
   ];
 
@@ -79,6 +87,8 @@ export default function Settings() {
         return <PrivacySettings />;
       case 'data':
         return <DataSyncSettings />;
+      case 'ai':
+        return <AISettings />;
       default:
         return null;
     }

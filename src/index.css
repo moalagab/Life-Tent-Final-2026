@@ -681,8 +681,8 @@
    Token names mirror @fluentui/tokens naming convention.
 ─────────────────────────────────────────────────────────────────────── */
 [data-platform="fluent"] {
-  font-family: "Segoe UI Variable", "Segoe UI", system-ui,
-               -apple-system, "Lama Sans", sans-serif;
+  font-family: "Lama Sans", "Segoe UI Variable", "Segoe UI",
+               system-ui, sans-serif;
 
   /* Radius — Fluent 2 scale (functional, tight) */
   --radius:    0.25rem;   /* 4px  — inputs, chips */
@@ -716,8 +716,8 @@
 }
 
 .dark [data-platform="fluent"] {
-  font-family: "Segoe UI Variable", "Segoe UI", system-ui,
-               -apple-system, "Lama Sans", sans-serif;
+  font-family: "Lama Sans", "Segoe UI Variable", "Segoe UI",
+               system-ui, sans-serif;
 
   --fluent-fill-subtle:   rgba(255,255,255,0.05);
   --fluent-fill-hover:    rgba(255,255,255,0.08);
@@ -796,8 +796,8 @@
    References: https://developer.apple.com/design/human-interface-guidelines/
 ═══════════════════════════════════════════════════════════════════ */
 [data-platform="hig"] {
-  font-family: -apple-system, "SF Pro Text", "SF Pro Display",
-               "Helvetica Neue", "Lama Sans", sans-serif;
+  font-family: "Lama Sans", -apple-system, "SF Pro Text", "SF Pro Display",
+               "Helvetica Neue", sans-serif;
 
   /* iOS radius scale */
   --radius:            0.625rem;   /* 10px — cells, controls */
@@ -838,8 +838,8 @@
 }
 
 .dark [data-platform="hig"] {
-  font-family: -apple-system, "SF Pro Text", "SF Pro Display",
-               "Helvetica Neue", "Lama Sans", sans-serif;
+  font-family: "Lama Sans", -apple-system, "SF Pro Text", "SF Pro Display",
+               "Helvetica Neue", sans-serif;
 
   --background: 0 0% 0%;       /* #000000 */
   --card:       240 3% 11%;    /* #1C1C1E */

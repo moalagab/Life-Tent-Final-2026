@@ -1,8 +1,10 @@
 import { useLanguage } from '@/hooks/useLanguage';
 import { useNotifications } from '@/hooks/useNotifications';
 import { usePushSubscription } from '@/hooks/usePushSubscription';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Switch } from '@/components/ui/switch';
-import { Bell, CalendarDays, CheckSquare, Repeat, AlertCircle, Mail, Smartphone } from 'lucide-react';
+import { Bell, CalendarDays, CheckSquare, Repeat, AlertCircle, Mail, Smartphone, Send, Loader2, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
@@ -45,9 +47,12 @@ export function NotificationSettings() {
   const { t, currentLanguage: language } = useLanguage();
   const { enabled, enableNotifications, disableNotifications, permission } = useNotifications();
   const { isSupported: pushSupported, isSubscribed: pushSubscribed, isLoading: pushLoading, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe } = usePushSubscription();
+  const { user } = useAuth();
   const [prefs, setPrefs] = useState<NotificationPrefs>(loadPrefs);
   const [emailDraft, setEmailDraft] = useState(prefs.emailAddress);
   const [savingEmail, setSavingEmail] = useState(false);
+  const [testingPush, setTestingPush]   = useState(false);
+  const [testPushDone, setTestPushDone] = useState(false);
 
   // Persist whenever prefs change
   useEffect(() => { savePrefs(prefs); }, [prefs]);
@@ -63,6 +68,29 @@ export function NotificationSettings() {
       const ok = await enableNotifications();
       if (ok) toast.success(t('settings.notificationsEnabled'));
       else toast.error(t('settings.notificationPermissionDenied'));
+    }
+  };
+
+  const handleTestPush = async () => {
+    if (!user || testingPush) return;
+    setTestingPush(true);
+    try {
+      const { error } = await supabase.functions.invoke('send-push', {
+        body: {
+          user_id: user.id,
+          title:   language === 'ar' ? '✅ إشعار تجريبي' : '✅ Test Notification',
+          body:    language === 'ar' ? 'إشعارات الجهاز تعمل بشكل صحيح!' : 'Device push notifications are working!',
+          url:     '/settings',
+        },
+      });
+      if (error) throw error;
+      setTestPushDone(true);
+      toast.success(language === 'ar' ? 'تم إرسال الإشعار التجريبي' : 'Test notification sent');
+      setTimeout(() => setTestPushDone(false), 3000);
+    } catch {
+      toast.error(language === 'ar' ? 'فشل إرسال الإشعار — تحقق من إعدادات VAPID' : 'Push failed — check VAPID configuration');
+    } finally {
+      setTestingPush(false);
     }
   };
 
@@ -129,7 +157,7 @@ export function NotificationSettings() {
 
       {/* Push Notifications (VAPID) */}
       {pushSupported && (
-        <div className="p-4 rounded-xl bg-muted/30 border border-border">
+        <div className="p-4 rounded-xl bg-muted/30 border border-border space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
@@ -161,10 +189,42 @@ export function NotificationSettings() {
               }}
             />
           </div>
+
+          {/* Status row */}
+          <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span className={`w-2 h-2 rounded-full ${pushSubscribed ? 'bg-success' : 'bg-muted-foreground/40'}`} />
+              {pushSubscribed
+                ? (language === 'ar' ? 'مشترك — الإشعارات مفعّلة' : 'Subscribed — notifications active')
+                : (language === 'ar' ? 'غير مشترك' : 'Not subscribed')}
+            </div>
+            {pushSubscribed && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs"
+                disabled={testingPush || !enabled}
+                onClick={handleTestPush}
+              >
+                {testingPush
+                  ? <Loader2 className="w-3 h-3 animate-spin me-1" />
+                  : testPushDone
+                  ? <CheckCircle2 className="w-3 h-3 text-success me-1" />
+                  : <Send className="w-3 h-3 me-1" />}
+                {language === 'ar' ? 'إشعار تجريبي' : 'Test push'}
+              </Button>
+            )}
+          </div>
+
           {!import.meta.env.VITE_VAPID_PUBLIC_KEY && (
-            <p className="mt-2 text-xs text-amber-500">
-              {language === 'ar' ? '⚠ VITE_VAPID_PUBLIC_KEY غير مضبوط في .env' : '⚠ VITE_VAPID_PUBLIC_KEY not set in .env'}
-            </p>
+            <div className="flex items-start gap-2 text-xs text-amber-500 bg-amber-500/10 rounded-lg p-2 border border-amber-500/20">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+              <span>
+                {language === 'ar'
+                  ? 'VITE_VAPID_PUBLIC_KEY غير مضبوط في .env — راجع إعدادات الذكاء الاصطناعي للتعليمات'
+                  : 'VITE_VAPID_PUBLIC_KEY not set in .env — see AI settings for instructions'}
+              </span>
+            </div>
           )}
         </div>
       )}

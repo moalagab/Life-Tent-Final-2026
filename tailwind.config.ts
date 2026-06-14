@@ -15,12 +15,12 @@ export default {
     },
     extend: {
       fontFamily: {
-        tajawal: ['Tajawal', 'sans-serif'],
-        sans:    ['Tajawal', 'sans-serif'],
-        // Fluent UI 2 — Windows/Web typography
-        fluent:  ['"Segoe UI Variable"', '"Segoe UI"', 'system-ui', '-apple-system', '"Lama Sans"', 'sans-serif'],
-        // Apple HIG — iOS/macOS typography
-        hig:     ['-apple-system', '"SF Pro Text"', '"SF Pro Display"', '"Helvetica Neue"', '"Lama Sans"', 'sans-serif'],
+        lama:    ['"Lama Sans"', 'system-ui', 'sans-serif'],
+        sans:    ['"Lama Sans"', 'system-ui', 'sans-serif'],
+        // Fluent UI 2 — Lama Sans first, Segoe UI as system fallback
+        fluent:  ['"Lama Sans"', '"Segoe UI Variable"', '"Segoe UI"', 'system-ui', 'sans-serif'],
+        // Apple HIG — Lama Sans first, SF Pro as system fallback
+        hig:     ['"Lama Sans"', '-apple-system', '"SF Pro Text"', '"SF Pro Display"', '"Helvetica Neue"', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
