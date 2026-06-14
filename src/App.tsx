@@ -84,10 +84,10 @@ function NativeBootstrap() {
     import('@capacitor/status-bar').then(({ StatusBar, Style }) => {
       if (theme === 'dark') {
         StatusBar.setStyle({ style: Style.Dark });
-        StatusBar.setBackgroundColor({ color: '#0B1733' });
+        StatusBar.setBackgroundColor({ color: '#131C32' });
       } else {
         StatusBar.setStyle({ style: Style.Light });
-        StatusBar.setBackgroundColor({ color: '#F4F5F8' });
+        StatusBar.setBackgroundColor({ color: '#EEF2FA' });
       }
     }).catch(() => {});
   }, [theme]);
