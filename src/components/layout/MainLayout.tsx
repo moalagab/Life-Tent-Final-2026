@@ -50,7 +50,14 @@ export function MainLayout({ children }: MainLayoutProps) {
         <>
           <MobileHeader />
 
-          <main className="min-h-screen pt-14 pb-[72px]">
+          {/* iOS-style main: respects nav bar + tab bar safe areas */}
+          <main
+            className="min-h-screen"
+            style={{
+              paddingTop:    'calc(44px + env(safe-area-inset-top, 0px))',
+              paddingBottom: 'calc(49px + env(safe-area-inset-bottom, 0px))',
+            }}
+          >
             {/* Offline banner */}
             {!isOnline && (
               <div className="flex items-center justify-center gap-2 px-4 py-2.5 bg-destructive/90 text-destructive-foreground text-xs font-medium">
@@ -79,18 +86,16 @@ export function MainLayout({ children }: MainLayoutProps) {
           <Sidebar />
 
           <main
-            className={cn(
-              'min-h-screen flex flex-col transition-all duration-300',
-              isRTL ? 'mr-64' : 'ml-64',
-            )}
+            className="min-h-screen flex flex-col"
+            style={{
+              marginInlineStart: 'var(--sidebar-width, 240px)',
+              transition: 'margin-inline-start 200ms ease-out',
+            }}
           >
-            {/* Top command bar */}
+            {/* Fluent command bar — 48px, acrylic/blur */}
             <div className={cn(
-              'sticky top-0 z-40 h-14 flex items-center gap-3',
+              'fluent-command-bar',
               'px-5 lg:px-7',
-              'bg-background/90 backdrop-blur-2xl',
-              'border-b border-border/50',
-              'shadow-[0_1px_3px_rgba(18,26,52,0.04)]',
             )}>
               <DashboardTopBar />
             </div>

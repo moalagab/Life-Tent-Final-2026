@@ -1,3 +1,12 @@
+/**
+ * Sidebar — Fluent UI 2 nav rail.
+ *
+ * Desktop:  fixed left/right rail, collapsible (240px ↔ 52px).
+ *           Active item: 3px accent bar + subtle tinted fill (fluent-fill-selected).
+ *           Mica-simulated: near-white/near-black with backdrop blur.
+ *
+ * Mobile:   Sheet overlay (unchanged from previous behaviour).
+ */
 import React, { useState, memo } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -18,17 +27,14 @@ import {
   Film,
   Settings,
   ChevronLeft,
-  ChevronRight,
   Tent,
   LogOut,
   Timer,
-  Menu,
   X,
   ShieldCheck,
 } from 'lucide-react';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
-interface NavItem { path: string; icon: React.ElementType; labelKey: string; activeColor?: string; activeBg?: string; }
+interface NavItem { path: string; icon: React.ElementType; labelKey: string; activeColor?: string; }
 
 interface SidebarContentProps {
   collapsed: boolean;
@@ -49,33 +55,53 @@ const SidebarContent = memo(function SidebarContent({
   collapsed, isMobile, navItems, locationPath, isRTL,
   onNavClick, onSignOut, onClose, onToggleCollapse, t, userName, userInitials,
 }: SidebarContentProps) {
+  const isCollapsed = collapsed && !isMobile;
+
   return (
-    <>
-      {/* Logo */}
-      <div className="flex items-center justify-between h-14 px-4 border-b border-sidebar-border/60">
-        <div className={cn('flex items-center gap-2.5', collapsed && !isMobile && 'justify-center w-full')}>
-          <div className="relative">
-            <div className="w-9 h-9 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold-glow-sm">
-              <Tent className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <div className="absolute -bottom-0.5 -end-0.5 w-2.5 h-2.5 bg-success rounded-full border-2 border-sidebar" />
+    <div className="flex flex-col h-full">
+
+      {/* ── Header — Fluent top area ── */}
+      <div className={cn(
+        'flex items-center border-b border-sidebar-border/50',
+        isCollapsed ? 'h-12 justify-center px-0' : 'h-12 justify-between px-3',
+      )}>
+        <div className={cn(
+          'flex items-center gap-2.5 min-w-0',
+          isCollapsed && 'justify-center',
+        )}>
+          {/* App icon — Fluent rounded square */}
+          <div className="w-8 h-8 rounded-fluent-sm bg-primary flex items-center justify-center shrink-0 shadow-sm">
+            <Tent className="w-4 h-4 text-primary-foreground" />
           </div>
-          {(!collapsed || isMobile) && (
-            <div className="flex flex-col leading-tight">
-              <span className="text-sm font-bold gold-text tracking-wide">LIFE TENT</span>
-              <span className="text-[10px] text-muted-foreground -mt-0.5">نظام حياتك</span>
+          {!isCollapsed && (
+            <div className="leading-tight min-w-0">
+              <p className="text-[13px] font-semibold text-foreground tracking-wide truncate">
+                LIFE TENT
+              </p>
+              <p className="text-[10px] text-muted-foreground leading-none">نظام حياتك</p>
             </div>
           )}
         </div>
+
         {isMobile && (
-          <button onClick={onClose} aria-label={t('common.close')} className="p-2 hover:bg-sidebar-accent rounded-lg">
-            <X className="w-5 h-5" aria-hidden="true" />
+          <button
+            onClick={onClose}
+            aria-label={t('common.close')}
+            className="p-1.5 rounded-fluent-sm text-muted-foreground hover:bg-[var(--fluent-fill-hover,rgba(0,0,0,0.06))] hover:text-foreground transition-colors"
+          >
+            <X className="w-4 h-4" />
           </button>
         )}
       </div>
 
-      {/* Navigation */}
-      <nav className="flex flex-col gap-1 p-3 mt-4 overflow-y-auto flex-1">
+      {/* ── Navigation items ── */}
+      <nav
+        aria-label="Main navigation"
+        className={cn(
+          'flex-1 overflow-y-auto py-2 space-y-0.5',
+          isCollapsed ? 'px-1.5' : 'px-2',
+        )}
+      >
         {navItems.map((item) => {
           const isActive = locationPath === item.path;
           return (
@@ -84,57 +110,70 @@ const SidebarContent = memo(function SidebarContent({
               to={item.path}
               onClick={onNavClick}
               aria-current={isActive ? 'page' : undefined}
+              title={isCollapsed ? t(item.labelKey) : undefined}
               className={cn(
-                'flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200',
-                'hover:bg-sidebar-accent group relative',
-                isActive && 'bg-sidebar-accent',
-                collapsed && !isMobile && 'justify-center'
+                'fluent-nav-item',
+                isCollapsed && 'justify-center px-0 w-[36px] mx-auto',
               )}
             >
-              {isActive && (
-                <div className="absolute top-1/2 -translate-y-1/2 start-0 w-1 h-8 bg-gradient-gold rounded-e-full" />
-              )}
-              <item.icon className={cn('w-5 h-5 transition-colors flex-shrink-0', isActive ? (item.activeColor || 'text-primary') : 'text-muted-foreground group-hover:text-foreground')} />
-              {(!collapsed || isMobile) && (
-                <span className={cn('text-sm font-medium transition-colors', isActive ? 'text-foreground font-semibold' : 'text-muted-foreground group-hover:text-foreground')}>
-                  {t(item.labelKey)}
-                </span>
-              )}
-              {collapsed && !isMobile && (
-                <div className="absolute px-2 py-1 bg-popover text-popover-foreground text-sm rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-lg border border-border start-full ms-2">
-                  {t(item.labelKey)}
-                </div>
+              <item.icon
+                className={cn(
+                  'shrink-0 transition-colors',
+                  isCollapsed ? 'w-[18px] h-[18px]' : 'w-[18px] h-[18px]',
+                  isActive
+                    ? (item.activeColor ?? 'text-primary')
+                    : 'text-muted-foreground group-hover:text-foreground',
+                )}
+              />
+              {!isCollapsed && (
+                <span className="flex-1 truncate">{t(item.labelKey)}</span>
               )}
             </NavLink>
           );
         })}
       </nav>
 
-      {/* Footer — user profile + settings */}
-      <div className="shrink-0 border-t border-sidebar-border/60 p-3 space-y-1">
+      {/* ── Footer — settings + user + collapse ── */}
+      <div className={cn(
+        'shrink-0 border-t border-sidebar-border/50 py-2 space-y-0.5',
+        isCollapsed ? 'px-1.5' : 'px-2',
+      )}>
         {/* Settings */}
         <NavLink
           to="/settings"
           onClick={onNavClick}
-          className={cn('flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 hover:bg-sidebar-accent group', collapsed && !isMobile && 'justify-center')}
+          aria-current={locationPath === '/settings' ? 'page' : undefined}
+          title={isCollapsed ? t('common.settings') : undefined}
+          className={cn(
+            'fluent-nav-item',
+            isCollapsed && 'justify-center px-0 w-[36px] mx-auto',
+          )}
         >
-          <Settings className="w-4.5 h-4.5 text-muted-foreground group-hover:text-foreground flex-shrink-0 w-[18px] h-[18px]" />
-          {(!collapsed || isMobile) && (
-            <span className="text-sm text-muted-foreground group-hover:text-foreground">{t('common.settings')}</span>
+          <Settings className={cn(
+            'shrink-0 transition-colors',
+            isCollapsed ? 'w-[18px] h-[18px]' : 'w-[18px] h-[18px]',
+            locationPath === '/settings' ? 'text-primary' : 'text-muted-foreground',
+          )} />
+          {!isCollapsed && (
+            <span className="flex-1">{t('common.settings')}</span>
           )}
         </NavLink>
 
         {/* User row */}
-        {(!collapsed || isMobile) ? (
-          <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-sidebar-accent/60">
-            <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center shrink-0">
-              <span className="text-[10px] font-bold text-primary-foreground">{userInitials || '?'}</span>
+        {!isCollapsed ? (
+          <div className="flex items-center gap-2 px-2 py-2 rounded-fluent-sm bg-sidebar-accent/50 mt-1">
+            <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0">
+              <span className="text-[9px] font-bold text-primary-foreground leading-none">
+                {userInitials ?? '?'}
+              </span>
             </div>
-            <span className="text-sm font-medium text-foreground flex-1 truncate">{userName || 'User'}</span>
+            <span className="text-[13px] font-medium text-foreground flex-1 truncate">
+              {userName ?? 'User'}
+            </span>
             <button
               onClick={onSignOut}
-              className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
               title={t('common.signOut')}
+              className="p-1 rounded-fluent-sm text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
             </button>
@@ -142,133 +181,121 @@ const SidebarContent = memo(function SidebarContent({
         ) : (
           <button
             onClick={onSignOut}
-            className="flex items-center justify-center w-full py-2.5 rounded-xl hover:bg-destructive/15 group"
+            title={t('common.signOut')}
+            className="fluent-nav-item justify-center px-0 w-[36px] mx-auto"
           >
-            <LogOut className="w-[18px] h-[18px] text-muted-foreground group-hover:text-destructive" />
+            <LogOut className="w-[18px] h-[18px] text-muted-foreground" />
           </button>
         )}
 
-        {/* Collapse toggle */}
+        {/* Collapse toggle (desktop only) */}
         {!isMobile && (
           <button
             onClick={onToggleCollapse}
-            aria-label={collapsed ? t('common.expand') : t('common.collapse')}
-            className={cn('flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 w-full hover:bg-sidebar-accent group', collapsed && 'justify-center')}
+            aria-label={isCollapsed ? t('common.expand') : t('common.collapse')}
+            className={cn(
+              'fluent-nav-item mt-1',
+              isCollapsed && 'justify-center px-0 w-[36px] mx-auto',
+            )}
           >
-            <ChevronLeft className={cn('w-4 h-4 text-muted-foreground group-hover:text-foreground transition-transform rtl:-scale-x-100', collapsed && 'rotate-180')} />
-            {!collapsed && <span className="text-xs text-muted-foreground group-hover:text-foreground">{t('common.collapse')}</span>}
+            <ChevronLeft
+              className={cn(
+                'w-[18px] h-[18px] text-muted-foreground transition-transform duration-200',
+                isRTL    && '-scale-x-100',
+                isCollapsed && 'rotate-180',
+              )}
+            />
+            {!isCollapsed && (
+              <span className="text-xs text-muted-foreground flex-1">
+                {t('common.collapse')}
+              </span>
+            )}
           </button>
         )}
       </div>
-    </>
+    </div>
   );
 });
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
+
+  // Communicate sidebar width to MainLayout via CSS variable
+  React.useEffect(() => {
+    document.documentElement.style.setProperty(
+      '--sidebar-width',
+      collapsed ? '52px' : '240px',
+    );
+  }, [collapsed]);
+  const location  = useLocation();
+  const navigate  = useNavigate();
   const { signOut, user } = useAuth();
-  const { t, isRTL } = useLanguage();
-  const isMobile = useIsMobile();
-  const isAdmin = useIsAdmin();
+  const { t, isRTL }     = useLanguage();
+  const isMobile         = useIsMobile();
+  const isAdmin          = useIsAdmin();
   const { isModuleActive } = useModuleAccess();
 
-  const allNavItems = [
-    { path: '/dashboard',  icon: LayoutDashboard, labelKey: 'common.dashboard',  activeColor: 'text-blue-500',    activeBg: 'bg-blue-500' },
-    { path: '/projects',   icon: FolderKanban,    labelKey: 'common.projects',   activeColor: 'text-purple-500',  activeBg: 'bg-purple-500' },
-    { path: '/tasks',      icon: CheckSquare,     labelKey: 'common.tasks',      activeColor: 'text-blue-500',    activeBg: 'bg-blue-500' },
-    { path: '/goals',      icon: Target,          labelKey: 'common.goals',      activeColor: 'text-amber-500',   activeBg: 'bg-amber-500' },
-    { path: '/finance',    icon: Wallet,          labelKey: 'common.finance',    activeColor: 'text-emerald-500', activeBg: 'bg-emerald-500' },
-    { path: '/knowledge',  icon: BookOpen,        labelKey: 'common.knowledge',  activeColor: 'text-violet-500',  activeBg: 'bg-violet-500' },
-    { path: '/habits',     icon: Repeat,          labelKey: 'common.habits',     activeColor: 'text-green-500',   activeBg: 'bg-green-500' },
-    { path: '/calendar',   icon: Calendar,        labelKey: 'common.calendar',   activeColor: 'text-sky-500',     activeBg: 'bg-sky-500' },
-    { path: '/studio',     icon: Film,            labelKey: 'common.studio',     activeColor: 'text-rose-500',    activeBg: 'bg-rose-500' },
-    { path: '/pomodoro',   icon: Timer,           labelKey: 'common.pomodoro',   activeColor: 'text-orange-500',  activeBg: 'bg-orange-500' },
-    ...(isAdmin ? [{ path: '/admin', icon: ShieldCheck, labelKey: 'common.admin', activeColor: 'text-primary', activeBg: 'bg-primary' }] : []),
+  const allNavItems: NavItem[] = [
+    { path: '/dashboard',  icon: LayoutDashboard, labelKey: 'common.dashboard',  activeColor: 'text-blue-500'    },
+    { path: '/projects',   icon: FolderKanban,    labelKey: 'common.projects',   activeColor: 'text-purple-500'  },
+    { path: '/tasks',      icon: CheckSquare,     labelKey: 'common.tasks',      activeColor: 'text-blue-500'    },
+    { path: '/goals',      icon: Target,          labelKey: 'common.goals',      activeColor: 'text-amber-500'   },
+    { path: '/finance',    icon: Wallet,          labelKey: 'common.finance',    activeColor: 'text-emerald-500' },
+    { path: '/knowledge',  icon: BookOpen,        labelKey: 'common.knowledge',  activeColor: 'text-violet-500'  },
+    { path: '/habits',     icon: Repeat,          labelKey: 'common.habits',     activeColor: 'text-green-500'   },
+    { path: '/calendar',   icon: Calendar,        labelKey: 'common.calendar',   activeColor: 'text-sky-500'     },
+    { path: '/studio',     icon: Film,            labelKey: 'common.studio',     activeColor: 'text-rose-500'    },
+    { path: '/pomodoro',   icon: Timer,           labelKey: 'common.pomodoro',   activeColor: 'text-orange-500'  },
+    ...(isAdmin ? [{ path: '/admin', icon: ShieldCheck, labelKey: 'common.admin', activeColor: 'text-primary' }] : []),
   ];
 
-  // Only show modules the user has unlocked (utility tools + admin always shown)
   const navItems = allNavItems.filter(item => {
-    const module = item.path.slice(1); // '/tasks' → 'tasks'
+    const module = item.path.slice(1);
     return module === 'admin' || isModuleActive(module);
   });
 
-  const fullName = (
-    user?.user_metadata?.full_name
-    || user?.user_metadata?.name
-    || user?.email?.split('@')[0]
-    || ''
-  );
-  const userName = fullName.split(' ')[0] || user?.email?.split('@')[0] || '';
+  const fullName     = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || '';
+  const userName     = fullName.split(' ')[0] || user?.email?.split('@')[0] || '';
   const userInitials = fullName
     ? fullName.split(' ').filter(Boolean).slice(0, 2).map((w: string) => w[0].toUpperCase()).join('')
     : '?';
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
-  };
-
-  const handleNavClick = () => {
-    if (isMobile) {
-      setMobileOpen(false);
-    }
-  };
 
   const sharedProps: SidebarContentProps = {
     collapsed, isMobile, navItems,
     locationPath: location.pathname,
     isRTL, t,
-    onNavClick: handleNavClick,
-    onSignOut: handleSignOut,
-    onClose: () => setMobileOpen(false),
+    onNavClick:      () => { if (isMobile) setMobileOpen(false); },
+    onSignOut:       async () => { await signOut(); navigate('/'); },
+    onClose:         () => setMobileOpen(false),
     onToggleCollapse: () => setCollapsed(c => !c),
     userName,
     userInitials,
   };
 
-  // Mobile sidebar
-  if (isMobile) {
-    return (
-      <>
-        {/* Mobile header bar — matches desktop top-bar height (h-14) */}
-        <div className="fixed top-0 inset-x-0 z-50 h-14 bg-sidebar/95 backdrop-blur-xl border-b border-sidebar-border/60 flex items-center justify-between px-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold-glow-sm">
-              <Tent className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <span className="text-sm font-bold gold-text tracking-wide">LIFE TENT</span>
-          </div>
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild>
-              <button aria-label={t('common.expand')} className="p-2 hover:bg-sidebar-accent rounded-lg">
-                <Menu className="w-6 h-6" aria-hidden="true" />
-              </button>
-            </SheetTrigger>
-            <SheetContent side={isRTL ? 'right' : 'left'} className="p-0 w-72 bg-sidebar border-sidebar-border">
-              <div className="flex flex-col h-full">
-                <SidebarContent {...sharedProps} />
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
-      </>
-    );
-  }
+  /* ── Mobile: null — all navigation via BottomNav (Apple HIG pattern) ── */
+  if (isMobile) return null;
 
-  // Desktop sidebar
+  /* ── Desktop: Fluent nav rail ── */
+  const railWidth = collapsed ? 'w-[52px]' : 'w-60';
+
   return (
     <aside
       className={cn(
-        'fixed top-0 z-40 h-screen transition-all duration-300 ease-in-out flex flex-col',
-        'bg-sidebar',
+        'fixed top-0 z-40 h-screen flex flex-col',
+        'bg-sidebar transition-[width] duration-200 ease-out',
         isRTL
-          ? 'right-0 border-s border-sidebar-border/40 shadow-[-1px_0_12px_rgba(18,26,52,0.06)]'
-          : 'left-0 border-e border-sidebar-border/40 shadow-[1px_0_12px_rgba(18,26,52,0.06)]',
-        collapsed ? 'w-20' : 'w-64'
+          ? 'right-0 border-s border-sidebar-border/50'
+          : 'left-0  border-e border-sidebar-border/50',
+        railWidth,
+        // Mica simulation: very light blur over underlying content
+        'backdrop-blur-[1px]',
       )}
+      style={{
+        boxShadow: isRTL
+          ? '-1px 0 12px rgba(18,26,52,0.05)'
+          :  '1px 0 12px rgba(18,26,52,0.05)',
+      }}
     >
       <SidebarContent {...sharedProps} />
     </aside>

@@ -660,14 +660,323 @@
 }
 
 @keyframes fade-in {
-  from { 
-    opacity: 0; 
+  from {
+    opacity: 0;
     transform: translateY(10px);
   }
-  to { 
-    opacity: 1; 
+  to {
+    opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PLATFORM DESIGN SYSTEMS
+   ── Fluent UI 2  ──  [data-platform="fluent"]  ──  Web / Desktop
+   ── Apple HIG    ──  [data-platform="hig"]     ──  iOS / Mobile
+═══════════════════════════════════════════════════════════════════════ */
+
+/* ─── Fluent UI 2 — Windows 11 / Web design language ─────────────────
+   References: https://github.com/microsoft/fluentui
+   Token names mirror @fluentui/tokens naming convention.
+─────────────────────────────────────────────────────────────────────── */
+[data-platform="fluent"] {
+  font-family: "Segoe UI Variable", "Segoe UI", system-ui,
+               -apple-system, "Lama Sans", sans-serif;
+
+  /* Radius — Fluent 2 scale (functional, tight) */
+  --radius:    0.25rem;   /* 4px  — inputs, chips */
+  --radius-md: 0.5rem;    /* 8px  — cards, panels */
+  --radius-lg: 0.75rem;   /* 12px — dialogs */
+
+  /* Fill tokens (Fluent Neutral) */
+  --fluent-fill-subtle:   rgba(0,0,0,0.04);
+  --fluent-fill-hover:    rgba(0,0,0,0.06);
+  --fluent-fill-pressed:  rgba(0,0,0,0.10);
+  --fluent-fill-selected: hsl(var(--primary) / 0.09);
+
+  /* Elevation (Depth 4 / 8 / 16 / 64) */
+  --elev-1: 0 1px 2px rgba(0,0,0,0.07), 0 0 1px rgba(0,0,0,0.04);
+  --elev-2: 0 2px 4px rgba(0,0,0,0.08), 0 0 2px rgba(0,0,0,0.05);
+  --elev-3: 0 4px 8px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06);
+  --elev-4: 0 8px 16px rgba(0,0,0,0.12),0 2px 8px rgba(0,0,0,0.07);
+
+  /* Motion tokens */
+  --fluent-fast:         100ms;
+  --fluent-normal:       200ms;
+  --fluent-slow:         300ms;
+  --fluent-curve:        cubic-bezier(0.33, 0, 0.67, 1);
+  --fluent-curve-decel:  cubic-bezier(0, 0, 0, 1);
+  --fluent-curve-accel:  cubic-bezier(1, 0, 1, 1);
+
+  /* Mica-simulated sidebar */
+  --sidebar-background: 220 22% 98%;
+  --sidebar-accent:     220 14% 93%;
+  --sidebar-border:     220 14% 90%;
+}
+
+.dark [data-platform="fluent"] {
+  font-family: "Segoe UI Variable", "Segoe UI", system-ui,
+               -apple-system, "Lama Sans", sans-serif;
+
+  --fluent-fill-subtle:   rgba(255,255,255,0.05);
+  --fluent-fill-hover:    rgba(255,255,255,0.08);
+  --fluent-fill-pressed:  rgba(255,255,255,0.12);
+  --fluent-fill-selected: hsl(var(--primary) / 0.22);
+
+  --elev-1: 0 1px 2px rgba(0,0,0,0.40),  0 0 1px rgba(0,0,0,0.30);
+  --elev-2: 0 2px 6px rgba(0,0,0,0.45),  0 4px 12px rgba(0,0,0,0.35);
+  --elev-3: 0 4px 12px rgba(0,0,0,0.50), 0 8px 24px rgba(0,0,0,0.40);
+  --elev-4: 0 8px 20px rgba(0,0,0,0.55), 0 16px 48px rgba(0,0,0,0.50);
+
+  --sidebar-background: 220 14% 10%;
+  --sidebar-accent:     220 14% 17%;
+  --sidebar-border:     220 14% 20%;
+}
+
+/* Flatten glass/card to Fluent surface style on web */
+[data-platform="fluent"] .lt-card,
+[data-platform="fluent"] .glass-card {
+  border-radius: var(--radius-md);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  box-shadow: var(--elev-2);
+}
+[data-platform="fluent"] .lt-card:hover,
+[data-platform="fluent"] .glass-card:hover {
+  transform: none;
+  box-shadow: var(--elev-3);
+  border-color: hsl(var(--border));
+}
+
+/* ─── Fluent Nav Item — sidebar navigation ───────────────────────── */
+.fluent-nav-item {
+  @apply relative flex items-center gap-3 h-9 w-full px-3 text-sm
+         text-muted-foreground rounded-[4px] no-underline;
+  transition: background 100ms cubic-bezier(0.33,0,0.67,1),
+              color     100ms cubic-bezier(0.33,0,0.67,1);
+}
+.fluent-nav-item:hover {
+  background: var(--fluent-fill-hover, rgba(0,0,0,0.06));
+  @apply text-foreground;
+}
+.fluent-nav-item[aria-current="page"] {
+  background: var(--fluent-fill-selected, rgba(0,0,0,0.08));
+  @apply text-foreground font-semibold;
+}
+/* Accent bar — Fluent active indicator */
+.fluent-nav-item[aria-current="page"]::before {
+  content: '';
+  position: absolute;
+  inset-block: 20%;
+  inset-inline-start: 0;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: hsl(var(--primary));
+}
+[dir="rtl"] .fluent-nav-item[aria-current="page"]::before {
+  border-radius: 3px 0 0 3px;
+}
+
+/* ─── Fluent command bar top strip ───────────────────────────────── */
+.fluent-command-bar {
+  @apply sticky top-0 z-40 flex items-center gap-3;
+  height: 48px;
+  background-color: hsl(var(--background) / 0.92);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border-bottom: 1px solid hsl(var(--border) / 0.60);
+  box-shadow: var(--elev-1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Apple Human Interface Guidelines — iOS / iPadOS design language
+   References: https://developer.apple.com/design/human-interface-guidelines/
+═══════════════════════════════════════════════════════════════════ */
+[data-platform="hig"] {
+  font-family: -apple-system, "SF Pro Text", "SF Pro Display",
+               "Helvetica Neue", "Lama Sans", sans-serif;
+
+  /* iOS radius scale */
+  --radius:            0.625rem;   /* 10px — cells, controls */
+  --ios-radius-modal:  1.25rem;    /* 20px — sheets */
+  --ios-radius-icon:   0.8125rem;  /* 13px — app icons */
+
+  /* iOS semantic system colors */
+  --ios-blue:   211 100% 50%;   /* #007AFF */
+  --ios-green:  142  70% 49%;   /* #34C759 */
+  --ios-red:      4  90% 58%;   /* #FF3B30 */
+  --ios-orange:  35 100% 50%;   /* #FF9500 */
+  --ios-gray:   240   2% 56%;   /* #8E8E93 systemGray */
+  --ios-gray-4: 240   5% 82%;   /* #D1D1D6 */
+  --ios-gray-5: 240   5% 90%;   /* #E5E5EA */
+  --ios-gray-6: 240   5% 95%;   /* #F2F2F7 */
+
+  /* iOS grouped background layers (light) */
+  --background:       240 5% 96%;  /* systemGroupedBackground */
+  --card:             0 0% 100%;   /* insetGrouped cells */
+  --muted:            240 5% 96%;
+  --muted-foreground: 240 2% 56%;
+  --border:           240 6% 83%;  /* hairline */
+
+  /* iOS elevation (very flat, subtle) */
+  --elev-1: 0 1px 3px rgba(0,0,0,0.08);
+  --elev-2: 0 2px 8px rgba(0,0,0,0.10);
+  --elev-3: 0 4px 20px rgba(0,0,0,0.12);
+  --elev-4: 0 8px 40px rgba(0,0,0,0.15);
+
+  /* iOS safe-area & sizing */
+  --ios-nav-height:   44px;
+  --ios-tab-height:   49px;
+  --ios-touch-min:    44px;
+
+  /* iOS motion */
+  --ios-ease:   cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ios-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dark [data-platform="hig"] {
+  font-family: -apple-system, "SF Pro Text", "SF Pro Display",
+               "Helvetica Neue", "Lama Sans", sans-serif;
+
+  --background: 0 0% 0%;       /* #000000 */
+  --card:       240 3% 11%;    /* #1C1C1E */
+  --border:     240 3% 22%;
+  --muted:      240 3% 11%;
+  --muted-foreground: 240 2% 62%;
+}
+
+/* iOS Navigation Bar */
+.hig-nav-bar {
+  @apply fixed top-0 inset-x-0 z-50 flex items-end justify-between px-4;
+  @apply backdrop-blur-2xl;
+  background-color: hsl(var(--background) / 0.88);
+  height: calc(44px + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: 8px;
+  border-bottom: 0.5px solid rgba(60,60,67,0.29);
+}
+.dark .hig-nav-bar {
+  border-bottom-color: rgba(84,84,88,0.65);
+}
+
+/* iOS Tab Bar */
+.hig-tab-bar {
+  @apply fixed bottom-0 inset-x-0 z-50 flex items-start justify-around;
+  @apply backdrop-blur-2xl;
+  background-color: hsl(var(--background) / 0.88);
+  height: calc(49px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-top: 0;
+  border-top: 0.5px solid rgba(60,60,67,0.29);
+}
+.dark .hig-tab-bar {
+  border-top-color: rgba(84,84,88,0.65);
+}
+
+/* iOS Tab Item */
+.hig-tab-item {
+  @apply flex flex-col items-center justify-center gap-0.5 py-2 flex-1
+         no-underline;
+  min-width: 44px;
+  color: #8E8E93;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: -0.15px;
+  transition: color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.hig-tab-item.is-active,
+.dark .hig-tab-item.is-active {
+  color: hsl(var(--primary));
+}
+
+/* iOS grouped list section */
+.hig-section {
+  @apply bg-card overflow-hidden mb-5;
+  border-radius: 10px;
+  box-shadow: var(--elev-1);
+}
+.hig-cell {
+  @apply flex items-center gap-3 px-4 py-3 bg-card transition-colors;
+  min-height: 44px;
+  border-bottom: 0.5px solid rgba(60,60,67,0.18);
+}
+.hig-cell:last-child { border-bottom: none; }
+.hig-cell:active { background: hsl(var(--ios-gray-5, 240 5% 90%)); }
+
+/* iOS Large Title (appears below nav bar, scrolls away) */
+.hig-large-title {
+  @apply font-bold leading-tight tracking-tight px-4 pb-2 pt-1;
+  font-size: 34px;
+}
+
+/* ─── Platform input overrides ────────────────────────────────────── */
+
+/* Fluent: bottom underline on focus, small radius */
+[data-platform="fluent"] input.lt-input {
+  border-radius: 4px;
+}
+[data-platform="fluent"] input.lt-input:focus-visible {
+  --tw-ring-shadow: none;
+  box-shadow: 0 2px 0 0 hsl(var(--primary)), var(--elev-1);
+  border-color: hsl(var(--primary));
+  outline: none;
+}
+
+/* HIG: filled tray, 44px touch target, no outer border, pill-ish radius */
+[data-platform="hig"] input.lt-input {
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(120, 120, 128, 0.12);
+  border-color: transparent;
+}
+.dark [data-platform="hig"] input.lt-input {
+  background: rgba(118, 118, 128, 0.24);
+}
+[data-platform="hig"] input.lt-input:focus-visible {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--card));
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.20);
+  --tw-ring-shadow: none;
+}
+
+/* ─── Fluent dialog / radix overrides ────────────────────────────── */
+[data-platform="fluent"] [role="dialog"],
+[data-platform="fluent"] [data-radix-popper-content-wrapper] > * {
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: var(--elev-4);
+}
+
+/* ─── HIG sheet / dialog overrides ───────────────────────────────── */
+[data-platform="hig"] [data-radix-dialog-content] {
+  border-radius: 20px 20px 0 0;
+}
+[data-platform="hig"] [data-radix-popper-content-wrapper] > * {
+  border-radius: 13px;
+  box-shadow: var(--elev-3);
+}
+
+/* ─── Fluent badge / chip ─────────────────────────────────────────── */
+[data-platform="fluent"] .badge,
+[data-platform="fluent"] [data-slot="badge"] {
+  border-radius: 4px;
+  font-size: 12px;
+  padding: 0 6px;
+  height: 20px;
+}
+
+/* ─── HIG badge ───────────────────────────────────────────────────── */
+[data-platform="hig"] .badge,
+[data-platform="hig"] [data-slot="badge"] {
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
 }
 
 @keyframes scale-in {

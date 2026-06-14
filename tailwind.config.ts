@@ -16,7 +16,11 @@ export default {
     extend: {
       fontFamily: {
         tajawal: ['Tajawal', 'sans-serif'],
-        sans: ['Tajawal', 'sans-serif'],
+        sans:    ['Tajawal', 'sans-serif'],
+        // Fluent UI 2 — Windows/Web typography
+        fluent:  ['"Segoe UI Variable"', '"Segoe UI"', 'system-ui', '-apple-system', '"Lama Sans"', 'sans-serif'],
+        // Apple HIG — iOS/macOS typography
+        hig:     ['-apple-system', '"SF Pro Text"', '"SF Pro Display"', '"Helvetica Neue"', '"Lama Sans"', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -134,9 +138,17 @@ export default {
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg:   "var(--radius)",
+        md:   "calc(var(--radius) - 2px)",
+        sm:   "calc(var(--radius) - 4px)",
+        // Fluent 2 named radii
+        "fluent-sm":  "4px",
+        "fluent-md":  "8px",
+        "fluent-lg":  "12px",
+        // Apple HIG named radii
+        "ios-cell":   "10px",
+        "ios-modal":  "20px",
+        "ios-icon":   "13px",
         "2xl": "1.5rem",
         "3xl": "2rem",
         card:   "24px",

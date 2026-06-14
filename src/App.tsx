@@ -15,6 +15,24 @@ import { useAppLifecycle } from "@/hooks/useAppLifecycle";
 import { isNative } from "@/lib/capacitor";
 import { useTheme } from "@/hooks/useTheme";
 
+/**
+ * PlatformInit — sets data-platform on <html> so CSS tokens apply.
+ *   "fluent" → Fluent UI 2  (desktop web, ≥768 px)
+ *   "hig"    → Apple HIG    (mobile web + native iOS/Android)
+ */
+function PlatformInit() {
+  useEffect(() => {
+    const apply = () => {
+      const platform = (isNative || window.innerWidth < 768) ? 'hig' : 'fluent';
+      document.documentElement.setAttribute('data-platform', platform);
+    };
+    apply();
+    window.addEventListener('resize', apply);
+    return () => window.removeEventListener('resize', apply);
+  }, []);
+  return null;
+}
+
 // Lazy-load all pages — nothing is eagerly bundled into the critical path
 const LandingPage     = lazy(() => import("./pages/LandingPage"));
 const Auth            = lazy(() => import("./pages/Auth"));
@@ -82,6 +100,7 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
+          <PlatformInit />
           <NativeBootstrap />
           <Toaster />
           <Sonner />
