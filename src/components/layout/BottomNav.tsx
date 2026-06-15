@@ -5,20 +5,19 @@
  * Style:   translucent, backdrop-blur, hairline top separator.
  * Active:  icon + label in primary color, heavier stroke weight.
  * Inactive: #8E8E93 (iOS systemGray).
- * More tab: opens a bottom sheet with all services (HIG-style sheet).
+ * More tab: opens AllServices sheet (lt-* design-system classes).
  */
 import { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, CheckSquare, Wallet, FolderKanban,
-  LayoutGrid, BookOpen, Repeat, Calendar, Film,
-  Timer, Settings, LogOut, User, Target, X,
+  LayoutDashboard, CheckSquare, Wallet, FolderKanban, LayoutGrid,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/hooks/useAuth';
 import { useModuleAccess } from '@/hooks/useModuleAccess';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { AllServices } from './AllServices';
 
 /* ── Primary tabs (4 visible + More) ──────────────────────────────── */
 const PRIMARY_TABS = [
@@ -28,19 +27,10 @@ const PRIMARY_TABS = [
   { path: '/projects',  icon: FolderKanban,    ar: 'المشاريع',  en: 'Projects' },
 ];
 
-/* ── Services shown in the More sheet ─────────────────────────────── */
-const SERVICES = [
-  { path: '/habits',   icon: Repeat,   ar: 'العادات',   en: 'Habits',    descAr: 'تتبع يومي',         descEn: 'Daily tracking',   from: 'from-green-500',   to: 'to-emerald-600'  },
-  { path: '/calendar', icon: Calendar, ar: 'التقويم',   en: 'Calendar',  descAr: 'المواعيد',           descEn: 'Schedule',         from: 'from-sky-500',     to: 'to-blue-600'     },
-  { path: '/knowledge',icon: BookOpen, ar: 'المعرفة',   en: 'Knowledge', descAr: 'ملاحظات ومقررات',   descEn: 'Notes & courses',  from: 'from-violet-500',  to: 'to-purple-600'   },
-  { path: '/studio',   icon: Film,     ar: 'الاستوديو', en: 'Studio',    descAr: 'كتب وأفلام',         descEn: 'Books & films',    from: 'from-rose-500',    to: 'to-pink-600'     },
-  { path: '/pomodoro', icon: Timer,    ar: 'بومودورو',  en: 'Pomodoro',  descAr: 'تركيز عميق',         descEn: 'Deep focus',       from: 'from-orange-500',  to: 'to-red-500'      },
-  { path: '/goals',    icon: Target,   ar: 'الأهداف',   en: 'Goals',     descAr: 'OKR والرؤية',        descEn: 'OKRs & vision',    from: 'from-amber-500',   to: 'to-orange-500'   },
-];
-
-const ACCOUNT_ITEMS = [
-  { path: '/profile',  icon: User,     ar: 'ملفي الشخصي', en: 'My Profile', from: 'from-primary',   to: 'to-primary/70' },
-  { path: '/settings', icon: Settings, ar: 'الإعدادات',   en: 'Settings',   from: 'from-slate-500', to: 'to-slate-600'  },
+/* ── Routes that live inside the More sheet (for isMoreActive check) ── */
+const MORE_PATHS = [
+  '/habits', '/calendar', '/knowledge', '/studio',
+  '/pomodoro', '/goals', '/profile', '/settings',
 ];
 
 /* ── Single tab button ─────────────────────────────────────────────── */
@@ -81,10 +71,15 @@ export function BottomNav() {
   const [moreOpen, setMoreOpen] = useState(false);
   const isAr = currentLanguage === 'ar';
 
-  const activePrimary  = PRIMARY_TABS.filter(t => isModuleActive(t.path.slice(1)));
-  const activeServices = SERVICES.filter(s => isModuleActive(s.path.slice(1)));
+  const activePrimary = PRIMARY_TABS.filter(t => isModuleActive(t.path.slice(1)));
 
-  const isMoreActive = [...SERVICES, ...ACCOUNT_ITEMS].some(item => pathname === item.path);
+  // Build a Set of active module IDs for AllServices filtering
+  const activeIds = new Set(
+    ['knowledge','calendar','habits','tasks','pomodoro','studio','goals','projects','finance']
+      .filter(id => isModuleActive(id))
+  );
+
+  const isMoreActive = MORE_PATHS.some(p => pathname === p);
 
   return (
     <>
@@ -119,143 +114,21 @@ export function BottomNav() {
         </button>
       </nav>
 
-      {/* ── Services sheet — iOS-style bottom sheet ── */}
+      {/* ── More sheet — uses AllServices (lt-* design system) ── */}
       <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
         <SheetContent
           side="bottom"
-          className={cn(
-            'p-0 border-0',
-            'bg-background',
-            'rounded-t-[20px]',   /* iOS sheet corner radius */
-            'max-h-[88vh] overflow-hidden flex flex-col',
-          )}
+          className="p-0 border-0 bg-transparent max-h-[92vh] overflow-y-auto"
         >
-          {/* iOS drag handle */}
-          <div className="flex justify-center pt-2.5 pb-1 shrink-0">
-            <div className="w-9 h-1 rounded-full bg-muted-foreground/25" />
-          </div>
-
-          {/* Sheet header */}
-          <div className="flex items-center justify-between px-4 pt-1 pb-3 shrink-0">
-            <div>
-              <h2 className="text-[17px] font-semibold text-foreground">
-                {isAr ? 'جميع الخدمات' : 'All Services'}
-              </h2>
-              <p className="text-[13px] text-muted-foreground mt-0.5">
-                {isAr
-                  ? `${activeServices.length} وحدة نشطة`
-                  : `${activeServices.length} active modules`}
-              </p>
-            </div>
-            <button
-              onClick={() => setMoreOpen(false)}
-              className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground"
-              aria-label={isAr ? 'إغلاق' : 'Close'}
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Sheet content — scrollable */}
-          <div className="flex-1 overflow-y-auto px-4 pb-8 space-y-6">
-
-            {/* Services grid — iOS 3-col */}
-            <div className="grid grid-cols-3 gap-3">
-              {activeServices.map(item => {
-                const active = pathname === item.path;
-                return (
-                  <button
-                    key={item.path}
-                    onClick={() => { navigate(item.path); setMoreOpen(false); }}
-                    className={cn(
-                      'flex flex-col items-center justify-center gap-2.5 py-4 px-2',
-                      'rounded-ios-cell transition-all duration-200 active:scale-95',
-                      active ? 'bg-card shadow-sm' : 'bg-muted/60 dark:bg-card/60',
-                    )}
-                  >
-                    <div className={cn(
-                      'w-12 h-12 rounded-ios-icon flex items-center justify-center',
-                      'bg-gradient-to-br shadow-sm',
-                      item.from, item.to,
-                    )}>
-                      <item.icon className="w-5 h-5 text-white" strokeWidth={1.8} />
-                    </div>
-                    <p className="text-[12px] font-semibold text-foreground text-center leading-tight">
-                      {isAr ? item.ar : item.en}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Account section */}
-            <div className="hig-section">
-              {ACCOUNT_ITEMS.map((item, i) => {
-                const active = pathname === item.path;
-                return (
-                  <button
-                    key={item.path}
-                    onClick={() => { navigate(item.path); setMoreOpen(false); }}
-                    className={cn(
-                      'hig-cell w-full transition-colors active:bg-[hsl(var(--ios-gray-5))]',
-                      i === 0 && 'rounded-t-ios-cell',
-                      i === ACCOUNT_ITEMS.length - 1 && 'rounded-b-ios-cell border-b-0',
-                    )}
-                  >
-                    <div className={cn(
-                      'w-9 h-9 rounded-ios-icon flex items-center justify-center bg-gradient-to-br shrink-0',
-                      item.from, item.to,
-                    )}>
-                      <item.icon className="w-[18px] h-[18px] text-white" strokeWidth={1.8} />
-                    </div>
-                    <span className={cn(
-                      'flex-1 text-[16px] text-start',
-                      active ? 'text-foreground font-medium' : 'text-foreground',
-                    )}>
-                      {isAr ? item.ar : item.en}
-                    </span>
-                    {/* iOS disclosure chevron */}
-                    <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Sign out — iOS destructive row */}
-            <div className="hig-section">
-              <button
-                onClick={() => { signOut(); setMoreOpen(false); }}
-                className="hig-cell w-full rounded-ios-cell border-b-0 text-destructive"
-              >
-                <div className="w-9 h-9 rounded-ios-icon bg-destructive/15 flex items-center justify-center shrink-0">
-                  <LogOut className="w-[18px] h-[18px] text-destructive" strokeWidth={1.8} />
-                </div>
-                <span className="flex-1 text-[16px] font-semibold text-start">
-                  {isAr ? 'تسجيل الخروج' : 'Sign Out'}
-                </span>
-              </button>
-            </div>
-          </div>
+          <AllServices
+            activeIds={activeIds}
+            onClose={() => setMoreOpen(false)}
+            onNavigate={(path) => { navigate(path); setMoreOpen(false); }}
+            onLogout={() => { signOut(); setMoreOpen(false); }}
+          />
         </SheetContent>
       </Sheet>
     </>
   );
 }
 
-/* inline import for chevron used in sheet */
-function ChevronRight({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="m9 18 6-6-6-6" />
-    </svg>
-  );
-}
