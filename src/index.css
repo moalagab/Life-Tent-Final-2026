@@ -26,17 +26,17 @@
   :root {
     /* ============================================
        Life Tent Light — Midnight Navy + Coral
-       #E6EBF7 base · #2E63E8 primary · #E2674A accent (coral)
+       #E6EBF7 base · #F3F6FD surface · #2E63E8 primary · #E2674A accent
        ============================================ */
 
-    /* Surfaces — #EEF2FA base · #FFFFFF cards */
-    --background: 220 54% 96%;           /* #EEF2FA */
+    /* Surfaces — #E6EBF7 base · #F3F6FD cards */
+    --background: 222 52% 94%;           /* #E6EBF7 */
     --foreground: 228 42% 14%;           /* #121A30 */
 
-    --card: 0 0% 100%;                   /* #FFFFFF */
+    --card: 222 71% 97%;                 /* #F3F6FD */
     --card-foreground: 228 42% 14%;
 
-    --popover: 0 0% 100%;
+    --popover: 0 0% 100%;                /* #FFFFFF */
     --popover-foreground: 228 42% 14%;
 
     /* Primary — Brand Blue #2E63E8 */
@@ -55,11 +55,11 @@
     --module-pomodoro:  5 70% 52%;       /* red */
 
     /* Neutral scale */
-    --secondary: 220 54% 93%;
-    --secondary-foreground: 225 20% 42%;  /* #45506B */
+    --secondary: 222 52% 91%;
+    --secondary-foreground: 225 22% 35%;  /* #45506B */
 
-    --muted: 222 44% 92%;                /* #E3E8F4 */
-    --muted-foreground: 222 15% 56%;     /* #7E889F */
+    --muted: 222 43% 92%;                /* #E2E7F3 */
+    --muted-foreground: 222 16% 61%;     /* #8A93AB */
 
     --accent: 12 73% 58%;               /* #E2674A coral */
     --accent-foreground: 0 0% 100%;
@@ -75,8 +75,8 @@
     --warning-foreground: 0 0% 100%;
 
     /* Lines & focus */
-    --border: 222 44% 92%;               /* #E3E8F4 */
-    --input: 218 45% 95%;                /* #EDF1F8 */
+    --border: 221 38% 88%;               /* #D5DCEC */
+    --input: 222 42% 92%;                /* #E2E7F3 */
     --ring: 221 77% 55%;                 /* blue focus */
 
     --radius: 1.25rem;                   /* 20px — lt-app card radius */
@@ -116,28 +116,29 @@
     --sidebar-ring: 221 77% 55%;
   }
 
-  .dark {
+  .dark, [data-theme="dark"] {
     /* ============================================
-       Life Tent Dark — Midnight Navy + Coral
-       #131C32 bg · #1B2643 surface · #5285F2 primary · #EC7E62 coral
+       Life Tent Dark — Midnight Navy + Coral  (canonical --d-* tokens)
+       #131C32 bg · #18223C surface · #1F2B49 elevated
+       #5285F2 primary · #EC7E62 accent
        ============================================ */
-    --background: 225 43% 14%;           /* #131C32 */
+    --background: 222 45% 14%;           /* #131C32 */
     --foreground: 221 60% 95%;           /* #EAF0FB */
 
-    --card: 224 44% 19%;                 /* #1B2643 */
+    --card: 222 43% 16%;                 /* #18223C */
     --card-foreground: 221 60% 95%;
 
-    --popover: 224 40% 22%;              /* #23304F */
+    --popover: 222 40% 20%;              /* #1F2B49 */
     --popover-foreground: 221 60% 95%;
 
     --primary: 224 85% 64%;              /* #5285F2 */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 224 40% 24%;
+    --secondary: 222 40% 22%;
     --secondary-foreground: 221 40% 80%;
 
-    --muted: 224 35% 22%;
-    --muted-foreground: 225 17% 55%;     /* #6A7693 */
+    --muted: 222 38% 20%;
+    --muted-foreground: 222 16% 50%;     /* #6A7693 */
 
     --accent: 14 77% 65%;               /* #EC7E62 coral */
     --accent-foreground: 0 0% 100%;
@@ -149,28 +150,28 @@
     --success-foreground: 0 0% 100%;
 
     --warning: 35 72% 58%;               /* #E2A24B */
-    --warning-foreground: 225 43% 14%;
+    --warning-foreground: 222 45% 14%;
 
-    --border: 224 36% 29%;               /* #2E3D63 */
-    --input: 225 36% 24%;                /* #283557 */
+    --border: 224 36% 26%;               /* #2A3759 */
+    --input: 224 39% 23%;                /* #243152 */
     --ring: 224 85% 64%;
 
     /* Glass */
-    --glass-bg: rgba(27,38,67,0.60);
-    --glass-bg-hover: rgba(27,38,67,0.75);
-    --glass-bg-active: rgba(27,38,67,0.85);
-    --glass-bg-disabled: rgba(27,38,67,0.30);
-    --glass-border: rgba(255,255,255,0.09);
-    --glass-border-hover: rgba(255,255,255,0.18);
+    --glass-bg: rgba(28,38,64,0.62);
+    --glass-bg-hover: rgba(28,38,64,0.78);
+    --glass-bg-active: rgba(28,38,64,0.88);
+    --glass-bg-disabled: rgba(28,38,64,0.30);
+    --glass-border: rgba(255,255,255,0.06);
+    --glass-border-hover: rgba(255,255,255,0.12);
     --glass-border-active: rgba(82,133,242,0.45);
-    --glass-border-disabled: rgba(255,255,255,0.04);
+    --glass-border-disabled: rgba(255,255,255,0.03);
     --glass-blur: 22px;
 
     /* Elevation */
     --elev-1: 0 1px 2px rgba(0,0,0,0.30), 0 2px 6px rgba(0,0,0,0.25);
     --elev-2: 0 1px 2px rgba(0,0,0,0.30), 0 10px 26px rgba(0,0,0,0.34);
     --elev-3: 0 4px 12px rgba(0,0,0,0.40), 0 16px 32px rgba(0,0,0,0.45);
-    --elev-4: 0 10px 34px rgba(0,0,0,0.50), 0 2px 6px rgba(0,0,0,0.40);
+    --elev-4: 0 30px 80px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.40);
 
     /* Focus ring — blue halo on dark */
     --focus-ring: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(224 85% 64% / 0.65);
@@ -179,13 +180,13 @@
     --gradient-gold: linear-gradient(135deg, #5285F2 0%, #EC7E62 100%);
 
     /* Sidebar */
-    --sidebar-background: 225 50% 10%;
+    --sidebar-background: 222 48% 10%;
     --sidebar-foreground: 221 60% 95%;
     --sidebar-primary: 224 85% 64%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 224 40% 18%;
+    --sidebar-accent: 222 43% 14%;
     --sidebar-accent-foreground: 221 60% 95%;
-    --sidebar-border: 224 36% 22%;
+    --sidebar-border: 224 36% 24%;
     --sidebar-ring: 224 85% 64%;
   }
 }
@@ -217,7 +218,7 @@
       hsl(var(--background));
   }
 
-  .dark body {
+  .dark body, [data-theme="dark"] body {
     background:
       radial-gradient(820px 460px at 88% -6%, rgba(82, 133, 242, 0.22), transparent 62%),
       radial-gradient(620px 460px at 2% 104%, rgba(236, 126, 98, 0.15), transparent 60%),
