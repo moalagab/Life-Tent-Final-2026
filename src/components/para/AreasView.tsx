@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAreas, useCreateArea, useUpdateArea, useArchiveArea, useRestoreArea, useDeleteArea, Area } from '@/hooks/useAreas';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,7 @@ const cadenceOptions = [
 
 export function AreasView() {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [showArchived, setShowArchived]   = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
   const [isDialogOpen, setIsDialogOpen]   = useState(false);
@@ -149,8 +151,9 @@ export function AreasView() {
         {areas?.map((area) => (
           <div
             key={area.id}
+            onClick={() => area.status !== 'archived' && navigate(`/areas/${area.id}`)}
             className={`glass-card relative overflow-hidden p-4 space-y-3 transition-all duration-200 ${
-              area.status === 'archived' ? 'opacity-50' : ''
+              area.status === 'archived' ? 'opacity-50' : 'cursor-pointer hover:shadow-md hover:-translate-y-0.5'
             }`}
           >
             {/* color bar */}
@@ -175,11 +178,14 @@ export function AreasView() {
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                  <Button
+                    variant="ghost" size="icon" className="h-8 w-8 shrink-0"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <MoreVertical className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                   <DropdownMenuItem onClick={() => handleOpenDialog(area)}>
                     <Pencil className="w-4 h-4 ml-2" />تعديل
                   </DropdownMenuItem>
