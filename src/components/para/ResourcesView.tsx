@@ -13,13 +13,15 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Plus, MoreVertical, Pencil, Archive, RotateCcw, Trash2, FileText, Link2, Film, BookOpen, File, ExternalLink, Search, Database, LayoutGrid, Filter, Layers } from 'lucide-react';
+import { Plus, MoreVertical, Pencil, Archive, RotateCcw, Trash2, FileText, Link2, Film, BookOpen, File, ExternalLink, Search, Database, LayoutGrid, Filter, Layers, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { UnifiedResourcesView } from './UnifiedResourcesView';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
+import { FileUploadZone, type UploadedFileInfo } from '@/components/ui/FileUploadZone';
+import { useFileUpload } from '@/hooks/useFileUpload';
 
 const resourceTypes: {
   value: ResourceType;
@@ -61,6 +63,12 @@ export function ResourcesView() {
     tags: [] as string[],
   });
   const [tagInput, setTagInput] = useState('');
+  const [uploadedFile, setUploadedFile] = useState<UploadedFileInfo | null>(null);
+
+  const { upload: uploadFile, uploading: fileUploading, progress: fileProgress } = useFileUpload({
+    bucket: 'attachments',
+    maxSize: 50 * 1024 * 1024,
+  });
 
   useRealtimeSubscription({ table: 'resources', queryKey: ['resources'] });
 
@@ -100,6 +108,19 @@ export function ResourcesView() {
     setFormData({ type: 'note', title: '', description: '', content: '', source_url: '', area_id: '', project_id: '', tags: [] });
     setTagInput('');
     setEditingResource(null);
+    setUploadedFile(null);
+  };
+
+  const handleFileUpload = async (file: File) => {
+    const result = await uploadFile(file);
+    if (result) {
+      setUploadedFile(result);
+      if (!formData.title) {
+        setFormData(prev => ({ ...prev, source_url: result.url, title: file.name.replace(/\.[^.]+$/, '') }));
+      } else {
+        setFormData(prev => ({ ...prev, source_url: result.url }));
+      }
+    }
   };
 
   const handleOpenDialog = (resource?: Resource) => {
@@ -380,8 +401,13 @@ export function ResourcesView() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     {resource.source_url && (
-                      <DropdownMenuItem onClick={() => window.open(resource.source_url, '_blank')}>
-                        <ExternalLink className="w-4 h-4 ml-2" />فتح الرابط
+                      <DropdownMenuItem onClick={() => window.open(resource.source_url!, '_blank')}>
+                        {(resource.type === 'file' || resource.type === 'media') ? (
+                          <Download className="w-4 h-4 ml-2" />
+                        ) : (
+                          <ExternalLink className="w-4 h-4 ml-2" />
+                        )}
+                        {resource.type === 'file' ? 'تنزيل الملف' : resource.type === 'media' ? 'فتح الوسائط' : 'فتح الرابط'}
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem onClick={() => handleOpenDialog(resource)}>
@@ -405,6 +431,18 @@ export function ResourcesView() {
 
               {resource.description && (
                 <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">{resource.description}</p>
+              )}
+
+              {resource.source_url && (resource.type === 'file' || resource.type === 'media') && (
+                <a
+                  href={resource.source_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1.5 text-xs text-primary hover:underline truncate"
+                >
+                  <Download className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">{decodeURIComponent(resource.source_url.split('/').pop() ?? 'الملف')}</span>
+                </a>
               )}
 
               {resource.tags && resource.tags.length > 0 && (
@@ -499,6 +537,38 @@ export function ResourcesView() {
                 placeholder="https://..."
                 className="bg-muted/50 border-border/50 mt-1"
               />
+            </div>
+          )}
+          {(formData.type === 'file' || formData.type === 'media') && (
+            <div>
+              <Label className="text-xs font-semibold text-muted-foreground mb-1.5 block">
+                {formData.type === 'media' ? 'ملف الوسائط' : 'الملف'}
+              </Label>
+              <FileUploadZone
+                onFileSelect={handleFileUpload}
+                uploading={fileUploading}
+                progress={fileProgress}
+                uploaded={uploadedFile}
+                onRemove={() => { setUploadedFile(null); setFormData(prev => ({ ...prev, source_url: '' })); }}
+                accept={formData.type === 'media' ? 'image/*,video/*,audio/*' : '*/*'}
+                maxSizeMb={50}
+              />
+              {!uploadedFile && (
+                <div className="flex items-center gap-2 mt-2">
+                  <div className="flex-1 h-px bg-border/40" />
+                  <span className="text-xs text-muted-foreground">أو أدخل رابطاً</span>
+                  <div className="flex-1 h-px bg-border/40" />
+                </div>
+              )}
+              {!uploadedFile && (
+                <Input
+                  type="url"
+                  value={formData.source_url}
+                  onChange={(e) => setFormData({ ...formData, source_url: e.target.value })}
+                  placeholder="https://..."
+                  className="bg-muted/50 border-border/50 mt-2"
+                />
+              )}
             </div>
           )}
           {(formData.type === 'note' || formData.type === 'document') && (

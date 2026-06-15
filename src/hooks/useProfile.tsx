@@ -16,6 +16,14 @@ export interface Profile {
   updated_at: string;
 }
 
+function toError(err: unknown, fallback = 'حدث خطأ'): Error {
+  if (err instanceof Error) return err;
+  if (err && typeof err === 'object' && 'message' in err) {
+    return new Error(String((err as { message: unknown }).message) || fallback);
+  }
+  return new Error(fallback);
+}
+
 export function useProfile() {
   const { user } = useAuth();
 
@@ -23,14 +31,14 @@ export function useProfile() {
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       if (!user) return null;
-      
+
       const { data, error } = await supabase
         .from('profiles')
         .select('id, user_id, full_name, avatar_url, preferred_language, timezone, reading_goal_yearly, reading_reminder_enabled, reading_reminder_time, created_at, updated_at')
         .eq('user_id', user.id)
         .maybeSingle();
-      
-      if (error) throw error;
+
+      if (error) throw toError(error);
       return data as Profile | null;
     },
     enabled: !!user,
@@ -53,25 +61,23 @@ export function useUpdateProfile() {
         .maybeSingle();
 
       if (existing) {
-        // Update existing profile
         const { data, error } = await supabase
           .from('profiles')
           .update({ ...updates, updated_at: new Date().toISOString() })
           .eq('user_id', user.id)
           .select()
           .single();
-        
-        if (error) throw error;
+
+        if (error) throw toError(error, 'فشل تحديث الملف الشخصي');
         return data;
       } else {
-        // Create new profile
         const { data, error } = await supabase
           .from('profiles')
           .insert({ ...updates, user_id: user.id })
           .select()
           .single();
-        
-        if (error) throw error;
+
+        if (error) throw toError(error, 'فشل إنشاء الملف الشخصي');
         return data;
       }
     },
@@ -87,7 +93,7 @@ export function useUploadAvatar() {
 
   return useMutation({
     mutationFn: async (file: File) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error('يجب تسجيل الدخول أولاً');
 
       const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
       const fileName = `avatar_${Date.now()}.${fileExt}`;
@@ -97,17 +103,12 @@ export function useUploadAvatar() {
         .from('avatars')
         .upload(filePath, file, { upsert: true, contentType: file.type });
 
-      if (uploadError) {
-        const msg = (uploadError as { message?: string }).message || 'Upload failed';
-        throw new Error(msg);
-      }
+      if (uploadError) throw toError(uploadError, 'فشل رفع الصورة');
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
 
-      await updateProfile.mutateAsync({ avatar_url: publicUrl });
-      return publicUrl;
+      await updateProfile.mutateAsync({ avatar_url: urlData.publicUrl });
+      return urlData.publicUrl;
     },
   });
 }
