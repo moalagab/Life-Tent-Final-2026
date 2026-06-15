@@ -60,11 +60,10 @@ export function AllServices({ activeIds, onClose, onNavigate, onLogout }: Props)
       </header>
 
       <div className="lt-grid">
-        {visibleModules.map(({ id, path, labelAr, Icon, hue }) => (
+        {visibleModules.map(({ id, path, labelAr, Icon }) => (
           <button
             key={id}
             className="lt-mod"
-            style={{ '--hue': hue } as React.CSSProperties}
             onClick={() => onNavigate(path)}
           >
             <span className="lt-ic">
@@ -79,7 +78,6 @@ export function AllServices({ activeIds, onClose, onNavigate, onLogout }: Props)
       <div className="lt-acc-row">
         <button
           className="lt-acc"
-          style={{ '--hue': '#E0A52F' } as React.CSSProperties}
           onClick={() => onNavigate('/profile')}
         >
           <span className="lt-acc-ic">
@@ -89,7 +87,6 @@ export function AllServices({ activeIds, onClose, onNavigate, onLogout }: Props)
         </button>
         <button
           className="lt-acc"
-          style={{ '--hue': 'var(--lt-text-2)' } as React.CSSProperties}
           onClick={() => onNavigate('/settings')}
         >
           <span className="lt-acc-ic">

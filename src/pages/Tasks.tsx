@@ -231,9 +231,7 @@ export default function Tasks() {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
-              <FolderKanban className="w-5 h-5 text-white" strokeWidth={1.8} />
-            </div>
+            <FolderKanban className="w-6 h-6 text-primary" strokeWidth={2} />
             <div>
               <h1 className="text-lg font-bold text-foreground leading-tight">{t('tasks.title')}</h1>
               <p className="text-[11px] text-muted-foreground">
@@ -292,16 +290,14 @@ export default function Tasks() {
                         : 'border-transparent bg-muted/30 hover:bg-muted/50',
                     )}
                   >
-                    <div className="relative">
-                      <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-sm', cat.from, cat.to)}>
-                        <Icon className="w-[18px] h-[18px] text-white" strokeWidth={1.8} />
-                      </div>
+                    <span className="relative">
+                      <Icon className={cn("w-7 h-7", isActive ? "text-primary" : "text-muted-foreground")} strokeWidth={isActive ? 2 : 1.75} />
                       {count > 0 && (
-                        <span className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[9px] font-bold px-1 shadow">
+                        <span className="absolute -top-2 -end-2 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[9px] font-bold px-1 shadow">
                           {count}
                         </span>
                       )}
-                    </div>
+                    </span>
                     <p className={cn('text-[10px] font-semibold text-center leading-tight', isActive ? 'text-foreground' : 'text-foreground/60')}>
                       {cat.label}
                     </p>

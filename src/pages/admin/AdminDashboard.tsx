@@ -45,19 +45,17 @@ function PlanBadge({ plan }: { plan: string }) {
 // ── Stat card ─────────────────────────────────────────────────────────────────
 
 function StatCard({
-  icon: Icon, label, value, iconColor,
+  icon: Icon, label, value, iconClass,
 }: {
   icon: React.ElementType;
   label: string;
   value: number | string | undefined;
-  iconColor: string;
+  iconClass: string;
 }) {
   return (
     <Card>
       <CardContent className="p-5 flex items-center gap-4">
-        <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center shrink-0', iconColor)}>
-          <Icon className="w-5 h-5" />
-        </div>
+        <Icon className={cn('w-7 h-7 shrink-0', iconClass)} />
         <div>
           <p className="text-xs text-muted-foreground mb-0.5">{label}</p>
           {value === undefined ? (
@@ -268,14 +266,14 @@ function AdminContent() {
         {/* ── Overview Tab ───────────────────────────────────────────────────── */}
         {activeTab === 'overview' && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard icon={Users}       label="إجمالي المستخدمين"  value={stats?.total_users}          iconColor="bg-blue-100 text-blue-600 dark:bg-blue-900/30" />
-            <StatCard icon={UserCheck}   label="نشطون اليوم"         value={stats?.active_today}         iconColor="bg-green-100 text-green-600 dark:bg-green-900/30" />
-            <StatCard icon={Crown}       label="مشتركو برو"          value={stats?.pro_subscribers}      iconColor="bg-primary/20 text-primary/80 dark:bg-primary/10" />
-            <StatCard icon={Briefcase}   label="مشتركو أعمال"        value={stats?.business_subscribers} iconColor="bg-violet-100 text-violet-600 dark:bg-violet-900/30" />
-            <StatCard icon={CalendarDays}label="جدد هذا الشهر"       value={stats?.new_this_month}       iconColor="bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30" />
-            <StatCard icon={TrendingUp}  label="نشطون هذا الأسبوع"  value={stats?.active_this_week}     iconColor="bg-orange-100 text-orange-600 dark:bg-orange-900/30" />
-            <StatCard icon={Ban}         label="محظورون"              value={stats?.banned_users}         iconColor="bg-red-100 text-red-600 dark:bg-red-900/30" />
-            <StatCard icon={BarChart3}   label="إجمالي الاشتراكات"   value={stats?.total_subscriptions}  iconColor="bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30" />
+            <StatCard icon={Users}       label="إجمالي المستخدمين"  value={stats?.total_users}          iconClass="text-blue-600 dark:text-blue-400" />
+            <StatCard icon={UserCheck}   label="نشطون اليوم"         value={stats?.active_today}         iconClass="text-green-600 dark:text-green-400" />
+            <StatCard icon={Crown}       label="مشتركو برو"          value={stats?.pro_subscribers}      iconClass="text-primary" />
+            <StatCard icon={Briefcase}   label="مشتركو أعمال"        value={stats?.business_subscribers} iconClass="text-violet-600 dark:text-violet-400" />
+            <StatCard icon={CalendarDays}label="جدد هذا الشهر"       value={stats?.new_this_month}       iconClass="text-cyan-600 dark:text-cyan-400" />
+            <StatCard icon={TrendingUp}  label="نشطون هذا الأسبوع"  value={stats?.active_this_week}     iconClass="text-orange-600 dark:text-orange-400" />
+            <StatCard icon={Ban}         label="محظورون"              value={stats?.banned_users}         iconClass="text-destructive" />
+            <StatCard icon={BarChart3}   label="إجمالي الاشتراكات"   value={stats?.total_subscriptions}  iconClass="text-indigo-600 dark:text-indigo-400" />
           </div>
         )}
 

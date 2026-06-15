@@ -119,9 +119,7 @@ export default function Projects() {
       <div className="mb-5">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-sm">
-              <FolderKanban className="w-5 h-5 text-white" strokeWidth={1.8} />
-            </div>
+            <FolderKanban className="w-6 h-6 text-primary" strokeWidth={2} />
             <div>
               <h1 className="text-lg font-bold text-foreground leading-tight">{t('projects.title')}</h1>
               <p className="text-[11px] text-muted-foreground">

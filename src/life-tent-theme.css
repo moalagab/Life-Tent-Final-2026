@@ -243,7 +243,7 @@ html body * {
   width: 52px; height: 52px;
   display: grid; place-items: center;
   margin-bottom: 8px;
-  color: var(--hue, var(--lt-primary));
+  color: var(--lt-primary);
 }
 
 .lt-mod-label { font-size: 13px; font-weight: 500; color: var(--lt-text); }

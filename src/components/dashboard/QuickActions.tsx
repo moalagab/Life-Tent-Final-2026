@@ -140,19 +140,10 @@ export function QuickActions() {
               onClick={() => handleAction(action.id)}
               className="flex flex-col items-center gap-2 shrink-0 group active:scale-95 transition-transform"
             >
-              <div
-                className="w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-200"
-                style={action.special
-                  ? { background: `linear-gradient(135deg, ${action.hue}, var(--lt-primary))`, boxShadow: `0 8px 20px color-mix(in srgb, ${action.hue} 30%, transparent)` }
-                  : { background: `color-mix(in srgb, ${action.hue} 14%, transparent)` }
-                }
-              >
-                <action.icon
-                  className="w-6 h-6"
-                  style={{ color: action.special ? '#fff' : action.hue }}
-                  strokeWidth={1.8}
-                />
-              </div>
+              <action.icon
+                className="w-8 h-8 text-primary"
+                strokeWidth={1.8}
+              />
               <span className="text-[10px] font-medium text-muted-foreground text-center leading-tight max-w-[56px]">
                 {action.label}
               </span>
@@ -183,18 +174,9 @@ export function QuickActions() {
           >
             <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
             <div className="relative flex flex-col items-center gap-2 text-center">
-              <div
-                className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3"
-                style={action.special
-                  ? { background: 'rgba(255,255,255,0.2)' }
-                  : { background: `color-mix(in srgb, ${action.hue} 14%, transparent)` }
-                }
-              >
-                <action.icon
-                  className="w-5 h-5 transition-transform duration-300"
-                  style={{ color: action.special ? '#fff' : action.hue }}
-                />
-              </div>
+              <action.icon
+                className={cn("w-7 h-7 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3", action.special ? "text-white" : "text-primary")}
+              />
               <span className={cn("text-[11px] font-semibold leading-tight", action.special ? "text-white" : "text-foreground")}>
                 {action.label}
               </span>

@@ -710,9 +710,7 @@ export function InvestmentsManager() {
                       : 'border-transparent bg-muted/30 hover:bg-muted/50',
                   )}
                 >
-                  <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-sm', tab.from, tab.to)}>
-                    <Icon className="w-[18px] h-[18px] text-white" strokeWidth={1.8} />
-                  </div>
+                  <Icon className={cn("w-6 h-6", isActive ? "text-primary" : "text-muted-foreground")} strokeWidth={isActive ? 2 : 1.75} />
                   <p className={cn('text-[10px] font-semibold text-center leading-tight', isActive ? 'text-foreground' : 'text-foreground/60')}>
                     {tab.label}
                   </p>
