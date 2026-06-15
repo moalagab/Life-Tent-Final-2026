@@ -71,19 +71,17 @@ function DefaultFallback({ error, onReset }: { error: Error; onReset: () => void
           نعتذر عن هذا الخطأ. يرجى المحاولة مرة أخرى.
         </p>
 
-        {isDev && (
-          <details className="text-start bg-muted rounded-lg p-4 text-xs font-mono overflow-auto max-h-48">
-            <summary className="cursor-pointer font-semibold mb-2">
-              تفاصيل الخطأ (وضع التطوير)
-            </summary>
-            <p className="text-destructive break-all">{error.message}</p>
-            {error.stack && (
-              <pre className="mt-2 text-muted-foreground whitespace-pre-wrap">
-                {error.stack}
-              </pre>
-            )}
-          </details>
-        )}
+        <details className="text-start bg-muted rounded-lg p-4 text-xs font-mono overflow-auto max-h-48">
+          <summary className="cursor-pointer font-semibold mb-2">
+            تفاصيل الخطأ
+          </summary>
+          <p className="text-destructive break-all">{error.message}</p>
+          {isDev && error.stack && (
+            <pre className="mt-2 text-muted-foreground whitespace-pre-wrap">
+              {error.stack}
+            </pre>
+          )}
+        </details>
 
         <div className="flex gap-3 justify-center pt-2">
           <button
