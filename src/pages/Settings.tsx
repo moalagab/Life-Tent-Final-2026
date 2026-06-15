@@ -17,55 +17,55 @@ export default function Settings() {
   const { t } = useLanguage();
   const [expandedSection, setExpandedSection] = useState<SectionId | null>('profile');
 
-  const settingsSections: { id: SectionId; label: string; icon: typeof User; description: string; gradient: string }[] = [
-    { 
-      id: 'profile', 
-      label: t('settings.profile'), 
-      icon: User, 
+  const settingsSections: { id: SectionId; label: string; icon: typeof User; description: string; hue: string }[] = [
+    {
+      id: 'profile',
+      label: t('settings.profile'),
+      icon: User,
       description: t('settings.profileDesc'),
-      gradient: 'from-blue-500/20 to-cyan-500/20'
+      hue: 'var(--lt-hue-task)'
     },
-    { 
-      id: 'notifications', 
-      label: t('settings.notifications'), 
-      icon: Bell, 
+    {
+      id: 'notifications',
+      label: t('settings.notifications'),
+      icon: Bell,
       description: t('settings.notificationsDesc'),
-      gradient: 'from-primary/20/20 to-orange-500/20'
+      hue: 'var(--lt-accent)'
     },
-    { 
-      id: 'language', 
-      label: t('settings.language'), 
-      icon: Globe, 
+    {
+      id: 'language',
+      label: t('settings.language'),
+      icon: Globe,
       description: t('settings.languageDesc'),
-      gradient: 'from-emerald-500/20 to-teal-500/20'
+      hue: 'var(--lt-hue-habit)'
     },
-    { 
-      id: 'appearance', 
-      label: t('settings.appearance'), 
-      icon: Palette, 
+    {
+      id: 'appearance',
+      label: t('settings.appearance'),
+      icon: Palette,
       description: t('settings.appearanceDesc'),
-      gradient: 'from-purple-500/20 to-pink-500/20'
+      hue: 'var(--lt-hue-studio)'
     },
-    { 
-      id: 'privacy', 
-      label: t('settings.privacy'), 
-      icon: Shield, 
+    {
+      id: 'privacy',
+      label: t('settings.privacy'),
+      icon: Shield,
       description: t('settings.privacyDesc'),
-      gradient: 'from-red-500/20 to-rose-500/20'
+      hue: 'var(--lt-danger)'
     },
     {
       id: 'data',
       label: t('settings.dataSync'),
       icon: Database,
       description: t('settings.dataSyncDesc'),
-      gradient: 'from-indigo-500/20 to-violet-500/20'
+      hue: 'var(--lt-hue-know)'
     },
     {
       id: 'ai',
       label: 'الذكاء الاصطناعي',
       icon: Brain,
       description: 'محرك القرار الذكي، الكاش، وإعدادات التحليل',
-      gradient: 'from-violet-500/20 to-purple-500/20'
+      hue: 'var(--lt-hue-proj)'
     },
   ];
 
@@ -99,7 +99,7 @@ export default function Settings() {
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-slate-500 to-slate-700 flex items-center justify-center shadow-sm">
+          <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm" style={{ background: 'linear-gradient(135deg, var(--lt-muted), var(--lt-text-2))' }}>
             <SettingsIcon className="w-5 h-5 text-white" strokeWidth={1.8} />
           </div>
           <div>
@@ -129,11 +129,11 @@ export default function Settings() {
                   aria-controls={`settings-section-${section.id}`}
                   className="w-full p-5 flex items-center gap-4 hover:bg-muted/30 transition-colors"
                 >
-                  <div className={cn(
-                    "w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center",
-                    section.gradient
-                  )}>
-                    <section.icon className="w-6 h-6 text-foreground" />
+                  <div
+                    className="w-12 h-12 rounded-xl flex items-center justify-center"
+                    style={{ background: `color-mix(in srgb, ${section.hue} 18%, transparent)` }}
+                  >
+                    <section.icon className="w-6 h-6" style={{ color: section.hue }} />
                   </div>
                   <div className="flex-1 text-start">
                     <h3 className="font-semibold text-foreground">

@@ -206,7 +206,7 @@ export default function Knowledge() {
       <div className="mb-5">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm" style={{ background: 'linear-gradient(135deg, var(--lt-hue-know), var(--lt-hue-proj))' }}>
               <GraduationCap className="w-5 h-5 text-white" strokeWidth={1.8} />
             </div>
             <div>
@@ -368,19 +368,19 @@ export default function Knowledge() {
             className={cn(
               'flex flex-col items-center gap-2.5 py-4 px-2 rounded-2xl border transition-all duration-200 active:scale-95',
               activeTab === 'notes'
-                ? 'bg-violet-500/10 border-violet-400/40 shadow-sm'
+                ? 'bg-card/80 border-border/50 shadow-sm'
                 : 'bg-muted/30 border-transparent hover:bg-muted/50',
             )}
           >
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm" style={{ background: 'var(--lt-hue-know)' }}>
               <FileText className="w-5 h-5 text-white" strokeWidth={1.8} />
             </div>
             <div className="flex flex-col items-center gap-0.5">
-              <span className={cn('text-xs font-semibold', activeTab === 'notes' ? 'text-violet-500' : 'text-foreground/80')}>
+              <span className={cn('text-xs font-semibold', activeTab === 'notes' ? 'text-foreground' : 'text-foreground/70')}>
                 {t('knowledge.notes')}
               </span>
               {(notes?.length ?? 0) > 0 && (
-                <span className={cn('text-[10px] font-medium tabular-nums', activeTab === 'notes' ? 'text-violet-400' : 'text-muted-foreground')}>
+                <span className={cn('text-[10px] font-medium tabular-nums', activeTab === 'notes' ? 'text-primary' : 'text-muted-foreground')}>
                   {notes!.length}
                 </span>
               )}
@@ -393,19 +393,19 @@ export default function Knowledge() {
             className={cn(
               'flex flex-col items-center gap-2.5 py-4 px-2 rounded-2xl border transition-all duration-200 active:scale-95',
               activeTab === 'courses'
-                ? 'bg-indigo-500/10 border-indigo-400/40 shadow-sm'
+                ? 'bg-card/80 border-border/50 shadow-sm'
                 : 'bg-muted/30 border-transparent hover:bg-muted/50',
             )}
           >
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-sm">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm" style={{ background: 'var(--lt-hue-cal)' }}>
               <GraduationCap className="w-5 h-5 text-white" strokeWidth={1.8} />
             </div>
             <div className="flex flex-col items-center gap-0.5">
-              <span className={cn('text-xs font-semibold', activeTab === 'courses' ? 'text-indigo-500' : 'text-foreground/80')}>
+              <span className={cn('text-xs font-semibold', activeTab === 'courses' ? 'text-foreground' : 'text-foreground/70')}>
                 {t('knowledge.courses')}
               </span>
               {(courses?.length ?? 0) > 0 && (
-                <span className={cn('text-[10px] font-medium tabular-nums', activeTab === 'courses' ? 'text-indigo-400' : 'text-muted-foreground')}>
+                <span className={cn('text-[10px] font-medium tabular-nums', activeTab === 'courses' ? 'text-primary' : 'text-muted-foreground')}>
                   {courses!.length}
                 </span>
               )}
@@ -418,19 +418,19 @@ export default function Knowledge() {
             className={cn(
               'flex flex-col items-center gap-2.5 py-4 px-2 rounded-2xl border transition-all duration-200 active:scale-95',
               activeTab === 'archived'
-                ? 'bg-slate-500/10 border-slate-400/40 shadow-sm'
+                ? 'bg-card/80 border-border/50 shadow-sm'
                 : 'bg-muted/30 border-transparent hover:bg-muted/50',
             )}
           >
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center shadow-sm">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm" style={{ background: 'var(--lt-muted)' }}>
               <Archive className="w-5 h-5 text-white" strokeWidth={1.8} />
             </div>
             <div className="flex flex-col items-center gap-0.5">
-              <span className={cn('text-xs font-semibold', activeTab === 'archived' ? 'text-slate-400' : 'text-foreground/80')}>
+              <span className={cn('text-xs font-semibold', activeTab === 'archived' ? 'text-foreground' : 'text-foreground/70')}>
                 {t('knowledge.archived')}
               </span>
               {(archivedNotes?.length ?? 0) > 0 && (
-                <span className={cn('text-[10px] font-medium tabular-nums', activeTab === 'archived' ? 'text-slate-400' : 'text-muted-foreground')}>
+                <span className={cn('text-[10px] font-medium tabular-nums', activeTab === 'archived' ? 'text-muted-foreground' : 'text-muted-foreground')}>
                   {archivedNotes!.length}
                 </span>
               )}

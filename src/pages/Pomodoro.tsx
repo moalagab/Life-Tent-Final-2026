@@ -204,21 +204,21 @@ export default function Pomodoro() {
       color: 'text-primary',
       bgColor: 'bg-primary/10',
       ringColor: 'stroke-primary',
-      gradient: 'from-primary/20 to-primary/10/20',
+      hue: 'var(--lt-hue-pomo)',
       icon: Brain,
     },
     shortBreak: {
-      color: 'text-emerald-500',
-      bgColor: 'bg-emerald-500/10',
-      ringColor: 'stroke-emerald-500',
-      gradient: 'from-emerald-500/20 to-teal-500/20',
+      color: 'text-success',
+      bgColor: 'bg-success/10',
+      ringColor: 'stroke-success',
+      hue: 'var(--lt-hue-habit)',
       icon: Coffee,
     },
     longBreak: {
-      color: 'text-blue-500',
-      bgColor: 'bg-blue-500/10',
-      ringColor: 'stroke-blue-500',
-      gradient: 'from-blue-500/20 to-indigo-500/20',
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
+      ringColor: 'stroke-primary',
+      hue: 'var(--lt-hue-cal)',
       icon: Coffee,
     },
   };
@@ -232,7 +232,7 @@ export default function Pomodoro() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-sm">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm" style={{ background: 'linear-gradient(135deg, var(--lt-hue-pomo), var(--lt-accent))' }}>
               <Timer className="w-5 h-5 text-white" strokeWidth={1.8} />
             </div>
             <div>
@@ -253,8 +253,8 @@ export default function Pomodoro() {
           {/* Gradient card tab selector */}
           <div className="grid grid-cols-2 gap-3 mb-6">
             {[
-              { value: 'timer', icon: Timer,    from: 'from-orange-500', to: 'to-red-500',    activeBorder: 'border-orange-400/40', arLabel: t('pomodoro.timer'),      enLabel: t('pomodoro.timer')      },
-              { value: 'stats', icon: BarChart3, from: 'from-emerald-500',to: 'to-teal-600',   activeBorder: 'border-emerald-400/40',arLabel: t('pomodoro.statistics'), enLabel: t('pomodoro.statistics') },
+              { value: 'timer', icon: Timer,    hue: 'var(--lt-hue-pomo)',  activeBorder: 'border-border/40', arLabel: t('pomodoro.timer'),      enLabel: t('pomodoro.timer')      },
+              { value: 'stats', icon: BarChart3, hue: 'var(--lt-hue-habit)', activeBorder: 'border-border/40', arLabel: t('pomodoro.statistics'), enLabel: t('pomodoro.statistics') },
             ].map(tab => {
               const active = activeTab === tab.value;
               return (
@@ -268,10 +268,10 @@ export default function Pomodoro() {
                       : 'border-transparent bg-muted/30 hover:bg-muted/50',
                   )}
                 >
-                  <div className={cn(
-                    'w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-sm',
-                    tab.from, tab.to,
-                  )}>
+                  <div
+                    className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm"
+                    style={{ background: tab.hue }}
+                  >
                     <tab.icon className="w-5 h-5 text-white" strokeWidth={1.8} />
                   </div>
                   <p className={cn(
@@ -305,7 +305,7 @@ export default function Pomodoro() {
                           <span className={cn(
                             'w-2 h-2 rounded-full',
                             task.priority === 'high' ? 'bg-destructive' :
-                            task.priority === 'medium' ? 'bg-primary/80' : 'bg-emerald-500'
+                            task.priority === 'medium' ? 'bg-primary/80' : 'bg-success'
                           )} />
                           {task.title}
                         </div>
@@ -349,10 +349,10 @@ export default function Pomodoro() {
             </div>
 
             {/* Timer Display */}
-            <div className={cn(
-              "glass-card p-12 text-center mb-8 bg-gradient-to-br transition-all duration-500",
-              currentSession.gradient
-            )}>
+            <div
+              className="glass-card p-12 text-center mb-8 transition-all duration-500"
+              style={{ background: `color-mix(in srgb, ${currentSession.hue} 12%, transparent)` }}
+            >
               <div className="relative inline-flex items-center justify-center">
                 <svg viewBox="0 0 288 288" className="w-56 h-56 sm:w-72 sm:h-72 transform -rotate-90">
                   <circle
@@ -438,9 +438,9 @@ export default function Pomodoro() {
                 <p className="text-[10px] sm:text-xs text-muted-foreground">{t('pomodoro.todaySessions')}</p>
               </div>
 
-              <div className="glass-card p-3 sm:p-5 text-center group hover:border-emerald-500/30 transition-all">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:scale-110 transition-transform">
-                  <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500" />
+              <div className="glass-card p-3 sm:p-5 text-center group hover:border-success/30 transition-all">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-success/10 flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:scale-110 transition-transform">
+                  <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-success" />
                 </div>
                 <p className="text-lg sm:text-3xl font-bold text-foreground">
                   {Math.floor(stats.todayMinutes / 60)}h {stats.todayMinutes % 60}m
@@ -448,9 +448,9 @@ export default function Pomodoro() {
                 <p className="text-[10px] sm:text-xs text-muted-foreground">{t('pomodoro.todayFocusTime')}</p>
               </div>
 
-              <div className="glass-card p-3 sm:p-5 text-center group hover:border-blue-500/30 transition-all">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:scale-110 transition-transform">
-                  <Target className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
+              <div className="glass-card p-3 sm:p-5 text-center group hover:border-primary/30 transition-all">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:scale-110 transition-transform">
+                  <Target className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 </div>
                 <p className="text-2xl sm:text-3xl font-bold text-foreground">
                   {(() => { const n = settings.sessionsBeforeLongBreak > 0 ? settings.sessionsBeforeLongBreak : 4; return n - (completedSessions % n); })()}
@@ -473,8 +473,8 @@ export default function Pomodoro() {
               </div>
               
               <div className="glass-card p-4 text-center">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-2">
-                  <Clock className="w-5 h-5 text-emerald-500" />
+                <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center mx-auto mb-2">
+                  <Clock className="w-5 h-5 text-success" />
                 </div>
                 <p className="text-2xl font-bold text-foreground">
                   {Math.floor(stats.totalMinutes / 60)}h
@@ -483,16 +483,16 @@ export default function Pomodoro() {
               </div>
               
               <div className="glass-card p-4 text-center">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center mx-auto mb-2">
-                  <Calendar className="w-5 h-5 text-blue-500" />
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-2">
+                  <Calendar className="w-5 h-5 text-primary" />
                 </div>
                 <p className="text-2xl font-bold text-foreground">{stats.weeklySessions}</p>
                 <p className="text-xs text-muted-foreground">{t('pomodoro.thisWeek')}</p>
               </div>
               
               <div className="glass-card p-4 text-center">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center mx-auto mb-2">
-                  <TrendingUp className="w-5 h-5 text-purple-500" />
+                <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center mx-auto mb-2">
+                  <TrendingUp className="w-5 h-5 text-accent" />
                 </div>
                 <p className="text-2xl font-bold text-foreground">
                   {stats.weeklySessions > 0 ? Math.round(stats.weeklyMinutes / stats.weeklySessions) : 0}m
@@ -546,7 +546,7 @@ export default function Pomodoro() {
             {/* Sessions Chart */}
             <div className="glass-card p-6">
               <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-emerald-500" />
+                <TrendingUp className="w-5 h-5 text-success" />
                 {t('pomodoro.sessionsTrend')}
               </h3>
               <div className="h-48">
@@ -570,11 +570,11 @@ export default function Pomodoro() {
                       }}
                       formatter={(value: number) => [`${value} ${t('pomodoro.sessions')}`, '']}
                     />
-                    <Area 
-                      type="monotone" 
-                      dataKey="sessions" 
-                      stroke="hsl(142.1 76.2% 36.3%)"
-                      fill="hsl(142.1 76.2% 36.3% / 0.2)"
+                    <Area
+                      type="monotone"
+                      dataKey="sessions"
+                      stroke="var(--lt-success)"
+                      fill="color-mix(in srgb, var(--lt-success) 20%, transparent)"
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -585,7 +585,7 @@ export default function Pomodoro() {
             {todaySessions && todaySessions.length > 0 && (
               <div className="glass-card p-6">
                 <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-blue-500" />
+                  <Clock className="w-5 h-5 text-primary" />
                   {t('pomodoro.recentSessions')}
                 </h3>
                 <div className="space-y-3">
@@ -597,13 +597,13 @@ export default function Pomodoro() {
                           <div className={cn(
                             'w-8 h-8 rounded-lg flex items-center justify-center',
                             session.session_type === 'work' ? 'bg-primary/10' :
-                            session.session_type === 'shortBreak' ? 'bg-emerald-500/10' : 'bg-blue-500/10'
+                            session.session_type === 'shortBreak' ? 'bg-success/10' : 'bg-primary/10'
                           )}>
                             {session.session_type === 'work' ? (
                               <Brain className={cn('w-4 h-4', 'text-primary')} />
                             ) : (
                               <Coffee className={cn('w-4 h-4', 
-                                session.session_type === 'shortBreak' ? 'text-emerald-500' : 'text-blue-500'
+                                session.session_type === 'shortBreak' ? 'text-success' : 'text-primary'
                               )} />
                             )}
                           </div>

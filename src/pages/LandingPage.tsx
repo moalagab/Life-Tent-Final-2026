@@ -81,49 +81,49 @@ export default function LandingPage() {
       icon: Target,
       title: t('landing.goalManagement'),
       description: t('landing.goalManagementDesc'),
-      color: 'from-primary/20 to-orange-600'
+      hue: 'var(--lt-hue-goal)'
     },
     {
       icon: CheckCircle,
       title: t('landing.taskManagement'),
       description: t('landing.taskManagementDesc'),
-      color: 'from-emerald-500 to-teal-600'
+      hue: 'var(--lt-hue-task)'
     },
     {
       icon: Calendar,
       title: t('landing.smartCalendar'),
       description: t('landing.smartCalendarDesc'),
-      color: 'from-blue-500 to-indigo-600'
+      hue: 'var(--lt-hue-cal)'
     },
     {
       icon: Wallet,
       title: t('landing.financialManagement'),
       description: t('landing.financialManagementDesc'),
-      color: 'from-green-500 to-emerald-600'
+      hue: 'var(--lt-hue-money)'
     },
     {
       icon: BookOpen,
       title: t('landing.knowledgeCenter'),
       description: t('landing.knowledgeCenterDesc'),
-      color: 'from-purple-500 to-violet-600'
+      hue: 'var(--lt-hue-know)'
     },
     {
       icon: BarChart3,
       title: t('landing.projectManagement'),
       description: t('landing.projectManagementDesc'),
-      color: 'from-rose-500 to-pink-600'
+      hue: 'var(--lt-hue-proj)'
     },
     {
       icon: Clock,
       title: t('landing.pomodoroTimer'),
       description: t('landing.pomodoroTimerDesc'),
-      color: 'from-red-500 to-rose-600'
+      hue: 'var(--lt-hue-pomo)'
     },
     {
       icon: Heart,
       title: t('landing.habitsMood'),
       description: t('landing.habitsMoodDesc'),
-      color: 'from-pink-500 to-fuchsia-600'
+      hue: 'var(--lt-hue-studio)'
     }
   ];
 
@@ -358,14 +358,18 @@ export default function LandingPage() {
                 }`}
                 onMouseEnter={() => setActiveFeature(index)}
               >
-                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                <div
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg"
+                  style={{ background: feature.hue }}
+                >
                   <feature.icon className="w-7 h-7 text-white" />
                 </div>
                 <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">{feature.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
-                <div className={`h-1 bg-gradient-to-r ${feature.color} rounded-full mt-4 transition-all duration-500 ${
-                  activeFeature === index ? 'w-full' : 'w-0 group-hover:w-full'
-                }`} />
+                <div
+                  className={`h-1 rounded-full mt-4 transition-all duration-500 ${activeFeature === index ? 'w-full' : 'w-0 group-hover:w-full'}`}
+                  style={{ background: feature.hue }}
+                />
               </div>
             ))}
           </div>

@@ -36,12 +36,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 type CategoryFilter = 'all' | 'personal' | 'financial' | 'customer' | 'processes' | 'learning';
 
 const categoryConfig = {
-  all:       { icon: LayoutGrid,   color: 'bg-foreground text-background', from: 'from-slate-600',   to: 'to-slate-700',   activeBorder: 'border-slate-400/40'   },
-  personal:  { icon: User,         color: 'bg-primary/80 text-white',      from: 'from-amber-500',   to: 'to-orange-500',  activeBorder: 'border-amber-400/40'   },
-  financial: { icon: TrendingUp,   color: 'bg-primary text-white',         from: 'from-emerald-500', to: 'to-teal-600',    activeBorder: 'border-emerald-400/40' },
-  customer:  { icon: Users,        color: 'bg-blue-500 text-white',         from: 'from-blue-500',    to: 'to-indigo-600',  activeBorder: 'border-blue-400/40'    },
-  processes: { icon: Cog,          color: 'bg-green-500 text-white',        from: 'from-green-500',   to: 'to-emerald-600', activeBorder: 'border-green-400/40'   },
-  learning:  { icon: GraduationCap,color: 'bg-purple-500 text-white',      from: 'from-purple-500',  to: 'to-indigo-600',  activeBorder: 'border-purple-400/40'  },
+  all:       { icon: LayoutGrid,    hue: 'var(--lt-text-2)',    activeBorder: 'border-border/40'      },
+  personal:  { icon: User,          hue: 'var(--lt-hue-goal)',  activeBorder: 'border-border/40'      },
+  financial: { icon: TrendingUp,    hue: 'var(--lt-hue-money)', activeBorder: 'border-border/40'      },
+  customer:  { icon: Users,         hue: 'var(--lt-hue-task)',  activeBorder: 'border-border/40'      },
+  processes: { icon: Cog,           hue: 'var(--lt-hue-habit)', activeBorder: 'border-border/40'      },
+  learning:  { icon: GraduationCap, hue: 'var(--lt-hue-proj)',  activeBorder: 'border-border/40'      },
 };
 
 export default function Goals() {
@@ -271,7 +271,7 @@ export default function Goals() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-sm">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm" style={{ background: 'linear-gradient(135deg, var(--lt-hue-goal), var(--lt-accent))' }}>
               <Target className="w-5 h-5 text-white" strokeWidth={1.8} />
             </div>
             <div>
@@ -438,10 +438,10 @@ export default function Goals() {
                           : 'border-transparent bg-muted/30 hover:bg-muted/50',
                       )}
                     >
-                      <div className={cn(
-                        'w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-sm relative',
-                        config.from, config.to,
-                      )}>
+                      <div
+                        className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm relative"
+                        style={{ background: config.hue }}
+                      >
                         <Icon className="w-5 h-5 text-white" strokeWidth={1.8} />
                         {count > 0 && (
                           <span className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-background text-foreground text-[10px] font-bold flex items-center justify-center border border-border/50 shadow-sm">
@@ -473,10 +473,10 @@ export default function Goals() {
                           : 'border-transparent bg-muted/30 hover:bg-muted/50',
                       )}
                     >
-                      <div className={cn(
-                        'w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-sm relative',
-                        config.from, config.to,
-                      )}>
+                      <div
+                        className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm relative"
+                        style={{ background: config.hue }}
+                      >
                         <Icon className="w-5 h-5 text-white" strokeWidth={1.8} />
                         {count > 0 && (
                           <span className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-background text-foreground text-[10px] font-bold flex items-center justify-center border border-border/50 shadow-sm">

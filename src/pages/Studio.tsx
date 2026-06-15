@@ -45,14 +45,13 @@ interface MediaFormData {
 const TAB_CFG: Record<ActiveTab, {
   Icon: React.ElementType;
   arLabel: string; enLabel: string;
-  activeBg: string; activeText: string; dotColor: string;
-  from: string; to: string; activeBorder: string;
+  hue: string; activeBorder: string;
 }> = {
-  books:    { Icon: BookOpen,  arLabel: 'الكتب',      enLabel: 'Books',    activeBg: 'bg-blue-500',    activeText: 'text-white', dotColor: 'bg-blue-500',    from: 'from-blue-500',    to: 'to-indigo-600',  activeBorder: 'border-blue-400/40'    },
-  movies:   { Icon: FilmIcon,  arLabel: 'الأفلام',    enLabel: 'Movies',   activeBg: 'bg-rose-500',    activeText: 'text-white', dotColor: 'bg-rose-500',    from: 'from-rose-500',    to: 'to-pink-600',    activeBorder: 'border-rose-400/40'    },
-  podcasts: { Icon: Mic2,      arLabel: 'البودكاست',  enLabel: 'Podcasts', activeBg: 'bg-violet-500',  activeText: 'text-white', dotColor: 'bg-violet-500',  from: 'from-violet-500',  to: 'to-purple-600',  activeBorder: 'border-violet-400/40'  },
-  stats:    { Icon: BarChart3, arLabel: 'الإحصاء',    enLabel: 'Stats',    activeBg: 'bg-emerald-500', activeText: 'text-white', dotColor: 'bg-emerald-500', from: 'from-emerald-500', to: 'to-teal-600',    activeBorder: 'border-emerald-400/40' },
-  archived: { Icon: Archive,   arLabel: 'الأرشيف',    enLabel: 'Archive',  activeBg: 'bg-slate-500',   activeText: 'text-white', dotColor: 'bg-slate-500',   from: 'from-slate-500',   to: 'to-slate-600',   activeBorder: 'border-slate-400/40'   },
+  books:    { Icon: BookOpen,  arLabel: 'الكتب',      enLabel: 'Books',    hue: 'var(--lt-hue-task)',   activeBorder: 'border-border/40' },
+  movies:   { Icon: FilmIcon,  arLabel: 'الأفلام',    enLabel: 'Movies',   hue: 'var(--lt-hue-studio)', activeBorder: 'border-border/40' },
+  podcasts: { Icon: Mic2,      arLabel: 'البودكاست',  enLabel: 'Podcasts', hue: 'var(--lt-hue-proj)',   activeBorder: 'border-border/40' },
+  stats:    { Icon: BarChart3, arLabel: 'الإحصاء',    enLabel: 'Stats',    hue: 'var(--lt-hue-habit)',  activeBorder: 'border-border/40' },
+  archived: { Icon: Archive,   arLabel: 'الأرشيف',    enLabel: 'Archive',  hue: 'var(--lt-muted)',      activeBorder: 'border-border/40' },
 };
 
 export default function Studio() {
@@ -234,7 +233,7 @@ export default function Studio() {
       {/* ── Page header ── */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-sm">
+          <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm" style={{ background: 'linear-gradient(135deg, var(--lt-hue-studio), var(--lt-hue-proj))' }}>
             <Film className="w-5 h-5 text-white" strokeWidth={1.8} />
           </div>
           <div>
@@ -279,10 +278,10 @@ export default function Studio() {
                     : 'border-transparent bg-muted/30 hover:bg-muted/50',
                 )}
               >
-                <div className={cn(
-                  'w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-sm relative',
-                  cfg.from, cfg.to,
-                )}>
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm relative"
+                  style={{ background: cfg.hue }}
+                >
                   <cfg.Icon className="w-5 h-5 text-white" strokeWidth={1.8} />
                   {count !== undefined && count > 0 && (
                     <span className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-background text-foreground text-[10px] font-bold flex items-center justify-center border border-border/50 shadow-sm">
@@ -316,10 +315,10 @@ export default function Studio() {
                     : 'border-transparent bg-muted/30 hover:bg-muted/50',
                 )}
               >
-                <div className={cn(
-                  'w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-sm relative',
-                  cfg.from, cfg.to,
-                )}>
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm relative"
+                  style={{ background: cfg.hue }}
+                >
                   <cfg.Icon className="w-5 h-5 text-white" strokeWidth={1.8} />
                   {count !== undefined && count > 0 && (
                     <span className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-background text-foreground text-[10px] font-bold flex items-center justify-center border border-border/50 shadow-sm">
@@ -486,7 +485,7 @@ function EmptyState({ tab, isAr, onAdd }: { tab: ActiveTab; isAr: boolean; onAdd
   };
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className={cn('w-16 h-16 rounded-2xl flex items-center justify-center mb-4', cfg.activeBg)}>
+      <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ background: cfg.hue }}>
         <cfg.Icon className="w-8 h-8 text-white" strokeWidth={1.5} />
       </div>
       <p className="text-muted-foreground mb-5 text-sm">{isAr ? messages[tab].ar : messages[tab].en}</p>
