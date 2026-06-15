@@ -279,10 +279,10 @@ export default function Studio() {
                 )}
               >
                 <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm relative"
-                  style={{ background: cfg.hue }}
+                  className={cn("w-12 h-12 rounded-xl flex items-center justify-center relative bg-muted/50", active && "shadow-sm")}
+                  style={active ? { background: `color-mix(in srgb, ${cfg.hue} 18%, transparent)` } : undefined}
                 >
-                  <cfg.Icon className="w-5 h-5 text-white" strokeWidth={1.8} />
+                  <cfg.Icon className={cn("w-5 h-5", !active && "text-muted-foreground")} style={active ? { color: cfg.hue } : undefined} strokeWidth={1.8} />
                   {count !== undefined && count > 0 && (
                     <span className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-background text-foreground text-[10px] font-bold flex items-center justify-center border border-border/50 shadow-sm">
                       {count}
@@ -316,10 +316,10 @@ export default function Studio() {
                 )}
               >
                 <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm relative"
-                  style={{ background: cfg.hue }}
+                  className={cn("w-12 h-12 rounded-xl flex items-center justify-center relative bg-muted/50", active && "shadow-sm")}
+                  style={active ? { background: `color-mix(in srgb, ${cfg.hue} 18%, transparent)` } : undefined}
                 >
-                  <cfg.Icon className="w-5 h-5 text-white" strokeWidth={1.8} />
+                  <cfg.Icon className={cn("w-5 h-5", !active && "text-muted-foreground")} style={active ? { color: cfg.hue } : undefined} strokeWidth={1.8} />
                   {count !== undefined && count > 0 && (
                     <span className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-background text-foreground text-[10px] font-bold flex items-center justify-center border border-border/50 shadow-sm">
                       {count}

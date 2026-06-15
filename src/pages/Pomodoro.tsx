@@ -269,10 +269,10 @@ export default function Pomodoro() {
                   )}
                 >
                   <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm"
-                    style={{ background: tab.hue }}
+                    className={cn("w-12 h-12 rounded-xl flex items-center justify-center bg-muted/50", active && "shadow-sm")}
+                    style={active ? { background: `color-mix(in srgb, ${tab.hue} 18%, transparent)` } : undefined}
                   >
-                    <tab.icon className="w-5 h-5 text-white" strokeWidth={1.8} />
+                    <tab.icon className={cn("w-5 h-5", !active && "text-muted-foreground")} style={active ? { color: tab.hue } : undefined} strokeWidth={1.8} />
                   </div>
                   <p className={cn(
                     'text-xs font-semibold text-center leading-tight',

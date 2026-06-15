@@ -372,8 +372,8 @@ export default function Knowledge() {
                 : 'bg-muted/30 border-transparent hover:bg-muted/50',
             )}
           >
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm" style={{ background: 'var(--lt-hue-know)' }}>
-              <FileText className="w-5 h-5 text-white" strokeWidth={1.8} />
+            <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center bg-muted/50", activeTab === 'notes' && "shadow-sm")} style={activeTab === 'notes' ? { background: 'color-mix(in srgb, var(--lt-hue-know) 18%, transparent)' } : undefined}>
+              <FileText className={cn("w-5 h-5", activeTab !== 'notes' && "text-muted-foreground")} style={activeTab === 'notes' ? { color: 'var(--lt-hue-know)' } : undefined} strokeWidth={1.8} />
             </div>
             <div className="flex flex-col items-center gap-0.5">
               <span className={cn('text-xs font-semibold', activeTab === 'notes' ? 'text-foreground' : 'text-foreground/70')}>
@@ -397,8 +397,8 @@ export default function Knowledge() {
                 : 'bg-muted/30 border-transparent hover:bg-muted/50',
             )}
           >
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm" style={{ background: 'var(--lt-hue-cal)' }}>
-              <GraduationCap className="w-5 h-5 text-white" strokeWidth={1.8} />
+            <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center bg-muted/50", activeTab === 'courses' && "shadow-sm")} style={activeTab === 'courses' ? { background: 'color-mix(in srgb, var(--lt-hue-cal) 18%, transparent)' } : undefined}>
+              <GraduationCap className={cn("w-5 h-5", activeTab !== 'courses' && "text-muted-foreground")} style={activeTab === 'courses' ? { color: 'var(--lt-hue-cal)' } : undefined} strokeWidth={1.8} />
             </div>
             <div className="flex flex-col items-center gap-0.5">
               <span className={cn('text-xs font-semibold', activeTab === 'courses' ? 'text-foreground' : 'text-foreground/70')}>
@@ -422,8 +422,8 @@ export default function Knowledge() {
                 : 'bg-muted/30 border-transparent hover:bg-muted/50',
             )}
           >
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm" style={{ background: 'var(--lt-muted)' }}>
-              <Archive className="w-5 h-5 text-white" strokeWidth={1.8} />
+            <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center bg-muted/50", activeTab === 'archived' && "shadow-sm")} style={activeTab === 'archived' ? { background: 'color-mix(in srgb, var(--lt-muted) 30%, transparent)' } : undefined}>
+              <Archive className={cn("w-5 h-5", activeTab !== 'archived' && "text-muted-foreground")} style={activeTab === 'archived' ? { color: 'var(--lt-muted)' } : undefined} strokeWidth={1.8} />
             </div>
             <div className="flex flex-col items-center gap-0.5">
               <span className={cn('text-xs font-semibold', activeTab === 'archived' ? 'text-foreground' : 'text-foreground/70')}>

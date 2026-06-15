@@ -130,10 +130,10 @@ export default function Settings() {
                   className="w-full p-5 flex items-center gap-4 hover:bg-muted/30 transition-colors"
                 >
                   <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center"
-                    style={{ background: `color-mix(in srgb, ${section.hue} 18%, transparent)` }}
+                    className={cn("w-12 h-12 rounded-xl flex items-center justify-center bg-muted/50", expandedSection === section.id && "shadow-sm")}
+                    style={expandedSection === section.id ? { background: `color-mix(in srgb, ${section.hue} 18%, transparent)` } : undefined}
                   >
-                    <section.icon className="w-6 h-6" style={{ color: section.hue }} />
+                    <section.icon className={cn("w-6 h-6", expandedSection !== section.id && "text-muted-foreground")} style={expandedSection === section.id ? { color: section.hue } : undefined} />
                   </div>
                   <div className="flex-1 text-start">
                     <h3 className="font-semibold text-foreground">

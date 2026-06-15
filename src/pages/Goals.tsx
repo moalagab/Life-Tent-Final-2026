@@ -439,10 +439,10 @@ export default function Goals() {
                       )}
                     >
                       <div
-                        className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm relative"
-                        style={{ background: config.hue }}
+                        className={cn("w-12 h-12 rounded-xl flex items-center justify-center relative bg-muted/50", isSelected && "shadow-sm")}
+                        style={isSelected ? { background: `color-mix(in srgb, ${config.hue} 18%, transparent)` } : undefined}
                       >
-                        <Icon className="w-5 h-5 text-white" strokeWidth={1.8} />
+                        <Icon className={cn("w-5 h-5", !isSelected && "text-muted-foreground")} style={isSelected ? { color: config.hue } : undefined} strokeWidth={1.8} />
                         {count > 0 && (
                           <span className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-background text-foreground text-[10px] font-bold flex items-center justify-center border border-border/50 shadow-sm">
                             {count}
@@ -474,10 +474,10 @@ export default function Goals() {
                       )}
                     >
                       <div
-                        className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm relative"
-                        style={{ background: config.hue }}
+                        className={cn("w-12 h-12 rounded-xl flex items-center justify-center relative bg-muted/50", isSelected && "shadow-sm")}
+                        style={isSelected ? { background: `color-mix(in srgb, ${config.hue} 18%, transparent)` } : undefined}
                       >
-                        <Icon className="w-5 h-5 text-white" strokeWidth={1.8} />
+                        <Icon className={cn("w-5 h-5", !isSelected && "text-muted-foreground")} style={isSelected ? { color: config.hue } : undefined} strokeWidth={1.8} />
                         {count > 0 && (
                           <span className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-background text-foreground text-[10px] font-bold flex items-center justify-center border border-border/50 shadow-sm">
                             {count}
