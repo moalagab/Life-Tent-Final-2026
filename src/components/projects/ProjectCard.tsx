@@ -3,8 +3,8 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { format } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { 
-  FolderKanban, Play, Pause, CheckCircle, Archive, 
-  MoreHorizontal, Eye, Edit3, Trash2, Target, ListTodo 
+  FolderKanban, Play, Pause, CheckCircle, Archive,
+  MoreHorizontal, Eye, Edit3, Trash2, Target, ListTodo, Share2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,6 +22,7 @@ interface ProjectCardProps {
   onEdit: (project: Project) => void;
   onDelete: (projectId: string) => void;
   onArchive?: (project: Project) => void;
+  onShare?: (project: Project) => void;
 }
 
 const phaseColors: Record<string, string> = {
@@ -39,7 +40,7 @@ const statusIcons: Record<string, typeof Play> = {
   archived: Archive,
 };
 
-export function ProjectCard({ project, onView, onEdit, onDelete, onArchive }: ProjectCardProps) {
+export function ProjectCard({ project, onView, onEdit, onDelete, onArchive, onShare }: ProjectCardProps) {
   const { t, currentLanguage } = useLanguage();
   const dateLocale = currentLanguage === 'ar' ? ar : enUS;
   
@@ -110,6 +111,12 @@ export function ProjectCard({ project, onView, onEdit, onDelete, onArchive }: Pr
               <Edit3 className="w-4 h-4 me-2" />
               {t('common.edit')}
             </DropdownMenuItem>
+            {onShare && (
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onShare(project); }}>
+                <Share2 className="w-4 h-4 me-2" />
+                مشاركة
+              </DropdownMenuItem>
+            )}
             {onArchive && status !== 'archived' && (
               <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onArchive(project); }}>
                 <Archive className="w-4 h-4 me-2" />

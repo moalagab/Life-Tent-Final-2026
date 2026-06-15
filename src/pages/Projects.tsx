@@ -11,6 +11,7 @@ import { ProjectCard } from '@/components/projects/ProjectCard';
 import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog';
 import { ProjectDetailDialog } from '@/components/projects/ProjectDetailDialog';
 import { ProjectNotifications } from '@/components/projects/ProjectNotifications';
+import { ShareDialog } from '@/components/ui/ShareDialog';
 
 // Heavy sub-views — lazy-loaded only when the user activates them
 const ProjectReports    = lazy(() => import('@/components/projects/ProjectReports').then(m => ({ default: m.ProjectReports })));
@@ -37,6 +38,7 @@ export default function Projects() {
   const [activeTab, setActiveTab] = useState('projects');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [sharingProject, setSharingProject] = useState<Project | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showReports, setShowReports] = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
@@ -221,6 +223,7 @@ export default function Projects() {
               onEdit={setSelectedProject}
               onDelete={handleDelete}
               onArchive={handleArchive}
+              onShare={(p) => setSharingProject(p)}
             />
           ))}
         </div>
@@ -237,11 +240,19 @@ export default function Projects() {
 
           {/* Dialogs */}
           <CreateProjectDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
-          <ProjectDetailDialog 
-            project={selectedProject} 
-            open={!!selectedProject} 
-            onOpenChange={(open) => !open && setSelectedProject(null)} 
+          <ProjectDetailDialog
+            project={selectedProject}
+            open={!!selectedProject}
+            onOpenChange={(open) => !open && setSelectedProject(null)}
           />
+          {sharingProject && (
+            <ShareDialog
+              open={!!sharingProject}
+              onOpenChange={(open) => !open && setSharingProject(null)}
+              projectId={sharingProject.id}
+              projectName={sharingProject.title}
+            />
+          )}
         </>
       )}
     </MainLayout>

@@ -388,6 +388,41 @@ export function useDebtSchedules(debtId?: string) {
   });
 }
 
+export function useMarkInstallmentPaid() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ scheduleId, debtId, amount }: { scheduleId: string; debtId: string; amount: number }) => {
+      // Mark schedule row as paid
+      const { error: schedError } = await supabase
+        .from('debt_schedules')
+        .update({ is_paid: true, paid_at: new Date().toISOString() })
+        .eq('id', scheduleId);
+      if (schedError) throw schedError;
+
+      // Reduce remaining_amount on the debt
+      const { data: debt, error: fetchError } = await supabase
+        .from('debts')
+        .select('remaining_amount')
+        .eq('id', debtId)
+        .single();
+      if (fetchError) throw fetchError;
+
+      const newRemaining = Math.max(0, (debt.remaining_amount ?? 0) - amount);
+      const { error: updateError } = await supabase
+        .from('debts')
+        .update({ remaining_amount: newRemaining })
+        .eq('id', debtId);
+      if (updateError) throw updateError;
+    },
+    onSuccess: (_data, { debtId }) => {
+      queryClient.invalidateQueries({ queryKey: ['debts'] });
+      queryClient.invalidateQueries({ queryKey: ['debt-schedules'] });
+      queryClient.invalidateQueries({ queryKey: ['debt-schedules', debtId] });
+    },
+  });
+}
+
 // Investment Hooks
 export function useInvestmentPortfolios() {
   const { user } = useAuth();

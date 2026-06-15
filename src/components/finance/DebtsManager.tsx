@@ -23,9 +23,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useDebts, useCreateDebt, useUpdateDebt, useDebtSchedules, Debt } from '@/hooks/useAdvancedFinance';
+import { useDebts, useCreateDebt, useUpdateDebt, useDebtSchedules, useMarkInstallmentPaid, Debt } from '@/hooks/useAdvancedFinance';
 import { toast } from 'sonner';
-import { format, addMonths, differenceInMonths } from 'date-fns';
+import { format, addMonths, differenceInMonths, differenceInDays } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -359,6 +359,7 @@ export function DebtsManager() {
   const { data: schedules } = useDebtSchedules();
   const createDebt = useCreateDebt();
   const updateDebt = useUpdateDebt();
+  const markInstallmentPaid = useMarkInstallmentPaid();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -532,6 +533,28 @@ export function DebtsManager() {
     }
   };
 
+  const handlePayInstallment = async (debtId: string) => {
+    const nextSchedule = schedules?.find(s => s.debt_id === debtId && !s.is_paid);
+    if (!nextSchedule) {
+      toast.info(language === 'ar' ? 'لا توجد أقساط مستحقة' : 'No pending installments');
+      return;
+    }
+    try {
+      await markInstallmentPaid.mutateAsync({
+        scheduleId: nextSchedule.id,
+        debtId,
+        amount: nextSchedule.amount,
+      });
+      toast.success(
+        language === 'ar'
+          ? `تم تسجيل دفع قسط ${nextSchedule.amount.toLocaleString()} SAR`
+          : `Installment of ${nextSchedule.amount.toLocaleString()} SAR recorded`
+      );
+    } catch {
+      toast.error(language === 'ar' ? 'حدث خطأ' : 'An error occurred');
+    }
+  };
+
   const openEditDialog = (debt: Debt) => {
     setEditingDebt(debt);
     const debtNotes = debt.notes?.split('|') || ['from_me', ''];
@@ -699,6 +722,13 @@ export function DebtsManager() {
             const daysUntilDue = debt.end_date ? Math.ceil((new Date(debt.end_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : null;
             const isNearDue = daysUntilDue !== null && daysUntilDue <= 30 && daysUntilDue > 0;
             const isOverdue = daysUntilDue !== null && daysUntilDue < 0;
+            // Next installment alerts
+            const daysUntilInstallment = nextPayment ? differenceInDays(new Date(nextPayment.due_date), new Date()) : null;
+            const installmentOverdue = daysUntilInstallment !== null && daysUntilInstallment < 0;
+            const installmentSoon = daysUntilInstallment !== null && daysUntilInstallment >= 0 && daysUntilInstallment <= 7;
+            const paidCount = schedules?.filter(s => s.debt_id === debt.id && s.is_paid).length ?? 0;
+            const totalCount = schedules?.filter(s => s.debt_id === debt.id).length ?? 0;
+            const remainingCount = totalCount - paidCount;
 
             return (
               <div key={debt.id} className={cn(
@@ -775,13 +805,23 @@ export function DebtsManager() {
                         {debt.minimum_payment?.toLocaleString() || '-'} {debt.currency || 'SAR'}
                       </p>
                     </div>
-                    <div className="p-3 rounded-lg bg-muted/20 text-center">
+                    <div className={cn(
+                      'p-3 rounded-lg text-center transition-colors',
+                      installmentOverdue ? 'bg-destructive/15' : installmentSoon ? 'bg-warning/15' : 'bg-muted/20',
+                    )}>
                       <p className="text-xs text-muted-foreground mb-1">
-                        {language === 'ar' ? 'السداد القادم' : 'Next Payment'}
+                        {language === 'ar' ? 'القسط القادم' : 'Next Installment'}
                       </p>
-                      <p className="font-semibold text-sm">
-                        {nextPayment ? format(new Date(nextPayment.due_date), 'MMM d', { locale }) : '-'}
-                      </p>
+                      {nextPayment ? (
+                        <>
+                          <p className={cn('font-semibold text-sm', installmentOverdue ? 'text-destructive' : installmentSoon ? 'text-warning' : '')}>
+                            {format(new Date(nextPayment.due_date), 'MMM d', { locale })}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {nextPayment.amount.toLocaleString()} {debt.currency || 'SAR'}
+                          </p>
+                        </>
+                      ) : <p className="font-semibold text-sm text-success">✓</p>}
                     </div>
                     <div className="p-3 rounded-lg bg-muted/20 text-center">
                       <p className="text-xs text-muted-foreground mb-1">
@@ -811,29 +851,73 @@ export function DebtsManager() {
                     </div>
                   )}
 
-                  {/* Action Buttons - More Visible */}
-                  <div className="flex items-center gap-2 pt-2 border-t">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                  {/* Installment alert banner */}
+                  {(installmentOverdue || installmentSoon) && (
+                    <div className={cn(
+                      'flex items-center gap-2 px-3 py-2 rounded-lg text-sm',
+                      installmentOverdue ? 'bg-destructive/10 text-destructive' : 'bg-warning/10 text-warning',
+                    )}>
+                      <AlertTriangle className="w-4 h-4 shrink-0" />
+                      {installmentOverdue
+                        ? (language === 'ar' ? `القسط متأخر ${Math.abs(daysUntilInstallment!)} يوم` : `Installment overdue by ${Math.abs(daysUntilInstallment!)} days`)
+                        : (language === 'ar' ? `القسط بعد ${daysUntilInstallment} يوم — ${nextPayment!.amount.toLocaleString()} SAR` : `Installment due in ${daysUntilInstallment} days — ${nextPayment!.amount.toLocaleString()} SAR`)}
+                    </div>
+                  )}
+
+                  {/* Installment counter */}
+                  {totalCount > 0 && (
+                    <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
+                      <span>
+                        {language === 'ar' ? `الأقساط: ${paidCount} / ${totalCount} مدفوع` : `Installments: ${paidCount} / ${totalCount} paid`}
+                      </span>
+                      {remainingCount > 0 && (
+                        <span>{language === 'ar' ? `${remainingCount} متبقي` : `${remainingCount} remaining`}</span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-2 pt-2 border-t flex-wrap">
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => openEditDialog(debt)}
                       className="flex-1"
                     >
                       <Edit className="w-4 h-4 me-2" />
                       {language === 'ar' ? 'تعديل' : 'Edit'}
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    {nextPayment && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePayInstallment(debt.id)}
+                        disabled={markInstallmentPaid.isPending}
+                        className={cn(
+                          'flex-1',
+                          installmentOverdue ? 'border-destructive/50 text-destructive hover:bg-destructive/10' : 'text-primary hover:bg-primary/10',
+                        )}
+                      >
+                        {markInstallmentPaid.isPending ? (
+                          <Loader2 className="w-4 h-4 animate-spin me-2" />
+                        ) : (
+                          <Calculator className="w-4 h-4 me-2" />
+                        )}
+                        {language === 'ar' ? 'دفع قسط' : 'Pay Installment'}
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => handleMarkAsPaid(debt.id)}
                       className="flex-1 text-success hover:text-success hover:bg-success/10"
                     >
                       <Check className="w-4 h-4 me-2" />
                       {language === 'ar' ? 'تم السداد' : 'Mark Paid'}
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => openDeleteConfirm(debt)}
                       className="text-destructive hover:text-destructive hover:bg-destructive/10"
                     >
