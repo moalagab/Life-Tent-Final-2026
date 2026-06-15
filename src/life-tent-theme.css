@@ -135,10 +135,15 @@
    2) GLOBAL BASE · الأساس العام
    يغيّر الخط والألوان على مستوى التطبيق بالكامل
    ============================================================= */
-html, body {
+/* specificity (0,0,0,2) — يتغلب على [data-platform] (0,1,0,0) عند التطبيق على body */
+html, html body {
   font-family: var(--lt-font);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+/* جميع العناصر النصية ترث الخط من body */
+html body * {
+  font-family: inherit;
 }
 
 /* الأرقام دائماً رفيعة + جدولية */

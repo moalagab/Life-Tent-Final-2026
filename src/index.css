@@ -805,32 +805,22 @@
    References: https://developer.apple.com/design/human-interface-guidelines/
 ═══════════════════════════════════════════════════════════════════ */
 [data-platform="hig"] {
-  font-family: "Lama Sans", -apple-system, "SF Pro Text", "SF Pro Display",
-               "Helvetica Neue", sans-serif;
+  /* iOS radius scale — موروثة من HIG، لا تتداخل مع الثيم */
+  --radius:            0.625rem;   /* 10px */
+  --ios-radius-modal:  1.25rem;    /* 20px */
+  --ios-radius-icon:   0.8125rem;  /* 13px */
 
-  /* iOS radius scale */
-  --radius:            0.625rem;   /* 10px — cells, controls */
-  --ios-radius-modal:  1.25rem;    /* 20px — sheets */
-  --ios-radius-icon:   0.8125rem;  /* 13px — app icons */
+  /* iOS semantic system colors (للمكوّنات الـ iOS فقط) */
+  --ios-blue:   211 100% 50%;
+  --ios-green:  142  70% 49%;
+  --ios-red:      4  90% 58%;
+  --ios-orange:  35 100% 50%;
+  --ios-gray:   240   2% 56%;
+  --ios-gray-4: 240   5% 82%;
+  --ios-gray-5: 240   5% 90%;
+  --ios-gray-6: 240   5% 95%;
 
-  /* iOS semantic system colors */
-  --ios-blue:   211 100% 50%;   /* #007AFF */
-  --ios-green:  142  70% 49%;   /* #34C759 */
-  --ios-red:      4  90% 58%;   /* #FF3B30 */
-  --ios-orange:  35 100% 50%;   /* #FF9500 */
-  --ios-gray:   240   2% 56%;   /* #8E8E93 systemGray */
-  --ios-gray-4: 240   5% 82%;   /* #D1D1D6 */
-  --ios-gray-5: 240   5% 90%;   /* #E5E5EA */
-  --ios-gray-6: 240   5% 95%;   /* #F2F2F7 */
-
-  /* iOS grouped background layers (light) */
-  --background:       240 5% 96%;  /* systemGroupedBackground */
-  --card:             0 0% 100%;   /* insetGrouped cells */
-  --muted:            240 5% 96%;
-  --muted-foreground: 240 2% 56%;
-  --border:           240 6% 83%;  /* hairline */
-
-  /* iOS elevation (very flat, subtle) */
+  /* iOS elevation */
   --elev-1: 0 1px 3px rgba(0,0,0,0.08);
   --elev-2: 0 2px 8px rgba(0,0,0,0.10);
   --elev-3: 0 4px 20px rgba(0,0,0,0.12);
@@ -844,46 +834,39 @@
   /* iOS motion */
   --ios-ease:   cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --ios-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* !! لا نُعيّن --background / --card / --border هنا
+     حتى تعمل توكنات life-tent-theme.css الكانونية
+     (--lt-bg / --background / إلخ.) بشكل صحيح على الموبايل !! */
 }
 
-.dark [data-platform="hig"] {
-  font-family: "Lama Sans", -apple-system, "SF Pro Text", "SF Pro Display",
-               "Helvetica Neue", sans-serif;
-
-  /* Life Tent midnight dark — consistent with main dark theme */
-  --background: 225 50% 8%;    /* deeper midnight for mobile */
-  --card:       224 44% 13%;   /* #0F1B36 */
-  --border:     224 36% 22%;
-  --muted:      224 44% 13%;
-  --muted-foreground: 222 15% 56%;
-}
-
-/* iOS Navigation Bar */
+/* iOS Navigation Bar — يستخدم --lt-bg مباشرة من life-tent-theme.css */
 .hig-nav-bar {
   @apply fixed top-0 inset-x-0 z-50 flex items-end justify-between px-4;
   @apply backdrop-blur-2xl;
-  background-color: hsl(var(--background) / 0.88);
+  background-color: color-mix(in srgb, var(--lt-bg) 88%, transparent);
   height: calc(44px + env(safe-area-inset-top, 0px));
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: 8px;
-  border-bottom: 0.5px solid rgba(60,60,67,0.29);
+  border-bottom: 0.5px solid var(--lt-hair);
 }
-.dark .hig-nav-bar {
-  border-bottom-color: rgba(84,84,88,0.65);
+.dark .hig-nav-bar,
+[data-theme="dark"] .hig-nav-bar {
+  border-bottom-color: var(--lt-border);
 }
 
 /* iOS Tab Bar */
 .hig-tab-bar {
   @apply fixed bottom-0 inset-x-0 z-50 flex items-start justify-around;
   @apply backdrop-blur-2xl;
-  background-color: hsl(var(--background) / 0.88);
+  background-color: color-mix(in srgb, var(--lt-bg) 88%, transparent);
   height: calc(49px + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
   padding-top: 0;
-  border-top: 0.5px solid rgba(60,60,67,0.29);
+  border-top: 0.5px solid var(--lt-hair);
 }
-.dark .hig-tab-bar {
-  border-top-color: rgba(84,84,88,0.65);
+.dark .hig-tab-bar,
+[data-theme="dark"] .hig-tab-bar {
+  border-top-color: var(--lt-border);
 }
 
 /* iOS Tab Item */
@@ -891,7 +874,7 @@
   @apply flex flex-col items-center justify-center gap-0.5 py-2 flex-1
          no-underline;
   min-width: 44px;
-  color: #8E8E93;
+  color: var(--lt-muted);
   font-size: 10px;
   font-weight: 500;
   letter-spacing: -0.15px;
@@ -899,8 +882,9 @@
   -webkit-tap-highlight-color: transparent;
 }
 .hig-tab-item.is-active,
-.dark .hig-tab-item.is-active {
-  color: hsl(var(--primary));
+.dark .hig-tab-item.is-active,
+[data-theme="dark"] .hig-tab-item.is-active {
+  color: var(--lt-primary);
 }
 
 /* iOS grouped list section */
