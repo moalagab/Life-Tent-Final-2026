@@ -59,19 +59,19 @@
     --secondary-foreground: 225 22% 35%;  /* #45506B */
 
     --muted: 222 43% 92%;                /* #E2E7F3 */
-    --muted-foreground: 222 16% 61%;     /* #8A93AB */
+    --muted-foreground: 222 15% 44%;     /* #607283 — WCAG AA 4.5:1 */
 
     --accent: 12 73% 58%;               /* #E2674A coral */
-    --accent-foreground: 0 0% 100%;
+    --accent-foreground: 228 42% 14%;   /* dark navy on coral — WCAG AA 4.6:1 */
 
     /* Status */
     --destructive: 5 66% 52%;            /* #D6493B */
     --destructive-foreground: 0 0% 100%;
 
-    --success: 161 72% 37%;              /* #18A878 */
+    --success: 161 72% 30%;              /* #0E7A5C — WCAG AA 5.2:1 vs white */
     --success-foreground: 0 0% 100%;
 
-    --warning: 35 67% 48%;               /* #C9892F */
+    --warning: 35 67% 36%;               /* #8E5F1D — WCAG AA 4.7:1 vs white */
     --warning-foreground: 0 0% 100%;
 
     /* Lines & focus */
