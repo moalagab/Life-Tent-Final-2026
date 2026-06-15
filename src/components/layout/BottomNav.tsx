@@ -132,7 +132,7 @@ export function BottomNav() {
         >
           {/* iOS drag handle */}
           <div className="flex justify-center pt-2.5 pb-1 shrink-0">
-            <div className="w-9 h-1 rounded-full bg-[rgba(60,60,67,0.3)] dark:bg-[rgba(235,235,245,0.3)]" />
+            <div className="w-9 h-1 rounded-full bg-muted-foreground/25" />
           </div>
 
           {/* Sheet header */}
@@ -149,7 +149,7 @@ export function BottomNav() {
             </div>
             <button
               onClick={() => setMoreOpen(false)}
-              className="w-8 h-8 rounded-full bg-[rgba(120,120,128,0.20)] flex items-center justify-center text-muted-foreground"
+              className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground"
               aria-label={isAr ? 'إغلاق' : 'Close'}
             >
               <X className="w-4 h-4" />
@@ -170,7 +170,7 @@ export function BottomNav() {
                     className={cn(
                       'flex flex-col items-center justify-center gap-2.5 py-4 px-2',
                       'rounded-ios-cell transition-all duration-200 active:scale-95',
-                      active ? 'bg-card shadow-sm' : 'bg-[hsl(var(--ios-gray-6,240_5%_95%))] dark:bg-card/70',
+                      active ? 'bg-card shadow-sm' : 'bg-muted/60 dark:bg-card/60',
                     )}
                   >
                     <div className={cn(

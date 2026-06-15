@@ -42,7 +42,7 @@ const buttonVariants = cva(
         gold:
           "bg-[hsl(43,100%,50%)] text-[hsl(225,60%,12%)] hover:bg-[hsl(43,100%,56%)] active:bg-[hsl(43,100%,44%)] shadow-sm font-semibold transition-colors rounded-[var(--radius,0.25rem)]",
         glass:
-          "bg-white/5 backdrop-blur-xl border border-white/10 hover:bg-white/10 text-foreground rounded-[var(--radius,0.25rem)]",
+          "bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--glass-border)] hover:bg-[var(--glass-bg-hover)] text-foreground rounded-[var(--radius,0.25rem)]",
 
         /* ── Fluent UI 2 ───────────────────────────────────────────── */
         "fluent-primary":
