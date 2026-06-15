@@ -724,7 +724,8 @@
   --sidebar-border:     220 14% 90%;
 }
 
-.dark [data-platform="fluent"] {
+.dark[data-platform="fluent"],
+[data-theme="dark"][data-platform="fluent"] {
   font-family: "Lama Sans", "Segoe UI Variable", "Segoe UI",
                system-ui, sans-serif;
 
@@ -927,7 +928,8 @@
   background: rgba(120, 120, 128, 0.12);
   border-color: transparent;
 }
-.dark [data-platform="hig"] input.lt-input {
+.dark[data-platform="hig"] input.lt-input,
+[data-theme="dark"][data-platform="hig"] input.lt-input {
   background: rgba(118, 118, 128, 0.24);
 }
 [data-platform="hig"] input.lt-input:focus-visible {
