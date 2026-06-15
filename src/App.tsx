@@ -52,9 +52,13 @@ const Studio       = lazy(() => import("./pages/Studio"));
 const Pomodoro     = lazy(() => import("./pages/Pomodoro"));
 const Settings      = lazy(() => import("./pages/Settings"));
 const Profile       = lazy(() => import("./pages/Profile"));
-const AreaWorkspace      = lazy(() => import("./pages/AreaWorkspace"));
-const ProjectWorkspace   = lazy(() => import("./pages/ProjectWorkspace"));
-const ArchivePage        = lazy(() => import("./pages/ArchivePage"));
+const AreaWorkspace       = lazy(() => import("./pages/AreaWorkspace"));
+const ProjectWorkspace    = lazy(() => import("./pages/ProjectWorkspace"));
+const GoalWorkspace       = lazy(() => import("./pages/GoalWorkspace"));
+const HabitDetail         = lazy(() => import("./pages/HabitDetail"));
+const MediaItemWorkspace  = lazy(() => import("./pages/MediaItemWorkspace"));
+const ResourceWorkspace   = lazy(() => import("./pages/ResourceWorkspace"));
+const ArchivePage         = lazy(() => import("./pages/ArchivePage"));
 
 function PageLoader() {
   return (
@@ -131,8 +135,13 @@ const App = () => (
                 <Route path="/pomodoro"   element={<ProtectedRoute><Pomodoro /></ProtectedRoute>} />
                 <Route path="/settings"   element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                 <Route path="/profile"    element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                <Route path="/areas/:id"    element={<ProtectedRoute><AreaWorkspace /></ProtectedRoute>} />
+                <Route path="/areas/:id"     element={<ProtectedRoute><AreaWorkspace /></ProtectedRoute>} />
                 <Route path="/projects/:id" element={<ProtectedRoute><ProjectWorkspace /></ProtectedRoute>} />
+                <Route path="/goals/:id"    element={<ProtectedRoute><GoalWorkspace /></ProtectedRoute>} />
+                <Route path="/habits/:id"   element={<ProtectedRoute><HabitDetail /></ProtectedRoute>} />
+                <Route path="/studio/:id"   element={<ProtectedRoute><MediaItemWorkspace /></ProtectedRoute>} />
+                <Route path="/resources/:id" element={<ProtectedRoute><ResourceWorkspace /></ProtectedRoute>} />
+                <Route path="/finance/:section" element={<ProtectedRoute><Finance /></ProtectedRoute>} />
                 <Route path="/archive"      element={<ProtectedRoute><ArchivePage /></ProtectedRoute>} />
 
                 <Route path="*" element={<NotFound />} />

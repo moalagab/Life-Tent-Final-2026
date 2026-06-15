@@ -1,4 +1,5 @@
 import { MainLayout } from '@/components/layout/MainLayout';
+import { useNavigate } from 'react-router-dom';
 import { Flame, Plus, TrendingUp, Smile, Frown, Meh, Zap, Moon, Loader2, Edit3, Trash2, MoreVertical, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -31,6 +32,7 @@ const habitColors = ['bg-primary', 'bg-success', 'bg-warning', 'bg-destructive',
 
 export default function Habits() {
   const { t, currentLanguage } = useLanguage();
+  const navigate = useNavigate();
   const { data: habits, isLoading } = useHabitsWithLogs();
   const { data: yearlyLogs } = useYearlyHabitLogs();
   const { data: todayMood } = useTodayMoodLog();
@@ -390,7 +392,8 @@ export default function Habits() {
               {habits.map((habit, index) => (
                 <div
                   key={habit.id}
-                  className="p-4 rounded-xl bg-muted/30 border border-border hover:border-primary/30 transition-all"
+                  onClick={() => navigate(`/habits/${habit.id}`)}
+                  className="p-4 rounded-xl bg-muted/30 border border-border hover:border-primary/30 transition-all cursor-pointer"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
@@ -405,11 +408,11 @@ export default function Habits() {
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+                        <button onClick={(e) => e.stopPropagation()} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
                           <MoreVertical className="w-4 h-4 text-muted-foreground" />
                         </button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                         <DropdownMenuItem onClick={() => {
                           setEditingHabit(habit);
                           setIsEditDialogOpen(true);
@@ -441,7 +444,7 @@ export default function Habits() {
                             {weekDayLabels[displayIndex]}
                           </span>
                           <button
-                            onClick={() => handleLogHabit(habit.id, date)}
+                            onClick={(e) => { e.stopPropagation(); handleLogHabit(habit.id, date); }}
                             disabled={logHabit.isPending}
                             className={cn(
                               'w-full aspect-square rounded-lg transition-all',

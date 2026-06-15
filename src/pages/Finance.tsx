@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
   LayoutDashboard, Wallet, Receipt, PiggyBank,
@@ -35,8 +35,9 @@ const ACCOUNTS_QUERY_KEY = ['accounts'];
 
 export default function Finance() {
   const { t, isRTL } = useLanguage();
+  const { section } = useParams<{ section?: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
-  const rawTab = searchParams.get('tab');
+  const rawTab = section ?? searchParams.get('tab');
   const initialTab: FinanceTab = (ALLOWED_TABS as readonly string[]).includes(rawTab ?? '')
     ? (rawTab as FinanceTab)
     : 'dashboard';

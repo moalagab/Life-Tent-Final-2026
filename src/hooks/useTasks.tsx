@@ -74,9 +74,19 @@ export function useUpdateTask() {
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: TaskUpdate & { id: string }) => {
+      // Auto-archive and mark completed when status transitions to 'done'
+      const finalUpdates =
+        updates.status === 'done'
+          ? {
+              ...updates,
+              completed_at: updates.completed_at ?? new Date().toISOString(),
+              archived_at: updates.archived_at ?? new Date().toISOString(),
+            }
+          : updates;
+
       const { data, error } = await supabase
         .from('tasks')
-        .update(updates)
+        .update(finalUpdates)
         .eq('id', id)
         .select()
         .single();
@@ -87,6 +97,7 @@ export function useUpdateTask() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['focus-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['archived-items'] });
       // Haptic feedback when a task is marked done
       if (data?.status === 'done') vibrate.success();
     },

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Star, Edit3, Trash2, Archive, RotateCcw, ShoppingCart,
   Target, MoreHorizontal, BookOpen, Film, Tv2, Mic2, FileText, CheckCircle2,
@@ -96,6 +97,7 @@ export function MediaItemCard({
 }: MediaItemCardProps) {
   const { currentLanguage } = useLanguage();
   const isAr = currentLanguage === 'ar';
+  const navigate = useNavigate();
   const [showActions, setShowActions] = useState(false);
 
   const cfg = TYPE_CFG[item.type] ?? TYPE_CFG.book;
@@ -120,8 +122,9 @@ export function MediaItemCard({
 
   return (
     <div
+      onClick={() => navigate(`/studio/${item.id}`)}
       className={cn(
-        'group flex flex-col rounded-2xl overflow-hidden border transition-all duration-200',
+        'group flex flex-col rounded-2xl overflow-hidden border transition-all duration-200 cursor-pointer',
         'bg-card/60 backdrop-blur-sm border-border/50',
         'hover:shadow-lg hover:shadow-black/5 hover:border-border active:scale-[0.98]',
       )}
@@ -146,11 +149,14 @@ export function MediaItemCard({
         {/* Actions menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="w-7 h-7 rounded-full bg-black/25 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={(e) => e.stopPropagation()}
+              className="w-7 h-7 rounded-full bg-black/25 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+            >
               <MoreHorizontal className="w-3.5 h-3.5 text-white" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent align="end" className="w-48" onClick={(e) => e.stopPropagation()}>
             {!isArchived ? (
               <>
                 <DropdownMenuItem onClick={() => onEdit(item)}>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { 
+import { useNavigate } from 'react-router-dom';
+import {
   Target, MoreHorizontal, TrendingUp, AlertTriangle, CheckCircle2,
   Calendar, FolderKanban, Plus, Trash2, Edit3, ChevronDown, ChevronUp,
   User, Users, Cog, GraduationCap, Sparkles, Archive, RotateCcw, Minus, PlusCircle
@@ -92,6 +93,7 @@ export function GoalCard({
   isArchived = false
 }: GoalCardProps) {
   const { t, currentLanguage } = useLanguage();
+  const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
   const [editingKrId, setEditingKrId] = useState<string | null>(null);
   const [editingValue, setEditingValue] = useState<string>('');
@@ -122,10 +124,13 @@ export function GoalCard({
   };
 
   return (
-    <div className={cn(
-      "group relative overflow-hidden rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20",
-      isArchived && "opacity-75"
-    )}>
+    <div
+      onClick={() => navigate(`/goals/${goal.id}`)}
+      className={cn(
+        "group relative overflow-hidden rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 cursor-pointer",
+        isArchived && "opacity-75"
+      )}
+    >
       {/* Gradient Accent */}
       <div className={cn(
         "absolute top-0 start-0 end-0 h-1 bg-gradient-to-r",
@@ -171,11 +176,14 @@ export function GoalCard({
           {/* Actions Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="p-2 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-muted transition-all">
+              <button
+                onClick={(e) => e.stopPropagation()}
+                className="p-2 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-muted transition-all"
+              >
                 <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
               {!isArchived && (
                 <>
                   <DropdownMenuItem onClick={onEdit} className="gap-2">

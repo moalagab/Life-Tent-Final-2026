@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useResources, useCreateResource, useUpdateResource, useArchiveResource, useRestoreResource, useDeleteResource, ResourceType, Resource } from '@/hooks/useResources';
 import { useActiveAreas } from '@/hooks/useAreas';
@@ -42,6 +43,7 @@ const resourceTypes: {
 
 export function ResourcesView() {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [showArchived,    setShowArchived]    = useState(false);
   const [showUnified,     setShowUnified]     = useState(false);
   const [showFilters,     setShowFilters]     = useState(false);
@@ -372,7 +374,8 @@ export function ResourcesView() {
           return (
             <div
               key={resource.id}
-              className={`glass-card p-4 space-y-2.5 transition-all duration-200 ${
+              onClick={() => navigate(`/resources/${resource.id}`)}
+              className={`glass-card p-4 space-y-2.5 transition-all duration-200 cursor-pointer hover:border-primary/30 ${
                 resource.status === 'archived' ? 'opacity-50' : ''
               }`}
             >
@@ -395,11 +398,11 @@ export function ResourcesView() {
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={(e) => e.stopPropagation()}>
                       <MoreVertical className="w-4 h-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                     {resource.source_url && (
                       <DropdownMenuItem onClick={() => window.open(resource.source_url!, '_blank')}>
                         {(resource.type === 'file' || resource.type === 'media') ? (
