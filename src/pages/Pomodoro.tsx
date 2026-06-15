@@ -139,7 +139,7 @@ export default function Pomodoro() {
         icon: '/favicon.ico'
       });
     }
-  }, [sessionType, completedSessions, settings, playSound, t, createSession, selectedTaskId]);
+  }, [sessionType, completedSessions, settings, playSound, t, createSession, selectedTaskId, releaseWakeLock]);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;

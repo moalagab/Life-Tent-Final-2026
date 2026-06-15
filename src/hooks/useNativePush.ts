@@ -42,7 +42,7 @@ export function useNativePush(): NativePushState {
   useEffect(() => {
     if (!isNative) return;
 
-    let cleanupFns: Array<() => void> = [];
+    const cleanupFns: Array<() => void> = [];
 
     import('@capacitor/push-notifications').then(({ PushNotifications }) => {
       // Check current permission state

@@ -42,7 +42,7 @@ export function FinanceCharts() {
       });
     }
     return months;
-  }, [transactions]);
+  }, [transactions, locale]);
 
   // Calculate category breakdown
   const categoryData = useMemo(() => {
