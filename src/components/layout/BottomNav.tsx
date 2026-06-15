@@ -21,10 +21,10 @@ import { AllServices } from './AllServices';
 
 /* ── Primary tabs (4 visible + More) ──────────────────────────────── */
 const PRIMARY_TABS = [
-  { path: '/tasks',     icon: CheckSquare,     ar: 'المهام',    en: 'Tasks',    hue: 'var(--lt-hue-task)'  },
-  { path: '/finance',   icon: Wallet,          ar: 'المالية',   en: 'Finance',  hue: 'var(--lt-hue-money)' },
-  { path: '/dashboard', icon: LayoutDashboard, ar: 'الرئيسية',  en: 'Home',     hue: 'var(--lt-primary)'   },
-  { path: '/projects',  icon: FolderKanban,    ar: 'المشاريع',  en: 'Projects', hue: 'var(--lt-hue-proj)'  },
+  { path: '/tasks',     icon: CheckSquare,     ar: 'المهام',    en: 'Tasks'    },
+  { path: '/finance',   icon: Wallet,          ar: 'المالية',   en: 'Finance'  },
+  { path: '/dashboard', icon: LayoutDashboard, ar: 'الرئيسية',  en: 'Home'     },
+  { path: '/projects',  icon: FolderKanban,    ar: 'المشاريع',  en: 'Projects' },
 ];
 
 /* ── Routes that live inside the More sheet (for isMoreActive check) ── */
@@ -39,20 +39,17 @@ function TabBtn({
   icon: Icon,
   label,
   isActive,
-  hue,
 }: {
   path: string;
   icon: React.ElementType;
   label: string;
   isActive: boolean;
-  hue?: string;
 }) {
   return (
     <NavLink
       to={path}
       className={cn('hig-tab-item', isActive && 'is-active')}
       aria-current={isActive ? 'page' : undefined}
-      style={isActive && hue ? { color: hue } : undefined}
     >
       <Icon
         className="transition-colors"
@@ -98,7 +95,6 @@ export function BottomNav() {
             icon={tab.icon}
             label={isAr ? tab.ar : tab.en}
             isActive={pathname === tab.path}
-            hue={tab.hue}
           />
         ))}
 

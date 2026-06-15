@@ -438,17 +438,14 @@ export default function Goals() {
                           : 'border-transparent bg-muted/30 hover:bg-muted/50',
                       )}
                     >
-                      <div
-                        className={cn("w-12 h-12 rounded-xl flex items-center justify-center relative bg-muted/50", isSelected && "shadow-sm")}
-                        style={isSelected ? { background: `color-mix(in srgb, ${config.hue} 18%, transparent)` } : undefined}
-                      >
-                        <Icon className={cn("w-5 h-5", !isSelected && "text-muted-foreground")} style={isSelected ? { color: config.hue } : undefined} strokeWidth={1.8} />
+                      <span className="relative">
+                        <Icon className={cn("w-7 h-7", isSelected ? "text-primary" : "text-muted-foreground")} strokeWidth={isSelected ? 2 : 1.75} />
                         {count > 0 && (
-                          <span className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-background text-foreground text-[10px] font-bold flex items-center justify-center border border-border/50 shadow-sm">
+                          <span className="absolute -top-2 -end-2 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center shadow-sm">
                             {count}
                           </span>
                         )}
-                      </div>
+                      </span>
                       <p className={cn('text-xs font-semibold text-center leading-tight', isSelected ? 'text-foreground' : 'text-foreground/70')}>
                         {tab.label}
                       </p>
@@ -473,17 +470,14 @@ export default function Goals() {
                           : 'border-transparent bg-muted/30 hover:bg-muted/50',
                       )}
                     >
-                      <div
-                        className={cn("w-12 h-12 rounded-xl flex items-center justify-center relative bg-muted/50", isSelected && "shadow-sm")}
-                        style={isSelected ? { background: `color-mix(in srgb, ${config.hue} 18%, transparent)` } : undefined}
-                      >
-                        <Icon className={cn("w-5 h-5", !isSelected && "text-muted-foreground")} style={isSelected ? { color: config.hue } : undefined} strokeWidth={1.8} />
+                      <span className="relative">
+                        <Icon className={cn("w-7 h-7", isSelected ? "text-primary" : "text-muted-foreground")} strokeWidth={isSelected ? 2 : 1.75} />
                         {count > 0 && (
-                          <span className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-background text-foreground text-[10px] font-bold flex items-center justify-center border border-border/50 shadow-sm">
+                          <span className="absolute -top-2 -end-2 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center shadow-sm">
                             {count}
                           </span>
                         )}
-                      </div>
+                      </span>
                       <p className={cn('text-xs font-semibold text-center leading-tight', isSelected ? 'text-foreground' : 'text-foreground/70')}>
                         {tab.label}
                       </p>

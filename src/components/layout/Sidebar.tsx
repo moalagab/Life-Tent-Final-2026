@@ -119,9 +119,8 @@ const SidebarContent = memo(function SidebarContent({
               <item.icon
                 className={cn(
                   'shrink-0 w-[18px] h-[18px] transition-colors',
-                  !isActive && 'text-muted-foreground group-hover:text-foreground',
+                  isActive ? 'text-primary' : 'text-muted-foreground',
                 )}
-                style={isActive ? { color: item.hue ?? 'var(--lt-primary)' } : undefined}
               />
               {!isCollapsed && (
                 <span className="flex-1 truncate">{t(item.labelKey)}</span>
