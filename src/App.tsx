@@ -52,8 +52,9 @@ const Studio       = lazy(() => import("./pages/Studio"));
 const Pomodoro     = lazy(() => import("./pages/Pomodoro"));
 const Settings      = lazy(() => import("./pages/Settings"));
 const Profile       = lazy(() => import("./pages/Profile"));
-const AreaWorkspace = lazy(() => import("./pages/AreaWorkspace"));
-const ArchivePage   = lazy(() => import("./pages/ArchivePage"));
+const AreaWorkspace      = lazy(() => import("./pages/AreaWorkspace"));
+const ProjectWorkspace   = lazy(() => import("./pages/ProjectWorkspace"));
+const ArchivePage        = lazy(() => import("./pages/ArchivePage"));
 
 function PageLoader() {
   return (
@@ -130,8 +131,9 @@ const App = () => (
                 <Route path="/pomodoro"   element={<ProtectedRoute><Pomodoro /></ProtectedRoute>} />
                 <Route path="/settings"   element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                 <Route path="/profile"    element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                <Route path="/areas/:id" element={<ProtectedRoute><AreaWorkspace /></ProtectedRoute>} />
-                <Route path="/archive"   element={<ProtectedRoute><ArchivePage /></ProtectedRoute>} />
+                <Route path="/areas/:id"    element={<ProtectedRoute><AreaWorkspace /></ProtectedRoute>} />
+                <Route path="/projects/:id" element={<ProtectedRoute><ProjectWorkspace /></ProtectedRoute>} />
+                <Route path="/archive"      element={<ProtectedRoute><ArchivePage /></ProtectedRoute>} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>

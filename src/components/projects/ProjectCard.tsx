@@ -1,8 +1,9 @@
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
-import { 
+import {
   FolderKanban, Play, Pause, CheckCircle, Archive,
   MoreHorizontal, Eye, Edit3, Trash2, Target, ListTodo, Share2
 } from 'lucide-react';
@@ -42,6 +43,7 @@ const statusIcons: Record<string, typeof Play> = {
 
 export function ProjectCard({ project, onView, onEdit, onDelete, onArchive, onShare }: ProjectCardProps) {
   const { t, currentLanguage } = useLanguage();
+  const navigate = useNavigate();
   const dateLocale = currentLanguage === 'ar' ? ar : enUS;
   
   const status = project.status || 'active';
@@ -72,8 +74,8 @@ export function ProjectCard({ project, onView, onEdit, onDelete, onArchive, onSh
 
   return (
     <div
-      className="glass-card p-6 hover:border-primary/30 transition-all duration-200 group cursor-pointer"
-      onClick={() => onView(project)}
+      className="glass-card p-6 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group cursor-pointer"
+      onClick={() => navigate(`/projects/${project.id}`)}
     >
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
@@ -102,31 +104,31 @@ export function ProjectCard({ project, onView, onEdit, onDelete, onArchive, onSh
               <MoreHorizontal className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onView(project); }}>
+          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuItem onClick={() => navigate(`/projects/${project.id}`)}>
               <Eye className="w-4 h-4 me-2" />
               {t('common.viewAll')}
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(project); }}>
+            <DropdownMenuItem onClick={() => onEdit(project)}>
               <Edit3 className="w-4 h-4 me-2" />
               {t('common.edit')}
             </DropdownMenuItem>
             {onShare && (
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onShare(project); }}>
+              <DropdownMenuItem onClick={() => onShare(project)}>
                 <Share2 className="w-4 h-4 me-2" />
                 مشاركة
               </DropdownMenuItem>
             )}
             {onArchive && status !== 'archived' && (
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onArchive(project); }}>
+              <DropdownMenuItem onClick={() => onArchive(project)}>
                 <Archive className="w-4 h-4 me-2" />
                 {t('projects.archives')}
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
-            <DropdownMenuItem 
+            <DropdownMenuItem
               className="text-destructive focus:text-destructive"
-              onClick={(e) => { e.stopPropagation(); onDelete(project.id); }}
+              onClick={() => onDelete(project.id)}
             >
               <Trash2 className="w-4 h-4 me-2" />
               {t('common.delete')}
