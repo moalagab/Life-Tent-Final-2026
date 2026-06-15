@@ -24,7 +24,6 @@ import { useGoals } from '@/hooks/useGoals';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-import { ReadingGoalCard } from '@/components/studio/ReadingGoalCard';
 import { MediaItemCard } from '@/components/studio/MediaItemCard';
 import { MediaFormDialog } from '@/components/studio/MediaFormDialog';
 import { AddToWishlistDialog } from '@/components/studio/AddToWishlistDialog';
@@ -86,7 +85,6 @@ export default function Studio() {
   const books    = mediaItems?.filter(i => i.type === 'book') ?? [];
   const movies   = mediaItems?.filter(i => ['movie','series'].includes(i.type)) ?? [];
   const podcasts = mediaItems?.filter(i => ['podcast','article'].includes(i.type)) ?? [];
-  const booksRead = books.filter(b => b.status === 'completed').length;
 
   const filterItems = (items: MediaItem[]) => {
     let out = items.filter(i =>
@@ -233,9 +231,7 @@ export default function Studio() {
       {/* ── Page header ── */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm" style={{ background: 'linear-gradient(135deg, var(--lt-hue-studio), var(--lt-hue-proj))' }}>
-            <Film className="w-5 h-5 text-white" strokeWidth={1.8} />
-          </div>
+          <Film className="w-6 h-6 text-primary" strokeWidth={2} />
           <div>
             <h1 className="text-lg font-bold text-foreground leading-tight">
               {isAr ? 'الاستديو' : 'Studio'}
@@ -257,8 +253,6 @@ export default function Studio() {
         </div>
       </div>
 
-      {/* ── Reading goal ── */}
-      <ReadingGoalCard booksRead={booksRead} onNavigateToGoals={() => navigate('/goals')} />
 
       {/* ── Tab cards (gradient grid 3+2) ── */}
       <div className="mb-4 space-y-3">

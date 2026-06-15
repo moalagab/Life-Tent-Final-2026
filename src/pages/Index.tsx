@@ -78,8 +78,6 @@ const Index = () => {
       <DashboardSection
         title={t('dashboard.overview')}
         icon={Sparkles}
-        from="from-amber-400"
-        to="to-orange-500"
         open={overview.open}
         onToggle={overview.toggle}
         summary={isAr ? 'صافي الثروة · الإنفاق الشهري · المهام اليوم' : 'Net Worth · Monthly Burn · Tasks Today'}
@@ -94,8 +92,6 @@ const Index = () => {
       <DashboardSection
         title={t('dashboard.activeWork')}
         icon={Activity}
-        from="from-blue-500"
-        to="to-indigo-600"
         open={activeWork.open}
         onToggle={activeWork.toggle}
         summary={isAr ? 'المشاريع · المهام · الأحداث القادمة' : 'Projects · Tasks · Upcoming Events'}
@@ -116,8 +112,6 @@ const Index = () => {
       <DashboardSection
         title={t('dashboard.rhythm')}
         icon={LayoutGrid}
-        from="from-emerald-500"
-        to="to-teal-600"
         open={rhythm.open}
         onToggle={rhythm.toggle}
         summary={isAr ? 'الصلاة · العادات · الأهداف' : 'Prayer · Habits · Goals'}
@@ -136,8 +130,6 @@ const Index = () => {
       <DashboardSection
         title={t('dashboard.financeSnapshot')}
         icon={Wallet}
-        from="from-green-500"
-        to="to-emerald-600"
         open={finance.open}
         onToggle={finance.toggle}
         summary={isAr ? 'الحسابات · الإيرادات · المصروفات' : 'Accounts · Income · Expenses'}
@@ -152,8 +144,6 @@ const Index = () => {
       <DashboardSection
         title={t('dashboard.libraryKnowledge')}
         icon={BookOpen}
-        from="from-sky-500"
-        to="to-blue-600"
         open={library.open}
         onToggle={library.toggle}
         summary={isAr ? 'المعرفة · الاستوديو الإبداعي' : 'Knowledge · Creative Studio'}
@@ -171,8 +161,6 @@ const Index = () => {
       <DashboardSection
         title={isAr ? 'الذكاء الاصطناعي' : 'AI Intelligence'}
         icon={Brain}
-        from="from-violet-500"
-        to="to-purple-600"
         open={aiSection.open}
         onToggle={aiSection.toggle}
         summary={isAr ? 'إحاطة الصباح · نقطة التحقق · رؤى السلوك' : 'Morning Brief · Midday Check · Behavior Insights'}

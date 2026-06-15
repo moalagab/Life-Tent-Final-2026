@@ -50,15 +50,13 @@ function StatCard({ title, value, change, changeLabel, icon: Icon, trend, color 
               </div>
             )}
           </div>
-          <div className={cn(
-            'p-3 rounded-xl',
-            color === 'success' ? 'bg-success/20 text-success' :
-            color === 'warning' ? 'bg-warning/20 text-warning' :
-            color === 'destructive' ? 'bg-destructive/20 text-destructive' :
-            'bg-primary/20 text-primary'
-          )}>
-            <Icon className="w-6 h-6" />
-          </div>
+          <Icon className={cn(
+            'w-7 h-7 shrink-0',
+            color === 'success' ? 'text-success' :
+            color === 'warning' ? 'text-warning' :
+            color === 'destructive' ? 'text-destructive' :
+            'text-primary'
+          )} />
         </div>
       </CardContent>
     </Card>

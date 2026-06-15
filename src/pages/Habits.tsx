@@ -249,9 +249,7 @@ export default function Habits() {
       <div className="mb-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-rose-500 flex items-center justify-center shadow-sm">
-              <Flame className="w-5 h-5 text-white" strokeWidth={1.8} />
-            </div>
+            <Flame className="w-6 h-6 text-primary" strokeWidth={2} />
             <div>
               <h1 className="text-lg font-bold text-foreground leading-tight">{t('habits.title')}</h1>
               <p className="text-[11px] text-muted-foreground">

@@ -232,9 +232,7 @@ export default function Pomodoro() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm" style={{ background: 'linear-gradient(135deg, var(--lt-hue-pomo), var(--lt-accent))' }}>
-              <Timer className="w-5 h-5 text-white" strokeWidth={1.8} />
-            </div>
+            <Timer className="w-6 h-6 text-primary" strokeWidth={2} />
             <div>
               <h1 className="text-lg font-bold text-foreground leading-tight">{t('pomodoro.title')}</h1>
               <p className="text-[11px] text-muted-foreground">{t('pomodoro.subtitle')}</p>
