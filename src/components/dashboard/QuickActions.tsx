@@ -18,7 +18,6 @@ export function QuickActions() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [activeDialog, setActiveDialog] = useState<string | null>(null);
-  const [hoveredAction, setHoveredAction] = useState<string | null>(null);
   
   const createTask = useCreateTask();
   const createGoal = useCreateGoal();
@@ -32,52 +31,12 @@ export function QuickActions() {
   const [eventForm, setEventForm] = useState({ title: '', start_time: '', end_time: '' });
 
   const actions = [
-    { 
-      id: 'task', 
-      icon: Plus, 
-      label: t('quickActions.newTask'),
-      iconBg: 'bg-primary/15',
-      iconColor: 'text-primary',
-      hoverBg: 'group-hover:bg-primary/10'
-    },
-    { 
-      id: 'note', 
-      icon: FileText, 
-      label: t('quickActions.quickNote'),
-      iconBg: 'bg-blue-500/15',
-      iconColor: 'text-blue-500',
-      hoverBg: 'group-hover:bg-blue-500/10'
-    },
-    { 
-      id: 'goal', 
-      icon: Target, 
-      label: t('quickActions.addGoal'),
-      iconBg: 'bg-success/15',
-      iconColor: 'text-success',
-      hoverBg: 'group-hover:bg-success/10'
-    },
-    { 
-      id: 'expense', 
-      icon: Wallet, 
-      label: t('quickActions.logExpense'),
-      iconBg: 'bg-destructive/15',
-      iconColor: 'text-destructive',
-      hoverBg: 'group-hover:bg-destructive/10'
-    },
-    { 
-      id: 'schedule', 
-      icon: Calendar, 
-      label: t('quickActions.schedule'),
-      iconBg: 'bg-purple-500/15',
-      iconColor: 'text-purple-500',
-      hoverBg: 'group-hover:bg-purple-500/10'
-    },
-    { 
-      id: 'pomodoro', 
-      icon: Timer, 
-      label: t('quickActions.pomodoro'),
-      special: true
-    },
+    { id: 'task',     icon: Plus,     label: t('quickActions.newTask'),    hue: 'var(--lt-hue-task)'   },
+    { id: 'note',     icon: FileText, label: t('quickActions.quickNote'),  hue: 'var(--lt-hue-know)'   },
+    { id: 'goal',     icon: Target,   label: t('quickActions.addGoal'),    hue: 'var(--lt-hue-goal)'   },
+    { id: 'expense',  icon: Wallet,   label: t('quickActions.logExpense'), hue: 'var(--lt-hue-money)'  },
+    { id: 'schedule', icon: Calendar, label: t('quickActions.schedule'),   hue: 'var(--lt-hue-cal)'    },
+    { id: 'pomodoro', icon: Timer,    label: t('quickActions.pomodoro'),   hue: 'var(--lt-hue-pomo)',   special: true },
   ];
 
   const handleAction = (actionId: string) => {
@@ -172,7 +131,7 @@ export function QuickActions() {
 
   return (
     <>
-      {/* ── Mobile: horizontal pill row (Al Rajhi style) ── */}
+      {/* ── Mobile: horizontal pill row ── */}
       <div className="md:hidden -mx-4 px-4">
         <div className="flex gap-4 overflow-x-auto scrollbar-none pb-1">
           {actions.map((action) => (
@@ -181,16 +140,18 @@ export function QuickActions() {
               onClick={() => handleAction(action.id)}
               className="flex flex-col items-center gap-2 shrink-0 group active:scale-95 transition-transform"
             >
-              <div className={cn(
-                'w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-200',
-                action.special
-                  ? 'bg-gradient-to-br from-primary to-violet-500 shadow-lg'
-                  : action.iconBg,
-              )}>
-                <action.icon className={cn(
-                  'w-6 h-6',
-                  action.special ? 'text-white' : action.iconColor,
-                )} strokeWidth={1.8} />
+              <div
+                className="w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-200"
+                style={action.special
+                  ? { background: `linear-gradient(135deg, ${action.hue}, var(--lt-primary))`, boxShadow: `0 8px 20px color-mix(in srgb, ${action.hue} 30%, transparent)` }
+                  : { background: `color-mix(in srgb, ${action.hue} 14%, transparent)` }
+                }
+              >
+                <action.icon
+                  className="w-6 h-6"
+                  style={{ color: action.special ? '#fff' : action.hue }}
+                  strokeWidth={1.8}
+                />
               </div>
               <span className="text-[10px] font-medium text-muted-foreground text-center leading-tight max-w-[56px]">
                 {action.label}
@@ -200,37 +161,41 @@ export function QuickActions() {
         </div>
       </div>
 
-      {/* ── Desktop: existing card grid ── */}
+      {/* ── Desktop: card grid ── */}
       <div className="hidden md:grid grid-cols-6 gap-2 lg:gap-3">
         {actions.map((action, idx) => (
           <button
             key={action.id}
             onClick={() => handleAction(action.id)}
-            onMouseEnter={() => setHoveredAction(action.id)}
-            onMouseLeave={() => setHoveredAction(null)}
-            style={{ animationDelay: `${idx * 40}ms` }}
+            style={{
+              animationDelay: `${idx * 40}ms`,
+              ...(action.special
+                ? { background: `linear-gradient(135deg, ${action.hue}, var(--lt-primary))` }
+                : {}),
+            }}
             className={cn(
               "group relative overflow-hidden rounded-2xl p-3.5 transition-all duration-300 slide-up",
-              "border backdrop-blur-xl",
-              "hover:-translate-y-1 active:scale-[0.97]",
+              "border backdrop-blur-xl hover:-translate-y-1 active:scale-[0.97]",
               action.special
-                ? "bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground border-primary/40 shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)] hover:shadow-[0_12px_32px_-8px_hsl(var(--primary)/0.8)]"
-                : "bg-card/50 border-border/40 hover:border-primary/40 hover:shadow-[0_8px_24px_-12px_hsl(var(--primary)/0.3)]"
+                ? "text-white border-transparent shadow-lg"
+                : "bg-card/50 border-border/40",
             )}
           >
             <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
-            {!action.special && (
-              <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300", action.hoverBg)} />
-            )}
             <div className="relative flex flex-col items-center gap-2 text-center">
-              <div className={cn(
-                "w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300",
-                "group-hover:scale-110 group-hover:rotate-3",
-                action.special ? "bg-white/20 backdrop-blur-sm" : action.iconBg
-              )}>
-                <action.icon className={cn("w-5 h-5 transition-transform duration-300", action.special ? "text-primary-foreground" : action.iconColor)} />
+              <div
+                className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3"
+                style={action.special
+                  ? { background: 'rgba(255,255,255,0.2)' }
+                  : { background: `color-mix(in srgb, ${action.hue} 14%, transparent)` }
+                }
+              >
+                <action.icon
+                  className="w-5 h-5 transition-transform duration-300"
+                  style={{ color: action.special ? '#fff' : action.hue }}
+                />
               </div>
-              <span className={cn("text-[11px] font-semibold leading-tight", action.special ? "text-primary-foreground" : "text-foreground")}>
+              <span className={cn("text-[11px] font-semibold leading-tight", action.special ? "text-white" : "text-foreground")}>
                 {action.label}
               </span>
             </div>

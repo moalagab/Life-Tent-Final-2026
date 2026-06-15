@@ -10,9 +10,10 @@
  */
 import { useAuth }     from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useTheme }    from '@/hooks/useTheme';
 import { useLocation } from 'react-router-dom';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
-import { Tent } from 'lucide-react';
+import { Tent, Sun, Moon } from 'lucide-react';
 
 function timeGreeting(lang: string): string {
   const h = new Date().getHours();
@@ -50,6 +51,7 @@ function getInitials(name: string): string {
 export function MobileHeader() {
   const { user }            = useAuth();
   const { currentLanguage } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const { pathname }        = useLocation();
   const isAr = currentLanguage === 'ar';
 
@@ -86,8 +88,19 @@ export function MobileHeader() {
         ) : null}
       </div>
 
-      {/* ── Right: notification bell + user avatar ── */}
+      {/* ── Right: theme toggle + notifications + avatar ── */}
       <div className="flex items-center gap-2.5 shrink-0">
+        <button
+          onClick={toggleTheme}
+          className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+          aria-label={theme === 'dark'
+            ? (isAr ? 'الوضع النهاري' : 'Light mode')
+            : (isAr ? 'الوضع الليلي' : 'Dark mode')}
+        >
+          {theme === 'dark'
+            ? <Sun  className="w-4.5 h-4.5" strokeWidth={1.75} />
+            : <Moon className="w-4.5 h-4.5" strokeWidth={1.75} />}
+        </button>
         <NotificationCenter />
 
         <div

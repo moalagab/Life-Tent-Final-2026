@@ -18,14 +18,15 @@
 
 .lt-app[data-theme="dark"],
 .dark .lt-app {
-  --bg: #131C32; --surface: #1B2643; --elevated: #23304F;
-  --border: #2E3D63; --hair: #283557;
+  /* مزامنة مع life-tent-theme.css — الليل */
+  --bg: #131C32; --surface: #18223C; --elevated: #1F2B49;
+  --border: #2A3759; --hair: #243152;
   --text: #EAF0FB; --text2: #A6B2CD; --muted: #6A7693;
   --primary: #5285F2; --primary2: #6B98F5; --primary-soft: #1B2A4E;
   --accent: #EC7E62; --accent2: #F08E74; --accent-soft: #36241D;
   --success: #35C28E; --warning: #E2A24B; --danger: #E2604E;
   --chart: #5285F2; --chart2: #8AB0F8;
-  --glass: rgba(27,38,67,.60); --glass-brd: rgba(255,255,255,.09);
+  --glass: rgba(28,38,64,.62); --glass-brd: rgba(255,255,255,.06);
   --e-rest: 0 1px 2px rgba(0,0,0,.3), 0 10px 26px rgba(0,0,0,.34);
   --e-overlay: 0 10px 34px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.4);
   --amb-a: 22%; --amb-b: 15%;
@@ -33,14 +34,15 @@
 
 .lt-app[data-theme="light"],
 :not(.dark) .lt-app {
-  --bg: #EEF2FA; --surface: #FFFFFF; --elevated: #FFFFFF;
-  --border: #E3E8F4; --hair: #EDF1F8;
-  --text: #121A30; --text2: #45506B; --muted: #7E889F;
+  /* مزامنة مع life-tent-theme.css — النهار */
+  --bg: #E6EBF7; --surface: #F3F6FD; --elevated: #FFFFFF;
+  --border: #D5DCEC; --hair: #E2E7F3;
+  --text: #121A30; --text2: #45506B; --muted: #8A93AB;
   --primary: #2E63E8; --primary2: #2453CC; --primary-soft: #E5ECFD;
   --accent: #E2674A; --accent2: #CF5A3F; --accent-soft: #FBE7E0;
-  --success: #18A878; --warning: #C9892F; --danger: #D6493B;
+  --success: #1E9E76; --warning: #C9842E; --danger: #D2503C;
   --chart: #2E63E8; --chart2: #7FA3F2;
-  --glass: rgba(255,255,255,.62); --glass-brd: rgba(18,26,48,.06);
+  --glass: rgba(255,255,255,.72); --glass-brd: rgba(18,26,48,.06);
   --e-rest: 0 1px 2px rgba(18,26,48,.05), 0 10px 26px rgba(18,26,48,.07);
   --e-overlay: 0 12px 34px rgba(18,26,48,.16), 0 2px 6px rgba(18,26,48,.06);
   --amb-a: 14%; --amb-b: 10%;

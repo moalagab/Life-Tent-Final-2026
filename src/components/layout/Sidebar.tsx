@@ -34,7 +34,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 
-interface NavItem { path: string; icon: React.ElementType; labelKey: string; activeColor?: string; }
+interface NavItem { path: string; icon: React.ElementType; labelKey: string; hue?: string; }
 
 interface SidebarContentProps {
   collapsed: boolean;
@@ -118,12 +118,10 @@ const SidebarContent = memo(function SidebarContent({
             >
               <item.icon
                 className={cn(
-                  'shrink-0 transition-colors',
-                  isCollapsed ? 'w-[18px] h-[18px]' : 'w-[18px] h-[18px]',
-                  isActive
-                    ? (item.activeColor ?? 'text-primary')
-                    : 'text-muted-foreground group-hover:text-foreground',
+                  'shrink-0 w-[18px] h-[18px] transition-colors',
+                  !isActive && 'text-muted-foreground group-hover:text-foreground',
                 )}
+                style={isActive ? { color: item.hue ?? 'var(--lt-primary)' } : undefined}
               />
               {!isCollapsed && (
                 <span className="flex-1 truncate">{t(item.labelKey)}</span>
@@ -237,17 +235,17 @@ export function Sidebar() {
   const { isModuleActive } = useModuleAccess();
 
   const allNavItems: NavItem[] = [
-    { path: '/dashboard',  icon: LayoutDashboard, labelKey: 'common.dashboard',  activeColor: 'text-blue-500'    },
-    { path: '/projects',   icon: FolderKanban,    labelKey: 'common.projects',   activeColor: 'text-purple-500'  },
-    { path: '/tasks',      icon: CheckSquare,     labelKey: 'common.tasks',      activeColor: 'text-blue-500'    },
-    { path: '/goals',      icon: Target,          labelKey: 'common.goals',      activeColor: 'text-amber-500'   },
-    { path: '/finance',    icon: Wallet,          labelKey: 'common.finance',    activeColor: 'text-emerald-500' },
-    { path: '/knowledge',  icon: BookOpen,        labelKey: 'common.knowledge',  activeColor: 'text-violet-500'  },
-    { path: '/habits',     icon: Repeat,          labelKey: 'common.habits',     activeColor: 'text-green-500'   },
-    { path: '/calendar',   icon: Calendar,        labelKey: 'common.calendar',   activeColor: 'text-sky-500'     },
-    { path: '/studio',     icon: Film,            labelKey: 'common.studio',     activeColor: 'text-rose-500'    },
-    { path: '/pomodoro',   icon: Timer,           labelKey: 'common.pomodoro',   activeColor: 'text-orange-500'  },
-    ...(isAdmin ? [{ path: '/admin', icon: ShieldCheck, labelKey: 'common.admin', activeColor: 'text-primary' }] : []),
+    { path: '/dashboard',  icon: LayoutDashboard, labelKey: 'common.dashboard'  },
+    { path: '/projects',   icon: FolderKanban,    labelKey: 'common.projects',   hue: 'var(--lt-hue-proj)'   },
+    { path: '/tasks',      icon: CheckSquare,     labelKey: 'common.tasks',      hue: 'var(--lt-hue-task)'   },
+    { path: '/goals',      icon: Target,          labelKey: 'common.goals',      hue: 'var(--lt-hue-goal)'   },
+    { path: '/finance',    icon: Wallet,          labelKey: 'common.finance',    hue: 'var(--lt-hue-money)'  },
+    { path: '/knowledge',  icon: BookOpen,        labelKey: 'common.knowledge',  hue: 'var(--lt-hue-know)'   },
+    { path: '/habits',     icon: Repeat,          labelKey: 'common.habits',     hue: 'var(--lt-hue-habit)'  },
+    { path: '/calendar',   icon: Calendar,        labelKey: 'common.calendar',   hue: 'var(--lt-hue-cal)'    },
+    { path: '/studio',     icon: Film,            labelKey: 'common.studio',     hue: 'var(--lt-hue-studio)' },
+    { path: '/pomodoro',   icon: Timer,           labelKey: 'common.pomodoro',   hue: 'var(--lt-hue-pomo)'   },
+    ...(isAdmin ? [{ path: '/admin', icon: ShieldCheck, labelKey: 'common.admin' }] : []),
   ];
 
   const navItems = allNavItems.filter(item => {
