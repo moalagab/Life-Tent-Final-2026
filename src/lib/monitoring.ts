@@ -12,6 +12,7 @@
  */
 
 import { logger } from './logger';
+import { capture } from './analytics';
 
 // ─── External transport hook ─────────────────────────────────────────────────
 
@@ -138,12 +139,13 @@ export function initMonitoring(): void {
   logger.info('Monitoring initialised', { env: import.meta.env.MODE });
 }
 
-/** Track a custom user action for analytics. */
+/** Track a custom user action for analytics (PostHog + local log). */
 export function trackEvent(
   name: string,
   properties?: Record<string, unknown>
 ): void {
   logger.debug(`Event: ${name}`, properties);
+  capture(name, properties);
 }
 
 /** Time a synchronous operation and log if it exceeds the threshold. */

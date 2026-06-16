@@ -7,6 +7,7 @@ import "./life-tent.css";
 import "./i18n";
 import { ThemeProvider } from "./hooks/useTheme";
 import { initMonitoring, connectMonitoringAdapter } from "./lib/monitoring";
+import { initAnalytics } from "./lib/analytics";
 import { registerSW } from "virtual:pwa-register";
 
 // ── PWA Service Worker registration ─────────────────────────────────────────
@@ -23,6 +24,9 @@ registerSW({
 
 // ── Monitoring (Web Vitals) — runs immediately, lightweight ─────────────────
 initMonitoring();
+
+// ── PostHog Analytics — init before render ───────────────────────────────────
+initAnalytics();
 
 // ── Sentry — lazy loaded after app mounts, never blocks render ───────────────
 const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN as string | undefined;

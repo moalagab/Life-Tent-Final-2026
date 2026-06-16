@@ -15,6 +15,7 @@ import { useAppLifecycle } from "@/hooks/useAppLifecycle";
 import { isNative } from "@/lib/capacitor";
 import { useTheme } from "@/hooks/useTheme";
 import { LightboxProvider } from "@/components/lightbox/LightboxProvider";
+import { PageViewTracker } from "@/components/PageViewTracker";
 
 /**
  * PlatformInit — sets data-platform on <html> so CSS tokens apply.
@@ -118,6 +119,7 @@ const App = () => (
           <Sonner />
           <PWAUpdatePrompt />
           <BrowserRouter>
+            <PageViewTracker />
             <OnboardingProvider>
             <Suspense fallback={<PageLoader />}>
               <Routes>

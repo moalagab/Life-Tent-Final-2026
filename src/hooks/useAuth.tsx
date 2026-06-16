@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { identify, analyticsReset, capture, EVENTS } from '@/lib/analytics';
 
 interface AuthContextType {
   user: User | null;
@@ -28,6 +29,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        if (event === 'SIGNED_IN' && session?.user) {
+          identify(session.user.id, {
+            email:      session.user.email,
+            created_at: session.user.created_at,
+          });
+        }
+        if (event === 'SIGNED_OUT') {
+          analyticsReset();
+        }
       }
     );
 
@@ -43,54 +54,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, fullName?: string) => {
     const redirectUrl = `${window.location.origin}/`;
-    
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: {
-          full_name: fullName
-        }
-      }
+        data: { full_name: fullName },
+      },
     });
+    if (!error) capture(EVENTS.USER_SIGNED_UP, { has_name: !!fullName });
     return { error: error as Error | null };
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (!error) capture(EVENTS.USER_SIGNED_IN, { method: 'email' });
     return { error: error as Error | null };
   };
 
   const signInWithGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/`,
-      },
+      options: { redirectTo: `${window.location.origin}/` },
     });
+    if (!error) capture(EVENTS.USER_SIGNED_IN_GOOGLE);
     return { error: error as Error | null };
   };
 
   const resetPassword = async (email: string) => {
     const redirectUrl = `${window.location.origin}/auth/reset-password`;
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: redirectUrl
+      redirectTo: redirectUrl,
     });
+    if (!error) capture(EVENTS.PASSWORD_RESET_SENT);
     return { error: error as Error | null };
   };
 
   const updatePassword = async (newPassword: string) => {
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword
-    });
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
     return { error: error as Error | null };
   };
 
   const signOut = async () => {
+    capture(EVENTS.USER_SIGNED_OUT);
     await supabase.auth.signOut();
   };
 
