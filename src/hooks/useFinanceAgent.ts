@@ -230,7 +230,7 @@ export function useFinanceAgent(): FinanceAgentResult {
       healthScore: score,
       healthLabel: healthLabel(score),
     };
-  }, [accounts, txRaw, stats, subscriptions, advFinance]);
+  }, [accounts, txRaw, stats, subscriptions, debtsRaw]);
 
   return {
     ...result,
