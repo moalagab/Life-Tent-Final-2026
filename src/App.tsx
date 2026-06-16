@@ -56,6 +56,7 @@ const Profile       = lazy(() => import("./pages/Profile"));
 const AreaWorkspace       = lazy(() => import("./pages/AreaWorkspace"));
 const ProjectWorkspace    = lazy(() => import("./pages/ProjectWorkspace"));
 const GoalWorkspace       = lazy(() => import("./pages/GoalWorkspace"));
+const FinanceWorkspace    = lazy(() => import("./pages/FinanceWorkspace"));
 const HabitDetail         = lazy(() => import("./pages/HabitDetail"));
 const MediaItemWorkspace  = lazy(() => import("./pages/MediaItemWorkspace"));
 const ResourceWorkspace   = lazy(() => import("./pages/ResourceWorkspace"));
@@ -145,6 +146,7 @@ const App = () => (
                 <Route path="/habits/:id"   element={<ProtectedRoute><HabitDetail /></ProtectedRoute>} />
                 <Route path="/studio/:id"   element={<ProtectedRoute><MediaItemWorkspace /></ProtectedRoute>} />
                 <Route path="/resources/:id" element={<ProtectedRoute><ResourceWorkspace /></ProtectedRoute>} />
+                <Route path="/finance/workspace" element={<ProtectedRoute><FinanceWorkspace /></ProtectedRoute>} />
                 <Route path="/finance/:section" element={<ProtectedRoute><Finance /></ProtectedRoute>} />
                 <Route path="/archive"      element={<ProtectedRoute><ArchivePage /></ProtectedRoute>} />
                 <Route path="/timeline"    element={<ProtectedRoute><Timeline /></ProtectedRoute>} />
