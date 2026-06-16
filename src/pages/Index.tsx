@@ -33,9 +33,11 @@ import { PredictivePanel } from '@/components/predictions/PredictivePanel';
 import { MemoryInsightsCard } from '@/components/memory/MemoryInsightsCard';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { CommandCenter } from '@/components/command/CommandCenter';
+import { DailyPlanningCycle } from '@/components/planning/DailyPlanningCycle';
+import { useDailyPlanningCycle } from '@/hooks/useDailyPlanningCycle';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet, Brain, Eye, Crosshair, Zap } from 'lucide-react';
+import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet, Brain, Eye, Crosshair, Zap, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import type { ReactNode } from 'react';
@@ -53,6 +55,17 @@ const Index = () => {
 
   const [commandCenterOpen, setCommandCenterOpen] = useState(false);
   const [focusModeActive, setFocusModeActive] = usePersistedState<boolean>('cmd.focusMode', false);
+
+  const [planningOpen, setPlanningOpen] = useState(false);
+  const { shouldShow: shouldShowPlanning, openManually: openPlanningManually } = useDailyPlanningCycle();
+
+  // Auto-open daily planning cycle on first morning visit
+  useEffect(() => {
+    if (shouldShowPlanning) {
+      const timer = setTimeout(() => setPlanningOpen(true), 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [shouldShowPlanning]);
 
   const [preset, setPreset] = usePersistedState<DashboardPreset>(
     'dashboard.preset',
@@ -247,10 +260,31 @@ const Index = () => {
         {/* ── Quick Actions ── */}
         <QuickActions />
 
-        {/* ── Command Center trigger ── */}
+        {/* ── Planning + Command Center triggers ── */}
+        <div className="grid grid-cols-2 gap-2">
+        {/* Daily planning trigger */}
+        <button
+          onClick={() => { openPlanningManually(); setPlanningOpen(true); }}
+          className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-2xl border border-amber-400/20 bg-gradient-to-r from-amber-400/5 to-orange-400/5 hover:from-amber-400/10 hover:to-orange-400/10 transition-all group active:scale-[0.99]"
+        >
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-lg bg-amber-400/15 border border-amber-400/25 flex items-center justify-center shrink-0">
+              <Sun className="w-3 h-3 text-amber-400" />
+            </div>
+            <div className="text-start">
+              <div className="text-xs font-black text-foreground/90 leading-tight">تخطيط اليوم</div>
+              <div className="text-[9px] text-muted-foreground/50">مراجعة · خطة · تركيز</div>
+            </div>
+          </div>
+          {shouldShowPlanning && (
+            <div className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+          )}
+        </button>
+
+        {/* Command Center trigger */}
         <button
           onClick={() => setCommandCenterOpen(true)}
-          className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl border border-red-500/20 bg-gradient-to-r from-red-500/5 to-orange-500/5 hover:from-red-500/10 hover:to-orange-500/10 transition-all group active:scale-[0.99]"
+          className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-2xl border border-red-500/20 bg-gradient-to-r from-red-500/5 to-orange-500/5 hover:from-red-500/10 hover:to-orange-500/10 transition-all group active:scale-[0.99]"
         >
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-red-500/15 border border-red-500/25 flex items-center justify-center shrink-0">
@@ -271,6 +305,7 @@ const Index = () => {
             <Crosshair className="w-3.5 h-3.5 text-red-400/50 group-hover:text-red-400 transition-colors" />
           </div>
         </button>
+        </div>{/* end grid */}
 
         {/* ── Focus mode active banner ── */}
         {focusModeActive && (
@@ -353,6 +388,12 @@ const Index = () => {
           </>
         )}
       </div>
+      {/* ── Daily Planning Cycle wizard ── */}
+      <DailyPlanningCycle
+        open={planningOpen}
+        onClose={() => setPlanningOpen(false)}
+      />
+
       {/* ── Command Center overlay ── */}
       <CommandCenter
         open={commandCenterOpen}

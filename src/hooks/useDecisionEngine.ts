@@ -7,7 +7,7 @@
  * Skip:  removes task from today's queue (localStorage, resets midnight)
  * Snooze: hides task for N hours (localStorage, timestamp-based)
  */
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTasks } from './useTasks';
 import { useBehaviorEngine } from './useBehaviorEngine';
 import { useAdaptivePriority, ScoredTask } from './useAdaptivePriority';
@@ -85,9 +85,10 @@ export interface DecisionEngineResult {
   memoryInfluenced: boolean; // true when operational memory shaped the recommendation
   memoryConfidence: number;  // 0-100
   isLoading: boolean;
-  skip:   (id: string) => void;
-  snooze: (id: string, hours?: number) => void;
-  reset:  () => void;        // clear all skips/snoozes
+  skip:     (id: string) => void;
+  skipMany: (ids: string[]) => void;  // batch skip from daily planning wizard
+  snooze:   (id: string, hours?: number) => void;
+  reset:    () => void;      // clear all skips/snoozes
 }
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
@@ -99,6 +100,13 @@ export function useDecisionEngine(): DecisionEngineResult {
 
   const [skipped, setSkipped] = useState<Set<string>>(() => loadSkipped());
   const [snoozed, setSnoozed] = useState<Map<string, number>>(() => loadSnoozed());
+
+  // Re-sync when the daily planning wizard bulk-skips tasks
+  useEffect(() => {
+    const handler = () => setSkipped(loadSkipped());
+    window.addEventListener('de:skips-updated', handler);
+    return () => window.removeEventListener('de:skips-updated', handler);
+  }, []);
 
   const { data: tasks,   isLoading: tasksLoading   } = useTasks();
   const { data: profile, isLoading: profileLoading } = useBehaviorEngine();
@@ -137,6 +145,16 @@ export function useDecisionEngine(): DecisionEngineResult {
     bumpVersion();
   }, [bumpVersion]);
 
+  const skipMany = useCallback((ids: string[]) => {
+    setSkipped(prev => {
+      const next = new Set(prev);
+      ids.forEach(id => next.add(id));
+      saveSkipped(next);
+      return next;
+    });
+    bumpVersion();
+  }, [bumpVersion]);
+
   const snooze = useCallback((id: string, hours = 1) => {
     setSnoozed(prev => {
       const next = new Map(prev);
@@ -169,6 +187,7 @@ export function useDecisionEngine(): DecisionEngineResult {
     memoryConfidence: memory?.confidence ?? 0,
     isLoading:        tasksLoading || profileLoading || memoryLoading,
     skip,
+    skipMany,
     snooze,
     reset,
   };
