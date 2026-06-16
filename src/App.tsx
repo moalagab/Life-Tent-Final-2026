@@ -60,6 +60,7 @@ const MediaItemWorkspace  = lazy(() => import("./pages/MediaItemWorkspace"));
 const ResourceWorkspace   = lazy(() => import("./pages/ResourceWorkspace"));
 const ArchivePage         = lazy(() => import("./pages/ArchivePage"));
 const Timeline            = lazy(() => import("./pages/Timeline"));
+const GraphPage           = lazy(() => import("./pages/GraphPage"));
 
 function PageLoader() {
   return (
@@ -145,6 +146,7 @@ const App = () => (
                 <Route path="/finance/:section" element={<ProtectedRoute><Finance /></ProtectedRoute>} />
                 <Route path="/archive"      element={<ProtectedRoute><ArchivePage /></ProtectedRoute>} />
                 <Route path="/timeline"    element={<ProtectedRoute><Timeline /></ProtectedRoute>} />
+                <Route path="/graph"      element={<ProtectedRoute><GraphPage /></ProtectedRoute>} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>

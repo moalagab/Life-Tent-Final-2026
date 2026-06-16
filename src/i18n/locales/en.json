@@ -39,7 +39,8 @@
     "exportError": "Export failed",
     "update": "Update",
     "admin": "Admin Panel",
-    "timeline": "Timeline"
+    "timeline": "Timeline",
+    "graph": "Relation Graph"
   },
   "dashboard": {
     "greeting": "Hello",

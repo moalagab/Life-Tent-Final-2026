@@ -16,7 +16,7 @@ import {
   ArrowRight, FolderKanban, Pencil, Check, X,
   ListTodo, Target, Database, Users, TrendingUp,
   LayoutGrid, Eye, StickyNote, Archive, Play, Pause,
-  CheckCircle, Calendar, Share2, Loader2,
+  CheckCircle, Calendar, Share2, Loader2, Network,
 } from 'lucide-react';
 
 import { ProjectTasksTab }    from '@/components/projects/ProjectTasksTab';
@@ -27,8 +27,11 @@ import { ProjectOkrsView }    from '@/components/projects/ProjectOkrsView';
 import { KanbanBoard }        from '@/components/projects/KanbanBoard';
 import { ProjectNotesTab }    from '@/components/projects/ProjectNotesTab';
 import { ShareDialog }        from '@/components/ui/ShareDialog';
+import { useEntityRelations } from '@/hooks/useEntityRelations';
+import { RelationGraph }      from '@/components/graph/RelationGraph';
+import { RelationEditor }     from '@/components/graph/RelationEditor';
 
-type WorkspaceTab = 'overview' | 'tasks' | 'kanban' | 'goals' | 'resources' | 'crm' | 'okrs' | 'notes';
+type WorkspaceTab = 'overview' | 'tasks' | 'kanban' | 'goals' | 'resources' | 'crm' | 'okrs' | 'notes' | 'graph';
 
 const TABS: { id: WorkspaceTab; labelAr: string; icon: React.ComponentType<{ className?: string; strokeWidth?: number }> }[] = [
   { id: 'overview',   labelAr: 'نظرة عامة', icon: Eye },
@@ -39,6 +42,7 @@ const TABS: { id: WorkspaceTab; labelAr: string; icon: React.ComponentType<{ cla
   { id: 'crm',        labelAr: 'CRM',        icon: Users },
   { id: 'okrs',       labelAr: 'OKRs',       icon: TrendingUp },
   { id: 'notes',      labelAr: 'ملاحظات',   icon: StickyNote },
+  { id: 'graph',      labelAr: 'العلاقات',   icon: Network },
 ];
 
 const PHASE_STEPS = ['initiation', 'planning', 'execution', 'monitoring', 'closing'] as const;
@@ -65,10 +69,12 @@ export default function ProjectWorkspace() {
   const [editTitle, setEditTitle] = useState('');
   const [isEditingDesc, setIsEditingDesc] = useState(false);
   const [editDesc, setEditDesc] = useState('');
-  const [shareOpen, setShareOpen] = useState(false);
+  const [shareOpen,    setShareOpen]    = useState(false);
+  const [relationOpen, setRelationOpen] = useState(false);
 
   const { data: projects } = useProjects();
   const { data: allTasks } = useTasks();
+  const { data: relations = [] } = useEntityRelations(id ?? '');
   const updateProject = useUpdateProject();
 
   const project = projects?.find(p => p.id === id);
@@ -401,6 +407,38 @@ export default function ProjectWorkspace() {
           {activeTab === 'crm' && <ProjectCRMTab projectId={project.id} />}
           {activeTab === 'okrs' && <ProjectOkrsView projectId={project.id} />}
           {activeTab === 'notes' && <ProjectNotesTab projectId={project.id} />}
+
+          {activeTab === 'graph' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-bold text-sm">خريطة العلاقات</p>
+                  <p className="text-xs text-muted-foreground">{relations.length} علاقة مرتبطة بهذا المشروع</p>
+                </div>
+                <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setRelationOpen(true)}>
+                  <Network className="w-3.5 h-3.5" />
+                  إدارة العلاقات
+                </Button>
+              </div>
+              <RelationGraph
+                entityId={project.id}
+                entityType="project"
+                entityLabel={project.title}
+                relations={relations}
+                height={420}
+                onAddRelation={() => setRelationOpen(true)}
+              />
+              <RelationEditor
+                open={relationOpen}
+                onOpenChange={setRelationOpen}
+                entityId={project.id}
+                entityType="project"
+                entityLabel={project.title}
+                relations={relations}
+                isAr
+              />
+            </div>
+          )}
 
         </div>
       </div>

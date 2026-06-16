@@ -39,7 +39,8 @@
     "exportError": "فشل التصدير",
     "update": "تحديث",
     "admin": "لوحة الادمن",
-    "timeline": "السجل الزمني"
+    "timeline": "السجل الزمني",
+    "graph": "خريطة العلاقات"
   },
   "dashboard": {
     "greeting": "مرحباً",

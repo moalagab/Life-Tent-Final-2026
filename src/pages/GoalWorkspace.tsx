@@ -6,6 +6,9 @@ import {
   useKeyResults, useUpdateKeyResult, useCreateKeyResult, useDeleteKeyResult,
 } from '@/hooks/useGoals';
 import { useHabits } from '@/hooks/useHabits';
+import { useEntityRelations } from '@/hooks/useEntityRelations';
+import { RelationGraph } from '@/components/graph/RelationGraph';
+import { RelationEditor } from '@/components/graph/RelationEditor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,7 +20,7 @@ import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import {
   ArrowRight, Target, Pencil, Check, X, Archive, Plus, Trash2,
-  FolderKanban, Flame, Calendar, TrendingUp, Activity, RotateCcw,
+  Network, Flame, Calendar, TrendingUp, Activity, RotateCcw,
   Loader2, User, Users, Cog, GraduationCap,
 } from 'lucide-react';
 
@@ -26,7 +29,7 @@ type Tab = 'overview' | 'keyresults' | 'connections';
 const TABS = [
   { id: 'overview' as Tab,     labelAr: 'نظرة عامة',    icon: Activity },
   { id: 'keyresults' as Tab,   labelAr: 'النتائج الرئيسية', icon: TrendingUp },
-  { id: 'connections' as Tab,  labelAr: 'الارتباطات',   icon: FolderKanban },
+  { id: 'connections' as Tab,  labelAr: 'خريطة العلاقات', icon: Network },
 ];
 
 const PERSPECTIVE_CONFIG: Record<string, { label: string; color: string; icon: typeof User }> = {
@@ -49,11 +52,13 @@ export default function GoalWorkspace() {
   const [newKrTitle, setNewKrTitle] = useState('');
   const [newKrTarget, setNewKrTarget] = useState('');
   const [newKrUnit, setNewKrUnit] = useState('');
-  const [addingKr, setAddingKr] = useState(false);
+  const [addingKr,     setAddingKr]     = useState(false);
+  const [relationOpen, setRelationOpen] = useState(false);
 
   const { data: goals } = useGoals(true);
   const { data: allKrs } = useKeyResults();
   const { data: habits } = useHabits();
+  const { data: relations = [] } = useEntityRelations(id ?? '');
   const updateGoal = useUpdateGoal();
   const archiveGoal = useArchiveGoal();
   const updateKr = useUpdateKeyResult();
@@ -372,35 +377,52 @@ export default function GoalWorkspace() {
 
           {/* CONNECTIONS */}
           {activeTab === 'connections' && (
-            <div className="space-y-3">
-              <div className="glass-card p-4 space-y-3">
-                <h3 className="font-semibold text-sm flex items-center gap-2"><FolderKanban className="w-4 h-4 text-primary" />المشروع المرتبط</h3>
-                {(goal as { projects?: { id: string; title: string; color?: string | null } | null }).projects ? (
-                  <button onClick={() => navigate(`/projects/${goal.project_id}`)} className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors text-start">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${(goal as { projects?: { color?: string | null } | null }).projects?.color || '#2563EB'}20` }}>
-                      <FolderKanban className="w-4 h-4" style={{ color: (goal as { projects?: { color?: string | null } | null }).projects?.color || '#2563EB' }} />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-bold text-sm">خريطة العلاقات</p>
+                  <p className="text-xs text-muted-foreground">{relations.length} علاقة مرتبطة بهذا الهدف</p>
+                </div>
+                <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setRelationOpen(true)}>
+                  <Network className="w-3.5 h-3.5" />
+                  إدارة العلاقات
+                </Button>
+              </div>
+
+              <RelationGraph
+                entityId={id}
+                entityType="goal"
+                entityLabel={goal.title}
+                relations={relations}
+                height={380}
+                onAddRelation={() => setRelationOpen(true)}
+              />
+
+              {/* Legacy static links (quick nav) */}
+              {(goal as { projects?: { id: string; title: string; color?: string | null } | null }).projects && (
+                <div className="glass-card p-3">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase mb-2">مشروع مرتبط (قاعدة البيانات)</p>
+                  <button onClick={() => navigate(`/projects/${goal.project_id}`)} className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors text-start">
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${(goal as { projects?: { color?: string | null } | null }).projects?.color || '#2563EB'}20` }}>
+                      <Network className="w-3.5 h-3.5" style={{ color: (goal as { projects?: { color?: string | null } | null }).projects?.color || '#2563EB' }} />
                     </div>
                     <span className="font-medium text-sm">{(goal as { projects?: { title: string } | null }).projects?.title}</span>
                     <ArrowRight className="w-4 h-4 text-muted-foreground ms-auto" />
                   </button>
-                ) : (
-                  <p className="text-sm text-muted-foreground py-2 text-center">لا يوجد مشروع مرتبط</p>
-                )}
-              </div>
-              <div className="glass-card p-4 space-y-3">
-                <h3 className="font-semibold text-sm flex items-center gap-2"><Flame className="w-4 h-4 text-warning" />العادة المرتبطة</h3>
-                {linkedHabit ? (
-                  <button onClick={() => navigate(`/habits/${linkedHabit.id}`)} className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors text-start">
-                    <div className="w-8 h-8 rounded-lg bg-warning/10 flex items-center justify-center shrink-0">
-                      <span className="text-lg">{linkedHabit.icon ?? '🔥'}</span>
-                    </div>
-                    <span className="font-medium text-sm">{linkedHabit.name}</span>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground ms-auto" />
-                  </button>
-                ) : (
-                  <p className="text-sm text-muted-foreground py-2 text-center">لا توجد عادة مرتبطة</p>
-                )}
-              </div>
+                </div>
+              )}
+
+              {id && goal && (
+                <RelationEditor
+                  open={relationOpen}
+                  onOpenChange={setRelationOpen}
+                  entityId={id}
+                  entityType="goal"
+                  entityLabel={goal.title}
+                  relations={relations}
+                  isAr
+                />
+              )}
             </div>
           )}
         </div>

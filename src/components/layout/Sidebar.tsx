@@ -33,6 +33,7 @@ import {
   X,
   ShieldCheck,
   Activity,
+  Network,
 } from 'lucide-react';
 
 interface NavItem { path: string; icon: React.ElementType; labelKey: string; hue?: string; }
@@ -246,6 +247,7 @@ export function Sidebar() {
     { path: '/studio',     icon: Film,            labelKey: 'common.studio',     hue: 'var(--lt-hue-studio)' },
     { path: '/pomodoro',   icon: Timer,           labelKey: 'common.pomodoro',   hue: 'var(--lt-hue-pomo)'   },
     { path: '/timeline',   icon: Activity,        labelKey: 'common.timeline'   },
+    { path: '/graph',      icon: Network,         labelKey: 'common.graph'      },
     ...(isAdmin ? [{ path: '/admin', icon: ShieldCheck, labelKey: 'common.admin' }] : []),
   ];
 
