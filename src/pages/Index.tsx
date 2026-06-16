@@ -27,6 +27,7 @@ import { useSectionState } from '@/hooks/useSectionState';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { useContextAwareness } from '@/hooks/useContextAwareness';
 import { ContextBanner } from '@/components/context/ContextBanner';
+import { CognitiveDashboard } from '@/components/cognitive/CognitiveDashboard';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet, Brain, Eye } from 'lucide-react';
@@ -259,6 +260,9 @@ const Index = () => {
 
             {/* ── Daily Decision Card (AI-layer) ── */}
             <DailyDecisionCard />
+
+            {/* ── Cognitive Load Control — curated tasks + projects ── */}
+            <CognitiveDashboard contextMode={context.mode} />
 
             {/* ── Mobile: preset switcher ── */}
             {isMobile && (
