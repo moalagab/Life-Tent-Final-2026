@@ -38,7 +38,9 @@ import { useDailyPlanningCycle } from '@/hooks/useDailyPlanningCycle';
 import { WeeklyReviewEngine } from '@/components/review/WeeklyReviewEngine';
 import { useWeeklyReview } from '@/hooks/useWeeklyReview';
 import { NaturalCapture }       from '@/components/capture/NaturalCapture';
-import { SuccessLoopFeedback } from '@/components/feedback/SuccessLoopFeedback';
+import { SuccessLoopFeedback }     from '@/components/feedback/SuccessLoopFeedback';
+import { SystemHealthCard }        from '@/components/health/SystemHealthCard';
+import { EmptyStateIntelligence }  from '@/components/empty/EmptyStateIntelligence';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet, Brain, Eye, Crosshair, Zap, Sun, BarChart3 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -343,6 +345,9 @@ const Index = () => {
         </button>
         </div>{/* end grid */}
 
+        {/* ── System Health Card ── */}
+        <SystemHealthCard />
+
         {/* ── Focus mode active banner ── */}
         {focusModeActive && (
           <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl border border-amber-400/25 bg-amber-400/5">
@@ -376,6 +381,9 @@ const Index = () => {
           </div>
         ) : focusModeActive ? null : (
           <>
+            {/* ── Empty State Intelligence ── */}
+            <EmptyStateIntelligence />
+
             {/* ── Attention ribbon ── */}
             <AttentionStrip />
 
