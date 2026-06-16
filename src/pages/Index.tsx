@@ -35,9 +35,11 @@ import { QuickActions } from '@/components/dashboard/QuickActions';
 import { CommandCenter } from '@/components/command/CommandCenter';
 import { DailyPlanningCycle } from '@/components/planning/DailyPlanningCycle';
 import { useDailyPlanningCycle } from '@/hooks/useDailyPlanningCycle';
+import { WeeklyReviewEngine } from '@/components/review/WeeklyReviewEngine';
+import { useWeeklyReview } from '@/hooks/useWeeklyReview';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet, Brain, Eye, Crosshair, Zap, Sun } from 'lucide-react';
+import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet, Brain, Eye, Crosshair, Zap, Sun, BarChart3 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import type { ReactNode } from 'react';
@@ -59,6 +61,9 @@ const Index = () => {
   const [planningOpen, setPlanningOpen] = useState(false);
   const { shouldShow: shouldShowPlanning, openManually: openPlanningManually } = useDailyPlanningCycle();
 
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const { shouldShow: shouldShowReview, openManually: openReviewManually } = useWeeklyReview();
+
   // Auto-open daily planning cycle on first morning visit
   useEffect(() => {
     if (shouldShowPlanning) {
@@ -66,6 +71,14 @@ const Index = () => {
       return () => clearTimeout(timer);
     }
   }, [shouldShowPlanning]);
+
+  // Auto-open weekly review on Fridays (after planning if both apply)
+  useEffect(() => {
+    if (shouldShowReview && !shouldShowPlanning) {
+      const timer = setTimeout(() => setReviewOpen(true), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [shouldShowReview, shouldShowPlanning]);
 
   const [preset, setPreset] = usePersistedState<DashboardPreset>(
     'dashboard.preset',
@@ -260,8 +273,8 @@ const Index = () => {
         {/* ── Quick Actions ── */}
         <QuickActions />
 
-        {/* ── Planning + Command Center triggers ── */}
-        <div className="grid grid-cols-2 gap-2">
+        {/* ── Planning + Review + Command Center triggers ── */}
+        <div className="grid grid-cols-3 gap-2">
         {/* Daily planning trigger */}
         <button
           onClick={() => { openPlanningManually(); setPlanningOpen(true); }}
@@ -278,6 +291,25 @@ const Index = () => {
           </div>
           {shouldShowPlanning && (
             <div className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+          )}
+        </button>
+
+        {/* Weekly review trigger */}
+        <button
+          onClick={() => { openReviewManually(); setReviewOpen(true); }}
+          className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-2xl border border-emerald-500/20 bg-gradient-to-r from-emerald-500/5 to-teal-500/5 hover:from-emerald-500/10 hover:to-teal-500/10 transition-all group active:scale-[0.99]"
+        >
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0">
+              <BarChart3 className="w-3 h-3 text-emerald-500" />
+            </div>
+            <div className="text-start">
+              <div className="text-xs font-black text-foreground/90 leading-tight">مراجعة الأسبوع</div>
+              <div className="text-[9px] text-muted-foreground/50">إنجاز · تأخر · خطة</div>
+            </div>
+          </div>
+          {shouldShowReview && (
+            <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
           )}
         </button>
 
@@ -388,6 +420,12 @@ const Index = () => {
           </>
         )}
       </div>
+      {/* ── Weekly Review Engine ── */}
+      <WeeklyReviewEngine
+        open={reviewOpen}
+        onClose={() => setReviewOpen(false)}
+      />
+
       {/* ── Daily Planning Cycle wizard ── */}
       <DailyPlanningCycle
         open={planningOpen}
