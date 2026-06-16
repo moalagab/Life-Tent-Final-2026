@@ -28,6 +28,7 @@ import { usePersistedState } from '@/hooks/usePersistedState';
 import { useContextAwareness } from '@/hooks/useContextAwareness';
 import { ContextBanner } from '@/components/context/ContextBanner';
 import { CognitiveDashboard } from '@/components/cognitive/CognitiveDashboard';
+import { AgentPanel } from '@/components/agents/AgentPanel';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet, Brain, Eye } from 'lucide-react';
@@ -263,6 +264,9 @@ const Index = () => {
 
             {/* ── Cognitive Load Control — curated tasks + projects ── */}
             <CognitiveDashboard contextMode={context.mode} />
+
+            {/* ── Agent Layer — Task / Finance / Habit agents ── */}
+            <AgentPanel />
 
             {/* ── Mobile: preset switcher ── */}
             {isMobile && (
