@@ -32,8 +32,10 @@ import { AgentPanel } from '@/components/agents/AgentPanel';
 import { PredictivePanel } from '@/components/predictions/PredictivePanel';
 import { MemoryInsightsCard } from '@/components/memory/MemoryInsightsCard';
 import { QuickActions } from '@/components/dashboard/QuickActions';
+import { CommandCenter } from '@/components/command/CommandCenter';
+import { usePersistedState } from '@/hooks/usePersistedState';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet, Brain, Eye } from 'lucide-react';
+import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet, Brain, Eye, Crosshair, Zap } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import type { ReactNode } from 'react';
@@ -48,6 +50,9 @@ const Index = () => {
   const isMobile   = useIsMobile();
   const context    = useContextAwareness();
   const [showFullInMorning, setShowFullInMorning] = useState(false);
+
+  const [commandCenterOpen, setCommandCenterOpen] = useState(false);
+  const [focusModeActive, setFocusModeActive] = usePersistedState<boolean>('cmd.focusMode', false);
 
   const [preset, setPreset] = usePersistedState<DashboardPreset>(
     'dashboard.preset',
@@ -242,6 +247,48 @@ const Index = () => {
         {/* ── Quick Actions ── */}
         <QuickActions />
 
+        {/* ── Command Center trigger ── */}
+        <button
+          onClick={() => setCommandCenterOpen(true)}
+          className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl border border-red-500/20 bg-gradient-to-r from-red-500/5 to-orange-500/5 hover:from-red-500/10 hover:to-orange-500/10 transition-all group active:scale-[0.99]"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-red-500/15 border border-red-500/25 flex items-center justify-center shrink-0">
+              <Crosshair className="w-3.5 h-3.5 text-red-400" />
+            </div>
+            <div className="text-start">
+              <div className="text-xs font-black text-foreground/90 leading-tight">مركز القيادة</div>
+              <div className="text-[9px] text-muted-foreground/50">خطة اليوم · حذف الثانوي · إعادة الحساب</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {focusModeActive && (
+              <div className="flex items-center gap-1 text-[9px] font-black text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded-full px-2 py-0.5">
+                <Zap className="w-2.5 h-2.5" />
+                تركيز
+              </div>
+            )}
+            <Crosshair className="w-3.5 h-3.5 text-red-400/50 group-hover:text-red-400 transition-colors" />
+          </div>
+        </button>
+
+        {/* ── Focus mode active banner ── */}
+        {focusModeActive && (
+          <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl border border-amber-400/25 bg-amber-400/5">
+            <Zap className="w-4 h-4 text-amber-400 shrink-0" />
+            <div className="flex-1">
+              <span className="text-xs font-black text-amber-400">وضع التركيز نشط</span>
+              <span className="text-[10px] text-muted-foreground/60 ms-2">— اللوحة مخفية، ركّز على مهمتك</span>
+            </div>
+            <button
+              onClick={() => setFocusModeActive(false)}
+              className="text-[10px] font-bold text-muted-foreground/60 hover:text-foreground transition-colors border border-border/40 rounded-lg px-2 py-1"
+            >
+              إيقاف
+            </button>
+          </div>
+        )}
+
         {/* ── MORNING MODE: only show FocusEngine + button to expand ── */}
         {isMorningFocus ? (
           <div className="flex flex-col items-center gap-3 py-4">
@@ -256,7 +303,7 @@ const Index = () => {
               فتح لوحة التحكم الكاملة
             </button>
           </div>
-        ) : (
+        ) : focusModeActive ? null : (
           <>
             {/* ── Attention ribbon ── */}
             <AttentionStrip />
@@ -306,6 +353,13 @@ const Index = () => {
           </>
         )}
       </div>
+      {/* ── Command Center overlay ── */}
+      <CommandCenter
+        open={commandCenterOpen}
+        onClose={() => setCommandCenterOpen(false)}
+        focusModeActive={focusModeActive}
+        onToggleFocusMode={() => setFocusModeActive(v => !v)}
+      />
     </MainLayout>
   );
 };
