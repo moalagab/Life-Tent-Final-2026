@@ -29,6 +29,7 @@ import { useContextAwareness } from '@/hooks/useContextAwareness';
 import { ContextBanner } from '@/components/context/ContextBanner';
 import { CognitiveDashboard } from '@/components/cognitive/CognitiveDashboard';
 import { AgentPanel } from '@/components/agents/AgentPanel';
+import { PredictivePanel } from '@/components/predictions/PredictivePanel';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet, Brain, Eye } from 'lucide-react';
@@ -267,6 +268,9 @@ const Index = () => {
 
             {/* ── Agent Layer — Task / Finance / Habit agents ── */}
             <AgentPanel />
+
+            {/* ── Predictive Layer — forward-looking forecasts ── */}
+            <PredictivePanel />
 
             {/* ── Mobile: preset switcher ── */}
             {isMobile && (
