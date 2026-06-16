@@ -4,7 +4,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import {
   LayoutDashboard, Wallet, Receipt, PiggyBank,
   CreditCard, RefreshCw, TrendingUp, FileText, Briefcase, Upload,
-  Gauge, ShoppingBag, History
+  Gauge, ShoppingBag, History, Brain,
 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { FinanceDashboard } from '@/components/finance/FinanceDashboard';
@@ -20,12 +20,13 @@ import { DataImport } from '@/components/finance/DataImport';
 import { WishlistManager } from '@/components/finance/WishlistManager';
 import { FinanceAIAssistant } from '@/components/finance/FinanceAIAssistant';
 import { FinanceAuditLogView } from '@/components/finance/FinanceAuditLogView';
+import { FinanceIntelligencePanel } from '@/components/finance/FinanceIntelligencePanel';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 import { cn } from '@/lib/utils';
 
 const ALLOWED_TABS = [
   'dashboard','accounts','transactions','budget','wishlist','debts',
-  'subscriptions','investments','projects','reports','audit','import',
+  'subscriptions','investments','projects','reports','audit','import','intelligence',
 ] as const;
 type FinanceTab = typeof ALLOWED_TABS[number];
 
@@ -97,10 +98,11 @@ export default function Finance() {
       labelEn: 'Advanced',
       activeBorder: 'border-violet-400/40',
       tabs: [
-        { id: 'projects', label: t('finance.projectFinance'), icon: Briefcase, from: 'from-indigo-500', to: 'to-blue-600'   },
-        { id: 'reports',  label: t('finance.reports'),        icon: FileText,  from: 'from-slate-500',  to: 'to-gray-600'   },
-        { id: 'audit',    label: t('finance.auditLog'),       icon: History,   from: 'from-yellow-500', to: 'to-amber-500'  },
-        { id: 'import',   label: t('finance.dataImport'),     icon: Upload,    from: 'from-teal-500',   to: 'to-green-500'  },
+        { id: 'projects',      label: t('finance.projectFinance'), icon: Briefcase, from: 'from-indigo-500',  to: 'to-blue-600'    },
+        { id: 'reports',       label: t('finance.reports'),        icon: FileText,  from: 'from-slate-500',   to: 'to-gray-600'    },
+        { id: 'audit',         label: t('finance.auditLog'),       icon: History,   from: 'from-yellow-500',  to: 'to-amber-500'   },
+        { id: 'import',        label: t('finance.dataImport'),     icon: Upload,    from: 'from-teal-500',    to: 'to-green-500'   },
+        { id: 'intelligence',  label: 'الذكاء',                   icon: Brain,     from: 'from-violet-500',  to: 'to-purple-600'  },
       ],
     },
   ] as const;
@@ -130,8 +132,8 @@ export default function Finance() {
                 )}>
                   {isRTL ? group.labelAr : group.labelEn}
                 </p>
-                {/* Card grid — 4 columns */}
-                <div className="grid grid-cols-4 gap-2">
+                {/* Card grid — auto columns based on count */}
+                <div className={cn('grid gap-2', group.tabs.length >= 5 ? 'grid-cols-5' : 'grid-cols-4')}>
                   {group.tabs.map(tab => {
                     const isActive = activeTab === tab.id;
                     const Icon = tab.icon;
@@ -177,6 +179,7 @@ export default function Finance() {
         {activeTab === 'reports'       && <FinanceReports />}
         {activeTab === 'audit'         && <FinanceAuditLogView />}
         {activeTab === 'import'        && <DataImport />}
+        {activeTab === 'intelligence'  && <FinanceIntelligencePanel />}
       </div>
 
       {/* AI Assistant */}
