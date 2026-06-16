@@ -25,10 +25,12 @@ import { useAutoReminders } from '@/hooks/useAutoReminders';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useSectionState } from '@/hooks/useSectionState';
 import { usePersistedState } from '@/hooks/usePersistedState';
+import { useContextAwareness } from '@/hooks/useContextAwareness';
+import { ContextBanner } from '@/components/context/ContextBanner';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet, Brain } from 'lucide-react';
-import { useEffect } from 'react';
+import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet, Brain, Eye } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import type { ReactNode } from 'react';
 
@@ -39,7 +41,9 @@ import type { ReactNode } from 'react';
 const Index = () => {
   useAutoReminders();
   const { t, currentLanguage } = useLanguage();
-  const isMobile = useIsMobile();
+  const isMobile   = useIsMobile();
+  const context    = useContextAwareness();
+  const [showFullInMorning, setShowFullInMorning] = useState(false);
 
   const [preset, setPreset] = usePersistedState<DashboardPreset>(
     'dashboard.preset',
@@ -178,15 +182,41 @@ const Index = () => {
   );
 
   // ---- Preset arrangements ----
-  const arrangements: Record<DashboardPreset, ReactNode[]> = {
-    focus:     [sectionAI, sectionRhythm, sectionActiveWork, sectionOverview, sectionFinance, sectionLibrary],
-    finance:   [sectionOverview, sectionFinance, sectionActiveWork, sectionRhythm, sectionAI, sectionLibrary],
-    execution: [sectionActiveWork, sectionOverview, sectionRhythm, sectionFinance, sectionAI, sectionLibrary],
+  const allSections = {
+    overview:         sectionOverview,
+    'active-work':    sectionActiveWork,
+    rhythm:           sectionRhythm,
+    finance:          sectionFinance,
+    library:          sectionLibrary,
+    'ai-intelligence': sectionAI,
   };
+
+  // Apply context hiding (skip when user overrode)
+  const hidden = (!context.isOverridden) ? new Set(context.hiddenSections) : new Set<string>();
+  const visible = (key: keyof typeof allSections) => !hidden.has(key) ? allSections[key] : null;
+
+  const arrangements: Record<DashboardPreset, (ReactNode | null)[]> = {
+    focus:     [visible('ai-intelligence'), visible('rhythm'),      visible('active-work'), visible('overview'), visible('finance'), visible('library')],
+    finance:   [visible('overview'),        visible('finance'),     visible('active-work'), visible('rhythm'),   visible('ai-intelligence'), visible('library')],
+    execution: [visible('active-work'),     visible('overview'),    visible('rhythm'),      visible('finance'),  visible('ai-intelligence'), visible('library')],
+  };
+
+  // ── Morning focus-only mode ──────────────────────────────────────────────
+  const isMorningFocus = context.focusOnlyMode && !context.isOverridden && !showFullInMorning;
 
   return (
     <MainLayout>
+      {/* Ambient background tint — changes with context mode */}
+      {context.accentScheme && (
+        <div
+          className={`fixed inset-0 -z-10 pointer-events-none bg-gradient-to-b ${context.accentScheme} to-transparent transition-all duration-1000`}
+        />
+      )}
+
       <div className="space-y-5 lg:space-y-8 pb-4 animate-fade-in">
+
+        {/* ── Context-aware mode banner ── */}
+        <ContextBanner context={context} />
 
         {/* ── Desktop only: greeting + preset switcher ── */}
         {!isMobile && (
@@ -205,26 +235,60 @@ const Index = () => {
         {/* ── Decision Engine — "شيء واحد فقط مهم الآن" ── */}
         <FocusEngine />
 
-        {/* ── Quick Actions (mobile: horizontal pills, desktop: cards grid) ── */}
+        {/* ── Quick Actions ── */}
         <QuickActions />
 
-        {/* ── Attention ribbon ── */}
-        <AttentionStrip />
-
-        {/* ── Daily Decision Card (AI-layer — deeper analysis) ── */}
-        <DailyDecisionCard />
-
-        {/* ── Mobile: preset switcher below the card ── */}
-        {isMobile && (
-          <div className="flex items-center justify-end">
-            <LayoutPresetSwitcher value={preset} onChange={setPreset} />
+        {/* ── MORNING MODE: only show FocusEngine + button to expand ── */}
+        {isMorningFocus ? (
+          <div className="flex flex-col items-center gap-3 py-4">
+            <p className="text-xs text-muted-foreground text-center max-w-xs">
+              🌅 وضع الصباح — ركّز على شيء واحد فقط قبل أن تفتح لوحة التحكم
+            </p>
+            <button
+              onClick={() => setShowFullInMorning(true)}
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-border/50 rounded-xl px-4 py-2 transition-colors hover:bg-muted/30"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              فتح لوحة التحكم الكاملة
+            </button>
           </div>
-        )}
+        ) : (
+          <>
+            {/* ── Attention ribbon ── */}
+            <AttentionStrip />
 
-        {/* ── Sections per preset ── */}
-        <div className="space-y-3">
-          {arrangements[preset]}
-        </div>
+            {/* ── Daily Decision Card (AI-layer) ── */}
+            <DailyDecisionCard />
+
+            {/* ── Mobile: preset switcher ── */}
+            {isMobile && (
+              <div className="flex items-center justify-end">
+                <LayoutPresetSwitcher value={preset} onChange={setPreset} />
+              </div>
+            )}
+
+            {/* ── Sections per preset (context-filtered) ── */}
+            <div className="space-y-3">
+              {arrangements[preset]}
+            </div>
+
+            {/* ── Show hidden sections indicator ── */}
+            {!context.isOverridden && hidden.size > 0 && (
+              <div className="flex items-center justify-center pt-2">
+                <button
+                  onClick={context.override}
+                  className="flex items-center gap-1.5 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                >
+                  <Eye className="w-3 h-3" />
+                  {hidden.size === 1
+                    ? `قسم واحد مخفي حسب السياق`
+                    : `${hidden.size} أقسام مخفية حسب السياق`}
+                  — اضغط لإظهارها
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </MainLayout>
   );
