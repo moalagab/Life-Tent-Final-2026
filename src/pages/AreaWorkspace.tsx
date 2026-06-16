@@ -7,6 +7,9 @@ import { useResources } from '@/hooks/useResources';
 import { useTasks } from '@/hooks/useTasks';
 import { useGoals } from '@/hooks/useGoals';
 import { useArchivedItems } from '@/hooks/useArchive';
+import { useAreaNotes } from '@/hooks/useKnowledge';
+import { NotesTab } from '@/components/notes/NotesTab';
+import { BackButton } from '@/components/ui/BackButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,17 +17,17 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import {
-  ArrowRight, Pencil, Archive, Check, X,
+  Pencil, Archive, Check, X,
   FolderKanban, CheckSquare, Target, Database,
   Layers, Activity, Plus, ExternalLink, FileText,
   Link2, Film, BookOpen, File, RotateCcw,
-  Calendar, AlertTriangle,
+  Calendar, AlertTriangle, StickyNote,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
-type WorkspaceTab = 'overview' | 'projects' | 'tasks' | 'goals' | 'resources' | 'archive';
+type WorkspaceTab = 'overview' | 'projects' | 'tasks' | 'goals' | 'resources' | 'notes' | 'archive';
 
 const TABS: { id: WorkspaceTab; labelAr: string; icon: React.ComponentType<{ className?: string; strokeWidth?: number }> }[] = [
   { id: 'overview',   labelAr: 'نظرة عامة', icon: Activity },
@@ -32,6 +35,7 @@ const TABS: { id: WorkspaceTab; labelAr: string; icon: React.ComponentType<{ cla
   { id: 'tasks',      labelAr: 'مهام',       icon: CheckSquare },
   { id: 'goals',      labelAr: 'أهداف',      icon: Target },
   { id: 'resources',  labelAr: 'موارد',      icon: Database },
+  { id: 'notes',      labelAr: 'ملاحظات',   icon: StickyNote },
   { id: 'archive',    labelAr: 'أرشيف',      icon: Archive },
 ];
 
@@ -65,6 +69,7 @@ export default function AreaWorkspace() {
   const { data: allGoals } = useGoals();
   const { data: resources } = useResources({ area_id: id });
   const { data: archivedItems } = useArchivedItems();
+  const { data: areaNotes = [], isLoading: notesLoading } = useAreaNotes(id ?? null);
 
   const updateArea = useUpdateArea();
   const archiveArea = useArchiveArea();
@@ -146,13 +151,11 @@ export default function AreaWorkspace() {
     <MainLayout>
       <div className="max-w-5xl mx-auto space-y-5">
 
-        {/* ── Breadcrumb ── */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <button onClick={() => navigate('/projects?tab=areas')} className="hover:text-foreground transition-colors">
-            المجالات
-          </button>
-          <ArrowRight className="w-3.5 h-3.5 shrink-0" />
-          <span className="text-foreground font-medium truncate max-w-[180px]">{area?.name}</span>
+        {/* ── Back + breadcrumb ── */}
+        <div className="flex items-center gap-3">
+          <BackButton to="/projects?tab=areas" label="المجالات" />
+          <span className="text-muted-foreground/40 text-sm">/</span>
+          <span className="text-sm font-medium text-foreground truncate max-w-[200px]">{area?.name}</span>
         </div>
 
         {/* ── Area Header ── */}
@@ -603,6 +606,16 @@ export default function AreaWorkspace() {
                 </div>
               )}
             </div>
+          )}
+
+          {/* NOTES */}
+          {activeTab === 'notes' && (
+            <NotesTab
+              notes={areaNotes}
+              isLoading={notesLoading}
+              linkField="folder"
+              linkValue={id ?? ''}
+            />
           )}
 
           {/* ARCHIVE */}

@@ -6,9 +6,12 @@ import {
   useKeyResults, useUpdateKeyResult, useCreateKeyResult, useDeleteKeyResult,
 } from '@/hooks/useGoals';
 import { useHabits } from '@/hooks/useHabits';
+import { useGoalNotes } from '@/hooks/useKnowledge';
 import { useEntityRelations } from '@/hooks/useEntityRelations';
 import { RelationGraph } from '@/components/graph/RelationGraph';
 import { RelationEditor } from '@/components/graph/RelationEditor';
+import { NotesTab } from '@/components/notes/NotesTab';
+import { BackButton } from '@/components/ui/BackButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,17 +22,18 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import {
-  ArrowRight, Target, Pencil, Check, X, Archive, Plus, Trash2,
+  Target, Pencil, Check, X, Archive, Plus, Trash2,
   Network, Flame, Calendar, TrendingUp, Activity, RotateCcw,
-  Loader2, User, Users, Cog, GraduationCap,
+  Loader2, User, Users, Cog, GraduationCap, StickyNote,
 } from 'lucide-react';
 
-type Tab = 'overview' | 'keyresults' | 'connections';
+type Tab = 'overview' | 'keyresults' | 'notes' | 'connections';
 
 const TABS = [
-  { id: 'overview' as Tab,     labelAr: 'نظرة عامة',    icon: Activity },
+  { id: 'overview' as Tab,     labelAr: 'نظرة عامة',       icon: Activity },
   { id: 'keyresults' as Tab,   labelAr: 'النتائج الرئيسية', icon: TrendingUp },
-  { id: 'connections' as Tab,  labelAr: 'خريطة العلاقات', icon: Network },
+  { id: 'notes' as Tab,        labelAr: 'ملاحظات',          icon: StickyNote },
+  { id: 'connections' as Tab,  labelAr: 'خريطة العلاقات',  icon: Network },
 ];
 
 const PERSPECTIVE_CONFIG: Record<string, { label: string; color: string; icon: typeof User }> = {
@@ -58,6 +62,7 @@ export default function GoalWorkspace() {
   const { data: goals } = useGoals(true);
   const { data: allKrs } = useKeyResults();
   const { data: habits } = useHabits();
+  const { data: goalNotes = [], isLoading: notesLoading } = useGoalNotes(id ?? null);
   const { data: relations = [] } = useEntityRelations(id ?? '');
   const updateGoal = useUpdateGoal();
   const archiveGoal = useArchiveGoal();
@@ -134,11 +139,11 @@ export default function GoalWorkspace() {
     <MainLayout>
       <div className="max-w-3xl mx-auto space-y-5">
 
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <button onClick={() => navigate('/goals')} className="hover:text-foreground transition-colors">الأهداف</button>
-          <ArrowRight className="w-3.5 h-3.5 shrink-0" />
-          <span className="text-foreground font-medium truncate max-w-[220px]">{goal.title}</span>
+        {/* Back + breadcrumb */}
+        <div className="flex items-center gap-3">
+          <BackButton to="/goals" label="الأهداف" />
+          <span className="text-muted-foreground/40 text-sm">/</span>
+          <span className="text-sm font-medium text-foreground truncate max-w-[220px]">{goal.title}</span>
         </div>
 
         {/* Header */}
@@ -373,6 +378,16 @@ export default function GoalWorkspace() {
                 </div>
               )}
             </div>
+          )}
+
+          {/* NOTES */}
+          {activeTab === 'notes' && id && (
+            <NotesTab
+              notes={goalNotes}
+              isLoading={notesLoading}
+              linkField="goal_id"
+              linkValue={id}
+            />
           )}
 
           {/* CONNECTIONS */}

@@ -45,6 +45,45 @@ export function useProjectNotes(projectId: string | null) {
   });
 }
 
+export function useGoalNotes(goalId: string | null) {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['notes', 'goal', goalId, user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('notes')
+        .select('*')
+        .eq('goal_id', goalId!)
+        .eq('is_archived', false)
+        .order('updated_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user && !!goalId,
+  });
+}
+
+// Area notes use `folder` field = areaId (no area_id column on notes table)
+export function useAreaNotes(areaId: string | null) {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['notes', 'area', areaId, user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('notes')
+        .select('*')
+        .eq('folder', areaId!)
+        .eq('is_archived', false)
+        .order('updated_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user && !!areaId,
+  });
+}
+
 export function useArchivedNotes() {
   const { user } = useAuth();
 
