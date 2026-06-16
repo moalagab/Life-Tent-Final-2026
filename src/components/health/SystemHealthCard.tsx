@@ -140,13 +140,16 @@ function HealthSkeleton() {
 export function SystemHealthCard() {
   const health = useSystemHealth();
 
-  if (health.isLoading) return <HealthSkeleton />;
-
-  // Weakest dimension for the "needs attention" badge
+  // useMemo MUST be before any early return (Rules of Hooks)
   const weakest = useMemo(
-    () => [...health.dimensions].sort((a, b) => a.score - b.score)[0],
+    () => health.dimensions.length > 0
+      ? [...health.dimensions].sort((a, b) => a.score - b.score)[0]
+      : null,
     [health.dimensions],
   );
+
+  if (health.isLoading) return <HealthSkeleton />;
+  if (!weakest) return null;
 
   return (
     <div

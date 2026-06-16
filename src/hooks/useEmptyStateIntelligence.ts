@@ -121,7 +121,7 @@ export function useEmptyStateIntelligence(): EmptyStateData {
     }));
 
     const isNewUser = emptyLayers.length === 5;
-    const nextStep  = allSteps.find(s => !s.done === false ? false : emptyLayers.includes(s.layer)) ?? null;
+    const nextStep  = allSteps.find(s => !s.done) ?? null;
     const doneCount = allSteps.filter(s => s.done).length;
 
     return { isNewUser, emptyLayers, nextStep, allSteps, doneCount, totalSteps: 5 };
