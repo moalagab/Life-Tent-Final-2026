@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { LifecycleBar } from '@/components/lifecycle/LifecycleBar';
 
 type TaskStatus = 'backlog' | 'todo' | 'in_progress' | 'review' | 'done';
 
@@ -246,6 +247,11 @@ export default function Tasks() {
             <Plus className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">{t('tasks.newTask')}</span>
           </button>
+        </div>
+
+        {/* Lifecycle Health Bar */}
+        <div className="mb-4">
+          <LifecycleBar />
         </div>
 
         {/* Search */}

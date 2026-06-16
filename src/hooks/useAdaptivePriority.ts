@@ -17,6 +17,7 @@
 import { useMemo } from 'react';
 import { differenceInHours, parseISO, format } from 'date-fns';
 import type { BehaviorProfile } from './useBehaviorEngine';
+import { getDecayFactor } from './useLifecycleIntelligence';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -47,6 +48,8 @@ interface RawTask {
   status: string;
   is_focus: boolean | null;
   completed_at: string | null;
+  created_at?: string;   // used for lifecycle decay
+  updated_at?: string;   // used for lifecycle decay
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -119,7 +122,14 @@ export function useAdaptivePriority(
     return pendingTasks
       .map((task): ScoredTask => {
         const reasons: string[] = [];
-        let score = BASE_SCORE[task.priority ?? 'medium'] ?? 20;
+
+        // 0. Lifecycle decay — ages tasks that haven't been touched recently
+        const decay = getDecayFactor(task);
+        const baseRaw = BASE_SCORE[task.priority ?? 'medium'] ?? 20;
+        let score = Math.round(baseRaw * decay);
+        if (decay < 0.90 && decay >= 0.75) reasons.push('المهمة تتقادم تدريجياً');
+        if (decay < 0.75 && decay >= 0.50) reasons.push('المهمة راكدة — تحقق منها');
+        if (decay < 0.50)                  reasons.push('مهمة قديمة — فكر في أرشفتها');
 
         // 1. Urgency
         const urg = urgencyBonus(task.due_date);
