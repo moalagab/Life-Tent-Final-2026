@@ -32,7 +32,7 @@ function HealthRing({
         <circle
           cx="60" cy="60" r={RADIUS}
           fill="none"
-          stroke="rgba(255,255,255,0.06)"
+          stroke="hsl(var(--border))"
           strokeWidth="10"
         />
         {/* Progress arc */}
@@ -56,7 +56,7 @@ function HealthRing({
         >
           {score}
         </span>
-        <span className="text-[10px] font-bold text-white/40 mt-0.5 uppercase tracking-widest">
+        <span className="text-[10px] font-bold text-muted-foreground mt-0.5 uppercase tracking-widest">
           {label}
         </span>
       </div>
@@ -87,12 +87,12 @@ function DimensionRow({ dim }: { dim: HealthDimension }) {
       </div>
 
       {/* Label */}
-      <span className="text-[12px] font-semibold text-white/70 w-14 shrink-0">
+      <span className="text-[12px] font-semibold text-foreground/70 w-14 shrink-0">
         {dim.label}
       </span>
 
       {/* Bar */}
-      <div className="flex-1 h-1.5 rounded-full bg-white/6 overflow-hidden">
+      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
         <div
           className="h-full rounded-full"
           style={{
@@ -118,7 +118,7 @@ function DimensionRow({ dim }: { dim: HealthDimension }) {
 
 function HealthSkeleton() {
   return (
-    <div className="w-full rounded-2xl border border-white/8 bg-[#0f0f1a] p-4 space-y-4">
+    <div className="w-full rounded-2xl border border-border/40 bg-card p-4 space-y-4">
       <div className="flex items-center gap-2">
         <Skeleton className="w-4 h-4 rounded" />
         <Skeleton className="w-24 h-3 rounded" />
@@ -153,14 +153,14 @@ export function SystemHealthCard() {
 
   return (
     <div
-      className="w-full rounded-2xl border bg-[#0f0f1a] p-4 overflow-hidden"
-      style={{ borderColor: `${health.overallColor}25` }}
+      className="w-full rounded-2xl border bg-card p-4 overflow-hidden"
+      style={{ borderColor: `${health.overallColor}40` }}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4" dir="rtl">
         <div className="flex items-center gap-2">
           <Activity className="w-3.5 h-3.5" style={{ color: health.overallColor }} />
-          <span className="text-[11px] font-bold text-white/50 uppercase tracking-widest">
+          <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
             صحة النظام
           </span>
         </div>
@@ -178,7 +178,7 @@ export function SystemHealthCard() {
             {weakest.label} يحتاج تحسين
           </span>
         ) : (
-          <span className="text-[10px] text-white/25">{health.overallLabel}</span>
+          <span className="text-[10px] text-muted-foreground/60">{health.overallLabel}</span>
         )}
       </div>
 
@@ -203,8 +203,8 @@ export function SystemHealthCard() {
 
       {/* Footer insight */}
       <p
-        className="mt-3 pt-3 border-t text-[11px] leading-snug"
-        style={{ borderColor: 'rgba(255,255,255,0.05)', color: `${health.overallColor}99` }}
+        className="mt-3 pt-3 border-t border-border/30 text-[11px] leading-snug"
+        style={{ color: `${health.overallColor}cc` }}
         dir="rtl"
       >
         {weakest.insight} · {health.dimensions.find(d => d.score === Math.max(...health.dimensions.map(d => d.score)))?.insight}

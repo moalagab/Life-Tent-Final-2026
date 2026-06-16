@@ -53,11 +53,11 @@ export function NaturalCapture() {
   const hasContent = text.trim().length >= 3;
 
   return (
-    <div className="w-full rounded-2xl border border-white/8 bg-[#0f0f1a] overflow-hidden">
+    <div className="w-full rounded-2xl border border-border/40 bg-card overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-2 px-4 pt-3 pb-1">
-        <Sparkles className="w-3.5 h-3.5 text-violet-400" />
-        <span className="text-[11px] font-medium text-white/40 uppercase tracking-widest">
+        <Sparkles className="w-3.5 h-3.5 text-violet-500" />
+        <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-widest">
           التقاط ذكي
         </span>
         {parsed && hasContent && (
@@ -78,15 +78,15 @@ export function NaturalCapture() {
           rows={1}
           dir="rtl"
           className={cn(
-            'w-full resize-none bg-transparent text-right text-sm text-white/90',
-            'placeholder:text-white/25 outline-none leading-relaxed',
+            'w-full resize-none bg-transparent text-right text-sm text-foreground',
+            'placeholder:text-muted-foreground/40 outline-none leading-relaxed',
             'transition-all',
           )}
         />
         {hasContent && (
           <button
             onClick={reset}
-            className="absolute left-4 top-1 text-white/20 hover:text-white/50 transition-colors"
+            className="absolute left-4 top-1 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -97,7 +97,7 @@ export function NaturalCapture() {
       {parsed && hasContent && parsed.fields.length > 0 && (
         <div
           className={cn(
-            'px-4 pb-3 flex flex-wrap gap-1.5 border-t border-white/5 pt-2.5',
+            'px-4 pb-3 flex flex-wrap gap-1.5 border-t border-border/30 pt-2.5',
             'transition-all',
           )}
           dir="rtl"
@@ -129,7 +129,7 @@ export function NaturalCapture() {
       {/* Footer action */}
       {hasContent && parsed && (
         <div className="flex items-center justify-between px-4 pb-3 pt-1">
-          <span className="text-[10px] text-white/25">Enter للحفظ · Esc للإلغاء</span>
+          <span className="text-[10px] text-muted-foreground/50">Enter للحفظ · Esc للإلغاء</span>
           <button
             onClick={submit}
             disabled={isCreating}

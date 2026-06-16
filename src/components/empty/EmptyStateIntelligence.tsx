@@ -63,20 +63,20 @@ function StepRow({
     >
       {/* Icon */}
       {step.done ? (
-        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
       ) : (
         <Circle
-          className={cn('w-4 h-4 shrink-0', isNext ? colors.text : 'text-white/20')}
+          className={cn('w-4 h-4 shrink-0', isNext ? colors.text : 'text-muted-foreground/30')}
         />
       )}
 
       {/* Text */}
       <div className="flex-1 min-w-0">
-        <p className={cn('text-[12px] font-bold leading-tight', step.done ? 'text-white/40 line-through' : 'text-white/80')}>
+        <p className={cn('text-[12px] font-bold leading-tight', step.done ? 'text-muted-foreground/50 line-through' : 'text-foreground')}>
           {step.title}
         </p>
         {isNext && !step.done && (
-          <p className="text-[10px] text-white/40 leading-snug mt-0.5">{step.description}</p>
+          <p className="text-[10px] text-muted-foreground leading-snug mt-0.5">{step.description}</p>
         )}
       </div>
 
@@ -114,20 +114,20 @@ export function EmptyStateIntelligence() {
   return (
     <div
       className={cn(
-        'w-full rounded-2xl border border-white/8 bg-[#0f0f1a] overflow-hidden',
+        'w-full rounded-2xl border border-border/40 bg-card overflow-hidden',
         'animate-in fade-in slide-in-from-top-2 duration-500',
       )}
     >
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 pt-4 pb-3 border-b border-white/5" dir="rtl">
+      <div className="flex items-center gap-3 px-4 pt-4 pb-3 border-b border-border/20" dir="rtl">
         <div className="w-8 h-8 rounded-xl bg-violet-500/15 border border-violet-500/25 flex items-center justify-center shrink-0">
-          <Sparkles className="w-4 h-4 text-violet-400" />
+          <Sparkles className="w-4 h-4 text-violet-500" />
         </div>
         <div className="flex-1">
-          <p className="text-[13px] font-black text-white/90 leading-tight">
+          <p className="text-[13px] font-black text-foreground leading-tight">
             {isNewUser ? 'مرحباً — لم تبدأ بعد' : 'النظام يحتاج اكتمالاً'}
           </p>
-          <p className="text-[10px] text-white/40 leading-tight mt-0.5">
+          <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">
             {isNewUser
               ? 'اتبع الخطوات التالية لتفعيل النظام كاملاً'
               : `${doneCount} من ${totalSteps} طبقات مفعّلة`}
@@ -136,7 +136,7 @@ export function EmptyStateIntelligence() {
         {/* Progress ring */}
         <div className="shrink-0 relative w-10 h-10">
           <svg width="40" height="40" viewBox="0 0 40 40" className="-rotate-90">
-            <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="4" />
+            <circle cx="20" cy="20" r="16" fill="none" stroke="hsl(var(--border))" strokeWidth="4" />
             <circle
               cx="20" cy="20" r="16"
               fill="none"
@@ -169,7 +169,7 @@ export function EmptyStateIntelligence() {
       {/* Bottom hint */}
       {!isNewUser && emptyLayers.length <= 2 && (
         <div className="px-4 pb-3">
-          <p className="text-[10px] text-white/25 text-center" dir="rtl">
+          <p className="text-[10px] text-muted-foreground/50 text-center" dir="rtl">
             النظام يعمل بكامل طاقته عندما تكتمل جميع الطبقات
           </p>
         </div>
