@@ -16,6 +16,7 @@ import { MorningBrief } from '@/components/dashboard/MorningBrief';
 import { MiddayCheckpoint } from '@/components/dashboard/MiddayCheckpoint';
 import { BehaviorInsights } from '@/components/dashboard/BehaviorInsights';
 import { DailyDecisionCard } from '@/components/dashboard/DailyDecisionCard';
+import { FocusEngine } from '@/components/dashboard/FocusEngine';
 import {
   LayoutPresetSwitcher,
   type DashboardPreset,
@@ -201,13 +202,16 @@ const Index = () => {
           </div>
         )}
 
+        {/* ── Decision Engine — "شيء واحد فقط مهم الآن" ── */}
+        <FocusEngine />
+
         {/* ── Quick Actions (mobile: horizontal pills, desktop: cards grid) ── */}
         <QuickActions />
 
         {/* ── Attention ribbon ── */}
         <AttentionStrip />
 
-        {/* ── Daily Decision Card ── */}
+        {/* ── Daily Decision Card (AI-layer — deeper analysis) ── */}
         <DailyDecisionCard />
 
         {/* ── Mobile: preset switcher below the card ── */}
