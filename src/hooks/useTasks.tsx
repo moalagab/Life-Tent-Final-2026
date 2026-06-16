@@ -2,7 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { useAuth } from './useAuth';
-import { vibrate } from '@/lib/vibrate';
+import { vibrate }          from '@/lib/vibrate';
+import { runSuccessLoop }   from '@/lib/successLoop';
 
 export type Task = Tables<'tasks'>;
 export type TaskInsert = TablesInsert<'tasks'>;
@@ -98,8 +99,16 @@ export function useUpdateTask() {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['focus-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['archived-items'] });
-      // Haptic feedback when a task is marked done
-      if (data?.status === 'done') vibrate.success();
+      if (data?.status === 'done') {
+        vibrate.success();
+        // Fire success loop — cascade goal/project/cache/memory updates
+        runSuccessLoop(queryClient, {
+          id:         data.id,
+          title:      data.title,
+          goal_id:    (data as never as { goal_id?: string | null }).goal_id,
+          project_id: data.project_id,
+        }).catch(() => {});
+      }
     },
   });
 }

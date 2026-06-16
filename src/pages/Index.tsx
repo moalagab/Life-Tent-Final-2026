@@ -37,7 +37,8 @@ import { DailyPlanningCycle } from '@/components/planning/DailyPlanningCycle';
 import { useDailyPlanningCycle } from '@/hooks/useDailyPlanningCycle';
 import { WeeklyReviewEngine } from '@/components/review/WeeklyReviewEngine';
 import { useWeeklyReview } from '@/hooks/useWeeklyReview';
-import { NaturalCapture } from '@/components/capture/NaturalCapture';
+import { NaturalCapture }       from '@/components/capture/NaturalCapture';
+import { SuccessLoopFeedback } from '@/components/feedback/SuccessLoopFeedback';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet, Brain, Eye, Crosshair, Zap, Sun, BarChart3 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -434,6 +435,9 @@ const Index = () => {
         open={planningOpen}
         onClose={() => setPlanningOpen(false)}
       />
+
+      {/* ── Success Loop feedback toasts ── */}
+      <SuccessLoopFeedback />
 
       {/* ── Command Center overlay ── */}
       <CommandCenter
