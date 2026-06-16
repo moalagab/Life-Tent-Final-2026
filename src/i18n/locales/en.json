@@ -38,7 +38,8 @@
     "exportSuccess": "Export successful",
     "exportError": "Export failed",
     "update": "Update",
-    "admin": "Admin Panel"
+    "admin": "Admin Panel",
+    "timeline": "Timeline"
   },
   "dashboard": {
     "greeting": "Hello",

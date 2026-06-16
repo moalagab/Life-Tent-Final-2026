@@ -38,7 +38,8 @@
     "exportSuccess": "تم التصدير بنجاح",
     "exportError": "فشل التصدير",
     "update": "تحديث",
-    "admin": "لوحة الادمن"
+    "admin": "لوحة الادمن",
+    "timeline": "السجل الزمني"
   },
   "dashboard": {
     "greeting": "مرحباً",

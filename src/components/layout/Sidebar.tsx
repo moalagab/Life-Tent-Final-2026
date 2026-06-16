@@ -32,6 +32,7 @@ import {
   Timer,
   X,
   ShieldCheck,
+  Activity,
 } from 'lucide-react';
 
 interface NavItem { path: string; icon: React.ElementType; labelKey: string; hue?: string; }
@@ -244,6 +245,7 @@ export function Sidebar() {
     { path: '/calendar',   icon: Calendar,        labelKey: 'common.calendar',   hue: 'var(--lt-hue-cal)'    },
     { path: '/studio',     icon: Film,            labelKey: 'common.studio',     hue: 'var(--lt-hue-studio)' },
     { path: '/pomodoro',   icon: Timer,           labelKey: 'common.pomodoro',   hue: 'var(--lt-hue-pomo)'   },
+    { path: '/timeline',   icon: Activity,        labelKey: 'common.timeline'   },
     ...(isAdmin ? [{ path: '/admin', icon: ShieldCheck, labelKey: 'common.admin' }] : []),
   ];
 

@@ -10,6 +10,7 @@ import { useOfflineQueue } from '@/hooks/useOfflineQueue';
 import { useToast } from '@/hooks/use-toast';
 import { WifiOff } from 'lucide-react';
 import { ModuleUnlockSheet } from '@/components/modules/ModuleUnlockSheet';
+import { UniversalFAB } from '@/components/universal/UniversalFAB';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -38,6 +39,8 @@ export function MainLayout({ children }: MainLayoutProps) {
     <div className="min-h-screen bg-background">
       {/* Progressive module unlock prompt */}
       <ModuleUnlockSheet />
+      {/* Universal create FAB — available on all pages */}
+      <UniversalFAB />
       {/* Ambient background glow — subtle, navy-tinted */}
       <div className="fixed inset-0 -z-10 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] via-transparent to-transparent" />
