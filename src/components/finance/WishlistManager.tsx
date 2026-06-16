@@ -15,6 +15,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useLightbox } from '@/components/lightbox/useLightbox';
 import { useWishlistItems, useCreateWishlistItem, useUpdateWishlistItem, useDeleteWishlistItem, WishlistItem } from '@/hooks/useWishlist';
 import { useEnvelopes, useSinkingFunds } from '@/hooks/useAdvancedFinance';
 import { toast } from 'sonner';
@@ -281,21 +282,31 @@ function ItemCard({
 }: ItemCardProps) {
   const savedPercent = item.estimated_price ? ((item.saved_amount || 0) / item.estimated_price) * 100 : 0;
   const categoryLabel = CATEGORIES.find(c => c.id === item.category)?.label[language as 'ar' | 'en'] || item.category;
+  const lightbox = useLightbox();
 
   return (
-    <div className="glass-card p-4 hover:shadow-lg transition-all duration-300 group">
+    <div className="glass-card p-4 transition-all duration-300 group">
       <div className="flex gap-4">
         {/* Image */}
         <div className="w-24 h-24 rounded-xl bg-muted/50 flex-shrink-0 overflow-hidden">
           {item.image_url ? (
-            <img
-              src={item.image_url}
-              alt={item.name}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = '/placeholder.svg';
-              }}
-            />
+            <button
+              onClick={() => lightbox.openSingle({
+                url:  item.image_url!,
+                name: item.name,
+                type: 'image/jpeg',
+              })}
+              className="w-full h-full block"
+            >
+              <img
+                src={item.image_url}
+                alt={item.name}
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/placeholder.svg';
+                }}
+              />
+            </button>
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <ShoppingBag className="w-8 h-8 text-muted-foreground/50" />

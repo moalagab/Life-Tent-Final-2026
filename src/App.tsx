@@ -14,6 +14,7 @@ import { PWAUpdatePrompt } from "@/components/PWAUpdatePrompt";
 import { useAppLifecycle } from "@/hooks/useAppLifecycle";
 import { isNative } from "@/lib/capacitor";
 import { useTheme } from "@/hooks/useTheme";
+import { LightboxProvider } from "@/components/lightbox/LightboxProvider";
 
 /**
  * PlatformInit — sets data-platform on <html> so CSS tokens apply.
@@ -109,6 +110,7 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
+          <LightboxProvider>
           <PlatformInit />
           <NativeBootstrap />
           <Toaster />
@@ -153,6 +155,7 @@ const App = () => (
             </Suspense>
             </OnboardingProvider>
           </BrowserRouter>
+          </LightboxProvider>
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>
