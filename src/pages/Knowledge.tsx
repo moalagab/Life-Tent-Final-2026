@@ -7,6 +7,7 @@ import { useNotes, useCourses, useCreateNote, useCreateCourse, useUpdateNote, us
 import { useProjects } from '@/hooks/useProjects';
 import { useGoals } from '@/hooks/useGoals';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,6 +23,7 @@ import { CourseDetailView } from '@/components/knowledge/CourseDetailView';
 import { NoteDetailDialog } from '@/components/knowledge/NoteDetailDialog';
 
 export default function Knowledge() {
+  const navigate = useNavigate();
   const { t, currentLanguage } = useLanguage();
   const { data: notes, isLoading: notesLoading } = useNotes();
   const { data: archivedNotes } = useArchivedNotes();
@@ -451,7 +453,7 @@ export default function Knowledge() {
               {filteredNotes.map((note) => (
                 <div
                   key={note.id}
-                  onClick={() => setSelectedNote(note)}
+                  onClick={() => navigate(`/knowledge/notes/${note.id}`)}
                   className="glass-card p-4 hover:border-primary/30 transition-all cursor-pointer group"
                 >
                   <div className="flex items-start justify-between mb-2">
@@ -465,9 +467,9 @@ export default function Knowledge() {
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setSelectedNote(note); }}>
+                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigate(`/knowledge/notes/${note.id}`); }}>
                           <Eye className="w-4 h-4 me-2" />
-                          {currentLanguage === 'ar' ? 'عرض وتعديل' : 'View & Edit'}
+                          {currentLanguage === 'ar' ? 'فتح الملاحظة' : 'Open Note'}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleArchiveNote(note.id); }}>
                           <Archive className="w-4 h-4 me-2" />

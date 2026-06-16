@@ -59,6 +59,8 @@ const ProjectWorkspace    = lazy(() => import("./pages/ProjectWorkspace"));
 const GoalWorkspace       = lazy(() => import("./pages/GoalWorkspace"));
 const FinanceWorkspace    = lazy(() => import("./pages/FinanceWorkspace"));
 const HabitDetail         = lazy(() => import("./pages/HabitDetail"));
+const TaskWorkspace       = lazy(() => import("./pages/TaskWorkspace"));
+const NoteWorkspace       = lazy(() => import("./pages/NoteWorkspace"));
 const MediaItemWorkspace  = lazy(() => import("./pages/MediaItemWorkspace"));
 const ResourceWorkspace   = lazy(() => import("./pages/ResourceWorkspace"));
 const ArchivePage         = lazy(() => import("./pages/ArchivePage"));
@@ -133,9 +135,11 @@ const App = () => (
                 <Route path="/dashboard"  element={<ProtectedRoute><Index /></ProtectedRoute>} />
                 <Route path="/projects"   element={<ProtectedRoute><Projects /></ProtectedRoute>} />
                 <Route path="/tasks"      element={<ProtectedRoute><Tasks /></ProtectedRoute>} />
+                <Route path="/tasks/:id"  element={<ProtectedRoute><TaskWorkspace /></ProtectedRoute>} />
                 <Route path="/goals"      element={<ProtectedRoute><Goals /></ProtectedRoute>} />
                 <Route path="/finance"    element={<ProtectedRoute><Finance /></ProtectedRoute>} />
-                <Route path="/knowledge"  element={<ProtectedRoute><Knowledge /></ProtectedRoute>} />
+                <Route path="/knowledge"         element={<ProtectedRoute><Knowledge /></ProtectedRoute>} />
+                <Route path="/knowledge/notes/:id" element={<ProtectedRoute><NoteWorkspace /></ProtectedRoute>} />
                 <Route path="/habits"     element={<ProtectedRoute><Habits /></ProtectedRoute>} />
                 <Route path="/calendar"   element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
                 <Route path="/studio"     element={<ProtectedRoute><Studio /></ProtectedRoute>} />

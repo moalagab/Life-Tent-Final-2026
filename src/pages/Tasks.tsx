@@ -10,7 +10,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useTasks, useCreateTask, useUpdateTask, useDeleteTask, Task } from '@/hooks/useTasks';
 import { useProjects } from '@/hooks/useProjects';
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { isToday, isPast, parseISO, startOfDay } from 'date-fns';
 import { TaskFormDialog, TaskFormData } from '@/components/tasks/TaskFormDialog';
 import { toast } from 'sonner';
@@ -31,6 +31,7 @@ const ALLOWED_CATEGORIES = ['all', 'work', 'personal'] as const;
 const ALLOWED_DUE_FILTERS = ['overdue', 'today'] as const;
 
 export default function Tasks() {
+  const navigate = useNavigate();
   const { t, currentLanguage } = useLanguage();
   const { data: tasks, isLoading } = useTasks();
   const { data: projects } = useProjects();
@@ -422,7 +423,7 @@ export default function Tasks() {
                     <div className={cn('w-2.5 h-2.5 rounded-full shrink-0', priority.dotColor)} />
 
                     {/* Main info */}
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/tasks/${task.id}`)}>
                       <p className="text-sm font-medium text-foreground truncate">{task.title}</p>
                       <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
                         {project ? (
@@ -579,7 +580,7 @@ export default function Tasks() {
                             </button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem className="gap-2">
+                            <DropdownMenuItem className="gap-2" onClick={() => navigate(`/tasks/${task.id}`)}>
                               <Edit3 className="w-4 h-4" />
                               {t('common.edit')}
                             </DropdownMenuItem>
@@ -595,7 +596,10 @@ export default function Tasks() {
 
                         {/* Task Content */}
                         <div className="pt-1">
-                          <h4 className="text-sm font-medium text-foreground mb-2 pe-6 group-hover:text-primary transition-colors">
+                          <h4
+                            className="text-sm font-medium text-foreground mb-2 pe-6 group-hover:text-primary transition-colors cursor-pointer"
+                            onClick={() => navigate(`/tasks/${task.id}`)}
+                          >
                             {task.title}
                           </h4>
 

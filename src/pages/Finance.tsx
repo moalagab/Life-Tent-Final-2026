@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams, useParams } from 'react-router-dom';
+import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
   LayoutDashboard, Wallet, Receipt, PiggyBank,
   CreditCard, RefreshCw, TrendingUp, FileText, Briefcase, Upload,
-  Gauge, ShoppingBag, History, Brain,
+  Gauge, ShoppingBag, History, Brain, LayoutGrid,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/hooks/useLanguage';
 import { FinanceDashboard } from '@/components/finance/FinanceDashboard';
 import { AccountsManager } from '@/components/finance/AccountsManager';
@@ -35,6 +36,7 @@ const TRANSACTIONS_QUERY_KEY = ['transactions'];
 const ACCOUNTS_QUERY_KEY = ['accounts'];
 
 export default function Finance() {
+  const navigate = useNavigate();
   const { t, isRTL } = useLanguage();
   const { section } = useParams<{ section?: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -113,10 +115,19 @@ export default function Finance() {
       <div className="mb-5">
         <div className="flex items-center gap-3 mb-4">
           <Wallet className="w-6 h-6 text-primary" strokeWidth={2} />
-          <div>
+          <div className="flex-1">
             <h1 className="text-lg font-bold text-foreground leading-tight">{t('finance.title')}</h1>
             <p className="text-[11px] text-muted-foreground">{t('finance.subtitle')}</p>
           </div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5 text-xs shrink-0"
+            onClick={() => navigate('/finance/workspace')}
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            {isRTL ? 'عرض Workspace' : 'Workspace'}
+          </Button>
         </div>
 
         {/* Grouped tab navigation — Goals-style card grid */}
