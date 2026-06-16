@@ -1073,3 +1073,72 @@
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground));
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   FLAT DESIGN — Remove all card/box shadows globally
+   Covers: CSS elevation tokens · component classes · Tailwind utilities
+═══════════════════════════════════════════════════════════════ */
+
+/* ① Zero-out the elevation token system */
+:root,
+.dark,
+[data-theme="dark"],
+[data-platform="fluent"],
+[data-platform="hig"],
+.dark[data-platform="fluent"],
+[data-theme="dark"][data-platform="fluent"] {
+  --elev-1: none;
+  --elev-2: none;
+  --elev-3: none;
+  --elev-4: none;
+}
+
+/* ② Remove box-shadow from every CSS component class */
+.glass-card,
+.glass-card:hover,
+.glass-card:active,
+.glass-card[data-state="active"],
+.glass-card.is-active,
+.glass-card.is-disabled,
+.glass-card:disabled,
+.dark .glass-card,
+.dark .glass-card:hover,
+.lt-card,
+.lt-card:hover,
+.bento-cell,
+.bento-cell:hover,
+.dark .bento-cell,
+.interactive-card,
+.interactive-card:hover,
+.btn-hover-lift:hover,
+.hover-glow:hover,
+.gold-glow,
+.animate-glow-pulse,
+.hig-section,
+.fluent-command-bar,
+[data-platform="fluent"] .lt-card,
+[data-platform="fluent"] .glass-card,
+[data-platform="fluent"] .lt-card:hover,
+[data-platform="fluent"] .glass-card:hover,
+[data-platform="fluent"] [role="dialog"],
+[data-platform="fluent"] [data-radix-popper-content-wrapper] > *,
+[data-platform="hig"] [data-radix-dialog-content],
+[data-platform="hig"] [data-radix-popper-content-wrapper] > * {
+  box-shadow: none !important;
+}
+
+/* ③ Override Tailwind shadow utilities — preserve ring utilities */
+.shadow-sm,
+.shadow,
+.shadow-md,
+.shadow-lg,
+.shadow-xl,
+.shadow-2xl,
+.shadow-inner,
+.shadow-none {
+  --tw-shadow: 0 0 #0000 !important;
+  --tw-shadow-colored: 0 0 #0000 !important;
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
+              var(--tw-ring-shadow, 0 0 #0000),
+              var(--tw-shadow) !important;
+}

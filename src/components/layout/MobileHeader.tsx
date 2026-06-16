@@ -11,7 +11,7 @@
 import { useAuth }     from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useTheme }    from '@/hooks/useTheme';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { Tent, Sun, Moon } from 'lucide-react';
 
@@ -53,6 +53,7 @@ export function MobileHeader() {
   const { currentLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const { pathname }        = useLocation();
+  const navigate            = useNavigate();
   const isAr = currentLanguage === 'ar';
 
   const fullName  = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || '';
@@ -103,14 +104,15 @@ export function MobileHeader() {
         </button>
         <NotificationCenter />
 
-        <div
-          className="w-8 h-8 rounded-full bg-primary flex items-center justify-center"
+        <button
+          onClick={() => navigate('/profile')}
+          className="w-8 h-8 rounded-full bg-primary flex items-center justify-center active:opacity-80 transition-opacity"
           aria-label={isAr ? 'الملف الشخصي' : 'Profile'}
         >
           <span className="text-[11px] font-bold text-primary-foreground leading-none">
             {initials}
           </span>
-        </div>
+        </button>
       </div>
     </header>
   );

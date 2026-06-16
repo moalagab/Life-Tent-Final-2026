@@ -1,11 +1,11 @@
 /**
- * Sidebar — Fluent UI 2 nav rail.
+ * Sidebar — Fluent UI 2 nav rail with grouped navigation.
  *
  * Desktop:  fixed left/right rail, collapsible (240px ↔ 52px).
- *           Active item: 3px accent bar + subtle tinted fill (fluent-fill-selected).
- *           Mica-simulated: near-white/near-black with backdrop blur.
+ *           Groups: Core | Workspace | Life | Learn | Tools
+ *           Active item: 3px accent bar + subtle tinted fill.
  *
- * Mobile:   Sheet overlay (unchanged from previous behaviour).
+ * Mobile:   returns null — navigation is via BottomNav.
  */
 import React, { useState, memo } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
@@ -36,50 +36,100 @@ import {
   Network,
 } from 'lucide-react';
 
-interface NavItem { path: string; icon: React.ElementType; labelKey: string; hue?: string; }
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface NavItem { path: string; icon: React.ElementType; labelKey: string; }
+
+interface NavGroup {
+  labelAr?: string;
+  labelEn?: string;
+  items: NavItem[];
+}
+
+// ── Nav groups definition ─────────────────────────────────────────────────────
+
+const BASE_GROUPS: NavGroup[] = [
+  {
+    items: [
+      { path: '/dashboard', icon: LayoutDashboard, labelKey: 'common.dashboard' },
+    ],
+  },
+  {
+    labelAr: 'العمل',
+    labelEn: 'Workspace',
+    items: [
+      { path: '/tasks',    icon: CheckSquare,  labelKey: 'common.tasks'    },
+      { path: '/projects', icon: FolderKanban, labelKey: 'common.projects' },
+      { path: '/goals',    icon: Target,       labelKey: 'common.goals'    },
+    ],
+  },
+  {
+    labelAr: 'الحياة',
+    labelEn: 'Life',
+    items: [
+      { path: '/habits',   icon: Repeat,   labelKey: 'common.habits'   },
+      { path: '/finance',  icon: Wallet,   labelKey: 'common.finance'  },
+      { path: '/calendar', icon: Calendar, labelKey: 'common.calendar' },
+    ],
+  },
+  {
+    labelAr: 'معرفة',
+    labelEn: 'Learn',
+    items: [
+      { path: '/knowledge', icon: BookOpen, labelKey: 'common.knowledge' },
+      { path: '/studio',    icon: Film,     labelKey: 'common.studio'    },
+    ],
+  },
+  {
+    labelAr: 'أدوات',
+    labelEn: 'Tools',
+    items: [
+      { path: '/pomodoro', icon: Timer,    labelKey: 'common.pomodoro' },
+      { path: '/timeline', icon: Activity, labelKey: 'common.timeline' },
+      { path: '/graph',    icon: Network,  labelKey: 'common.graph'    },
+    ],
+  },
+];
+
+// ── SidebarContent ─────────────────────────────────────────────────────────────
 
 interface SidebarContentProps {
-  collapsed: boolean;
-  isMobile: boolean;
-  navItems: NavItem[];
-  locationPath: string;
-  isRTL: boolean;
-  onNavClick: () => void;
-  onSignOut: () => void;
-  onClose: () => void;
+  collapsed:        boolean;
+  isMobile:         boolean;
+  navGroups:        NavGroup[];
+  locationPath:     string;
+  isRTL:            boolean;
+  onNavClick:       () => void;
+  onSignOut:        () => void;
+  onClose:          () => void;
   onToggleCollapse: () => void;
-  t: (key: string) => string;
-  userName?: string;
-  userInitials?: string;
+  t:                (key: string) => string;
+  userName?:        string;
+  userInitials?:    string;
 }
 
 const SidebarContent = memo(function SidebarContent({
-  collapsed, isMobile, navItems, locationPath, isRTL,
+  collapsed, isMobile, navGroups, locationPath, isRTL,
   onNavClick, onSignOut, onClose, onToggleCollapse, t, userName, userInitials,
 }: SidebarContentProps) {
   const isCollapsed = collapsed && !isMobile;
+  const isAr = isRTL;
 
   return (
     <div className="flex flex-col h-full">
 
-      {/* ── Header — Fluent top area ── */}
+      {/* ── Header ── */}
       <div className={cn(
-        'flex items-center border-b border-sidebar-border/50',
+        'flex items-center border-b border-sidebar-border/50 shrink-0',
         isCollapsed ? 'h-12 justify-center px-0' : 'h-12 justify-between px-3',
       )}>
-        <div className={cn(
-          'flex items-center gap-2.5 min-w-0',
-          isCollapsed && 'justify-center',
-        )}>
-          {/* App icon — Fluent rounded square */}
+        <div className={cn('flex items-center gap-2.5 min-w-0', isCollapsed && 'justify-center')}>
           <div className="w-8 h-8 rounded-fluent-sm bg-primary flex items-center justify-center shrink-0 shadow-sm">
             <Tent className="w-4 h-4 text-primary-foreground" />
           </div>
           {!isCollapsed && (
             <div className="leading-tight min-w-0">
-              <p className="text-[13px] font-semibold text-foreground tracking-wide truncate">
-                LIFE TENT
-              </p>
+              <p className="text-[13px] font-semibold text-foreground tracking-wide truncate">LIFE TENT</p>
               <p className="text-[10px] text-muted-foreground leading-none">نظام حياتك</p>
             </div>
           )}
@@ -96,38 +146,61 @@ const SidebarContent = memo(function SidebarContent({
         )}
       </div>
 
-      {/* ── Navigation items ── */}
+      {/* ── Navigation — grouped ── */}
       <nav
         aria-label="Main navigation"
         className={cn(
-          'flex-1 overflow-y-auto py-2 space-y-0.5',
+          'flex-1 overflow-y-auto py-2',
           isCollapsed ? 'px-1.5' : 'px-2',
         )}
       >
-        {navItems.map((item) => {
-          const isActive = locationPath === item.path;
+        {navGroups.map((group, gi) => {
+          if (group.items.length === 0) return null;
+          const groupLabel = isAr ? group.labelAr : group.labelEn;
+
           return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              onClick={onNavClick}
-              aria-current={isActive ? 'page' : undefined}
-              title={isCollapsed ? t(item.labelKey) : undefined}
-              className={cn(
-                'fluent-nav-item',
-                isCollapsed && 'justify-center px-0 w-[36px] mx-auto',
+            <div key={gi} className={gi > 0 ? 'mt-2' : ''}>
+              {/* Group separator when collapsed */}
+              {isCollapsed && gi > 0 && (
+                <div className="my-2 mx-1 h-px bg-border/40" />
               )}
-            >
-              <item.icon
-                className={cn(
-                  'shrink-0 w-[18px] h-[18px] transition-colors',
-                  isActive ? 'text-primary' : 'text-muted-foreground',
-                )}
-              />
-              {!isCollapsed && (
-                <span className="flex-1 truncate">{t(item.labelKey)}</span>
+
+              {/* Group label when expanded */}
+              {!isCollapsed && groupLabel && (
+                <p className="px-2 pt-1 pb-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground/40 select-none">
+                  {groupLabel}
+                </p>
               )}
-            </NavLink>
+
+              <div className="space-y-0.5">
+                {group.items.map((item) => {
+                  const isActive = locationPath === item.path;
+                  return (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      onClick={onNavClick}
+                      aria-current={isActive ? 'page' : undefined}
+                      title={isCollapsed ? t(item.labelKey) : undefined}
+                      className={cn(
+                        'fluent-nav-item',
+                        isCollapsed && 'justify-center px-0 w-[36px] mx-auto',
+                      )}
+                    >
+                      <item.icon
+                        className={cn(
+                          'shrink-0 w-[18px] h-[18px] transition-colors',
+                          isActive ? 'text-primary' : 'text-muted-foreground',
+                        )}
+                      />
+                      {!isCollapsed && (
+                        <span className="flex-1 truncate">{t(item.labelKey)}</span>
+                      )}
+                    </NavLink>
+                  );
+                })}
+              </div>
+            </div>
           );
         })}
       </nav>
@@ -143,19 +216,13 @@ const SidebarContent = memo(function SidebarContent({
           onClick={onNavClick}
           aria-current={locationPath === '/settings' ? 'page' : undefined}
           title={isCollapsed ? t('common.settings') : undefined}
-          className={cn(
-            'fluent-nav-item',
-            isCollapsed && 'justify-center px-0 w-[36px] mx-auto',
-          )}
+          className={cn('fluent-nav-item', isCollapsed && 'justify-center px-0 w-[36px] mx-auto')}
         >
           <Settings className={cn(
-            'shrink-0 transition-colors',
-            isCollapsed ? 'w-[18px] h-[18px]' : 'w-[18px] h-[18px]',
+            'shrink-0 w-[18px] h-[18px] transition-colors',
             locationPath === '/settings' ? 'text-primary' : 'text-muted-foreground',
           )} />
-          {!isCollapsed && (
-            <span className="flex-1">{t('common.settings')}</span>
-          )}
+          {!isCollapsed && <span className="flex-1">{t('common.settings')}</span>}
         </NavLink>
 
         {/* User row */}
@@ -192,18 +259,13 @@ const SidebarContent = memo(function SidebarContent({
           <button
             onClick={onToggleCollapse}
             aria-label={isCollapsed ? t('common.expand') : t('common.collapse')}
-            className={cn(
-              'fluent-nav-item mt-1',
-              isCollapsed && 'justify-center px-0 w-[36px] mx-auto',
-            )}
+            className={cn('fluent-nav-item mt-1', isCollapsed && 'justify-center px-0 w-[36px] mx-auto')}
           >
-            <ChevronLeft
-              className={cn(
-                'w-[18px] h-[18px] text-muted-foreground transition-transform duration-200',
-                isRTL    && '-scale-x-100',
-                isCollapsed && 'rotate-180',
-              )}
-            />
+            <ChevronLeft className={cn(
+              'w-[18px] h-[18px] text-muted-foreground transition-transform duration-200',
+              isRTL && '-scale-x-100',
+              isCollapsed && 'rotate-180',
+            )} />
             {!isCollapsed && (
               <span className="text-xs text-muted-foreground flex-1">
                 {t('common.collapse')}
@@ -216,9 +278,10 @@ const SidebarContent = memo(function SidebarContent({
   );
 });
 
+// ── Main Sidebar ───────────────────────────────────────────────────────────────
+
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   // Communicate sidebar width to MainLayout via CSS variable
   React.useEffect(() => {
@@ -227,6 +290,7 @@ export function Sidebar() {
       collapsed ? '52px' : '240px',
     );
   }, [collapsed]);
+
   const location  = useLocation();
   const navigate  = useNavigate();
   const { signOut, user } = useAuth();
@@ -235,26 +299,22 @@ export function Sidebar() {
   const isAdmin          = useIsAdmin();
   const { isModuleActive } = useModuleAccess();
 
-  const allNavItems: NavItem[] = [
-    { path: '/dashboard',  icon: LayoutDashboard, labelKey: 'common.dashboard'  },
-    { path: '/projects',   icon: FolderKanban,    labelKey: 'common.projects',   hue: 'var(--lt-hue-proj)'   },
-    { path: '/tasks',      icon: CheckSquare,     labelKey: 'common.tasks',      hue: 'var(--lt-hue-task)'   },
-    { path: '/goals',      icon: Target,          labelKey: 'common.goals',      hue: 'var(--lt-hue-goal)'   },
-    { path: '/finance',    icon: Wallet,          labelKey: 'common.finance',    hue: 'var(--lt-hue-money)'  },
-    { path: '/knowledge',  icon: BookOpen,        labelKey: 'common.knowledge',  hue: 'var(--lt-hue-know)'   },
-    { path: '/habits',     icon: Repeat,          labelKey: 'common.habits',     hue: 'var(--lt-hue-habit)'  },
-    { path: '/calendar',   icon: Calendar,        labelKey: 'common.calendar',   hue: 'var(--lt-hue-cal)'    },
-    { path: '/studio',     icon: Film,            labelKey: 'common.studio',     hue: 'var(--lt-hue-studio)' },
-    { path: '/pomodoro',   icon: Timer,           labelKey: 'common.pomodoro',   hue: 'var(--lt-hue-pomo)'   },
-    { path: '/timeline',   icon: Activity,        labelKey: 'common.timeline'   },
-    { path: '/graph',      icon: Network,         labelKey: 'common.graph'      },
-    ...(isAdmin ? [{ path: '/admin', icon: ShieldCheck, labelKey: 'common.admin' }] : []),
-  ];
+  // Build filtered groups — only include active modules
+  const navGroups: NavGroup[] = BASE_GROUPS.map(group => ({
+    ...group,
+    items: group.items.filter(item => {
+      const module = item.path.slice(1);
+      return isModuleActive(module);
+    }),
+  }));
 
-  const navItems = allNavItems.filter(item => {
-    const module = item.path.slice(1);
-    return module === 'admin' || isModuleActive(module);
-  });
+  // Admin item — append to tools group or add separate group
+  if (isAdmin) {
+    const toolsGroup = navGroups.find(g => g.labelAr === 'أدوات');
+    if (toolsGroup) {
+      toolsGroup.items.push({ path: '/admin', icon: ShieldCheck, labelKey: 'common.admin' });
+    }
+  }
 
   const fullName     = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || '';
   const userName     = fullName.split(' ')[0] || user?.email?.split('@')[0] || '';
@@ -263,21 +323,21 @@ export function Sidebar() {
     : '?';
 
   const sharedProps: SidebarContentProps = {
-    collapsed, isMobile, navItems,
+    collapsed, isMobile, navGroups,
     locationPath: location.pathname,
     isRTL, t,
-    onNavClick:      () => { if (isMobile) setMobileOpen(false); },
-    onSignOut:       async () => { await signOut(); navigate('/'); },
-    onClose:         () => setMobileOpen(false),
+    onNavClick:       () => {},
+    onSignOut:        async () => { await signOut(); navigate('/'); },
+    onClose:          () => {},
     onToggleCollapse: () => setCollapsed(c => !c),
     userName,
     userInitials,
   };
 
-  /* ── Mobile: null — all navigation via BottomNav (Apple HIG pattern) ── */
+  /* Mobile: null — navigation via BottomNav */
   if (isMobile) return null;
 
-  /* ── Desktop: Fluent nav rail ── */
+  /* Desktop: Fluent nav rail */
   const railWidth = collapsed ? 'w-[52px]' : 'w-60';
 
   return (
@@ -289,13 +349,12 @@ export function Sidebar() {
           ? 'right-0 border-s border-sidebar-border/50'
           : 'left-0  border-e border-sidebar-border/50',
         railWidth,
-        // Mica simulation: very light blur over underlying content
         'backdrop-blur-[1px]',
       )}
       style={{
         boxShadow: isRTL
-          ? '-1px 0 12px rgba(18,26,52,0.05)'
-          :  '1px 0 12px rgba(18,26,52,0.05)',
+          ? '-1px 0 12px rgba(18,26,52,0.04)'
+          :  '1px 0 12px rgba(18,26,52,0.04)',
       }}
     >
       <SidebarContent {...sharedProps} />

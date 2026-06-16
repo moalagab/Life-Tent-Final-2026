@@ -31,31 +31,35 @@ import { CognitiveDashboard } from '@/components/cognitive/CognitiveDashboard';
 import { AgentPanel } from '@/components/agents/AgentPanel';
 import { PredictivePanel } from '@/components/predictions/PredictivePanel';
 import { MemoryInsightsCard } from '@/components/memory/MemoryInsightsCard';
-import { QuickActions } from '@/components/dashboard/QuickActions';
 import { CommandCenter } from '@/components/command/CommandCenter';
 import { DailyPlanningCycle } from '@/components/planning/DailyPlanningCycle';
 import { useDailyPlanningCycle } from '@/hooks/useDailyPlanningCycle';
 import { WeeklyReviewEngine } from '@/components/review/WeeklyReviewEngine';
 import { useWeeklyReview } from '@/hooks/useWeeklyReview';
 import { NaturalCapture }       from '@/components/capture/NaturalCapture';
-import { SuccessLoopFeedback }     from '@/components/feedback/SuccessLoopFeedback';
-import { SystemHealthCard }        from '@/components/health/SystemHealthCard';
-import { EmptyStateIntelligence }  from '@/components/empty/EmptyStateIntelligence';
+import { SuccessLoopFeedback }  from '@/components/feedback/SuccessLoopFeedback';
+import { SystemHealthCard }     from '@/components/health/SystemHealthCard';
+import { EmptyStateIntelligence } from '@/components/empty/EmptyStateIntelligence';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet, Brain, Eye, Crosshair, Zap, Sun, BarChart3 } from 'lucide-react';
+import {
+  Activity, LayoutGrid, Sparkles, BookOpen, Wallet, Brain,
+  Eye, Crosshair, Zap, Sun, BarChart3,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import type { ReactNode } from 'react';
 
 /**
- * Dashboard — restructured for scannability with persisted section state and
- * user-selectable layout presets (Focus / Finance / Execution).
+ * Dashboard — focused layout.
+ * Hero: FocusEngine + NaturalCapture.
+ * Control strip: Planning · Review · Command (compact).
+ * Sections: collapsible preset-driven panels.
  */
 const Index = () => {
   useAutoReminders();
   const { t, currentLanguage } = useLanguage();
-  const isMobile   = useIsMobile();
-  const context    = useContextAwareness();
+  const isMobile = useIsMobile();
+  const context  = useContextAwareness();
   const [showFullInMorning, setShowFullInMorning] = useState(false);
 
   const [commandCenterOpen, setCommandCenterOpen] = useState(false);
@@ -75,7 +79,7 @@ const Index = () => {
     }
   }, [shouldShowPlanning]);
 
-  // Auto-open weekly review on Fridays (after planning if both apply)
+  // Auto-open weekly review on Fridays
   useEffect(() => {
     if (shouldShowReview && !shouldShowPlanning) {
       const timer = setTimeout(() => setReviewOpen(true), 2000);
@@ -83,10 +87,7 @@ const Index = () => {
     }
   }, [shouldShowReview, shouldShowPlanning]);
 
-  const [preset, setPreset] = usePersistedState<DashboardPreset>(
-    'dashboard.preset',
-    'execution'
-  );
+  const [preset, setPreset] = usePersistedState<DashboardPreset>('dashboard.preset', 'execution');
 
   // Keyboard shortcuts: Alt+1 Focus, Alt+2 Finance, Alt+3 Execution
   useEffect(() => {
@@ -99,23 +100,25 @@ const Index = () => {
       if (!next) return;
       e.preventDefault();
       setPreset(next);
-      const presetKey = { focus: 'dashboard.presetFocus', finance: 'dashboard.presetFinance', execution: 'dashboard.presetExecution' }[next] as string;
-      toast.success(`${t('dashboard.presetSwitched')}: ${t(presetKey)}`);
+      const key = { focus: 'dashboard.presetFocus', finance: 'dashboard.presetFinance', execution: 'dashboard.presetExecution' }[next] as string;
+      toast.success(`${t('dashboard.presetSwitched')}: ${t(key)}`);
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [setPreset, t]);
 
-  const overview = useSectionState('overview', false);
-  const activeWork = useSectionState('active-work', true);
-  const rhythm = useSectionState('rhythm', false);
-  const finance = useSectionState('finance', false);
-  const library = useSectionState('library', false);
-  const aiSection = useSectionState('ai-intelligence', false);
+  // Sections — overview + active-work open by default; AI section open by default
+  const overview   = useSectionState('overview',         true);
+  const activeWork = useSectionState('active-work',      true);
+  const rhythm     = useSectionState('rhythm',           false);
+  const finance    = useSectionState('finance',          false);
+  const library    = useSectionState('library',          false);
+  const aiSection  = useSectionState('ai-intelligence',  true);
 
   const isAr = currentLanguage === 'ar';
 
-  // ---- Section renderers ----
+  // ── Section definitions ────────────────────────────────────────────────────
+
   const sectionOverview = (
     <section key="overview">
       <DashboardSection
@@ -125,7 +128,10 @@ const Index = () => {
         onToggle={overview.toggle}
         summary={isAr ? 'صافي الثروة · الإنفاق الشهري · المهام اليوم' : 'Net Worth · Monthly Burn · Tasks Today'}
       >
-        <KpiStrip />
+        <>
+          <KpiStrip />
+          <SystemHealthCard />
+        </>
       </DashboardSection>
     </section>
   );
@@ -145,6 +151,7 @@ const Index = () => {
             <div className="min-w-0 space-y-3 lg:space-y-4"><FocusTasks /></div>
           </div>
           <div className="mt-3 lg:mt-4"><UpcomingEvents /></div>
+          <div className="mt-3 lg:mt-4"><CognitiveDashboard contextMode={context.mode} /></div>
         </>
       </DashboardSection>
     </section>
@@ -206,30 +213,36 @@ const Index = () => {
         icon={Brain}
         open={aiSection.open}
         onToggle={aiSection.toggle}
-        summary={isAr ? 'إحاطة الصباح · نقطة التحقق · رؤى السلوك' : 'Morning Brief · Midday Check · Behavior Insights'}
+        summary={isAr ? 'إحاطة الصباح · نقطة التحقق · رؤى السلوك · التوقعات' : 'Morning Brief · Midday Check · Insights · Forecasts'}
       >
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4 items-start">
-          <div className="lg:col-span-2 min-w-0"><MorningBrief /></div>
-          <div className="space-y-3 lg:space-y-4 min-w-0">
-            <MiddayCheckpoint />
-            <BehaviorInsights />
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4 items-start">
+            <div className="lg:col-span-2 min-w-0"><MorningBrief /></div>
+            <div className="space-y-3 lg:space-y-4 min-w-0">
+              <MiddayCheckpoint />
+              <BehaviorInsights />
+            </div>
           </div>
+          <DailyDecisionCard />
+          <AgentPanel />
+          <PredictivePanel />
+          <MemoryInsightsCard />
         </div>
       </DashboardSection>
     </section>
   );
 
-  // ---- Preset arrangements ----
+  // ── Preset arrangements ────────────────────────────────────────────────────
+
   const allSections = {
-    overview:         sectionOverview,
-    'active-work':    sectionActiveWork,
-    rhythm:           sectionRhythm,
-    finance:          sectionFinance,
-    library:          sectionLibrary,
+    overview:          sectionOverview,
+    'active-work':     sectionActiveWork,
+    rhythm:            sectionRhythm,
+    finance:           sectionFinance,
+    library:           sectionLibrary,
     'ai-intelligence': sectionAI,
   };
 
-  // Apply context hiding (skip when user overrode)
   const hidden = (!context.isOverridden) ? new Set(context.hiddenSections) : new Set<string>();
   const visible = (key: keyof typeof allSections) => !hidden.has(key) ? allSections[key] : null;
 
@@ -239,26 +252,25 @@ const Index = () => {
     execution: [visible('active-work'),     visible('overview'),    visible('rhythm'),      visible('finance'),  visible('ai-intelligence'), visible('library')],
   };
 
-  // ── Morning focus-only mode ──────────────────────────────────────────────
   const isMorningFocus = context.focusOnlyMode && !context.isOverridden && !showFullInMorning;
 
   return (
     <MainLayout>
-      {/* Ambient background tint — changes with context mode */}
+      {/* Ambient background tint */}
       {context.accentScheme && (
         <div
           className={`fixed inset-0 -z-10 pointer-events-none bg-gradient-to-b ${context.accentScheme} to-transparent transition-all duration-1000`}
         />
       )}
 
-      <div className="space-y-5 lg:space-y-8 pb-4 animate-fade-in">
+      <div className="space-y-4 lg:space-y-6 pb-4 animate-fade-in">
 
-        {/* ── Context-aware mode banner ── */}
+        {/* Context-aware banner */}
         <ContextBanner context={context} />
 
-        {/* ── Desktop only: greeting + preset switcher ── */}
+        {/* Desktop: greeting + preset switcher */}
         {!isMobile && (
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 sm:gap-3 lg:gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 sm:gap-3">
             <GreetingSlim />
             <div className="flex items-center gap-2">
               <span className="hidden lg:inline-flex items-center gap-1 text-[10px] font-mono text-muted-foreground/60">
@@ -270,151 +282,98 @@ const Index = () => {
           </div>
         )}
 
-        {/* ── Decision Engine — "شيء واحد فقط مهم الآن" ── */}
+        {/* Hero: Decision Engine */}
         <FocusEngine />
 
-        {/* ── Quick Actions ── */}
-        <QuickActions />
-
-        {/* ── Natural Language Capture ── */}
+        {/* Smart capture bar */}
         <NaturalCapture />
 
-        {/* ── Planning + Review + Command Center triggers ── */}
-        <div className="grid grid-cols-3 gap-2">
-        {/* Daily planning trigger */}
-        <button
-          onClick={() => { openPlanningManually(); setPlanningOpen(true); }}
-          className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-2xl border border-amber-400/20 bg-gradient-to-r from-amber-400/5 to-orange-400/5 hover:from-amber-400/10 hover:to-orange-400/10 transition-all group active:scale-[0.99]"
-        >
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-amber-400/15 border border-amber-400/25 flex items-center justify-center shrink-0">
-              <Sun className="w-3 h-3 text-amber-400" />
-            </div>
-            <div className="text-start">
-              <div className="text-xs font-black text-foreground/90 leading-tight">تخطيط اليوم</div>
-              <div className="text-[9px] text-muted-foreground/50">مراجعة · خطة · تركيز</div>
-            </div>
-          </div>
-          {shouldShowPlanning && (
-            <div className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
-          )}
-        </button>
+        {/* Compact action strip: Planning · Review · Command */}
+        <div className="flex items-center rounded-xl border border-border/40 bg-muted/20 overflow-hidden text-xs">
+          <button
+            onClick={() => { openPlanningManually(); setPlanningOpen(true); }}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 hover:bg-background/70 transition-colors"
+          >
+            <Sun className="w-3 h-3 text-amber-400 shrink-0" />
+            <span className="font-semibold text-foreground/80">{isAr ? 'تخطيط اليوم' : 'Daily Plan'}</span>
+            {shouldShowPlanning && <div className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />}
+          </button>
+          <div className="w-px h-5 bg-border/60 shrink-0" />
+          <button
+            onClick={() => { openReviewManually(); setReviewOpen(true); }}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 hover:bg-background/70 transition-colors"
+          >
+            <BarChart3 className="w-3 h-3 text-emerald-500 shrink-0" />
+            <span className="font-semibold text-foreground/80">{isAr ? 'مراجعة الأسبوع' : 'Weekly Review'}</span>
+            {shouldShowReview && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />}
+          </button>
+          <div className="w-px h-5 bg-border/60 shrink-0" />
+          <button
+            onClick={() => setCommandCenterOpen(true)}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 hover:bg-background/70 transition-colors"
+          >
+            <Crosshair className="w-3 h-3 text-muted-foreground shrink-0" />
+            <span className="font-semibold text-foreground/80">{isAr ? 'مركز القيادة' : 'Command'}</span>
+            {focusModeActive && <Zap className="w-2.5 h-2.5 text-amber-400 shrink-0" />}
+          </button>
+        </div>
 
-        {/* Weekly review trigger */}
-        <button
-          onClick={() => { openReviewManually(); setReviewOpen(true); }}
-          className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-2xl border border-emerald-500/20 bg-gradient-to-r from-emerald-500/5 to-teal-500/5 hover:from-emerald-500/10 hover:to-teal-500/10 transition-all group active:scale-[0.99]"
-        >
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0">
-              <BarChart3 className="w-3 h-3 text-emerald-500" />
-            </div>
-            <div className="text-start">
-              <div className="text-xs font-black text-foreground/90 leading-tight">مراجعة الأسبوع</div>
-              <div className="text-[9px] text-muted-foreground/50">إنجاز · تأخر · خطة</div>
-            </div>
-          </div>
-          {shouldShowReview && (
-            <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-          )}
-        </button>
-
-        {/* Command Center trigger */}
-        <button
-          onClick={() => setCommandCenterOpen(true)}
-          className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-2xl border border-red-500/20 bg-gradient-to-r from-red-500/5 to-orange-500/5 hover:from-red-500/10 hover:to-orange-500/10 transition-all group active:scale-[0.99]"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-red-500/15 border border-red-500/25 flex items-center justify-center shrink-0">
-              <Crosshair className="w-3.5 h-3.5 text-red-400" />
-            </div>
-            <div className="text-start">
-              <div className="text-xs font-black text-foreground/90 leading-tight">مركز القيادة</div>
-              <div className="text-[9px] text-muted-foreground/50">خطة اليوم · حذف الثانوي · إعادة الحساب</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {focusModeActive && (
-              <div className="flex items-center gap-1 text-[9px] font-black text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded-full px-2 py-0.5">
-                <Zap className="w-2.5 h-2.5" />
-                تركيز
-              </div>
-            )}
-            <Crosshair className="w-3.5 h-3.5 text-red-400/50 group-hover:text-red-400 transition-colors" />
-          </div>
-        </button>
-        </div>{/* end grid */}
-
-        {/* ── System Health Card ── */}
-        <SystemHealthCard />
-
-        {/* ── Focus mode active banner ── */}
+        {/* Focus mode active banner */}
         {focusModeActive && (
           <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl border border-amber-400/25 bg-amber-400/5">
             <Zap className="w-4 h-4 text-amber-400 shrink-0" />
             <div className="flex-1">
-              <span className="text-xs font-black text-amber-400">وضع التركيز نشط</span>
-              <span className="text-[10px] text-muted-foreground/60 ms-2">— اللوحة مخفية، ركّز على مهمتك</span>
+              <span className="text-xs font-black text-amber-400">{isAr ? 'وضع التركيز نشط' : 'Focus mode on'}</span>
+              <span className="text-[10px] text-muted-foreground/60 ms-2">
+                {isAr ? '— اللوحة مخفية، ركّز على مهمتك' : '— dashboard hidden, stay focused'}
+              </span>
             </div>
             <button
               onClick={() => setFocusModeActive(false)}
               className="text-[10px] font-bold text-muted-foreground/60 hover:text-foreground transition-colors border border-border/40 rounded-lg px-2 py-1"
             >
-              إيقاف
+              {isAr ? 'إيقاف' : 'Exit'}
             </button>
           </div>
         )}
 
-        {/* ── MORNING MODE: only show FocusEngine + button to expand ── */}
+        {/* Morning focus-only mode */}
         {isMorningFocus ? (
-          <div className="flex flex-col items-center gap-3 py-4">
+          <div className="flex flex-col items-center gap-3 py-6">
             <p className="text-xs text-muted-foreground text-center max-w-xs">
-              🌅 وضع الصباح — ركّز على شيء واحد فقط قبل أن تفتح لوحة التحكم
+              {isAr
+                ? '🌅 وضع الصباح — ركّز على شيء واحد فقط قبل أن تفتح لوحة التحكم'
+                : '🌅 Morning mode — focus on one thing before opening the dashboard'}
             </p>
             <button
               onClick={() => setShowFullInMorning(true)}
               className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-border/50 rounded-xl px-4 py-2 transition-colors hover:bg-muted/30"
             >
               <Eye className="w-3.5 h-3.5" />
-              فتح لوحة التحكم الكاملة
+              {isAr ? 'فتح لوحة التحكم الكاملة' : 'Open full dashboard'}
             </button>
           </div>
         ) : focusModeActive ? null : (
           <>
-            {/* ── Empty State Intelligence ── */}
+            {/* Empty state guidance */}
             <EmptyStateIntelligence />
 
-            {/* ── Attention ribbon ── */}
+            {/* Attention ribbon */}
             <AttentionStrip />
 
-            {/* ── Daily Decision Card (AI-layer) ── */}
-            <DailyDecisionCard />
-
-            {/* ── Cognitive Load Control — curated tasks + projects ── */}
-            <CognitiveDashboard contextMode={context.mode} />
-
-            {/* ── Agent Layer — Task / Finance / Habit agents ── */}
-            <AgentPanel />
-
-            {/* ── Predictive Layer — forward-looking forecasts ── */}
-            <PredictivePanel />
-
-            {/* ── Operational Memory — what the system has learned ── */}
-            <MemoryInsightsCard />
-
-            {/* ── Mobile: preset switcher ── */}
+            {/* Mobile: preset switcher */}
             {isMobile && (
               <div className="flex items-center justify-end">
                 <LayoutPresetSwitcher value={preset} onChange={setPreset} />
               </div>
             )}
 
-            {/* ── Sections per preset (context-filtered) ── */}
+            {/* Sections per preset */}
             <div className="space-y-3">
               {arrangements[preset]}
             </div>
 
-            {/* ── Show hidden sections indicator ── */}
+            {/* Hidden sections indicator */}
             {!context.isOverridden && hidden.size > 0 && (
               <div className="flex items-center justify-center pt-2">
                 <button
@@ -423,31 +382,19 @@ const Index = () => {
                 >
                   <Eye className="w-3 h-3" />
                   {hidden.size === 1
-                    ? `قسم واحد مخفي حسب السياق`
-                    : `${hidden.size} أقسام مخفية حسب السياق`}
-                  — اضغط لإظهارها
+                    ? (isAr ? 'قسم واحد مخفي حسب السياق' : '1 section hidden by context')
+                    : (isAr ? `${hidden.size} أقسام مخفية حسب السياق` : `${hidden.size} sections hidden`)}
+                  {isAr ? ' — اضغط لإظهارها' : ' — tap to show'}
                 </button>
               </div>
             )}
           </>
         )}
       </div>
-      {/* ── Weekly Review Engine ── */}
-      <WeeklyReviewEngine
-        open={reviewOpen}
-        onClose={() => setReviewOpen(false)}
-      />
 
-      {/* ── Daily Planning Cycle wizard ── */}
-      <DailyPlanningCycle
-        open={planningOpen}
-        onClose={() => setPlanningOpen(false)}
-      />
-
-      {/* ── Success Loop feedback toasts ── */}
+      <WeeklyReviewEngine open={reviewOpen} onClose={() => setReviewOpen(false)} />
+      <DailyPlanningCycle open={planningOpen} onClose={() => setPlanningOpen(false)} />
       <SuccessLoopFeedback />
-
-      {/* ── Command Center overlay ── */}
       <CommandCenter
         open={commandCenterOpen}
         onClose={() => setCommandCenterOpen(false)}
