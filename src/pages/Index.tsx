@@ -30,6 +30,7 @@ import { ContextBanner } from '@/components/context/ContextBanner';
 import { CognitiveDashboard } from '@/components/cognitive/CognitiveDashboard';
 import { AgentPanel } from '@/components/agents/AgentPanel';
 import { PredictivePanel } from '@/components/predictions/PredictivePanel';
+import { MemoryInsightsCard } from '@/components/memory/MemoryInsightsCard';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet, Brain, Eye } from 'lucide-react';
@@ -271,6 +272,9 @@ const Index = () => {
 
             {/* ── Predictive Layer — forward-looking forecasts ── */}
             <PredictivePanel />
+
+            {/* ── Operational Memory — what the system has learned ── */}
+            <MemoryInsightsCard />
 
             {/* ── Mobile: preset switcher ── */}
             {isMobile && (

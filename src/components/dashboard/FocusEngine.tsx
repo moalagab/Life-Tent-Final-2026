@@ -23,6 +23,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { ScoredTask } from '@/hooks/useAdaptivePriority';
+import { MemoryInfluenceBadge } from '@/components/memory/MemoryInsightsCard';
 
 // ── Mode configuration ─────────────────────────────────────────────────────────
 
@@ -315,6 +316,9 @@ export function FocusEngine() {
               <Clock className="w-3 h-3" />
               ~{focusTask.estimatedMinutes}{isAr ? 'د' : ' min'}
             </span>
+          )}
+          {focusTask.memoryReasons && focusTask.memoryReasons.length > 0 && (
+            <MemoryInfluenceBadge memoryReasons={focusTask.memoryReasons} />
           )}
         </div>
 

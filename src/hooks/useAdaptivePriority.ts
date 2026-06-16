@@ -15,9 +15,10 @@
  *  - Procrastination booster for today's due tasks
  */
 import { useMemo } from 'react';
-import { differenceInHours, parseISO, format } from 'date-fns';
+import { differenceInHours, parseISO, format, getDay, getHours } from 'date-fns';
 import type { BehaviorProfile } from './useBehaviorEngine';
 import { getDecayFactor } from './useLifecycleIntelligence';
+import type { OperationalMemory } from './useOperationalMemory';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -36,6 +37,7 @@ export interface ScoredTask {
   adaptiveScore: number;        // 0–100
   action: TaskAction;
   reasons: string[];            // Human-readable explanation (Arabic)
+  memoryReasons: string[];      // Reasons sourced from OperationalMemory patterns
   suggestedTime?: string;       // e.g. "09:00" based on peakHour (never past)
   estimatedMinutes?: number;    // Rough estimate from title length
 }
@@ -110,18 +112,22 @@ function suggestTime(peakHour: number): string {
 export function useAdaptivePriority(
   tasks: RawTask[],
   profile: BehaviorProfile | undefined,
+  memory?: OperationalMemory,
 ): ScoredTask[] {
   return useMemo(() => {
     if (!profile) return [];
 
-    const pendingTasks = tasks.filter(t => t.status !== 'done');
-    const stalledSet   = new Set(profile.stalledTaskIds);
-    const now          = new Date();
-    const todayStr     = format(now, 'yyyy-MM-dd');
+    const pendingTasks  = tasks.filter(t => t.status !== 'done');
+    const stalledSet    = new Set(profile.stalledTaskIds);
+    const now           = new Date();
+    const todayStr      = format(now, 'yyyy-MM-dd');
+    const currentHour   = getHours(now);
+    const currentDay    = getDay(now);
 
     return pendingTasks
       .map((task): ScoredTask => {
-        const reasons: string[] = [];
+        const reasons: string[]       = [];
+        const memoryReasons: string[] = [];
 
         // 0. Lifecycle decay — ages tasks that haven't been touched recently
         const decay = getDecayFactor(task);
@@ -185,7 +191,55 @@ export function useAdaptivePriority(
           reasons.push('تميل للتأجيل — قدّم هذه المهمة');
         }
 
-        // 7. Quick-win detection
+        // 7. Operational Memory injection
+        if (memory && memory.confidence >= 40) {
+          const isHeavyPrio  = task.priority === 'critical' || task.priority === 'high';
+          const inBestHours  = memory.bestHours.includes(currentHour);
+          const isWorstDay   = currentDay === memory.worstDayOfWeek;
+          const isBestDay    = currentDay === memory.bestDayOfWeek;
+          const histRate     = memory.completionRateByPriority[task.priority ?? 'medium'];
+
+          // Best hour boost — history says this is when you get things done
+          if (inBestHours && isHeavyPrio) {
+            score += 12;
+            const msg = 'الآن في ذروة إنتاجيتك التاريخية';
+            reasons.push(msg);
+            memoryReasons.push(msg);
+          }
+
+          // Best day boost
+          if (isBestDay && isHeavyPrio && !inBestHours) {
+            score += 6;
+            const msg = 'يومك الأقوى تاريخياً — استثمره';
+            reasons.push(msg);
+            memoryReasons.push(msg);
+          }
+
+          // Worst day — deflate heavy tasks
+          if (isWorstDay && isHeavyPrio) {
+            score -= 10;
+            const msg = 'تاريخياً أداؤك أضعف هذا اليوم — خذ مهاماً أخف';
+            reasons.push(msg);
+            memoryReasons.push(msg);
+          }
+
+          // Low historical completion rate for this priority
+          if (histRate !== undefined && histRate < 0.45 && !task.is_focus) {
+            score -= 7;
+            const msg = `تُنجز ${Math.round(histRate * 100)}% من مهام هذا المستوى — كن واقعياً`;
+            reasons.push(msg);
+            memoryReasons.push(msg);
+          }
+
+          // High historical rate → confidence boost
+          if (histRate !== undefined && histRate >= 0.75) {
+            score += 5;
+            const msg = `معدل إنجازك التاريخي ${Math.round(histRate * 100)}% — هذا قابل للإنجاز`;
+            memoryReasons.push(msg);
+          }
+        }
+
+        // 8. Quick-win detection
         const estMinutes = estimateMinutes(task.title);
         const isQuickWin = estMinutes <= 15;
         if (isQuickWin && profile.energyEstimate <= 2) {
@@ -231,10 +285,11 @@ export function useAdaptivePriority(
           adaptiveScore: finalScore,
           action,
           reasons,
+          memoryReasons,
           suggestedTime,
           estimatedMinutes: estMinutes,
         };
       })
       .sort((a, b) => b.adaptiveScore - a.adaptiveScore);
-  }, [tasks, profile]);
+  }, [tasks, profile, memory]);
 }

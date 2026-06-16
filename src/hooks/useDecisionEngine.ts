@@ -11,6 +11,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { useTasks } from './useTasks';
 import { useBehaviorEngine } from './useBehaviorEngine';
 import { useAdaptivePriority, ScoredTask } from './useAdaptivePriority';
+import { useOperationalMemory } from './useOperationalMemory';
 
 export type ContextMode = 'deep-work' | 'review' | 'execution' | 'wind-down';
 
@@ -81,6 +82,8 @@ export interface DecisionEngineResult {
   energy: number;            // 1–5
   peakHour: number;
   riskLevel: 'low' | 'medium' | 'high';
+  memoryInfluenced: boolean; // true when operational memory shaped the recommendation
+  memoryConfidence: number;  // 0-100
   isLoading: boolean;
   skip:   (id: string) => void;
   snooze: (id: string, hours?: number) => void;
@@ -97,8 +100,9 @@ export function useDecisionEngine(): DecisionEngineResult {
   const [skipped, setSkipped] = useState<Set<string>>(() => loadSkipped());
   const [snoozed, setSnoozed] = useState<Map<string, number>>(() => loadSnoozed());
 
-  const { data: tasks, isLoading: tasksLoading }   = useTasks();
+  const { data: tasks,   isLoading: tasksLoading   } = useTasks();
   const { data: profile, isLoading: profileLoading } = useBehaviorEngine();
+  const { data: memory,  isLoading: memoryLoading  } = useOperationalMemory();
 
   // Only pending, non-archived tasks
   const activeTasks = useMemo(
@@ -110,7 +114,7 @@ export function useDecisionEngine(): DecisionEngineResult {
     [tasks],
   );
 
-  const scoredTasks = useAdaptivePriority(activeTasks, profile);
+  const scoredTasks = useAdaptivePriority(activeTasks, profile, memory);
 
   // Remove skipped (today) and snoozed (until expiry)
   const filtered = useMemo(() => {
@@ -160,8 +164,10 @@ export function useDecisionEngine(): DecisionEngineResult {
     mode:           getContextMode(),
     energy:         profile?.energyEstimate ?? 3,
     peakHour:       profile?.peakHour ?? 9,
-    riskLevel:      profile?.todayRiskLevel ?? 'low',
-    isLoading:      tasksLoading || profileLoading,
+    riskLevel:        profile?.todayRiskLevel ?? 'low',
+    memoryInfluenced: (memory?.confidence ?? 0) >= 40 && (filtered[0]?.memoryReasons?.length ?? 0) > 0,
+    memoryConfidence: memory?.confidence ?? 0,
+    isLoading:        tasksLoading || profileLoading || memoryLoading,
     skip,
     snooze,
     reset,

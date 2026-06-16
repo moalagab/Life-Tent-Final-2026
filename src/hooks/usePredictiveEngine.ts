@@ -18,10 +18,11 @@ import {
   differenceInDays, parseISO, addDays, format,
   getDay, isWeekend, isTomorrow, isThisWeek,
 } from 'date-fns';
-import { useTasks }           from './useTasks';
-import { useProjects }        from './useProjects';
-import { useBehaviorEngine }  from './useBehaviorEngine';
-import { useHabitsWithLogs }  from './useHabits';
+import { useTasks }                 from './useTasks';
+import { useProjects }              from './useProjects';
+import { useBehaviorEngine }        from './useBehaviorEngine';
+import { useHabitsWithLogs }        from './useHabits';
+import { useOperationalMemory }     from './useOperationalMemory';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -161,6 +162,7 @@ function predictTaskDelays(
 function predictProjectAbandonment(
   projects: any[],
   tasks: any[],
+  abandonThreshold = 14,
 ): Prediction[] {
   const activeProjects = projects.filter(
     p => p.status === 'active' && !p.archived_at,
@@ -185,8 +187,8 @@ function predictProjectAbandonment(
     });
 
     const allBacklog   = pending.length > 0 && pending.every(t => t.status === 'backlog');
-    const longInactive = daysSinceActivity > 21;
-    const medInactive  = daysSinceActivity > 10;
+    const longInactive = daysSinceActivity > abandonThreshold * 1.5;
+    const medInactive  = daysSinceActivity > abandonThreshold * 0.7;
     const lowProgress  = (p.progress ?? 0) < 20 && projectTasks.length > 3;
     const noDeadline   = !p.due_date;
 
@@ -237,6 +239,7 @@ function predictPressureSpike(
   procScore: number,
   overcommitScore: number,
   peakDay: number,
+  memoryWorstDay = -1,
 ): Prediction[] {
   const today    = new Date();
   const tomorrow = addDays(today, 1);
@@ -273,7 +276,8 @@ function predictPressureSpike(
     const reasons: string[] = [];
     reasons.push(`${dueTomorrow.length} مهام موعدها ${DAY_NAMES_AR[tomorrowDay]}`);
     if (isTomMonday)  reasons.push('بداية الأسبوع تحمل ضغطاً إضافياً تاريخياً');
-    if (isTomFriday)  reasons.push('الجمعة: انتهاء أسبوع العمل يُضاعف الضغط');
+    if (isTomFriday)  reasons.push('الجمعة: انتهاية أسبوع العمل يُضاعف الضغط');
+    if (tomorrowDay === memoryWorstDay) reasons.push('غداً هو أضعف يوم تاريخياً في أسبوعك');
     if (highOverload) reasons.push(`معدل الإفراط في الالتزام ${overcommitScore}%`);
     if (highProc)     reasons.push('معدل التسويف مرتفع — المهام تتراكم');
     if (dueThisWeek.length > 3) reasons.push(`+ ${dueThisWeek.length} مهمة خلال الأيام التالية`);
@@ -479,10 +483,11 @@ function predictEnergyDrop(
 // ── Main hook ──────────────────────────────────────────────────────────────────
 
 export function usePredictiveEngine(): PredictiveReport {
-  const { data: rawTasks    = [], isLoading: tL } = useTasks();
-  const { data: projects    = [], isLoading: pL } = useProjects();
+  const { data: rawTasks       = [], isLoading: tL } = useTasks();
+  const { data: projects       = [], isLoading: pL } = useProjects();
   const { data: habitsWithLogs = [], isLoading: hL } = useHabitsWithLogs();
-  const { data: profile,          isLoading: bL } = useBehaviorEngine();
+  const { data: profile,             isLoading: bL } = useBehaviorEngine();
+  const { data: memory,              isLoading: mL } = useOperationalMemory();
 
   const predictions = useMemo<Prediction[]>(() => {
     if (!profile) return [];
@@ -492,10 +497,16 @@ export function usePredictiveEngine(): PredictiveReport {
       fragileHabitIds, stalledTaskIds, peakDay, completedToday,
     } = profile;
 
+    // Use memory-calibrated project lifespan threshold if available
+    const projectAbandonThreshold = memory?.medianProjectLifeDays ?? 14;
+
+    // Use memory worst day to boost pressure spike confidence
+    const memoryWorstDay = memory?.worstDayOfWeek ?? -1;
+
     const allPredictions: Prediction[] = [
       ...predictTaskDelays(rawTasks, procrastinationScore, stalledTaskIds),
-      ...predictProjectAbandonment(projects, rawTasks),
-      ...predictPressureSpike(rawTasks, procrastinationScore, overcommitmentScore, peakDay),
+      ...predictProjectAbandonment(projects, rawTasks, projectAbandonThreshold),
+      ...predictPressureSpike(rawTasks, procrastinationScore, overcommitmentScore, peakDay, memoryWorstDay),
       ...predictHabitBreaks(habitsWithLogs, fragileHabitIds),
     ];
 
@@ -535,6 +546,6 @@ export function usePredictiveEngine(): PredictiveReport {
     riskScore,
     riskLabel,
     mostUrgent: predictions[0] ?? null,
-    isLoading: tL || pL || hL || bL,
+    isLoading: tL || pL || hL || bL || mL,
   };
 }
