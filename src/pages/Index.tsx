@@ -37,7 +37,7 @@ import { DailyPlanningCycle } from '@/components/planning/DailyPlanningCycle';
 import { useDailyPlanningCycle } from '@/hooks/useDailyPlanningCycle';
 import { WeeklyReviewEngine } from '@/components/review/WeeklyReviewEngine';
 import { useWeeklyReview } from '@/hooks/useWeeklyReview';
-import { usePersistedState } from '@/hooks/usePersistedState';
+import { NaturalCapture } from '@/components/capture/NaturalCapture';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Activity, LayoutGrid, Sparkles, BookOpen, Wallet, Brain, Eye, Crosshair, Zap, Sun, BarChart3 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -272,6 +272,9 @@ const Index = () => {
 
         {/* ── Quick Actions ── */}
         <QuickActions />
+
+        {/* ── Natural Language Capture ── */}
+        <NaturalCapture />
 
         {/* ── Planning + Review + Command Center triggers ── */}
         <div className="grid grid-cols-3 gap-2">
