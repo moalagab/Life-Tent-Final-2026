@@ -279,15 +279,15 @@ function StalledSection({ data }: { data: StalledProject | null }) {
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="rounded-lg bg-black/10 dark:bg-white/5 p-2">
+          <div className="rounded-lg bg-muted/30 p-2">
             <div className="text-lg font-black text-amber-400">{daysSinceActivity}</div>
             <div className="text-[9px] text-muted-foreground">يوم بلا نشاط</div>
           </div>
-          <div className="rounded-lg bg-black/10 dark:bg-white/5 p-2">
+          <div className="rounded-lg bg-muted/30 p-2">
             <div className="text-lg font-black text-foreground">{pendingTaskCount}</div>
             <div className="text-[9px] text-muted-foreground">مهمة معلقة</div>
           </div>
-          <div className="rounded-lg bg-black/10 dark:bg-white/5 p-2">
+          <div className="rounded-lg bg-muted/30 p-2">
             <div className="text-lg font-black text-foreground">
               {project.progress ?? 0}%
             </div>
@@ -387,17 +387,17 @@ function InterventionSection({ data }: { data: GoalIntervention | null }) {
 
         {/* Progress ring + stats */}
         <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="rounded-lg bg-black/10 dark:bg-white/5 p-2">
+          <div className="rounded-lg bg-muted/30 p-2">
             <div className={cn('text-xl font-black tabular-nums', isCritical ? 'text-red-400' : 'text-amber-400')}>
               {progressPercent}%
             </div>
             <div className="text-[9px] text-muted-foreground">التقدم</div>
           </div>
-          <div className="rounded-lg bg-black/10 dark:bg-white/5 p-2">
+          <div className="rounded-lg bg-muted/30 p-2">
             <div className="text-xl font-black">{goal.current_value ?? 0}</div>
             <div className="text-[9px] text-muted-foreground">الحالي</div>
           </div>
-          <div className="rounded-lg bg-black/10 dark:bg-white/5 p-2">
+          <div className="rounded-lg bg-muted/30 p-2">
             <div className="text-xl font-black">{goal.target_value ?? '?'}</div>
             <div className="text-[9px] text-muted-foreground">الهدف</div>
           </div>
