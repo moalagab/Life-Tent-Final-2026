@@ -21,14 +21,17 @@ import { useAccounts } from './useFinance';
 export type EmptyLayer = 'goals' | 'projects' | 'tasks' | 'habits' | 'finance';
 
 export interface SetupStep {
-  id:          EmptyLayer;
-  title:       string;
-  description: string;
-  cta:         string;
-  route:       string;
-  done:        boolean;
-  color:       string;   // tailwind color token for icon/border
-  bgClass:     string;
+  id:           EmptyLayer;
+  title:        string;
+  titleEn:      string;
+  description:  string;
+  descriptionEn:string;
+  cta:          string;
+  ctaEn:        string;
+  route:        string;
+  done:         boolean;
+  color:        string;
+  bgClass:      string;
 }
 
 export interface EmptyStateData {
@@ -45,54 +48,69 @@ export interface EmptyStateData {
 
 const STEP_DEFS: Array<Omit<SetupStep, 'done'> & { layer: EmptyLayer }> = [
   {
-    id:          'goals',
-    layer:       'goals',
-    title:       'حدد هدفك الأول',
-    description: 'الأهداف هي البوصلة — ابدأ بتحديد ما تريد تحقيقه قبل أي شيء آخر.',
-    cta:         'أنشئ هدفاً',
-    route:       '/goals',
-    color:       'violet',
-    bgClass:     'from-violet-500/10 to-purple-500/5',
+    id:           'goals',
+    layer:        'goals',
+    title:        'حدد هدفك الأول',
+    titleEn:      'Set your first goal',
+    description:  'الأهداف هي البوصلة — ابدأ بتحديد ما تريد تحقيقه قبل أي شيء آخر.',
+    descriptionEn:'Goals are your compass — start by deciding what you want to achieve.',
+    cta:          'أنشئ هدفاً',
+    ctaEn:        'Create goal',
+    route:        '/goals',
+    color:        'violet',
+    bgClass:      'from-violet-500/10 to-purple-500/5',
   },
   {
-    id:          'projects',
-    layer:       'projects',
-    title:       'أنشئ مشروعك الأول',
-    description: 'جمّع المهام المترابطة في مشروع واحد لتتبع التقدم بسهولة.',
-    cta:         'أنشئ مشروعاً',
-    route:       '/projects',
-    color:       'blue',
-    bgClass:     'from-blue-500/10 to-indigo-500/5',
+    id:           'projects',
+    layer:        'projects',
+    title:        'أنشئ مشروعك الأول',
+    titleEn:      'Create your first project',
+    description:  'جمّع المهام المترابطة في مشروع واحد لتتبع التقدم بسهولة.',
+    descriptionEn:'Group related tasks in one project to track progress easily.',
+    cta:          'أنشئ مشروعاً',
+    ctaEn:        'Create project',
+    route:        '/projects',
+    color:        'blue',
+    bgClass:      'from-blue-500/10 to-indigo-500/5',
   },
   {
-    id:          'tasks',
-    layer:       'tasks',
-    title:       'أضف مهمتك الأولى',
-    description: 'المهام هي وحدة الإنجاز اليومي — ابدأ بشيء صغير وقابل للإنجاز.',
-    cta:         'أضف مهمة',
-    route:       '/tasks',
-    color:       'emerald',
-    bgClass:     'from-emerald-500/10 to-teal-500/5',
+    id:           'tasks',
+    layer:        'tasks',
+    title:        'أضف مهمتك الأولى',
+    titleEn:      'Add your first task',
+    description:  'المهام هي وحدة الإنجاز اليومي — ابدأ بشيء صغير وقابل للإنجاز.',
+    descriptionEn:'Tasks are your daily execution unit — start small and achievable.',
+    cta:          'أضف مهمة',
+    ctaEn:        'Add task',
+    route:        '/tasks',
+    color:        'emerald',
+    bgClass:      'from-emerald-500/10 to-teal-500/5',
   },
   {
-    id:          'habits',
-    layer:       'habits',
-    title:       'ابنِ عادتك الأولى',
-    description: 'العادات تبني النتائج على المدى البعيد — اختر عادة واحدة وابدأ بها.',
-    cta:         'أضف عادة',
-    route:       '/habits',
-    color:       'amber',
-    bgClass:     'from-amber-500/10 to-orange-500/5',
+    id:           'habits',
+    layer:        'habits',
+    title:        'ابنِ عادتك الأولى',
+    titleEn:      'Build your first habit',
+    description:  'العادات تبني النتائج على المدى البعيد — اختر عادة واحدة وابدأ بها.',
+    descriptionEn:'Habits build long-term results — pick one and start today.',
+    cta:          'أضف عادة',
+    ctaEn:        'Add habit',
+    route:        '/habits',
+    color:        'amber',
+    bgClass:      'from-amber-500/10 to-orange-500/5',
   },
   {
-    id:          'finance',
-    layer:       'finance',
-    title:       'أضف حسابك البنكي',
-    description: 'ربط المالية يمنحك رؤية شاملة — أضف حسابك لتبدأ تتبع دخلك ومصروفاتك.',
-    cta:         'أضف حساباً',
-    route:       '/finance',
-    color:       'rose',
-    bgClass:     'from-rose-500/10 to-pink-500/5',
+    id:           'finance',
+    layer:        'finance',
+    title:        'أضف حسابك البنكي',
+    titleEn:      'Add your bank account',
+    description:  'ربط المالية يمنحك رؤية شاملة — أضف حسابك لتبدأ تتبع دخلك ومصروفاتك.',
+    descriptionEn:'Connecting finances gives you a full picture — track income and expenses.',
+    cta:          'أضف حساباً',
+    ctaEn:        'Add account',
+    route:        '/finance',
+    color:        'rose',
+    bgClass:      'from-rose-500/10 to-pink-500/5',
   },
 ];
 

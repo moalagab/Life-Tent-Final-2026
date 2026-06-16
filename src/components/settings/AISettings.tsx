@@ -3,24 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Brain, Trash2, RefreshCw, Clock, Zap, Activity, TrendingUp, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/hooks/useLanguage';
 import { format } from 'date-fns';
 import type { AnalysisMode } from '@/hooks/useAIDecisionEngine';
 
 const MODES: AnalysisMode[] = ['morning', 'midday', 'evening', 'full'];
-
-const MODE_LABELS: Record<AnalysisMode, string> = {
-  morning: 'الصباح (05:00–11:59)',
-  midday: 'منتصف النهار (12:00–14:59)',
-  evening: 'المساء (18:00–23:59)',
-  full: 'التحليل الكامل',
-};
-
-const MODE_TTL: Record<AnalysisMode, string> = {
-  morning: '2 ساعة',
-  midday: '4 ساعات',
-  evening: '8 ساعات',
-  full: '4 ساعات',
-};
 
 function detectMode(): AnalysisMode {
   const hour = new Date().getHours();
@@ -38,8 +25,34 @@ interface CacheInfo {
 
 export function AISettings() {
   const { user } = useAuth();
+  const { currentLanguage } = useLanguage();
+  const isAr = currentLanguage === 'ar';
   const userId = user?.id ?? 'anonymous';
   const currentMode = detectMode();
+
+  const MODE_LABELS: Record<AnalysisMode, string> = isAr ? {
+    morning: 'الصباح (05:00–11:59)',
+    midday:  'منتصف النهار (12:00–14:59)',
+    evening: 'المساء (18:00–23:59)',
+    full:    'التحليل الكامل',
+  } : {
+    morning: 'Morning (05:00–11:59)',
+    midday:  'Midday (12:00–14:59)',
+    evening: 'Evening (18:00–23:59)',
+    full:    'Full Analysis',
+  };
+
+  const MODE_TTL: Record<AnalysisMode, string> = isAr ? {
+    morning: '2 ساعة',
+    midday:  '4 ساعات',
+    evening: '8 ساعات',
+    full:    '4 ساعات',
+  } : {
+    morning: '2 hours',
+    midday:  '4 hours',
+    evening: '8 hours',
+    full:    '4 hours',
+  };
 
   const [cacheInfos, setCacheInfos] = useState<CacheInfo[]>([]);
   const [cleared, setCleared] = useState<AnalysisMode | null>(null);
@@ -79,7 +92,6 @@ export function AISettings() {
 
   const clearAllCache = () => {
     MODES.forEach(mode => clearCache(mode));
-    // Also clear snapshot flag so next mount records a fresh one
     try {
       localStorage.removeItem(`lt.snapshot-recorded.${userId}.${format(new Date(), 'yyyy-MM-dd')}`);
     } catch { /* ignore */ }
@@ -96,9 +108,11 @@ export function AISettings() {
             <Brain className="w-5 h-5 text-violet-400" />
           </div>
           <div>
-            <h4 className="font-semibold text-foreground">محرك القرار الذكي</h4>
+            <h4 className="font-semibold text-foreground">{isAr ? 'محرك القرار الذكي' : 'AI Decision Engine'}</h4>
             <p className="text-sm text-muted-foreground">
-              يحلل مهامك وعاداتك وأهدافك ليقدم توصيات شخصية مدعومة بـ Gemini 2.5 Flash
+              {isAr
+                ? 'يحلل مهامك وعاداتك وأهدافك ليقدم توصيات شخصية مدعومة بـ Gemini 2.5 Flash'
+                : 'Analyzes your tasks, habits, and goals to deliver personalized recommendations powered by Gemini 2.5 Flash'}
             </p>
           </div>
         </div>
@@ -109,7 +123,7 @@ export function AISettings() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock className="w-4 h-4" />
-            <span>الوضع الحالي</span>
+            <span>{isAr ? 'الوضع الحالي' : 'Current mode'}</span>
           </div>
           <span className={cn(
             "text-xs font-medium px-2.5 py-1 rounded-full",
@@ -125,7 +139,7 @@ export function AISettings() {
         <div className="flex items-center justify-between mb-3">
           <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
             <Activity className="w-4 h-4 text-muted-foreground" />
-            أوضاع التحليل والكاش
+            {isAr ? 'أوضاع التحليل والكاش' : 'Analysis modes & cache'}
           </h4>
           {hasCached && (
             <Button
@@ -135,7 +149,7 @@ export function AISettings() {
               onClick={clearAllCache}
             >
               <Trash2 className="w-3 h-3 me-1" />
-              مسح الكل
+              {isAr ? 'مسح الكل' : 'Clear all'}
             </Button>
           )}
         </div>
@@ -162,14 +176,18 @@ export function AISettings() {
                   </span>
                   {info.mode === currentMode && (
                     <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-primary/20 text-primary shrink-0">
-                      الآن
+                      {isAr ? 'الآن' : 'Now'}
                     </span>
                   )}
                 </div>
                 <div className="text-xs text-muted-foreground mt-0.5">
                   {info.cachedAt
-                    ? `آخر تحليل: ${format(new Date(info.cachedAt), 'HH:mm')} — منذ ${info.ageMinutes} دقيقة • صلاحية: ${MODE_TTL[info.mode]}`
-                    : `لا يوجد كاش • صلاحية: ${MODE_TTL[info.mode]}`}
+                    ? isAr
+                      ? `آخر تحليل: ${format(new Date(info.cachedAt), 'HH:mm')} — منذ ${info.ageMinutes} دقيقة • صلاحية: ${MODE_TTL[info.mode]}`
+                      : `Last analysis: ${format(new Date(info.cachedAt), 'HH:mm')} — ${info.ageMinutes}m ago • TTL: ${MODE_TTL[info.mode]}`
+                    : isAr
+                      ? `لا يوجد كاش • صلاحية: ${MODE_TTL[info.mode]}`
+                      : `No cache • TTL: ${MODE_TTL[info.mode]}`}
                 </div>
               </div>
               {info.cachedAt && (
@@ -178,7 +196,7 @@ export function AISettings() {
                   size="sm"
                   className="h-7 w-7 p-0 shrink-0"
                   onClick={() => clearCache(info.mode)}
-                  title="مسح الكاش"
+                  title={isAr ? 'مسح الكاش' : 'Clear cache'}
                 >
                   {cleared === info.mode
                     ? <CheckCircle2 className="w-3.5 h-3.5 text-success" />
@@ -194,20 +212,22 @@ export function AISettings() {
       <div className="p-4 rounded-xl bg-muted/30 border border-border space-y-3">
         <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
           <Zap className="w-4 h-4 text-warning" />
-          حدود الاستخدام
+          {isAr ? 'حدود الاستخدام' : 'Rate limits'}
         </h4>
         <div className="grid grid-cols-2 gap-3">
           <div className="p-3 rounded-lg bg-background/50 border border-border text-center">
             <p className="text-lg font-bold text-foreground">50</p>
-            <p className="text-xs text-muted-foreground">قرار / ساعة</p>
+            <p className="text-xs text-muted-foreground">{isAr ? 'قرار / ساعة' : 'decisions / hour'}</p>
           </div>
           <div className="p-3 rounded-lg bg-background/50 border border-border text-center">
             <p className="text-lg font-bold text-foreground">30</p>
-            <p className="text-xs text-muted-foreground">مساعد مالي / ساعة</p>
+            <p className="text-xs text-muted-foreground">{isAr ? 'مساعد مالي / ساعة' : 'finance assistant / hour'}</p>
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
-          الكاش يقلل الاستهلاك — لن تُستهلك طلبات إضافية حتى انتهاء صلاحية التحليل الحالي
+          {isAr
+            ? 'الكاش يقلل الاستهلاك — لن تُستهلك طلبات إضافية حتى انتهاء صلاحية التحليل الحالي'
+            : 'Cache reduces usage — no additional requests until the current analysis expires'}
         </p>
       </div>
 
@@ -215,25 +235,25 @@ export function AISettings() {
       <div className="p-4 rounded-xl bg-muted/30 border border-border space-y-3">
         <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-muted-foreground" />
-          كيف يعمل المحرك
+          {isAr ? 'كيف يعمل المحرك' : 'How the engine works'}
         </h4>
         <ul className="space-y-2 text-xs text-muted-foreground">
-          <li className="flex items-start gap-2">
-            <span className="w-4 h-4 rounded-full bg-violet-500/20 text-violet-400 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">1</span>
-            <span>يجمع بيانات مهامك وعاداتك وأهدافك وإنجازات اليوم والوضع المالي</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="w-4 h-4 rounded-full bg-violet-500/20 text-violet-400 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">2</span>
-            <span>يحسب درجة أولوية لكل مهمة بناءً على الطاقة المتوقعة وحالة التركيز</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="w-4 h-4 rounded-full bg-violet-500/20 text-violet-400 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</span>
-            <span>يرسل الصورة الكاملة لـ Gemini 2.5 Flash ليولّد توصيات شخصية</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="w-4 h-4 rounded-full bg-violet-500/20 text-violet-400 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">4</span>
-            <span>يحفظ النتيجة في الكاش المحلي ويعرضها في لوحة التحكم الرئيسية</span>
-          </li>
+          {(isAr ? [
+            'يجمع بيانات مهامك وعاداتك وأهدافك وإنجازات اليوم والوضع المالي',
+            'يحسب درجة أولوية لكل مهمة بناءً على الطاقة المتوقعة وحالة التركيز',
+            'يرسل الصورة الكاملة لـ Gemini 2.5 Flash ليولّد توصيات شخصية',
+            'يحفظ النتيجة في الكاش المحلي ويعرضها في لوحة التحكم الرئيسية',
+          ] : [
+            'Collects your tasks, habits, goals, daily achievements and financial status',
+            'Calculates a priority score for each task based on expected energy and focus state',
+            'Sends the full picture to Gemini 2.5 Flash to generate personalized recommendations',
+            'Saves the result to local cache and displays it in the main dashboard',
+          ]).map((step, i) => (
+            <li key={i} className="flex items-start gap-2">
+              <span className="w-4 h-4 rounded-full bg-violet-500/20 text-violet-400 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">{i + 1}</span>
+              <span>{step}</span>
+            </li>
+          ))}
         </ul>
       </div>
 
@@ -241,7 +261,9 @@ export function AISettings() {
       <div className="flex items-start gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20">
         <AlertCircle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
         <p className="text-xs text-muted-foreground">
-          لتفعيل التحليل الذكي، تأكد من ضبط <code className="font-mono bg-muted px-1 rounded">GEMINI_API_KEY</code> في إعدادات Supabase Edge Functions
+          {isAr
+            ? <>لتفعيل التحليل الذكي، تأكد من ضبط <code className="font-mono bg-muted px-1 rounded">GEMINI_API_KEY</code> في إعدادات Supabase Edge Functions</>
+            : <>To enable AI analysis, make sure <code className="font-mono bg-muted px-1 rounded">GEMINI_API_KEY</code> is set in your Supabase Edge Functions settings</>}
         </p>
       </div>
 
@@ -249,9 +271,13 @@ export function AISettings() {
       <div className="p-4 rounded-xl bg-destructive/5 border border-destructive/15">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h4 className="text-sm font-medium text-foreground">إعادة تعيين ذاكرة التخصيص</h4>
+            <h4 className="text-sm font-medium text-foreground">
+              {isAr ? 'إعادة تعيين ذاكرة التخصيص' : 'Reset personalization memory'}
+            </h4>
             <p className="text-xs text-muted-foreground mt-1">
-              يمسح سجل الأنماط السلوكية (30 لقطة). سيبدأ المحرك من صفحة بيضاء.
+              {isAr
+                ? 'يمسح سجل الأنماط السلوكية (30 لقطة). سيبدأ المحرك من صفحة بيضاء.'
+                : 'Clears the behavioral pattern log (30 snapshots). The engine will start fresh.'}
             </p>
           </div>
           <Button
@@ -265,7 +291,7 @@ export function AISettings() {
             }}
           >
             <RefreshCw className="w-3.5 h-3.5 me-1.5" />
-            إعادة تعيين
+            {isAr ? 'إعادة تعيين' : 'Reset'}
           </Button>
         </div>
       </div>

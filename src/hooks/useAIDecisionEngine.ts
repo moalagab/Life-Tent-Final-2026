@@ -28,6 +28,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useLanguage } from './useLanguage';
 import { useBehaviorEngine } from './useBehaviorEngine';
 import { useAdaptivePriority } from './useAdaptivePriority';
 import { usePersonalizationMemory } from './usePersonalizationMemory';
@@ -266,6 +267,7 @@ function isWeekSummaryDay(): boolean {
 
 export function useAIDecisionEngine() {
   const { user } = useAuth();
+  const { currentLanguage } = useLanguage();
   const userId = user?.id ?? 'anonymous';
 
   const { data: profile, isLoading: profileLoading } = useBehaviorEngine();
@@ -347,6 +349,7 @@ export function useAIDecisionEngine() {
           doneToday,
           finance:   financeSummary,
           isWeekSummary: selectedMode === 'morning' && isWeekSummaryDay(),
+          language:  currentLanguage,
         },
       });
 
@@ -368,7 +371,7 @@ export function useAIDecisionEngine() {
     } finally {
       setIsAnalysing(false);
     }
-  }, [profile, scoredTasks, trends, userId, habitsSummary, goalsSummary, doneToday, financeSummary, resolveUserName]);
+  }, [profile, scoredTasks, trends, userId, habitsSummary, goalsSummary, doneToday, financeSummary, resolveUserName, currentLanguage]);
 
   const refresh = useCallback(() => {
     const mode = detectMode();

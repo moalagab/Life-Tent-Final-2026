@@ -18,6 +18,7 @@ import {
   LayoutGrid, Eye, StickyNote, Archive, Play, Pause,
   CheckCircle, Calendar, Share2, Loader2, Network,
 } from 'lucide-react';
+import { useLanguage } from '@/hooks/useLanguage';
 
 import { ProjectTasksTab }    from '@/components/projects/ProjectTasksTab';
 import { ProjectGoalsTab }    from '@/components/projects/ProjectGoalsTab';
@@ -33,23 +34,7 @@ import { RelationEditor }     from '@/components/graph/RelationEditor';
 
 type WorkspaceTab = 'overview' | 'tasks' | 'kanban' | 'goals' | 'resources' | 'crm' | 'okrs' | 'notes' | 'graph';
 
-const TABS: { id: WorkspaceTab; labelAr: string; icon: React.ComponentType<{ className?: string; strokeWidth?: number }> }[] = [
-  { id: 'overview',   labelAr: 'نظرة عامة', icon: Eye },
-  { id: 'tasks',      labelAr: 'مهام',       icon: ListTodo },
-  { id: 'kanban',     labelAr: 'كانبان',     icon: LayoutGrid },
-  { id: 'goals',      labelAr: 'أهداف',      icon: Target },
-  { id: 'resources',  labelAr: 'موارد',      icon: Database },
-  { id: 'crm',        labelAr: 'CRM',        icon: Users },
-  { id: 'okrs',       labelAr: 'OKRs',       icon: TrendingUp },
-  { id: 'notes',      labelAr: 'ملاحظات',   icon: StickyNote },
-  { id: 'graph',      labelAr: 'العلاقات',   icon: Network },
-];
-
 const PHASE_STEPS = ['initiation', 'planning', 'execution', 'monitoring', 'closing'] as const;
-const PHASE_LABELS: Record<string, string> = {
-  initiation: 'تأسيس', planning: 'تخطيط', execution: 'تنفيذ',
-  monitoring: 'مراقبة', closing: 'إغلاق',
-};
 const STATUS_COLORS: Record<string, string> = {
   active: 'bg-success/10 text-success border-success/20',
   on_hold: 'bg-warning/10 text-warning border-warning/20',
@@ -63,6 +48,24 @@ const STATUS_ICONS: Record<string, typeof Play> = {
 export default function ProjectWorkspace() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { currentLanguage } = useLanguage();
+  const isAr = currentLanguage === 'ar';
+
+  const TABS: { id: WorkspaceTab; label: string; icon: React.ComponentType<{ className?: string; strokeWidth?: number }> }[] = [
+    { id: 'overview',   label: isAr ? 'نظرة عامة' : 'Overview',   icon: Eye },
+    { id: 'tasks',      label: isAr ? 'مهام'       : 'Tasks',      icon: ListTodo },
+    { id: 'kanban',     label: isAr ? 'كانبان'     : 'Kanban',     icon: LayoutGrid },
+    { id: 'goals',      label: isAr ? 'أهداف'      : 'Goals',      icon: Target },
+    { id: 'resources',  label: isAr ? 'موارد'      : 'Resources',  icon: Database },
+    { id: 'crm',        label: 'CRM',                               icon: Users },
+    { id: 'okrs',       label: 'OKRs',                              icon: TrendingUp },
+    { id: 'notes',      label: isAr ? 'ملاحظات'    : 'Notes',      icon: StickyNote },
+    { id: 'graph',      label: isAr ? 'العلاقات'   : 'Relations',  icon: Network },
+  ];
+
+  const PHASE_LABELS: Record<string, string> = isAr
+    ? { initiation: 'تأسيس', planning: 'تخطيط', execution: 'تنفيذ', monitoring: 'مراقبة', closing: 'إغلاق' }
+    : { initiation: 'Initiation', planning: 'Planning', execution: 'Execution', monitoring: 'Monitoring', closing: 'Closing' };
 
   const [activeTab, setActiveTab] = useState<WorkspaceTab>('overview');
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -89,8 +92,8 @@ export default function ProjectWorkspace() {
       <MainLayout>
         <div className="flex flex-col items-center justify-center h-64 gap-3">
           <FolderKanban className="w-12 h-12 text-muted-foreground/30" />
-          <p className="text-muted-foreground">المشروع غير موجود</p>
-          <Button variant="outline" onClick={() => navigate('/projects')}>العودة للمشاريع</Button>
+          <p className="text-muted-foreground">{isAr ? 'المشروع غير موجود' : 'Project not found'}</p>
+          <Button variant="outline" onClick={() => navigate('/projects')}>{isAr ? 'العودة للمشاريع' : 'Back to Projects'}</Button>
         </div>
       </MainLayout>
     );
@@ -111,16 +114,16 @@ export default function ProjectWorkspace() {
     try {
       await updateProject.mutateAsync({ id: project.id, title: editTitle.trim() });
       setIsEditingTitle(false);
-      toast.success('تم تحديث اسم المشروع');
-    } catch { toast.error('حدث خطأ'); }
+      toast.success(isAr ? 'تم تحديث اسم المشروع' : 'Project name updated');
+    } catch { toast.error(isAr ? 'حدث خطأ' : 'Error occurred'); }
   };
 
   const handleSaveDesc = async () => {
     try {
       await updateProject.mutateAsync({ id: project.id, description: editDesc });
       setIsEditingDesc(false);
-      toast.success('تم تحديث الوصف');
-    } catch { toast.error('حدث خطأ'); }
+      toast.success(isAr ? 'تم تحديث الوصف' : 'Description updated');
+    } catch { toast.error(isAr ? 'حدث خطأ' : 'Error occurred'); }
   };
 
   const handlePhaseChange = async (phase: string) => {
@@ -130,16 +133,16 @@ export default function ProjectWorkspace() {
         phase: phase as 'initiation' | 'planning' | 'execution' | 'monitoring' | 'closing',
         status: phase === 'closing' ? 'completed' : project.status,
       });
-      toast.success('تم تحديث المرحلة');
-    } catch { toast.error('حدث خطأ'); }
+      toast.success(isAr ? 'تم تحديث المرحلة' : 'Phase updated');
+    } catch { toast.error(isAr ? 'حدث خطأ' : 'Error occurred'); }
   };
 
   const handleArchive = async () => {
     try {
       await updateProject.mutateAsync({ id: project.id, status: 'archived', para_category: 'archive' });
-      toast.success('تم نقل المشروع للأرشيف');
+      toast.success(isAr ? 'تم نقل المشروع للأرشيف' : 'Project archived');
       navigate('/projects');
-    } catch { toast.error('حدث خطأ'); }
+    } catch { toast.error(isAr ? 'حدث خطأ' : 'Error occurred'); }
   };
 
   return (
@@ -149,7 +152,7 @@ export default function ProjectWorkspace() {
         {/* ── Breadcrumb ── */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <button onClick={() => navigate('/projects')} className="hover:text-foreground transition-colors">
-            المشاريع
+            {isAr ? 'المشاريع' : 'Projects'}
           </button>
           <ArrowRight className="w-3.5 h-3.5 shrink-0" />
           <span className="text-foreground font-medium truncate max-w-[220px]">{project.title}</span>
@@ -221,8 +224,8 @@ export default function ProjectWorkspace() {
                       rows={2} className="text-sm bg-muted/50 resize-none" dir="auto" autoFocus
                     />
                     <div className="flex gap-2">
-                      <Button size="sm" onClick={handleSaveDesc}>حفظ</Button>
-                      <Button size="sm" variant="outline" onClick={() => setIsEditingDesc(false)}>إلغاء</Button>
+                      <Button size="sm" onClick={handleSaveDesc}>{isAr ? 'حفظ' : 'Save'}</Button>
+                      <Button size="sm" variant="outline" onClick={() => setIsEditingDesc(false)}>{isAr ? 'إلغاء' : 'Cancel'}</Button>
                     </div>
                   </div>
                 ) : (
@@ -231,7 +234,7 @@ export default function ProjectWorkspace() {
                     className="group flex items-start gap-1.5 mt-1.5 text-start w-full"
                   >
                     <p className="text-sm text-muted-foreground line-clamp-2">
-                      {project.description || 'أضف وصفاً للمشروع...'}
+                      {project.description || (isAr ? 'أضف وصفاً للمشروع...' : 'Add a project description...')}
                     </p>
                     <Pencil className="w-3 h-3 mt-0.5 text-muted-foreground/0 group-hover:text-muted-foreground/60 shrink-0 transition-opacity" />
                   </button>
@@ -243,12 +246,12 @@ export default function ProjectWorkspace() {
             <div className="flex items-center gap-2 shrink-0">
               <Button variant="outline" size="sm" onClick={() => setShareOpen(true)} className="gap-1.5">
                 <Share2 className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">مشاركة</span>
+                <span className="hidden sm:inline">{isAr ? 'مشاركة' : 'Share'}</span>
               </Button>
               {project.status !== 'archived' && (
                 <Button variant="outline" size="sm" onClick={handleArchive} className="gap-1.5">
                   <Archive className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">أرشفة</span>
+                  <span className="hidden sm:inline">{isAr ? 'أرشفة' : 'Archive'}</span>
                 </Button>
               )}
             </div>
@@ -258,7 +261,7 @@ export default function ProjectWorkspace() {
           <div className="relative mt-4 space-y-3">
             <div className="space-y-1">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">التقدم الكلي</span>
+                <span className="text-muted-foreground">{isAr ? 'التقدم الكلي' : 'Overall Progress'}</span>
                 <span className="font-semibold text-primary">{project.progress ?? 0}%</span>
               </div>
               <div className="h-2.5 bg-muted rounded-full overflow-hidden">
@@ -271,9 +274,9 @@ export default function ProjectWorkspace() {
 
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: 'المهام', value: projectTasks.length, sub: `${completedTasks} مكتملة`, color: 'text-primary' },
-                { label: 'التقدم', value: `${project.progress ?? 0}%`, sub: 'نسبة الإنجاز', color: 'text-success' },
-                { label: 'الموعد', value: project.due_date ? format(new Date(project.due_date), 'dd MMM', { locale: ar }) : '—', sub: 'تاريخ التسليم', color: 'text-amber-500' },
+                { label: isAr ? 'المهام' : 'Tasks', value: projectTasks.length, sub: isAr ? `${completedTasks} مكتملة` : `${completedTasks} done`, color: 'text-primary' },
+                { label: isAr ? 'التقدم' : 'Progress', value: `${project.progress ?? 0}%`, sub: isAr ? 'نسبة الإنجاز' : 'Completion rate', color: 'text-success' },
+                { label: isAr ? 'الموعد' : 'Due', value: project.due_date ? format(new Date(project.due_date), 'dd MMM', { locale: ar }) : '—', sub: isAr ? 'تاريخ التسليم' : 'Delivery date', color: 'text-amber-500' },
               ].map((kpi) => (
                 <div key={kpi.label} className="text-center p-2.5 rounded-xl bg-background/40">
                   <p className={cn('text-lg font-bold', kpi.color)}>{kpi.value}</p>
@@ -287,7 +290,7 @@ export default function ProjectWorkspace() {
 
         {/* ── Phase Stepper ── */}
         <div className="glass-card p-4">
-          <p className="text-xs text-muted-foreground mb-3 font-medium">مراحل المشروع (PMBOK)</p>
+          <p className="text-xs text-muted-foreground mb-3 font-medium">{isAr ? 'مراحل المشروع (PMBOK)' : 'Project Phases (PMBOK)'}</p>
           <div className="flex items-center gap-1.5">
             {PHASE_STEPS.map((phase, index) => (
               <div key={phase} className="flex items-center flex-1 min-w-0">
@@ -313,7 +316,7 @@ export default function ProjectWorkspace() {
 
         {/* ── Tab Selector ── */}
         <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
-          {TABS.map(({ id: tabId, labelAr, icon: Icon }) => {
+          {TABS.map(({ id: tabId, label, icon: Icon }) => {
             const active = activeTab === tabId;
             return (
               <button
@@ -331,7 +334,7 @@ export default function ProjectWorkspace() {
                   strokeWidth={active ? 2 : 1.75}
                 />
                 <span className={cn('text-[10px] font-semibold leading-none', active ? 'text-foreground' : 'text-foreground/60')}>
-                  {labelAr}
+                  {label}
                 </span>
               </button>
             );
@@ -345,7 +348,7 @@ export default function ProjectWorkspace() {
             <div className="space-y-4">
               {/* Description card */}
               <div className="glass-card p-4">
-                <h3 className="font-semibold text-sm mb-2">الوصف</h3>
+                <h3 className="font-semibold text-sm mb-2">{isAr ? 'الوصف' : 'Description'}</h3>
                 {project.description ? (
                   <p className="text-sm text-muted-foreground">{project.description}</p>
                 ) : (
@@ -353,7 +356,7 @@ export default function ProjectWorkspace() {
                     onClick={() => { setEditDesc(''); setIsEditingDesc(true); }}
                     className="text-sm text-muted-foreground/60 hover:text-muted-foreground italic"
                   >
-                    أضف وصفاً للمشروع...
+                    {isAr ? 'أضف وصفاً للمشروع...' : 'Add a project description...'}
                   </button>
                 )}
               </div>
@@ -363,9 +366,9 @@ export default function ProjectWorkspace() {
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold text-sm flex items-center gap-2">
                     <ListTodo className="w-4 h-4 text-primary" />
-                    آخر المهام
+                    {isAr ? 'آخر المهام' : 'Recent Tasks'}
                   </h3>
-                  <button onClick={() => setActiveTab('tasks')} className="text-xs text-primary hover:underline">الكل</button>
+                  <button onClick={() => setActiveTab('tasks')} className="text-xs text-primary hover:underline">{isAr ? 'الكل' : 'All'}</button>
                 </div>
                 {projectTasks.slice(0, 5).map((t) => {
                   const isOverdue = t.due_date && new Date(t.due_date) < new Date() && !['done', 'completed'].includes(t.status ?? '');
@@ -386,7 +389,7 @@ export default function ProjectWorkspace() {
                   );
                 })}
                 {projectTasks.length === 0 && (
-                  <p className="text-xs text-muted-foreground text-center py-3">لا توجد مهام لهذا المشروع</p>
+                  <p className="text-xs text-muted-foreground text-center py-3">{isAr ? 'لا توجد مهام لهذا المشروع' : 'No tasks for this project'}</p>
                 )}
               </div>
 
@@ -394,7 +397,7 @@ export default function ProjectWorkspace() {
               {project.status !== 'archived' && (
                 <Button variant="outline" className="w-full gap-2" onClick={handleArchive}>
                   <Archive className="w-4 h-4" />
-                  نقل المشروع للأرشيف
+                  {isAr ? 'نقل المشروع للأرشيف' : 'Archive Project'}
                 </Button>
               )}
             </div>
@@ -412,12 +415,12 @@ export default function ProjectWorkspace() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-bold text-sm">خريطة العلاقات</p>
-                  <p className="text-xs text-muted-foreground">{relations.length} علاقة مرتبطة بهذا المشروع</p>
+                  <p className="font-bold text-sm">{isAr ? 'خريطة العلاقات' : 'Relations Map'}</p>
+                  <p className="text-xs text-muted-foreground">{relations.length} {isAr ? 'علاقة مرتبطة بهذا المشروع' : 'relations linked to this project'}</p>
                 </div>
                 <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setRelationOpen(true)}>
                   <Network className="w-3.5 h-3.5" />
-                  إدارة العلاقات
+                  {isAr ? 'إدارة العلاقات' : 'Manage Relations'}
                 </Button>
               </div>
               <RelationGraph

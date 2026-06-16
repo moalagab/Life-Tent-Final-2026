@@ -1,15 +1,25 @@
 import React, { useRef, useEffect } from 'react';
 import { Sparkles, Send, X, AlertCircle } from 'lucide-react';
 import { useNaturalCapture } from '@/hooks/useNaturalCapture';
+import { useLanguage } from '@/hooks/useLanguage';
 import { cn } from '@/lib/utils';
 
-const PLACEHOLDERS = [
+const PLACEHOLDERS_AR = [
   'سدد إيجار المكتب يوم 5 يوليو 2500 ريال...',
   'دفعت فاتورة الكهرباء 180 ريال...',
   'اشتراك نتفليكس 65 ريال...',
   'راجع تقرير المبيعات يوم الأحد...',
   'استلمت راتب الشهر 12000 ريال...',
   'اتصل بالعميل غداً...',
+];
+
+const PLACEHOLDERS_EN = [
+  'Paid office rent July 5 — 2500 SAR...',
+  'Paid electricity bill 180 SAR...',
+  'Netflix subscription 65 SAR...',
+  'Review sales report on Sunday...',
+  'Received monthly salary 12000 SAR...',
+  'Call the client tomorrow...',
 ];
 
 function useCyclingPlaceholder(items: string[], intervalMs = 4000) {
@@ -31,6 +41,9 @@ function confidenceColor(c: number) {
 export function NaturalCapture() {
   const { text, setText, parsed, isCreating, error, submit, reset } =
     useNaturalCapture();
+  const { currentLanguage } = useLanguage();
+  const isAr = currentLanguage === 'ar';
+  const PLACEHOLDERS = isAr ? PLACEHOLDERS_AR : PLACEHOLDERS_EN;
   const inputRef     = useRef<HTMLTextAreaElement>(null);
   const placeholder  = useCyclingPlaceholder(PLACEHOLDERS);
 
@@ -58,11 +71,11 @@ export function NaturalCapture() {
       <div className="flex items-center gap-2 px-4 pt-3 pb-1">
         <Sparkles className="w-3.5 h-3.5 text-violet-500" />
         <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-widest">
-          التقاط ذكي
+          {isAr ? 'التقاط ذكي' : 'Smart Capture'}
         </span>
         {parsed && hasContent && (
           <span className={cn('mr-auto text-[10px] font-medium', confidenceColor(parsed.confidence))}>
-            {parsed.confidence}% دقة
+            {parsed.confidence}% {isAr ? 'دقة' : 'conf.'}
           </span>
         )}
       </div>
@@ -129,7 +142,9 @@ export function NaturalCapture() {
       {/* Footer action */}
       {hasContent && parsed && (
         <div className="flex items-center justify-between px-4 pb-3 pt-1">
-          <span className="text-[10px] text-muted-foreground/50">Enter للحفظ · Esc للإلغاء</span>
+          <span className="text-[10px] text-muted-foreground/50">
+            {isAr ? 'Enter للحفظ · Esc للإلغاء' : 'Enter to save · Esc to cancel'}
+          </span>
           <button
             onClick={submit}
             disabled={isCreating}
@@ -145,7 +160,7 @@ export function NaturalCapture() {
             ) : (
               <Send className="w-3 h-3" />
             )}
-            {isCreating ? 'جاري الحفظ...' : `حفظ ${parsed.typeLabel}`}
+            {isCreating ? (isAr ? 'جاري الحفظ...' : 'Saving...') : `${isAr ? 'حفظ' : 'Save'} ${parsed.typeLabel}`}
           </button>
         </div>
       )}

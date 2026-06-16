@@ -125,7 +125,7 @@ export default function Projects() {
             <div>
               <h1 className="text-lg font-bold text-foreground leading-tight">{t('projects.title')}</h1>
               <p className="text-[11px] text-muted-foreground">
-                {filteredProjects.length} {currentLanguage === 'ar' ? 'مشروع' : 'projects'}
+                {filteredProjects.length} {t('projects.tasksCount')}
               </p>
             </div>
           </div>
@@ -156,7 +156,7 @@ export default function Projects() {
             onClick={() => { setShowCRM(!showCRM); setShowDashboard(false); setShowReports(false); }}
           >
             <Users className="w-4 h-4 me-2" />
-            {currentLanguage === 'ar' ? 'CRM' : 'CRM'}
+            CRM
           </Button>
           <Button
             variant={showDashboard ? 'default' : 'outline'}
@@ -164,7 +164,7 @@ export default function Projects() {
             onClick={() => { setShowDashboard(!showDashboard); setShowReports(false); setShowCRM(false); }}
           >
             <LayoutDashboard className="w-4 h-4 me-2" />
-            <span className="hidden sm:inline">{currentLanguage === 'ar' ? 'لوحة التحكم' : 'Dashboard'}</span>
+            <span className="hidden sm:inline">{t('common.dashboard')}</span>
           </Button>
           <Button
             variant={showReports ? 'default' : 'outline'}
@@ -172,7 +172,7 @@ export default function Projects() {
             onClick={() => { setShowReports(!showReports); setShowDashboard(false); setShowCRM(false); }}
           >
             <BarChart3 className="w-4 h-4 me-2" />
-            <span className="hidden sm:inline">{currentLanguage === 'ar' ? 'التقارير' : 'Reports'}</span>
+            <span className="hidden sm:inline">{t('finance.reports')}</span>
           </Button>
           <Button variant="outline" size="default">
             <Filter className="w-4 h-4 me-2" />

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { AdminGuard } from '@/components/admin/AdminGuard';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { useAdmin } from '@/hooks/useAdmin';
+import { useLanguage } from '@/hooks/useLanguage';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,12 +33,20 @@ const PLAN_STYLES: Record<string, string> = {
   pro:      'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
   business: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300',
 };
-const PLAN_LABELS: Record<string, string> = { free: 'مجاني', pro: 'برو', business: 'أعمال' };
 
-function PlanBadge({ plan }: { plan: string }) {
+function getPlanLabel(plan: string, isAr: boolean): string {
+  const labels: Record<string, { ar: string; en: string }> = {
+    free:     { ar: 'مجاني',  en: 'Free'     },
+    pro:      { ar: 'برو',    en: 'Pro'      },
+    business: { ar: 'أعمال',  en: 'Business' },
+  };
+  return labels[plan]?.[isAr ? 'ar' : 'en'] ?? plan;
+}
+
+function PlanBadge({ plan, isAr }: { plan: string; isAr: boolean }) {
   return (
     <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium', PLAN_STYLES[plan] ?? PLAN_STYLES.free)}>
-      {PLAN_LABELS[plan] ?? plan}
+      {getPlanLabel(plan, isAr)}
     </span>
   );
 }
@@ -62,7 +71,7 @@ function StatCard({
             <Skeleton className="h-7 w-16" />
           ) : (
             <p className="text-2xl font-bold">
-              {typeof value === 'number' ? value.toLocaleString('ar-SA') : value}
+              {typeof value === 'number' ? value.toLocaleString() : value}
             </p>
           )}
         </div>
@@ -75,11 +84,13 @@ function StatCard({
 
 function UserRow({
   user,
+  isAr,
   onBan,
   onUnban,
   onChangePlan,
 }: {
   user: AdminUser;
+  isAr: boolean;
   onBan: (u: AdminUser) => void;
   onUnban: (u: AdminUser) => void;
   onChangePlan: (userId: string, plan: SubscriptionPlan) => void;
@@ -104,18 +115,18 @@ function UserRow({
       </td>
       {/* Plan */}
       <td className="p-3">
-        <PlanBadge plan={user.plan} />
+        <PlanBadge plan={user.plan} isAr={isAr} />
       </td>
       {/* Joined */}
       <td className="p-3 text-sm text-muted-foreground whitespace-nowrap">
-        {new Date(user.created_at).toLocaleDateString('ar-SA')}
+        {new Date(user.created_at).toLocaleDateString(isAr ? 'ar-SA' : 'en-GB')}
       </td>
       {/* Status */}
       <td className="p-3">
         {user.is_banned ? (
-          <span className="text-xs bg-destructive/10 text-destructive px-2 py-0.5 rounded-full">محظور</span>
+          <span className="text-xs bg-destructive/10 text-destructive px-2 py-0.5 rounded-full">{isAr ? 'محظور' : 'Banned'}</span>
         ) : (
-          <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded-full">نشط</span>
+          <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded-full">{isAr ? 'نشط' : 'Active'}</span>
         )}
       </td>
       {/* Actions */}
@@ -129,9 +140,9 @@ function UserRow({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="free">مجاني</SelectItem>
-              <SelectItem value="pro">برو</SelectItem>
-              <SelectItem value="business">أعمال</SelectItem>
+              <SelectItem value="free">{isAr ? 'مجاني' : 'Free'}</SelectItem>
+              <SelectItem value="pro">{isAr ? 'برو' : 'Pro'}</SelectItem>
+              <SelectItem value="business">{isAr ? 'أعمال' : 'Business'}</SelectItem>
             </SelectContent>
           </Select>
           {user.is_banned ? (
@@ -139,14 +150,14 @@ function UserRow({
               className="h-7 text-xs text-success border-success/40 hover:bg-success/10"
               onClick={() => onUnban(user)}
             >
-              رفع الحظر
+              {isAr ? 'رفع الحظر' : 'Unban'}
             </Button>
           ) : (
             <Button size="sm" variant="outline"
               className="h-7 text-xs text-destructive border-destructive/40 hover:bg-destructive/10"
               onClick={() => onBan(user)}
             >
-              <Ban className="w-3 h-3 me-1" /> حظر
+              <Ban className="w-3 h-3 me-1" /> {isAr ? 'حظر' : 'Ban'}
             </Button>
           )}
         </div>
@@ -159,6 +170,8 @@ function UserRow({
 
 function AdminContent() {
   const { loading, error, getStats, getUsers, banUser, unbanUser, updateSubscription } = useAdmin();
+  const { currentLanguage } = useLanguage();
+  const isAr = currentLanguage === 'ar';
 
   const [stats,     setStats]     = useState<AdminStats | null>(null);
   const [users,     setUsers]     = useState<AdminUser[]>([]);
@@ -211,26 +224,28 @@ function AdminContent() {
   };
 
   const tabs = [
-    { id: 'overview' as const, label: 'نظرة عامة',  icon: BarChart3 },
-    { id: 'users'    as const, label: 'المستخدمون', icon: Users },
+    { id: 'overview' as const, label: isAr ? 'نظرة عامة'  : 'Overview', icon: BarChart3 },
+    { id: 'users'    as const, label: isAr ? 'المستخدمون' : 'Users',    icon: Users },
   ];
 
   const totalPages = Math.ceil(total / PAGE_SIZE) || 1;
 
   return (
-    <div dir="rtl">
+    <div dir={isAr ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="border-b bg-card px-6 py-4 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-primary" />
-            لوحة تحكم الادمن
+            {isAr ? 'لوحة تحكم الادمن' : 'Admin Dashboard'}
           </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Life Tent OS — إدارة المستخدمين والاشتراكات</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Life Tent OS — {isAr ? 'إدارة المستخدمين والاشتراكات' : 'User & Subscription Management'}
+          </p>
         </div>
         <Button variant="ghost" size="sm" onClick={() => { loadStats(); loadUsers(); }} disabled={loading}>
           <RefreshCw className={cn('w-4 h-4 me-2', loading && 'animate-spin')} />
-          تحديث
+          {isAr ? 'تحديث' : 'Refresh'}
         </Button>
       </div>
 
@@ -266,14 +281,14 @@ function AdminContent() {
         {/* ── Overview Tab ───────────────────────────────────────────────────── */}
         {activeTab === 'overview' && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard icon={Users}       label="إجمالي المستخدمين"  value={stats?.total_users}          iconClass="text-blue-600 dark:text-blue-400" />
-            <StatCard icon={UserCheck}   label="نشطون اليوم"         value={stats?.active_today}         iconClass="text-green-600 dark:text-green-400" />
-            <StatCard icon={Crown}       label="مشتركو برو"          value={stats?.pro_subscribers}      iconClass="text-primary" />
-            <StatCard icon={Briefcase}   label="مشتركو أعمال"        value={stats?.business_subscribers} iconClass="text-violet-600 dark:text-violet-400" />
-            <StatCard icon={CalendarDays}label="جدد هذا الشهر"       value={stats?.new_this_month}       iconClass="text-cyan-600 dark:text-cyan-400" />
-            <StatCard icon={TrendingUp}  label="نشطون هذا الأسبوع"  value={stats?.active_this_week}     iconClass="text-orange-600 dark:text-orange-400" />
-            <StatCard icon={Ban}         label="محظورون"              value={stats?.banned_users}         iconClass="text-destructive" />
-            <StatCard icon={BarChart3}   label="إجمالي الاشتراكات"   value={stats?.total_subscriptions}  iconClass="text-indigo-600 dark:text-indigo-400" />
+            <StatCard icon={Users}       label={isAr ? 'إجمالي المستخدمين' : 'Total Users'}        value={stats?.total_users}          iconClass="text-blue-600 dark:text-blue-400" />
+            <StatCard icon={UserCheck}   label={isAr ? 'نشطون اليوم'        : 'Active Today'}        value={stats?.active_today}         iconClass="text-green-600 dark:text-green-400" />
+            <StatCard icon={Crown}       label={isAr ? 'مشتركو برو'          : 'Pro Subscribers'}    value={stats?.pro_subscribers}      iconClass="text-primary" />
+            <StatCard icon={Briefcase}   label={isAr ? 'مشتركو أعمال'       : 'Business Subscribers'} value={stats?.business_subscribers} iconClass="text-violet-600 dark:text-violet-400" />
+            <StatCard icon={CalendarDays}label={isAr ? 'جدد هذا الشهر'      : 'New This Month'}     value={stats?.new_this_month}       iconClass="text-cyan-600 dark:text-cyan-400" />
+            <StatCard icon={TrendingUp}  label={isAr ? 'نشطون هذا الأسبوع' : 'Active This Week'}   value={stats?.active_this_week}     iconClass="text-orange-600 dark:text-orange-400" />
+            <StatCard icon={Ban}         label={isAr ? 'محظورون'             : 'Banned'}             value={stats?.banned_users}         iconClass="text-destructive" />
+            <StatCard icon={BarChart3}   label={isAr ? 'إجمالي الاشتراكات'  : 'Total Subscriptions'} value={stats?.total_subscriptions}  iconClass="text-indigo-600 dark:text-indigo-400" />
           </div>
         )}
 
@@ -285,7 +300,7 @@ function AdminContent() {
               <div className="relative flex-1 min-w-48">
                 <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                 <Input
-                  placeholder="ابحث بالاسم أو البريد..."
+                  placeholder={isAr ? 'ابحث بالاسم أو البريد...' : 'Search by name or email...'}
                   value={search}
                   onChange={e => { setSearch(e.target.value); setPage(0); }}
                   className="ps-9"
@@ -296,11 +311,11 @@ function AdminContent() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">الكل</SelectItem>
-                  <SelectItem value="free">مجاني</SelectItem>
-                  <SelectItem value="pro">برو</SelectItem>
-                  <SelectItem value="business">أعمال</SelectItem>
-                  <SelectItem value="banned">محظورون</SelectItem>
+                  <SelectItem value="all">{isAr ? 'الكل' : 'All'}</SelectItem>
+                  <SelectItem value="free">{isAr ? 'مجاني' : 'Free'}</SelectItem>
+                  <SelectItem value="pro">{isAr ? 'برو' : 'Pro'}</SelectItem>
+                  <SelectItem value="business">{isAr ? 'أعمال' : 'Business'}</SelectItem>
+                  <SelectItem value="banned">{isAr ? 'محظورون' : 'Banned'}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -311,11 +326,11 @@ function AdminContent() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b bg-muted/30 text-sm">
-                      <th className="p-3 text-start font-medium text-muted-foreground">المستخدم</th>
-                      <th className="p-3 text-start font-medium text-muted-foreground">الخطة</th>
-                      <th className="p-3 text-start font-medium text-muted-foreground">التسجيل</th>
-                      <th className="p-3 text-start font-medium text-muted-foreground">الحالة</th>
-                      <th className="p-3 text-start font-medium text-muted-foreground">إجراءات</th>
+                      <th className="p-3 text-start font-medium text-muted-foreground">{isAr ? 'المستخدم' : 'User'}</th>
+                      <th className="p-3 text-start font-medium text-muted-foreground">{isAr ? 'الخطة' : 'Plan'}</th>
+                      <th className="p-3 text-start font-medium text-muted-foreground">{isAr ? 'التسجيل' : 'Joined'}</th>
+                      <th className="p-3 text-start font-medium text-muted-foreground">{isAr ? 'الحالة' : 'Status'}</th>
+                      <th className="p-3 text-start font-medium text-muted-foreground">{isAr ? 'إجراءات' : 'Actions'}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -332,7 +347,7 @@ function AdminContent() {
                     ) : users.length === 0 ? (
                       <tr>
                         <td colSpan={5} className="p-12 text-center text-muted-foreground">
-                          لا يوجد مستخدمون
+                          {isAr ? 'لا يوجد مستخدمون' : 'No users found'}
                         </td>
                       </tr>
                     ) : (
@@ -340,6 +355,7 @@ function AdminContent() {
                         <UserRow
                           key={user.id}
                           user={user}
+                          isAr={isAr}
                           onBan={setBanTarget}
                           onUnban={handleUnban}
                           onChangePlan={handleChangePlan}
@@ -354,7 +370,7 @@ function AdminContent() {
             {/* Pagination */}
             <div className="flex items-center justify-between text-sm text-muted-foreground">
               <span>
-                إجمالي: <strong className="text-foreground">{total.toLocaleString('ar-SA')}</strong> مستخدم
+                {isAr ? 'إجمالي:' : 'Total:'} <strong className="text-foreground">{total.toLocaleString()}</strong> {isAr ? 'مستخدم' : 'users'}
               </span>
               <div className="flex items-center gap-1">
                 <Button
@@ -382,29 +398,32 @@ function AdminContent() {
 
       {/* Ban Confirm Dialog */}
       <AlertDialog open={!!banTarget} onOpenChange={open => { if (!open) { setBanTarget(null); setBanReason(''); } }}>
-        <AlertDialogContent dir="rtl">
+        <AlertDialogContent dir={isAr ? 'rtl' : 'ltr'}>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-destructive">
-              <Ban className="w-5 h-5" /> تأكيد حظر المستخدم
+              <Ban className="w-5 h-5" /> {isAr ? 'تأكيد حظر المستخدم' : 'Confirm Ban User'}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              سيتم حظر <strong>{banTarget?.full_name ?? banTarget?.email}</strong>. أدخل سبب الحظر:
+              {isAr
+                ? <>سيتم حظر <strong>{banTarget?.full_name ?? banTarget?.email}</strong>. أدخل سبب الحظر:</>
+                : <>You are about to ban <strong>{banTarget?.full_name ?? banTarget?.email}</strong>. Enter a reason:</>
+              }
             </AlertDialogDescription>
           </AlertDialogHeader>
           <Input
-            placeholder="سبب الحظر..."
+            placeholder={isAr ? 'سبب الحظر...' : 'Ban reason...'}
             value={banReason}
             onChange={e => setBanReason(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleBanConfirm()}
           />
           <AlertDialogFooter className="flex-row-reverse gap-2">
-            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel>{isAr ? 'إلغاء' : 'Cancel'}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleBanConfirm}
               disabled={!banReason.trim() || loading}
               className="bg-destructive hover:bg-destructive/90"
             >
-              {loading ? 'جارٍ الحظر...' : 'تأكيد الحظر'}
+              {loading ? (isAr ? 'جارٍ الحظر...' : 'Banning...') : (isAr ? 'تأكيد الحظر' : 'Confirm Ban')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

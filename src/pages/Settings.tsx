@@ -14,7 +14,8 @@ import { AISettings } from '@/components/settings/AISettings';
 type SectionId = 'profile' | 'notifications' | 'language' | 'appearance' | 'privacy' | 'data' | 'ai';
 
 export default function Settings() {
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
+  const isAr = currentLanguage === 'ar';
   const [expandedSection, setExpandedSection] = useState<SectionId | null>('profile');
 
   const settingsSections: { id: SectionId; label: string; icon: typeof User; description: string; hue: string }[] = [
@@ -62,9 +63,9 @@ export default function Settings() {
     },
     {
       id: 'ai',
-      label: 'الذكاء الاصطناعي',
+      label: isAr ? 'الذكاء الاصطناعي' : 'AI Engine',
       icon: Brain,
-      description: 'محرك القرار الذكي، الكاش، وإعدادات التحليل',
+      description: isAr ? 'محرك القرار الذكي، الكاش، وإعدادات التحليل' : 'Decision engine, cache & analysis settings',
       hue: 'var(--lt-hue-proj)'
     },
   ];

@@ -26,15 +26,9 @@ import {
   Network, Flame, Calendar, TrendingUp, Activity, RotateCcw,
   Loader2, User, Users, Cog, GraduationCap, StickyNote,
 } from 'lucide-react';
+import { useLanguage } from '@/hooks/useLanguage';
 
 type Tab = 'overview' | 'keyresults' | 'notes' | 'connections';
-
-const TABS = [
-  { id: 'overview' as Tab,     labelAr: 'نظرة عامة',       icon: Activity },
-  { id: 'keyresults' as Tab,   labelAr: 'النتائج الرئيسية', icon: TrendingUp },
-  { id: 'notes' as Tab,        labelAr: 'ملاحظات',          icon: StickyNote },
-  { id: 'connections' as Tab,  labelAr: 'خريطة العلاقات',  icon: Network },
-];
 
 const PERSPECTIVE_CONFIG: Record<string, { label: string; color: string; icon: typeof User }> = {
   personal:  { label: 'شخصي',   color: 'text-primary',     icon: User },
@@ -47,6 +41,15 @@ const PERSPECTIVE_CONFIG: Record<string, { label: string; color: string; icon: t
 export default function GoalWorkspace() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { currentLanguage } = useLanguage();
+  const isAr = currentLanguage === 'ar';
+
+  const TABS = [
+    { id: 'overview'    as Tab, label: isAr ? 'نظرة عامة'       : 'Overview',      icon: Activity  },
+    { id: 'keyresults'  as Tab, label: isAr ? 'النتائج الرئيسية' : 'Key Results',   icon: TrendingUp },
+    { id: 'notes'       as Tab, label: isAr ? 'ملاحظات'          : 'Notes',         icon: StickyNote },
+    { id: 'connections' as Tab, label: isAr ? 'خريطة العلاقات'   : 'Relations',     icon: Network   },
+  ];
 
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -94,8 +97,8 @@ export default function GoalWorkspace() {
       <MainLayout>
         <div className="flex flex-col items-center justify-center h-64 gap-3">
           <Target className="w-12 h-12 text-muted-foreground/30" />
-          <p className="text-muted-foreground">الهدف غير موجود</p>
-          <Button variant="outline" onClick={() => navigate('/goals')}>العودة للأهداف</Button>
+          <p className="text-muted-foreground">{isAr ? 'الهدف غير موجود' : 'Goal not found'}</p>
+          <Button variant="outline" onClick={() => navigate('/goals')}>{isAr ? 'العودة للأهداف' : 'Back to Goals'}</Button>
         </div>
       </MainLayout>
     );
@@ -107,16 +110,16 @@ export default function GoalWorkspace() {
 
   const handleSaveTitle = async () => {
     if (!editTitle.trim()) return;
-    try { await updateGoal.mutateAsync({ id: goal.id, title: editTitle.trim() }); setIsEditingTitle(false); toast.success('تم التحديث'); }
-    catch { toast.error('حدث خطأ'); }
+    try { await updateGoal.mutateAsync({ id: goal.id, title: editTitle.trim() }); setIsEditingTitle(false); toast.success(isAr ? 'تم التحديث' : 'Updated'); }
+    catch { toast.error(isAr ? 'حدث خطأ' : 'Error occurred'); }
   };
   const handleSaveDesc = async () => {
-    try { await updateGoal.mutateAsync({ id: goal.id, description: editDesc }); setIsEditingDesc(false); toast.success('تم التحديث'); }
-    catch { toast.error('حدث خطأ'); }
+    try { await updateGoal.mutateAsync({ id: goal.id, description: editDesc }); setIsEditingDesc(false); toast.success(isAr ? 'تم التحديث' : 'Updated'); }
+    catch { toast.error(isAr ? 'حدث خطأ' : 'Error occurred'); }
   };
   const handleArchive = async () => {
-    try { await archiveGoal.mutateAsync(goal.id); toast.success('تم أرشفة الهدف'); navigate('/goals'); }
-    catch { toast.error('حدث خطأ'); }
+    try { await archiveGoal.mutateAsync(goal.id); toast.success(isAr ? 'تم أرشفة الهدف' : 'Goal archived'); navigate('/goals'); }
+    catch { toast.error(isAr ? 'حدث خطأ' : 'Error occurred'); }
   };
   const handleUpdateKr = async (krId: string, newValue: number) => {
     try { await updateKr.mutateAsync({ id: krId, current_value: newValue }); }
@@ -127,8 +130,8 @@ export default function GoalWorkspace() {
     try {
       await createKr.mutateAsync({ goal_id: goal.id, title: newKrTitle.trim(), target_value: parseFloat(newKrTarget), unit: newKrUnit || null });
       setNewKrTitle(''); setNewKrTarget(''); setNewKrUnit(''); setAddingKr(false);
-      toast.success('تم إضافة النتيجة');
-    } catch { toast.error('حدث خطأ'); }
+      toast.success(isAr ? 'تم إضافة النتيجة' : 'Key result added');
+    } catch { toast.error(isAr ? 'حدث خطأ' : 'Error occurred'); }
   };
   const handleDeleteKr = async (krId: string) => {
     try { await deleteKr.mutateAsync(krId); }
@@ -141,7 +144,7 @@ export default function GoalWorkspace() {
 
         {/* Back + breadcrumb */}
         <div className="flex items-center gap-3">
-          <BackButton to="/goals" label="الأهداف" />
+          <BackButton to="/goals" label={isAr ? 'الأهداف' : 'Goals'} />
           <span className="text-muted-foreground/40 text-sm">/</span>
           <span className="text-sm font-medium text-foreground truncate max-w-[220px]">{goal.title}</span>
         </div>
@@ -184,13 +187,13 @@ export default function GoalWorkspace() {
                   <div className="mt-2 space-y-2">
                     <Textarea value={editDesc} onChange={e => setEditDesc(e.target.value)} rows={2} className="text-sm bg-muted/50 resize-none" dir="auto" autoFocus />
                     <div className="flex gap-2">
-                      <Button size="sm" onClick={handleSaveDesc}>حفظ</Button>
-                      <Button size="sm" variant="outline" onClick={() => setIsEditingDesc(false)}>إلغاء</Button>
+                      <Button size="sm" onClick={handleSaveDesc}>{isAr ? 'حفظ' : 'Save'}</Button>
+                      <Button size="sm" variant="outline" onClick={() => setIsEditingDesc(false)}>{isAr ? 'إلغاء' : 'Cancel'}</Button>
                     </div>
                   </div>
                 ) : (
                   <button onClick={() => { setEditDesc(goal.description ?? ''); setIsEditingDesc(true); }} className="group flex items-start gap-1.5 mt-1.5 text-start w-full">
-                    <p className="text-sm text-muted-foreground line-clamp-2">{goal.description || 'أضف وصفاً للهدف...'}</p>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{goal.description || (isAr ? 'أضف وصفاً للهدف...' : 'Add a goal description...')}</p>
                     <Pencil className="w-3 h-3 mt-0.5 text-muted-foreground/0 group-hover:text-muted-foreground/60 shrink-0 transition-opacity" />
                   </button>
                 )}
@@ -200,12 +203,12 @@ export default function GoalWorkspace() {
               {goal.is_active ? (
                 <Button variant="outline" size="sm" onClick={handleArchive} className="gap-1.5">
                   <Archive className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">أرشفة</span>
+                  <span className="hidden sm:inline">{isAr ? 'أرشفة' : 'Archive'}</span>
                 </Button>
               ) : (
-                <Button variant="outline" size="sm" onClick={() => updateGoal.mutateAsync({ id: goal.id, is_active: true }).then(() => toast.success('تم الاستعادة'))} className="gap-1.5">
+                <Button variant="outline" size="sm" onClick={() => updateGoal.mutateAsync({ id: goal.id, is_active: true }).then(() => toast.success(isAr ? 'تم الاستعادة' : 'Restored'))} className="gap-1.5">
                   <RotateCcw className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">استعادة</span>
+                  <span className="hidden sm:inline">{isAr ? 'استعادة' : 'Restore'}</span>
                 </Button>
               )}
             </div>
@@ -214,7 +217,7 @@ export default function GoalWorkspace() {
           {/* Progress */}
           <div className="relative mt-5 space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">التقدم الكلي</span>
+              <span className="text-muted-foreground">{isAr ? 'التقدم الكلي' : 'Overall Progress'}</span>
               <span className={cn('font-bold', progress >= 80 ? 'text-success' : progress >= 50 ? 'text-primary' : 'text-destructive')}>
                 {progress}%
               </span>
@@ -224,8 +227,8 @@ export default function GoalWorkspace() {
             </div>
             {goal.target_value && (
               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>الحالي: {goal.current_value ?? 0} {goal.unit ?? ''}</span>
-                <span>الهدف: {goal.target_value} {goal.unit ?? ''}</span>
+                <span>{isAr ? 'الحالي:' : 'Current:'} {goal.current_value ?? 0} {goal.unit ?? ''}</span>
+                <span>{isAr ? 'الهدف:' : 'Target:'} {goal.target_value} {goal.unit ?? ''}</span>
               </div>
             )}
           </div>
@@ -233,14 +236,14 @@ export default function GoalWorkspace() {
 
         {/* Tabs */}
         <div className="grid grid-cols-3 gap-2">
-          {TABS.map(({ id: tabId, labelAr, icon: Icon }) => {
+          {TABS.map(({ id: tabId, label, icon: Icon }) => {
             const active = activeTab === tabId;
             return (
               <button key={tabId} onClick={() => setActiveTab(tabId)}
                 className={cn('flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl border transition-all active:scale-95',
                   active ? 'bg-card/80 border-border/50 shadow-sm' : 'border-transparent bg-muted/30 hover:bg-muted/50')}>
                 <Icon className={cn('w-5 h-5', active ? 'text-primary' : 'text-muted-foreground')} strokeWidth={active ? 2 : 1.75} />
-                <span className={cn('text-xs font-semibold', active ? 'text-foreground' : 'text-foreground/60')}>{labelAr}</span>
+                <span className={cn('text-xs font-semibold', active ? 'text-foreground' : 'text-foreground/60')}>{label}</span>
               </button>
             );
           })}
@@ -255,9 +258,9 @@ export default function GoalWorkspace() {
               {/* Stats grid */}
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { label: 'التقدم', value: `${progress}%`, color: progress >= 80 ? 'text-success' : 'text-primary' },
-                  { label: 'النتائج', value: krs.length, color: 'text-blue-500' },
-                  { label: 'نتائج مكتملة', value: krs.filter(k => (k.current_value ?? 0) >= k.target_value).length, color: 'text-success' },
+                  { label: isAr ? 'التقدم' : 'Progress', value: `${progress}%`, color: progress >= 80 ? 'text-success' : 'text-primary' },
+                  { label: isAr ? 'النتائج' : 'Key Results', value: krs.length, color: 'text-blue-500' },
+                  { label: isAr ? 'نتائج مكتملة' : 'Completed', value: krs.filter(k => (k.current_value ?? 0) >= k.target_value).length, color: 'text-success' },
                 ].map(s => (
                   <div key={s.label} className="glass-card p-4 text-center">
                     <p className={cn('text-2xl font-bold', s.color)}>{s.value}</p>
@@ -270,8 +273,8 @@ export default function GoalWorkspace() {
               {krs.length > 0 && (
                 <div className="glass-card p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-sm">النتائج الرئيسية</h3>
-                    <button onClick={() => setActiveTab('keyresults')} className="text-xs text-primary hover:underline">الكل</button>
+                    <h3 className="font-semibold text-sm">{isAr ? 'النتائج الرئيسية' : 'Key Results'}</h3>
+                    <button onClick={() => setActiveTab('keyresults')} className="text-xs text-primary hover:underline">{isAr ? 'الكل' : 'All'}</button>
                   </div>
                   {krs.slice(0, 3).map(kr => {
                     const pct = Math.min(100, Math.round(((kr.current_value ?? 0) / (kr.target_value || 1)) * 100));
@@ -291,19 +294,19 @@ export default function GoalWorkspace() {
               {/* Connections preview */}
               {((goal as { projects?: { title: string } | null }).projects || linkedHabit) && (
                 <div className="glass-card p-4 space-y-2">
-                  <h3 className="font-semibold text-sm">الارتباطات</h3>
+                  <h3 className="font-semibold text-sm">{isAr ? 'الارتباطات' : 'Connections'}</h3>
                   {(goal as { projects?: { title: string; color?: string | null } | null }).projects && (
                     <div className="flex items-center gap-2.5 p-2 rounded-xl bg-muted/30">
                       <FolderKanban className="w-4 h-4 text-primary shrink-0" />
                       <span className="text-sm">{(goal as { projects?: { title: string } | null }).projects?.title}</span>
-                      <Badge variant="outline" className="text-xs ms-auto">مشروع</Badge>
+                      <Badge variant="outline" className="text-xs ms-auto">{isAr ? 'مشروع' : 'Project'}</Badge>
                     </div>
                   )}
                   {linkedHabit && (
                     <div className="flex items-center gap-2.5 p-2 rounded-xl bg-muted/30">
                       <Flame className="w-4 h-4 text-warning shrink-0" />
                       <span className="text-sm">{linkedHabit.name}</span>
-                      <Badge variant="outline" className="text-xs ms-auto">عادة</Badge>
+                      <Badge variant="outline" className="text-xs ms-auto">{isAr ? 'عادة' : 'Habit'}</Badge>
                     </div>
                   )}
                 </div>
@@ -315,23 +318,23 @@ export default function GoalWorkspace() {
           {activeTab === 'keyresults' && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">{krs.length} نتيجة رئيسية</p>
+                <p className="text-sm text-muted-foreground">{krs.length} {isAr ? 'نتيجة رئيسية' : 'key results'}</p>
                 <Button variant="gold" size="sm" onClick={() => setAddingKr(true)} className="gap-1.5">
-                  <Plus className="w-3.5 h-3.5" /> إضافة نتيجة
+                  <Plus className="w-3.5 h-3.5" /> {isAr ? 'إضافة نتيجة' : 'Add Result'}
                 </Button>
               </div>
 
               {addingKr && (
                 <div className="glass-card p-4 space-y-3">
-                  <h3 className="font-semibold text-sm">نتيجة رئيسية جديدة</h3>
-                  <Input placeholder="عنوان النتيجة..." value={newKrTitle} onChange={e => setNewKrTitle(e.target.value)} dir="auto" />
+                  <h3 className="font-semibold text-sm">{isAr ? 'نتيجة رئيسية جديدة' : 'New Key Result'}</h3>
+                  <Input placeholder={isAr ? 'عنوان النتيجة...' : 'Result title...'} value={newKrTitle} onChange={e => setNewKrTitle(e.target.value)} dir="auto" />
                   <div className="flex gap-2">
-                    <Input placeholder="القيمة المستهدفة" type="number" value={newKrTarget} onChange={e => setNewKrTarget(e.target.value)} className="flex-1" />
-                    <Input placeholder="الوحدة (اختياري)" value={newKrUnit} onChange={e => setNewKrUnit(e.target.value)} className="flex-1" dir="auto" />
+                    <Input placeholder={isAr ? 'القيمة المستهدفة' : 'Target value'} type="number" value={newKrTarget} onChange={e => setNewKrTarget(e.target.value)} className="flex-1" />
+                    <Input placeholder={isAr ? 'الوحدة (اختياري)' : 'Unit (optional)'} value={newKrUnit} onChange={e => setNewKrUnit(e.target.value)} className="flex-1" dir="auto" />
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={handleAddKr} disabled={createKr.isPending}>حفظ</Button>
-                    <Button size="sm" variant="outline" onClick={() => setAddingKr(false)}>إلغاء</Button>
+                    <Button size="sm" onClick={handleAddKr} disabled={createKr.isPending}>{isAr ? 'حفظ' : 'Save'}</Button>
+                    <Button size="sm" variant="outline" onClick={() => setAddingKr(false)}>{isAr ? 'إلغاء' : 'Cancel'}</Button>
                   </div>
                 </div>
               )}
@@ -365,7 +368,7 @@ export default function GoalWorkspace() {
                         onBlur={e => { const v = parseFloat(e.target.value); if (!isNaN(v) && v !== (kr.current_value ?? 0)) handleUpdateKr(kr.id, v); }}
                         onKeyDown={e => { if (e.key === 'Enter') { const v = parseFloat((e.target as HTMLInputElement).value); if (!isNaN(v)) handleUpdateKr(kr.id, v); } }}
                       />
-                      <span className="text-xs text-muted-foreground shrink-0">من {kr.target_value} {kr.unit ?? ''}</span>
+                      <span className="text-xs text-muted-foreground shrink-0">{isAr ? 'من' : 'of'} {kr.target_value} {kr.unit ?? ''}</span>
                     </div>
                   </div>
                 );
@@ -373,8 +376,8 @@ export default function GoalWorkspace() {
               {krs.length === 0 && !addingKr && (
                 <div className="text-center py-16 text-muted-foreground">
                   <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                  <p className="font-medium">لا توجد نتائج رئيسية</p>
-                  <p className="text-xs mt-1">أضف نتائج قابلة للقياس لتتبع تقدمك</p>
+                  <p className="font-medium">{isAr ? 'لا توجد نتائج رئيسية' : 'No key results'}</p>
+                  <p className="text-xs mt-1">{isAr ? 'أضف نتائج قابلة للقياس لتتبع تقدمك' : 'Add measurable results to track your progress'}</p>
                 </div>
               )}
             </div>
@@ -395,12 +398,12 @@ export default function GoalWorkspace() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-bold text-sm">خريطة العلاقات</p>
-                  <p className="text-xs text-muted-foreground">{relations.length} علاقة مرتبطة بهذا الهدف</p>
+                  <p className="font-bold text-sm">{isAr ? 'خريطة العلاقات' : 'Relations Map'}</p>
+                  <p className="text-xs text-muted-foreground">{relations.length} {isAr ? 'علاقة مرتبطة بهذا الهدف' : 'relations linked to this goal'}</p>
                 </div>
                 <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setRelationOpen(true)}>
                   <Network className="w-3.5 h-3.5" />
-                  إدارة العلاقات
+                  {isAr ? 'إدارة العلاقات' : 'Manage Relations'}
                 </Button>
               </div>
 
@@ -416,7 +419,7 @@ export default function GoalWorkspace() {
               {/* Legacy static links (quick nav) */}
               {(goal as { projects?: { id: string; title: string; color?: string | null } | null }).projects && (
                 <div className="glass-card p-3">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase mb-2">مشروع مرتبط (قاعدة البيانات)</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase mb-2">{isAr ? 'مشروع مرتبط (قاعدة البيانات)' : 'Linked Project (DB)'}</p>
                   <button onClick={() => navigate(`/projects/${goal.project_id}`)} className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors text-start">
                     <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${(goal as { projects?: { color?: string | null } | null }).projects?.color || '#2563EB'}20` }}>
                       <Network className="w-3.5 h-3.5" style={{ color: (goal as { projects?: { color?: string | null } | null }).projects?.color || '#2563EB' }} />

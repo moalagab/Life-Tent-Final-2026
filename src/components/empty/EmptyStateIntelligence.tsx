@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, Circle, ArrowLeft, Sparkles } from 'lucide-react';
 import { useEmptyStateIntelligence, type SetupStep } from '@/hooks/useEmptyStateIntelligence';
+import { useLanguage } from '@/hooks/useLanguage';
 import { cn } from '@/lib/utils';
 
 // ── Color map (tailwind classes) ──────────────────────────────────────────────
@@ -44,10 +45,12 @@ function StepRow({
   step,
   isNext,
   onNavigate,
+  isAr,
 }: {
   step:       SetupStep;
   isNext:     boolean;
   onNavigate: (route: string) => void;
+  isAr:       boolean;
 }) {
   const colors = COLOR_MAP[step.color] ?? COLOR_MAP.blue;
 
@@ -73,10 +76,12 @@ function StepRow({
       {/* Text */}
       <div className="flex-1 min-w-0">
         <p className={cn('text-[12px] font-bold leading-tight', step.done ? 'text-muted-foreground/50 line-through' : 'text-foreground')}>
-          {step.title}
+          {isAr ? step.title : step.titleEn}
         </p>
         {isNext && !step.done && (
-          <p className="text-[10px] text-muted-foreground leading-snug mt-0.5">{step.description}</p>
+          <p className="text-[10px] text-muted-foreground leading-snug mt-0.5">
+            {isAr ? step.description : step.descriptionEn}
+          </p>
         )}
       </div>
 
@@ -90,7 +95,7 @@ function StepRow({
             colors.btn,
           )}
         >
-          {step.cta}
+          {isAr ? step.cta : step.ctaEn}
           <ArrowLeft className="w-3 h-3" />
         </button>
       )}
@@ -102,6 +107,8 @@ function StepRow({
 
 export function EmptyStateIntelligence() {
   const navigate = useNavigate();
+  const { currentLanguage } = useLanguage();
+  const isAr = currentLanguage === 'ar';
   const {
     isNewUser, emptyLayers, allSteps, nextStep, doneCount, totalSteps, isLoading,
   } = useEmptyStateIntelligence();
@@ -125,12 +132,14 @@ export function EmptyStateIntelligence() {
         </div>
         <div className="flex-1">
           <p className="text-[13px] font-black text-foreground leading-tight">
-            {isNewUser ? 'مرحباً — لم تبدأ بعد' : 'النظام يحتاج اكتمالاً'}
+            {isNewUser
+              ? (isAr ? 'مرحباً — لم تبدأ بعد' : 'Welcome — Not started yet')
+              : (isAr ? 'النظام يحتاج اكتمالاً' : 'System needs completion')}
           </p>
           <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">
             {isNewUser
-              ? 'اتبع الخطوات التالية لتفعيل النظام كاملاً'
-              : `${doneCount} من ${totalSteps} طبقات مفعّلة`}
+              ? (isAr ? 'اتبع الخطوات التالية لتفعيل النظام كاملاً' : 'Follow these steps to fully activate the system')
+              : (isAr ? `${doneCount} من ${totalSteps} طبقات مفعّلة` : `${doneCount} of ${totalSteps} layers activated`)}
           </p>
         </div>
         {/* Progress ring */}
@@ -162,6 +171,7 @@ export function EmptyStateIntelligence() {
             step={step}
             isNext={nextStep?.id === step.id}
             onNavigate={navigate}
+            isAr={isAr}
           />
         ))}
       </div>
@@ -170,7 +180,7 @@ export function EmptyStateIntelligence() {
       {!isNewUser && emptyLayers.length <= 2 && (
         <div className="px-4 pb-3">
           <p className="text-[10px] text-muted-foreground/50 text-center" dir="rtl">
-            النظام يعمل بكامل طاقته عندما تكتمل جميع الطبقات
+            {isAr ? 'النظام يعمل بكامل طاقته عندما تكتمل جميع الطبقات' : 'The system runs at full capacity when all layers are complete'}
           </p>
         </div>
       )}

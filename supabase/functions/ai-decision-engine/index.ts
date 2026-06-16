@@ -150,6 +150,7 @@ interface RequestBody {
   finance?: FinanceSummary;
   doneToday?: number;
   isWeekSummary?: boolean;
+  language?: string;
 }
 
 interface AIAction {
@@ -170,68 +171,162 @@ interface DailyTopTask {
 // ── Prompt builder ────────────────────────────────────────────────────────────
 
 function buildPrompt(body: RequestBody): string {
-  const { profile, tasks, trends, mode, userName, habits, goals, finance, doneToday = 0, isWeekSummary = false } = body;
-  const name     = userName ?? "المستخدم";
+  const { profile, tasks, trends, mode, userName, habits, goals, finance, doneToday = 0, isWeekSummary = false, language = "ar" } = body;
+  const isEn = language === "en";
+  const name = userName ?? (isEn ? "User" : "المستخدم");
   const topTasks = tasks.slice(0, 7);
 
-  const focusWindow =
-    trends.preferredFocusWindow === "morning"   ? "الصباح"
-    : trends.preferredFocusWindow === "afternoon" ? "بعد الظهر"
-    : trends.preferredFocusWindow === "evening"   ? "المساء"
-    : "غير محدد";
+  const focusWindow = isEn
+    ? (trends.preferredFocusWindow === "morning" ? "Morning" : trends.preferredFocusWindow === "afternoon" ? "Afternoon" : trends.preferredFocusWindow === "evening" ? "Evening" : "Unknown")
+    : (trends.preferredFocusWindow === "morning" ? "الصباح" : trends.preferredFocusWindow === "afternoon" ? "بعد الظهر" : trends.preferredFocusWindow === "evening" ? "المساء" : "غير محدد");
 
-  const trendLabel =
-    trends.weeklyCompletionTrend === "improving" ? "تحسّن 📈"
-    : trends.weeklyCompletionTrend === "declining" ? "تراجع 📉"
-    : "مستقر ➡️";
+  const trendLabel = isEn
+    ? (trends.weeklyCompletionTrend === "improving" ? "Improving 📈" : trends.weeklyCompletionTrend === "declining" ? "Declining 📉" : "Stable ➡️")
+    : (trends.weeklyCompletionTrend === "improving" ? "تحسّن 📈" : trends.weeklyCompletionTrend === "declining" ? "تراجع 📉" : "مستقر ➡️");
 
   const modeInstruction = (() => {
     if (isWeekSummary) {
-      return "هذا الأحد — قدّم مراجعة استراتيجية أسبوعية شاملة. ماذا أنجز؟ ما الذي لم ينجز؟ ما أهم تعديل للأسبوع القادم؟";
+      return isEn
+        ? "It's Sunday — deliver a comprehensive strategic weekly review. What was accomplished? What wasn't? What is the single most important adjustment for next week?"
+        : "هذا الأحد — قدّم مراجعة استراتيجية أسبوعية شاملة. ماذا أنجز؟ ما الذي لم ينجز؟ ما أهم تعديل للأسبوع القادم؟";
     }
     switch (mode) {
       case "morning":
-        return "ركّز على خطة اليوم، التحفيز على البداية القوية، وتوزيع الطاقة الصباحية على المهام الأهم.";
+        return isEn
+          ? "Focus on the day plan, motivating a strong start, and distributing morning energy across the most important tasks."
+          : "ركّز على خطة اليوم، التحفيز على البداية القوية، وتوزيع الطاقة الصباحية على المهام الأهم.";
       case "midday":
-        return "قيّم ما تم إنجازه حتى الآن، أعد تحديد الأولويات للنصف المتبقي، وتحقق من الطاقة الحالية.";
+        return isEn
+          ? "Assess what has been accomplished so far, re-prioritize for the remaining half of the day, and check current energy levels."
+          : "قيّم ما تم إنجازه حتى الآن، أعد تحديد الأولويات للنصف المتبقي، وتحقق من الطاقة الحالية.";
       case "evening":
-        return "قدّم مراجعة نهاية اليوم: ما الذي أنجزه المستخدم، ما الذي لم ينجز، وكيف يستعد لغد أفضل. نبرة تأملية وهادئة.";
+        return isEn
+          ? "Provide an end-of-day review: what the user accomplished, what wasn't done, and how to prepare for a better tomorrow. Reflective and calm tone."
+          : "قدّم مراجعة نهاية اليوم: ما الذي أنجزه المستخدم، ما الذي لم ينجز، وكيف يستعد لغد أفضل. نبرة تأملية وهادئة.";
       default:
-        return "قدّم تحليلاً شاملاً لأنماط الأداء وفرص التحسين الاستراتيجية على المدى البعيد.";
+        return isEn
+          ? "Provide a comprehensive analysis of performance patterns and strategic improvement opportunities for the long term."
+          : "قدّم تحليلاً شاملاً لأنماط الأداء وفرص التحسين الاستراتيجية على المدى البعيد.";
     }
   })();
 
-  const habitsSection = habits
-    ? `- العادات النشطة: ${habits.totalActive} | مكتملة اليوم: ${habits.todayCompleted} | هشة: ${habits.fragileCount}`
-    : "- بيانات العادات غير متاحة";
+  const habitsSection = isEn
+    ? (habits ? `- Active habits: ${habits.totalActive} | Completed today: ${habits.todayCompleted} | Fragile: ${habits.fragileCount}` : "- Habit data not available")
+    : (habits ? `- العادات النشطة: ${habits.totalActive} | مكتملة اليوم: ${habits.todayCompleted} | هشة: ${habits.fragileCount}` : "- بيانات العادات غير متاحة");
 
-  const goalsSection = goals
-    ? `- الأهداف النشطة: ${goals.activeCount} | متوسط التقدم: ${Math.round(goals.avgProgress)}%`
-    : "- بيانات الأهداف غير متاحة";
+  const goalsSection = isEn
+    ? (goals ? `- Active goals: ${goals.activeCount} | Avg progress: ${Math.round(goals.avgProgress)}%` : "- Goal data not available")
+    : (goals ? `- الأهداف النشطة: ${goals.activeCount} | متوسط التقدم: ${Math.round(goals.avgProgress)}%` : "- بيانات الأهداف غير متاحة");
 
-  const financeSection = finance
-    ? `- الصحة المالية: ${finance.healthScore === "good" ? "جيدة ✅" : finance.healthScore === "warning" ? "تحتاج انتباهاً ⚠️" : "حرجة 🔴"}
+  const financeSection = isEn
+    ? (finance
+        ? `- Financial health: ${finance.healthScore === "good" ? "Good ✅" : finance.healthScore === "warning" ? "Needs attention ⚠️" : "Critical 🔴"}
+- Upcoming bills (7 days): ${finance.upcomingBillsCount} (total: ${finance.totalUpcomingAmount.toFixed(0)})
+- Over-budget categories this month: ${finance.overBudgetCategories}`
+        : "- Financial data not available")
+    : (finance
+        ? `- الصحة المالية: ${finance.healthScore === "good" ? "جيدة ✅" : finance.healthScore === "warning" ? "تحتاج انتباهاً ⚠️" : "حرجة 🔴"}
 - فواتير قادمة خلال 7 أيام: ${finance.upcomingBillsCount} (إجمالي: ${finance.totalUpcomingAmount.toFixed(0)})
 - فئات تجاوزت الميزانية هذا الشهر: ${finance.overBudgetCategories}`
-    : "- البيانات المالية غير متاحة";
+        : "- البيانات المالية غير متاحة");
 
   const distractionSection = profile.distractionPatterns?.length
-    ? `\n### أنماط التشتت:\n${profile.distractionPatterns.map(p => `- ${p}`).join("\n")}`
+    ? (isEn
+        ? `\n### Distraction patterns:\n${profile.distractionPatterns.map(p => `- ${p}`).join("\n")}`
+        : `\n### أنماط التشتت:\n${profile.distractionPatterns.map(p => `- ${p}`).join("\n")}`)
     : "";
 
   const tasksSection = topTasks.length > 0
     ? topTasks.map((t, i) =>
-        `${i + 1}. "${t.title}" — نقاط: ${t.adaptiveScore}/100 — إجراء: ${t.action}${t.estimatedMinutes ? ` — تقدير: ${t.estimatedMinutes} دقيقة` : ""}${t.suggestedTime ? ` — وقت مقترح: ${t.suggestedTime}` : ""}`
+        isEn
+          ? `${i + 1}. "${t.title}" — score: ${t.adaptiveScore}/100 — action: ${t.action}${t.estimatedMinutes ? ` — est: ${t.estimatedMinutes} min` : ""}${t.suggestedTime ? ` — suggested time: ${t.suggestedTime}` : ""}`
+          : `${i + 1}. "${t.title}" — نقاط: ${t.adaptiveScore}/100 — إجراء: ${t.action}${t.estimatedMinutes ? ` — تقدير: ${t.estimatedMinutes} دقيقة` : ""}${t.suggestedTime ? ` — وقت مقترح: ${t.suggestedTime}` : ""}`
       ).join("\n")
-    : `✅ لا توجد مهام معلقة — أنجز ${doneToday} مهمة اليوم!`;
+    : (isEn ? `✅ No pending tasks — ${doneToday} tasks completed today!` : `✅ لا توجد مهام معلقة — أنجز ${doneToday} مهمة اليوم!`);
 
   const completedTodayLine = profile.completedToday !== undefined
-    ? `- أُنجز اليوم: ${profile.completedToday} مهمة`
+    ? (isEn ? `- Completed today: ${profile.completedToday} tasks` : `- أُنجز اليوم: ${profile.completedToday} مهمة`)
     : "";
 
   const focusCountLine = profile.focusTaskCount !== undefined
-    ? `- مهام التركيز الحالية: ${profile.focusTaskCount}`
+    ? (isEn ? `- Current focus tasks: ${profile.focusTaskCount}` : `- مهام التركيز الحالية: ${profile.focusTaskCount}`)
     : "";
+
+  if (isEn) {
+    return `You are an AI assistant expert in personal productivity, time management, and personal finance. Your task is to analyze user data and deliver precise, actionable guidance.
+
+## Response rules:
+- Write in natural, everyday English — clear and direct
+- Be specific — no generalities or filler
+- Link every recommendation to real data from the context below
+- Do not repeat the same idea in different words
+- ${modeInstruction}
+
+---
+
+## Context for ${name}:
+
+### Performance profile (last 30 days):
+- Completion rate: ${profile.completionRate}% ${profile.completionRate >= 80 ? "✅" : profile.completionRate >= 60 ? "⚠️" : "🔴"}
+- Procrastination: ${profile.procrastinationScore}/100 ${profile.procrastinationScore > 50 ? "(high)" : "(acceptable)"}
+- Overcommitment: ${profile.overcommitmentScore}/100
+- Today's energy: ${profile.energyEstimate}/5 stars
+- Risk level: ${profile.todayRiskLevel === "high" ? "High 🔴" : profile.todayRiskLevel === "medium" ? "Medium 🟡" : "Low 🟢"}
+- Peak productivity hour: ${profile.peakHour}:00
+- Stalled tasks (+3 days): ${profile.stalledTaskIds.length}
+${completedTodayLine}
+${focusCountLine}
+${habitsSection}
+${goalsSection}
+
+### Financial status:
+${financeSection}
+
+### Weekly trend:
+- Completion trend: ${trendLabel}
+- Avg weekly energy: ${trends.avgEnergy.toFixed(1)}/5
+- Preferred focus window: ${focusWindow}
+- Total tasks completed historically: ${trends.totalTasksCompleted}
+${distractionSection}
+
+### Task list (highest priority first):
+${tasksSection}
+
+---
+
+## Required — respond with JSON only, no text outside it:
+{
+  "decisions": [
+    "Decision 1 — frame it as a real data-driven decision question, e.g.: 'Should you postpone task X to tomorrow to preserve your energy for the most important task?'",
+    "Decision 2 — a different type of decision (financial, habit, or delegation)",
+    "Decision 3 — a strategic decision for the day"
+  ],
+  "top_tasks": [
+    { "title": "Title of first task from the list above", "why": "Why it's first — one sentence linked to the data", "estimated_minutes": number },
+    { "title": "Second task", "why": "Reason", "estimated_minutes": number },
+    { "title": "Third task", "why": "Reason", "estimated_minutes": number }
+  ],
+  "biggest_risk": "The biggest risk today in one sentence — linked to real data (overdue task, bill, fragile habit...)",
+  "top_opportunity": "The top opportunity today in one sentence — something positive achievable based on energy and data",
+  "day_forecast": "Day forecast in two sentences: what productivity and energy levels will look like based on data, and what awaits the user.",
+  "brief": "One paragraph of 3-4 sentences. Start with a real data point (positive or challenge), then analysis, then a clear directive. Do not start with phrases like 'Hello' or 'Based on the data'.",
+  "highlight": "A specific achievement or strength grounded in the data above — one sentence.",
+  "coaching": "One tactical tip actionable right now — specific and practical, e.g.: 'Start with task X because your energy is now ${profile.energyEstimate}/5'.",
+  "energy_tip": "A short energy management tip suited to level ${profile.energyEstimate}/5 and the time of day — one sentence.",
+  "actions": [
+    {
+      "type": "focus|reschedule|delegate|review|habit|energy|finance",
+      "title": "Action title (3-6 words)",
+      "description": "What to do specifically — one practical, direct sentence.",
+      "taskId": "task ID if mentioned or null",
+      "priority": "high|medium|low",
+      "estimated_minutes": approximate_number_of_minutes
+    }
+  ]
+}
+
+Generate 4-5 actions ordered from highest to lowest priority. If financial status is warning or critical, add a "finance" action. If there are fragile habits, add a "habit" action.`;
+  }
 
   return `أنت مساعد ذكاء اصطناعي خبير في الإنتاجية الشخصية وإدارة الوقت والتمويل الشخصي. مهمتك تحليل بيانات المستخدم وتقديم توجيهات دقيقة وقابلة للتنفيذ.
 
@@ -323,7 +418,96 @@ interface FullAIResponse {
   day_forecast: string;
 }
 
-function buildFallback(mode: string): FullAIResponse {
+function buildFallback(mode: string, language = "ar"): FullAIResponse {
+  const isEn = language === "en";
+
+  if (isEn) {
+    const decisionsFallback = [
+      "Should you start with the hardest task now or warm up with an easier one first?",
+      "Should you keep your focus session at 90 minutes or split it into Pomodoro blocks?",
+      "Can you delegate any task from your list today to free up time for what matters most?",
+    ];
+    const topTasksFallback: DailyTopTask[] = [
+      { title: "Review your tasks and pick the top three", why: "Clarity at the start boosts productivity by 40%", estimated_minutes: 10 },
+      { title: "Complete one task fully",                  why: "Finishing a task releases dopamine that fuels momentum", estimated_minutes: 45 },
+      { title: "Check today's schedule",                   why: "Avoid surprises and time conflicts",                   estimated_minutes: 5  },
+    ];
+    switch (mode) {
+      case "morning":
+        return {
+          brief: "A new day begins — review your tasks and pick the three most important things you want to accomplish today. Clarity on goals is half the achievement.",
+          highlight: "Every day you open this system is a step toward discipline.",
+          coaching: "Start with the hardest task on your list right now — your mind is at its best in the morning.",
+          energy_tip: "Drink a glass of water before starting — it activates focus and working memory.",
+          decisions: decisionsFallback,
+          top_tasks: topTasksFallback,
+          biggest_risk: "Not setting clear priorities may scatter your energy across secondary tasks.",
+          top_opportunity: "Morning is the best time to tackle your hardest task — don't waste this window.",
+          day_forecast: "A day with moderate to good energy. Focus on one or two main tasks and maintain workflow.",
+          actions: [
+            { type: "focus",  title: "Pick your first task", description: "Choose the most important task today and start it immediately.", taskId: null, priority: "high",   estimated_minutes: 5  },
+            { type: "review", title: "Review today's list",  description: "Make sure every scheduled task has a specific time slot.",      taskId: null, priority: "medium", estimated_minutes: 10 },
+          ],
+        };
+      case "midday":
+        return {
+          brief: "You've reached midday — the perfect time to evaluate what you've accomplished and reprioritize for the second half.",
+          highlight: "Every task you completed today is a real step forward.",
+          coaching: "Review three tasks you haven't finished yet — are they still necessary? Postpone what can wait.",
+          energy_tip: "Take a 10-minute break from screens — it resets your focus for the second half of the day.",
+          decisions: [
+            "Should you finish the remaining tasks or re-sort them by current importance?",
+            "Does your energy allow for a deep focus session now, or are lighter tasks better?",
+            "Do you need to reschedule any appointment or commitment for today?",
+          ],
+          top_tasks: topTasksFallback,
+          biggest_risk: "Afternoon energy dip may cause distraction in the second half of the day.",
+          top_opportunity: "Complete one major task in the next two hours before energy drops.",
+          day_forecast: "Energy naturally declining in the afternoon. Assign complex tasks now and keep communications for later.",
+          actions: [
+            { type: "review",     title: "Progress check",       description: "Review how many tasks you've completed vs. your morning plan.", taskId: null, priority: "high",   estimated_minutes: 5 },
+            { type: "reschedule", title: "Reschedule overdue tasks", description: "Move unfinished tasks to tomorrow if needed.",              taskId: null, priority: "medium", estimated_minutes: 5 },
+          ],
+        };
+      case "evening":
+        return {
+          brief: "Another day is done — take two minutes to reflect on what you accomplished and what didn't happen. Every day teaches you something about your work style.",
+          highlight: "Closing the day with awareness is the habit of true producers.",
+          coaching: "Write down three things you accomplished today before sleeping — it reinforces intrinsic motivation.",
+          energy_tip: "Step away from screens 30 minutes before bed for deeper sleep.",
+          decisions: [
+            "Should you prepare tomorrow's task list now or leave it for the morning?",
+            "Do you need to add today's unfinished tasks to tomorrow's list?",
+            "What one thing, if done tomorrow, would most improve your week?",
+          ],
+          top_tasks: topTasksFallback,
+          biggest_risk: "Going to sleep without logging what wasn't done costs you context and momentum for tomorrow.",
+          top_opportunity: "Good rest tonight doubles your productivity tomorrow.",
+          day_forecast: "Time for recovery and preparation. Focus on rest and closing open mental loops.",
+          actions: [
+            { type: "review", title: "End-of-day review",       description: "What did you accomplish today? What was postponed and why?", taskId: null, priority: "high",   estimated_minutes: 5 },
+            { type: "focus",  title: "Plan tomorrow's first task", description: "Identify now the most important task you'll start with tomorrow morning.", taskId: null, priority: "medium", estimated_minutes: 3 },
+            { type: "habit",  title: "Check daily habits",      description: "Did you log your habits today? Don't forget before sleeping.", taskId: null, priority: "low",    estimated_minutes: 2 },
+          ],
+        };
+      default:
+        return {
+          brief: "Analyze your performance patterns and identify improvement opportunities for next week.",
+          highlight: "Continuing to use the system is itself a productive habit.",
+          coaching: "Identify the one pattern that, if changed, would make the biggest difference to your productivity.",
+          energy_tip: "Good rest tonight makes a better day tomorrow.",
+          decisions: decisionsFallback,
+          top_tasks: topTasksFallback,
+          biggest_risk: "Continuing the same patterns without review slows your growth.",
+          top_opportunity: "Analyzing and changing one weak pattern creates large cumulative gains.",
+          day_forecast: "Time for strategic analysis. Review your data and identify the most important adjustment for next week.",
+          actions: [
+            { type: "review", title: "Weekly analysis", description: "Review what you accomplished this week, what didn't happen, and why.", taskId: null, priority: "high", estimated_minutes: 15 },
+          ],
+        };
+    }
+  }
+
   const decisionsFallback = [
     "هل تبدأ بأصعب مهمة الآن أم تُحضّر ذهنك أولاً بمهمة أسهل؟",
     "هل تُبقي جلسة التركيز 90 دقيقة أم تقسّمها على بومودور؟",
@@ -413,13 +597,13 @@ function buildFallback(mode: string): FullAIResponse {
 
 // ── Response validator ────────────────────────────────────────────────────────
 
-function validateResponse(data: unknown, mode: string): FullAIResponse {
-  if (!data || typeof data !== "object") return buildFallback(mode);
+function validateResponse(data: unknown, mode: string, language = "ar"): FullAIResponse {
+  if (!data || typeof data !== "object") return buildFallback(mode, language);
   const d = data as Record<string, unknown>;
 
   const brief    = typeof d.brief    === "string" && d.brief.length    > 10 ? d.brief    : null;
   const coaching = typeof d.coaching === "string" && d.coaching.length > 10 ? d.coaching : null;
-  if (!brief || !coaching) return buildFallback(mode);
+  if (!brief || !coaching) return buildFallback(mode, language);
 
   const actions: AIAction[] = [];
   if (Array.isArray(d.actions)) {
@@ -439,7 +623,7 @@ function validateResponse(data: unknown, mode: string): FullAIResponse {
   }
 
   // Validate decisions[]
-  const fallback = buildFallback(mode);
+  const fallback = buildFallback(mode, language);
   const decisions: string[] = [];
   if (Array.isArray(d.decisions)) {
     for (const dec of d.decisions) {
@@ -519,7 +703,7 @@ Deno.serve(async (req: Request) => {
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey) {
     console.error("GEMINI_API_KEY not configured — returning fallback");
-    return new Response(JSON.stringify(buildFallback(body.mode)), {
+    return new Response(JSON.stringify(buildFallback(body.mode, body.language)), {
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   }
@@ -542,7 +726,7 @@ Deno.serve(async (req: Request) => {
     });
   } catch (networkErr) {
     console.error("Gemini network error:", networkErr);
-    return new Response(JSON.stringify(buildFallback(body.mode)), {
+    return new Response(JSON.stringify(buildFallback(body.mode, body.language)), {
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   }
@@ -550,7 +734,7 @@ Deno.serve(async (req: Request) => {
   if (!geminiRes.ok) {
     const errText = await geminiRes.text();
     console.error(`Gemini API ${geminiRes.status}:`, errText);
-    return new Response(JSON.stringify(buildFallback(body.mode)), {
+    return new Response(JSON.stringify(buildFallback(body.mode, body.language)), {
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   }
@@ -561,7 +745,7 @@ Deno.serve(async (req: Request) => {
     rawText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
   } catch (parseErr) {
     console.error("Gemini response parse error:", parseErr);
-    return new Response(JSON.stringify(buildFallback(body.mode)), {
+    return new Response(JSON.stringify(buildFallback(body.mode, body.language)), {
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   }
@@ -573,7 +757,7 @@ Deno.serve(async (req: Request) => {
     parsed = null;
   }
 
-  const validated = validateResponse(parsed, body.mode);
+  const validated = validateResponse(parsed, body.mode, body.language);
 
   return new Response(JSON.stringify(validated), {
     headers: { "Content-Type": "application/json", ...corsHeaders },
