@@ -9,6 +9,7 @@
  */
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/hooks/useLanguage';
 import {
   Brain, TrendingUp, AlertTriangle, Minus,
   ChevronDown, ChevronUp, Clock, Zap, RefreshCw,
@@ -50,18 +51,13 @@ function PatternChip({ pattern: p }: { pattern: MemoryPattern }) {
       'flex items-center gap-2 px-3 py-2 rounded-xl border transition-colors',
       `${cfg.bg} border-current/10`,
     )}>
-      {/* Icon */}
       <div className={cfg.color}>
         <PatternIcon patternKey={p.key} />
       </div>
-
-      {/* Text */}
       <div className="flex-1 min-w-0">
         <div className="text-[10px] text-muted-foreground truncate">{p.label}</div>
         <div className={cn('text-xs font-black truncate', cfg.color)}>{p.value}</div>
       </div>
-
-      {/* Confidence bar */}
       <div className="flex flex-col items-end gap-0.5 shrink-0">
         <span className="text-[8px] font-bold text-muted-foreground/60">{p.confidence}%</span>
         <div className="w-10 h-1 bg-muted rounded-full overflow-hidden">
@@ -79,6 +75,8 @@ function PatternChip({ pattern: p }: { pattern: MemoryPattern }) {
 
 export function MemoryInfluenceBadge({ memoryReasons }: { memoryReasons: string[] }) {
   const [open, setOpen] = useState(false);
+  const { currentLanguage } = useLanguage();
+  const isAr = currentLanguage === 'ar';
   if (memoryReasons.length === 0) return null;
 
   return (
@@ -88,7 +86,7 @@ export function MemoryInfluenceBadge({ memoryReasons }: { memoryReasons: string[
         className="flex items-center gap-1 text-[9px] font-black text-indigo-500 bg-indigo-500/10 border border-indigo-500/20 rounded-full px-2 py-0.5 hover:bg-indigo-500/15 transition-colors"
       >
         <Brain className="w-2.5 h-2.5" />
-        بناءً على تاريخك
+        {isAr ? 'بناءً على تاريخك' : 'Based on your history'}
         {open ? <ChevronUp className="w-2.5 h-2.5" /> : <ChevronDown className="w-2.5 h-2.5" />}
       </button>
       {open && (
@@ -109,7 +107,9 @@ export function MemoryInfluenceBadge({ memoryReasons }: { memoryReasons: string[
 
 export function MemoryInsightsCard() {
   const { data: memory, isLoading } = useOperationalMemory();
-  const { memoryInfluenced, memoryConfidence } = useDecisionEngine();
+  const { memoryInfluenced } = useDecisionEngine();
+  const { currentLanguage } = useLanguage();
+  const isAr = currentLanguage === 'ar';
   const [expanded, setExpanded] = useState(false);
 
   if (isLoading) {
@@ -131,11 +131,15 @@ export function MemoryInsightsCard() {
       <div className="rounded-2xl border border-border/50 bg-card/60 p-4">
         <div className="flex items-center gap-2 mb-3">
           <Brain className="w-4 h-4 text-indigo-400" />
-          <span className="text-sm font-black">ذاكرة النظام</span>
+          <span className="text-sm font-black">
+            {isAr ? 'ذاكرة النظام' : 'System Memory'}
+          </span>
           <span className="text-[10px] text-muted-foreground/50">Operational Memory</span>
         </div>
         <p className="text-xs text-muted-foreground text-center py-3">
-          النظام يجمع بياناتك — ستظهر الأنماط بعد أسبوع من الاستخدام
+          {isAr
+            ? 'النظام يجمع بياناتك — ستظهر الأنماط بعد أسبوع من الاستخدام'
+            : 'The system is collecting your data — patterns will appear after a week of usage'}
         </p>
       </div>
     );
@@ -150,7 +154,7 @@ export function MemoryInsightsCard() {
 
   const updatedAgo = formatDistanceToNow(parseISO(memory.computedAt), {
     addSuffix: true,
-    locale: ar,
+    locale: isAr ? ar : undefined,
   });
 
   return (
@@ -158,7 +162,9 @@ export function MemoryInsightsCard() {
       {/* Header */}
       <div className="flex items-center gap-2 px-4 pt-3.5 pb-2.5 border-b border-border/40">
         <Brain className="w-4 h-4 text-indigo-500 shrink-0" />
-        <span className="text-sm font-black text-foreground">ذاكرة النظام</span>
+        <span className="text-sm font-black text-foreground">
+          {isAr ? 'ذاكرة النظام' : 'System Memory'}
+        </span>
         <span className="text-[10px] text-muted-foreground/50 flex-1">Operational Memory</span>
 
         {/* Confidence badge */}
@@ -166,7 +172,9 @@ export function MemoryInsightsCard() {
           <div className={cn('text-xs font-black tabular-nums', confidenceColor)}>
             {memory.confidence}%
           </div>
-          <div className="text-[9px] text-muted-foreground/50">ثقة</div>
+          <div className="text-[9px] text-muted-foreground/50">
+            {isAr ? 'ثقة' : 'confidence'}
+          </div>
         </div>
       </div>
 
@@ -174,19 +182,20 @@ export function MemoryInsightsCard() {
         {/* Stats bar */}
         <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
           <span>
-            <span className="font-black text-foreground">{memory.dataPoints}</span> نقطة بيانات
+            <span className="font-black text-foreground">{memory.dataPoints}</span>{' '}
+            {isAr ? 'نقطة بيانات' : 'data points'}
           </span>
           <span className="text-border/80">·</span>
           {memoryInfluenced && (
             <>
               <span className="flex items-center gap-1 text-indigo-500 font-bold">
                 <Brain className="w-3 h-3" />
-                تؤثر في قراراتك الآن
+                {isAr ? 'تؤثر في قراراتك الآن' : 'Influencing your decisions now'}
               </span>
               <span className="text-border/80">·</span>
             </>
           )}
-          <span>آخر تحديث {updatedAgo}</span>
+          <span>{isAr ? 'آخر تحديث' : 'Updated'} {updatedAgo}</span>
         </div>
 
         {/* Confidence bar */}
@@ -216,9 +225,9 @@ export function MemoryInsightsCard() {
             className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground hover:text-foreground transition-colors w-full justify-center py-1"
           >
             {expanded ? (
-              <><ChevronUp className="w-3 h-3" /> إخفاء</>
+              <><ChevronUp className="w-3 h-3" /> {isAr ? 'إخفاء' : 'Hide'}</>
             ) : (
-              <><ChevronDown className="w-3 h-3" /> {memory.patterns.length - 4} أنماط أخرى</>
+              <><ChevronDown className="w-3 h-3" /> {memory.patterns.length - 4} {isAr ? 'أنماط أخرى' : 'more patterns'}</>
             )}
           </button>
         )}
@@ -228,7 +237,9 @@ export function MemoryInsightsCard() {
           <div className="flex items-center gap-1.5 p-2.5 rounded-xl bg-indigo-500/6 border border-indigo-500/15">
             <Brain className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
             <span className="text-[10px] text-indigo-600 dark:text-indigo-300 font-semibold">
-              الذاكرة تُشكّل قرارات اليوم — الاقتراحات مبنية على أنماطك الفعلية
+              {isAr
+                ? 'الذاكرة تُشكّل قرارات اليوم — الاقتراحات مبنية على أنماطك الفعلية'
+                : "Memory is shaping today's decisions — suggestions are built on your actual patterns"}
             </span>
           </div>
         )}

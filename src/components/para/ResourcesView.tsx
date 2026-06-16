@@ -24,7 +24,7 @@ import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 import { FileUploadZone, type UploadedFileInfo } from '@/components/ui/FileUploadZone';
 import { useFileUpload } from '@/hooks/useFileUpload';
 
-const resourceTypes: {
+function getResourceTypes(isAr: boolean): {
   value: ResourceType;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -32,17 +32,21 @@ const resourceTypes: {
   from: string;
   to: string;
   activeBorder: string;
-}[] = [
-  { value: 'note',     label: 'ملاحظة', icon: FileText, color: 'text-blue-500',   from: 'from-blue-500',   to: 'to-blue-600',    activeBorder: 'border-blue-400/40'   },
-  { value: 'file',     label: 'ملف',     icon: File,     color: 'text-purple-500', from: 'from-purple-500', to: 'to-violet-600',  activeBorder: 'border-purple-400/40' },
-  { value: 'link',     label: 'رابط',    icon: Link2,    color: 'text-cyan-500',   from: 'from-cyan-500',   to: 'to-blue-500',    activeBorder: 'border-cyan-400/40'   },
-  { value: 'course',   label: 'دورة',    icon: BookOpen, color: 'text-amber-500',  from: 'from-amber-500',  to: 'to-orange-500',  activeBorder: 'border-amber-400/40'  },
-  { value: 'media',    label: 'وسائط',   icon: Film,     color: 'text-pink-500',   from: 'from-pink-500',   to: 'to-rose-500',    activeBorder: 'border-pink-400/40'   },
-  { value: 'document', label: 'مستند',   icon: FileText, color: 'text-green-500',  from: 'from-green-500',  to: 'to-emerald-600', activeBorder: 'border-green-400/40'  },
-];
+}[] {
+  return [
+    { value: 'note',     label: isAr ? 'ملاحظة' : 'Note',     icon: FileText, color: 'text-blue-500',   from: 'from-blue-500',   to: 'to-blue-600',    activeBorder: 'border-blue-400/40'   },
+    { value: 'file',     label: isAr ? 'ملف'     : 'File',     icon: File,     color: 'text-purple-500', from: 'from-purple-500', to: 'to-violet-600',  activeBorder: 'border-purple-400/40' },
+    { value: 'link',     label: isAr ? 'رابط'    : 'Link',     icon: Link2,    color: 'text-cyan-500',   from: 'from-cyan-500',   to: 'to-blue-500',    activeBorder: 'border-cyan-400/40'   },
+    { value: 'course',   label: isAr ? 'دورة'    : 'Course',   icon: BookOpen, color: 'text-amber-500',  from: 'from-amber-500',  to: 'to-orange-500',  activeBorder: 'border-amber-400/40'  },
+    { value: 'media',    label: isAr ? 'وسائط'   : 'Media',    icon: Film,     color: 'text-pink-500',   from: 'from-pink-500',   to: 'to-rose-500',    activeBorder: 'border-pink-400/40'   },
+    { value: 'document', label: isAr ? 'مستند'   : 'Document', icon: FileText, color: 'text-green-500',  from: 'from-green-500',  to: 'to-emerald-600', activeBorder: 'border-green-400/40'  },
+  ];
+}
 
 export function ResourcesView() {
-  const { t } = useLanguage();
+  const { currentLanguage } = useLanguage();
+  const isAr = currentLanguage === 'ar';
+  const resourceTypes = getResourceTypes(isAr);
   const navigate = useNavigate();
   const [showArchived,    setShowArchived]    = useState(false);
   const [showUnified,     setShowUnified]     = useState(false);
@@ -93,8 +97,8 @@ export function ResourcesView() {
     return (
       <div className="space-y-5">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-foreground">الموارد الموحدة</h2>
-          <Button variant="outline" size="sm" onClick={() => setShowUnified(false)}>العودة</Button>
+          <h2 className="text-xl font-bold text-foreground">{isAr ? 'الموارد الموحدة' : 'Unified Resources'}</h2>
+          <Button variant="outline" size="sm" onClick={() => setShowUnified(false)}>{isAr ? 'العودة' : 'Back'}</Button>
         </div>
         <UnifiedResourcesView />
       </div>
@@ -156,7 +160,7 @@ export function ResourcesView() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.title.trim()) { toast.error('العنوان مطلوب'); return; }
+    if (!formData.title.trim()) { toast.error(isAr ? 'العنوان مطلوب' : 'Title is required'); return; }
     try {
       const payload = {
         ...formData,
@@ -165,33 +169,37 @@ export function ResourcesView() {
       };
       if (editingResource) {
         await updateResource.mutateAsync({ id: editingResource.id, ...payload });
-        toast.success('تم تحديث المورد بنجاح');
+        toast.success(isAr ? 'تم تحديث المورد بنجاح' : 'Resource updated successfully');
       } else {
         await createResource.mutateAsync(payload);
-        toast.success('تم إنشاء المورد بنجاح');
+        toast.success(isAr ? 'تم إنشاء المورد بنجاح' : 'Resource created successfully');
       }
       setIsDialogOpen(false);
       resetForm();
-    } catch { toast.error('حدث خطأ'); }
+    } catch { toast.error(isAr ? 'حدث خطأ' : 'An error occurred'); }
   };
 
   const handleArchive = async (id: string) => {
-    try { await archiveResource.mutateAsync(id); toast.success('تم أرشفة المورد'); }
-    catch { toast.error('حدث خطأ'); }
+    try { await archiveResource.mutateAsync(id); toast.success(isAr ? 'تم أرشفة المورد' : 'Resource archived'); }
+    catch { toast.error(isAr ? 'حدث خطأ' : 'An error occurred'); }
   };
 
   const handleRestore = async (id: string) => {
-    try { await restoreResource.mutateAsync(id); toast.success('تم استعادة المورد'); }
-    catch { toast.error('حدث خطأ'); }
+    try { await restoreResource.mutateAsync(id); toast.success(isAr ? 'تم استعادة المورد' : 'Resource restored'); }
+    catch { toast.error(isAr ? 'حدث خطأ' : 'An error occurred'); }
   };
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    try { await deleteResource.mutateAsync(deleteId); toast.success('تم حذف المورد'); setDeleteId(null); }
-    catch { toast.error('حدث خطأ'); }
+    try {
+      await deleteResource.mutateAsync(deleteId);
+      toast.success(isAr ? 'تم حذف المورد' : 'Resource deleted');
+      setDeleteId(null);
+    } catch { toast.error(isAr ? 'حدث خطأ' : 'An error occurred'); }
   };
 
   const getTypeInfo = (type: ResourceType) => resourceTypes.find(t => t.value === type) ?? resourceTypes[0];
+  const dateLocale = isAr ? ar : undefined;
 
   if (isLoading) {
     return (
@@ -206,21 +214,21 @@ export function ResourcesView() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-xl font-bold text-foreground">الموارد</h2>
-          <p className="text-sm text-muted-foreground">ملاحظات، ملفات، روابط، دورات، ووسائط</p>
+          <h2 className="text-xl font-bold text-foreground">{isAr ? 'الموارد' : 'Resources'}</h2>
+          <p className="text-sm text-muted-foreground">{isAr ? 'ملاحظات، ملفات، روابط، دورات، ووسائط' : 'Notes, files, links, courses, and media'}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)} className="gap-2">
             <Filter className="w-4 h-4" />
-            <span className="hidden sm:inline">فلاتر</span>
+            <span className="hidden sm:inline">{isAr ? 'فلاتر' : 'Filters'}</span>
           </Button>
           <Button variant="outline" size="sm" onClick={() => setShowUnified(true)} className="gap-2">
             <LayoutGrid className="w-4 h-4" />
-            <span className="hidden sm:inline">موحد</span>
+            <span className="hidden sm:inline">{isAr ? 'موحد' : 'Unified'}</span>
           </Button>
           <Button variant="gold" size="sm" onClick={() => handleOpenDialog()} className="gap-2">
             <Plus className="w-4 h-4" />
-            مورد جديد
+            {isAr ? 'مورد جديد' : 'New Resource'}
           </Button>
         </div>
       </div>
@@ -229,7 +237,7 @@ export function ResourcesView() {
       <div className="relative">
         <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
-          placeholder="بحث في الموارد..."
+          placeholder={isAr ? 'بحث في الموارد...' : 'Search resources...'}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pr-10 bg-muted/50 border-border/50"
@@ -242,10 +250,10 @@ export function ResourcesView() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Select value={filterAreaId} onValueChange={setFilterAreaId}>
               <SelectTrigger className="bg-muted/50 border-border/50">
-                <SelectValue placeholder="كل المجالات" />
+                <SelectValue placeholder={isAr ? 'كل المجالات' : 'All Areas'} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">كل المجالات</SelectItem>
+                <SelectItem value="all">{isAr ? 'كل المجالات' : 'All Areas'}</SelectItem>
                 {areas?.map((area) => (
                   <SelectItem key={area.id} value={area.id}>{area.name}</SelectItem>
                 ))}
@@ -253,10 +261,10 @@ export function ResourcesView() {
             </Select>
             <Select value={filterProjectId} onValueChange={setFilterProjectId}>
               <SelectTrigger className="bg-muted/50 border-border/50">
-                <SelectValue placeholder="كل المشاريع" />
+                <SelectValue placeholder={isAr ? 'كل المشاريع' : 'All Projects'} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">كل المشاريع</SelectItem>
+                <SelectItem value="all">{isAr ? 'كل المشاريع' : 'All Projects'}</SelectItem>
                 {projects?.map((project) => (
                   <SelectItem key={project.id} value={project.id}>{project.title}</SelectItem>
                 ))}
@@ -265,7 +273,9 @@ export function ResourcesView() {
           </div>
           <div className="flex items-center gap-2">
             <Switch id="show-archived-resources" checked={showArchived} onCheckedChange={setShowArchived} />
-            <Label htmlFor="show-archived-resources" className="text-xs cursor-pointer">إظهار المؤرشف</Label>
+            <Label htmlFor="show-archived-resources" className="text-xs cursor-pointer">
+              {isAr ? 'إظهار المؤرشف' : 'Show Archived'}
+            </Label>
           </div>
         </div>
       )}
@@ -273,7 +283,7 @@ export function ResourcesView() {
       {/* Type filter — Goals-style card grid (4 + 3) */}
       <div className="space-y-2">
         <div className="grid grid-cols-4 gap-2">
-          {/* "الكل" card */}
+          {/* All card */}
           {(() => {
             const isSelected = activeType === 'all';
             const totalCount = resources?.length ?? 0;
@@ -296,7 +306,7 @@ export function ResourcesView() {
                   )}
                 </span>
                 <p className={cn('text-[10px] font-semibold text-center leading-tight', isSelected ? 'text-foreground' : 'text-foreground/60')}>
-                  الكل
+                  {isAr ? 'الكل' : 'All'}
                 </p>
               </button>
             );
@@ -391,7 +401,9 @@ export function ResourcesView() {
                         {typeInfo.label}
                       </Badge>
                       {resource.status === 'archived' && (
-                        <Badge variant="secondary" className="text-xs py-0">مؤرشف</Badge>
+                        <Badge variant="secondary" className="text-xs py-0">
+                          {isAr ? 'مؤرشف' : 'Archived'}
+                        </Badge>
                       )}
                     </div>
                   </div>
@@ -410,23 +422,27 @@ export function ResourcesView() {
                         ) : (
                           <ExternalLink className="w-4 h-4 ml-2" />
                         )}
-                        {resource.type === 'file' ? 'تنزيل الملف' : resource.type === 'media' ? 'فتح الوسائط' : 'فتح الرابط'}
+                        {resource.type === 'file'
+                          ? (isAr ? 'تنزيل الملف' : 'Download File')
+                          : resource.type === 'media'
+                          ? (isAr ? 'فتح الوسائط' : 'Open Media')
+                          : (isAr ? 'فتح الرابط' : 'Open Link')}
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem onClick={() => handleOpenDialog(resource)}>
-                      <Pencil className="w-4 h-4 ml-2" />تعديل
+                      <Pencil className="w-4 h-4 ml-2" />{isAr ? 'تعديل' : 'Edit'}
                     </DropdownMenuItem>
                     {resource.status === 'active' ? (
                       <DropdownMenuItem onClick={() => handleArchive(resource.id)}>
-                        <Archive className="w-4 h-4 ml-2" />أرشفة
+                        <Archive className="w-4 h-4 ml-2" />{isAr ? 'أرشفة' : 'Archive'}
                       </DropdownMenuItem>
                     ) : (
                       <DropdownMenuItem onClick={() => handleRestore(resource.id)}>
-                        <RotateCcw className="w-4 h-4 ml-2" />استعادة
+                        <RotateCcw className="w-4 h-4 ml-2" />{isAr ? 'استعادة' : 'Restore'}
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem onClick={() => setDeleteId(resource.id)} className="text-destructive">
-                      <Trash2 className="w-4 h-4 ml-2" />حذف
+                      <Trash2 className="w-4 h-4 ml-2" />{isAr ? 'حذف' : 'Delete'}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -444,7 +460,9 @@ export function ResourcesView() {
                   className="flex items-center gap-1.5 text-xs text-primary hover:underline truncate"
                 >
                   <Download className="w-3.5 h-3.5 shrink-0" />
-                  <span className="truncate">{decodeURIComponent(resource.source_url.split('/').pop() ?? 'الملف')}</span>
+                  <span className="truncate">
+                    {decodeURIComponent(resource.source_url.split('/').pop() ?? (isAr ? 'الملف' : 'File'))}
+                  </span>
                 </a>
               )}
 
@@ -461,7 +479,7 @@ export function ResourcesView() {
 
               <div className="flex items-center justify-between text-xs text-muted-foreground pt-0.5 border-t border-border/30">
                 <span className="truncate max-w-[60%]">{resource.areas?.name || resource.projects?.title || '—'}</span>
-                <span>{format(new Date(resource.updated_at), 'dd MMM', { locale: ar })}</span>
+                <span>{format(new Date(resource.updated_at), 'dd MMM', { locale: dateLocale })}</span>
               </div>
             </div>
           );
@@ -473,10 +491,10 @@ export function ResourcesView() {
           <div className="w-16 h-16 rounded-2xl bg-muted/40 flex items-center justify-center mx-auto mb-4">
             <Database className="w-8 h-8 opacity-40" />
           </div>
-          <p className="font-medium mb-1">لا توجد موارد</p>
-          <p className="text-xs mb-4">أضف ملاحظات، روابط، ملفات، أو دورات</p>
+          <p className="font-medium mb-1">{isAr ? 'لا توجد موارد' : 'No resources'}</p>
+          <p className="text-xs mb-4">{isAr ? 'أضف ملاحظات، روابط، ملفات، أو دورات' : 'Add notes, links, files, or courses'}</p>
           <Button variant="outline" size="sm" onClick={() => handleOpenDialog()}>
-            <Plus className="w-4 h-4 ml-1" />أضف أول مورد
+            <Plus className="w-4 h-4 ml-1" />{isAr ? 'أضف أول مورد' : 'Add first resource'}
           </Button>
         </div>
       )}
@@ -485,11 +503,11 @@ export function ResourcesView() {
       <ResponsiveSheet
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        title={editingResource ? 'تعديل المورد' : 'مورد جديد'}
+        title={editingResource ? (isAr ? 'تعديل المورد' : 'Edit Resource') : (isAr ? 'مورد جديد' : 'New Resource')}
       >
         <div className="space-y-4 pb-4">
           <div>
-            <Label className="text-xs font-semibold text-muted-foreground">النوع</Label>
+            <Label className="text-xs font-semibold text-muted-foreground">{isAr ? 'النوع' : 'Type'}</Label>
             <Select
               value={formData.type}
               onValueChange={(v: ResourceType) => setFormData({ ...formData, type: v })}
@@ -510,29 +528,29 @@ export function ResourcesView() {
             </Select>
           </div>
           <div>
-            <Label className="text-xs font-semibold text-muted-foreground">العنوان</Label>
+            <Label className="text-xs font-semibold text-muted-foreground">{isAr ? 'العنوان' : 'Title'}</Label>
             <Input
               dir="auto"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="عنوان المورد..."
+              placeholder={isAr ? 'عنوان المورد...' : 'Resource title...'}
               className="bg-muted/50 border-border/50 mt-1"
             />
           </div>
           <div>
-            <Label className="text-xs font-semibold text-muted-foreground">الوصف</Label>
+            <Label className="text-xs font-semibold text-muted-foreground">{isAr ? 'الوصف' : 'Description'}</Label>
             <Textarea
               dir="auto"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="وصف مختصر..."
+              placeholder={isAr ? 'وصف مختصر...' : 'Brief description...'}
               rows={2}
               className="bg-muted/50 border-border/50 mt-1 resize-none"
             />
           </div>
           {(formData.type === 'link' || formData.type === 'course') && (
             <div>
-              <Label className="text-xs font-semibold text-muted-foreground">الرابط</Label>
+              <Label className="text-xs font-semibold text-muted-foreground">{isAr ? 'الرابط' : 'URL'}</Label>
               <Input
                 type="url"
                 value={formData.source_url}
@@ -545,7 +563,7 @@ export function ResourcesView() {
           {(formData.type === 'file' || formData.type === 'media') && (
             <div>
               <Label className="text-xs font-semibold text-muted-foreground mb-1.5 block">
-                {formData.type === 'media' ? 'ملف الوسائط' : 'الملف'}
+                {formData.type === 'media' ? (isAr ? 'ملف الوسائط' : 'Media File') : (isAr ? 'الملف' : 'File')}
               </Label>
               <FileUploadZone
                 onFileSelect={handleFileUpload}
@@ -559,7 +577,7 @@ export function ResourcesView() {
               {!uploadedFile && (
                 <div className="flex items-center gap-2 mt-2">
                   <div className="flex-1 h-px bg-border/40" />
-                  <span className="text-xs text-muted-foreground">أو أدخل رابطاً</span>
+                  <span className="text-xs text-muted-foreground">{isAr ? 'أو أدخل رابطاً' : 'or enter a URL'}</span>
                   <div className="flex-1 h-px bg-border/40" />
                 </div>
               )}
@@ -576,12 +594,12 @@ export function ResourcesView() {
           )}
           {(formData.type === 'note' || formData.type === 'document') && (
             <div>
-              <Label className="text-xs font-semibold text-muted-foreground">المحتوى</Label>
+              <Label className="text-xs font-semibold text-muted-foreground">{isAr ? 'المحتوى' : 'Content'}</Label>
               <Textarea
                 dir="auto"
                 value={formData.content}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                placeholder="محتوى المورد..."
+                placeholder={isAr ? 'محتوى المورد...' : 'Resource content...'}
                 rows={4}
                 className="bg-muted/50 border-border/50 mt-1 resize-none"
               />
@@ -589,16 +607,16 @@ export function ResourcesView() {
           )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <Label className="text-xs font-semibold text-muted-foreground">المجال</Label>
+              <Label className="text-xs font-semibold text-muted-foreground">{isAr ? 'المجال' : 'Area'}</Label>
               <Select
                 value={formData.area_id || 'none'}
                 onValueChange={(v) => setFormData({ ...formData, area_id: v === 'none' ? '' : v })}
               >
                 <SelectTrigger className="bg-muted/50 border-border/50 mt-1">
-                  <SelectValue placeholder="اختر مجال" />
+                  <SelectValue placeholder={isAr ? 'اختر مجال' : 'Select area'} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">بدون</SelectItem>
+                  <SelectItem value="none">{isAr ? 'بدون' : 'None'}</SelectItem>
                   {areas?.map((area) => (
                     <SelectItem key={area.id} value={area.id}>{area.name}</SelectItem>
                   ))}
@@ -606,16 +624,16 @@ export function ResourcesView() {
               </Select>
             </div>
             <div>
-              <Label className="text-xs font-semibold text-muted-foreground">المشروع</Label>
+              <Label className="text-xs font-semibold text-muted-foreground">{isAr ? 'المشروع' : 'Project'}</Label>
               <Select
                 value={formData.project_id || 'none'}
                 onValueChange={(v) => setFormData({ ...formData, project_id: v === 'none' ? '' : v })}
               >
                 <SelectTrigger className="bg-muted/50 border-border/50 mt-1">
-                  <SelectValue placeholder="اختر مشروع" />
+                  <SelectValue placeholder={isAr ? 'اختر مشروع' : 'Select project'} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">بدون</SelectItem>
+                  <SelectItem value="none">{isAr ? 'بدون' : 'None'}</SelectItem>
                   {projects?.map((project) => (
                     <SelectItem key={project.id} value={project.id}>{project.title}</SelectItem>
                   ))}
@@ -624,14 +642,14 @@ export function ResourcesView() {
             </div>
           </div>
           <div>
-            <Label className="text-xs font-semibold text-muted-foreground">الوسوم</Label>
+            <Label className="text-xs font-semibold text-muted-foreground">{isAr ? 'الوسوم' : 'Tags'}</Label>
             <div className="flex gap-2 mt-1 mb-2">
               <Input
                 dir="auto"
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
-                placeholder="أضف وسم واضغط Enter..."
+                placeholder={isAr ? 'أضف وسم واضغط Enter...' : 'Add tag and press Enter...'}
                 className="flex-1 bg-muted/50 border-border/50"
               />
               <Button type="button" variant="outline" size="icon" onClick={handleAddTag}>
@@ -652,9 +670,11 @@ export function ResourcesView() {
             </div>
           </div>
           <div className="flex gap-2 pt-2">
-            <Button variant="outline" className="flex-1" onClick={() => setIsDialogOpen(false)}>إلغاء</Button>
+            <Button variant="outline" className="flex-1" onClick={() => setIsDialogOpen(false)}>
+              {isAr ? 'إلغاء' : 'Cancel'}
+            </Button>
             <Button variant="gold" className="flex-1" onClick={handleSubmit} disabled={createResource.isPending || updateResource.isPending}>
-              {editingResource ? 'تحديث' : 'إنشاء'}
+              {editingResource ? (isAr ? 'تحديث' : 'Update') : (isAr ? 'إنشاء' : 'Create')}
             </Button>
           </div>
         </div>
@@ -664,12 +684,16 @@ export function ResourcesView() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
-            <AlertDialogDescription>سيتم حذف هذا المورد نهائياً. لا يمكن التراجع.</AlertDialogDescription>
+            <AlertDialogTitle>{isAr ? 'هل أنت متأكد؟' : 'Are you sure?'}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {isAr ? 'سيتم حذف هذا المورد نهائياً. لا يمكن التراجع.' : 'This resource will be permanently deleted. This action cannot be undone.'}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>إلغاء</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">حذف</AlertDialogAction>
+            <AlertDialogCancel>{isAr ? 'إلغاء' : 'Cancel'}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+              {isAr ? 'حذف' : 'Delete'}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -12,23 +12,28 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-const typeConfig: Record<
+function getTypeConfig(isAr: boolean): Record<
   ArchivedItem['type'],
   { label: string; icon: React.ComponentType<{ className?: string }>; bar: string; iconColor: string }
-> = {
-  project:  { label: 'مشروع', icon: FolderKanban, bar: 'bg-blue-500',    iconColor: 'text-blue-500'    },
-  area:     { label: 'مجال',   icon: Layers,       bar: 'bg-purple-500',  iconColor: 'text-purple-500'  },
-  goal:     { label: 'هدف',    icon: Target,       bar: 'bg-primary',     iconColor: 'text-primary'     },
-  task:     { label: 'مهمة',   icon: CheckSquare,  bar: 'bg-green-500',   iconColor: 'text-green-500'   },
-  resource: { label: 'مورد',   icon: Database,     bar: 'bg-cyan-500',    iconColor: 'text-cyan-500'    },
-  customer: { label: 'عميل',   icon: Users,        bar: 'bg-pink-500',    iconColor: 'text-pink-500'    },
-};
+> {
+  return {
+    project:  { label: isAr ? 'مشروع' : 'Project',  icon: FolderKanban, bar: 'bg-blue-500',    iconColor: 'text-blue-500'    },
+    area:     { label: isAr ? 'مجال'   : 'Area',     icon: Layers,       bar: 'bg-purple-500',  iconColor: 'text-purple-500'  },
+    goal:     { label: isAr ? 'هدف'    : 'Goal',     icon: Target,       bar: 'bg-primary',     iconColor: 'text-primary'     },
+    task:     { label: isAr ? 'مهمة'   : 'Task',     icon: CheckSquare,  bar: 'bg-green-500',   iconColor: 'text-green-500'   },
+    resource: { label: isAr ? 'مورد'   : 'Resource', icon: Database,     bar: 'bg-cyan-500',    iconColor: 'text-cyan-500'    },
+    customer: { label: isAr ? 'عميل'   : 'Customer', icon: Users,        bar: 'bg-pink-500',    iconColor: 'text-pink-500'    },
+  };
+}
 
 export function ArchiveView() {
-  const { t } = useLanguage();
+  const { currentLanguage } = useLanguage();
+  const isAr = currentLanguage === 'ar';
   const [searchQuery, setSearchQuery] = useState('');
   const [activeType, setActiveType]   = useState<ArchivedItem['type'] | 'all'>('all');
   const queryClient = useQueryClient();
+
+  const typeConfig = getTypeConfig(isAr);
 
   const { data: archivedItems, isLoading } = useArchivedItems();
 
@@ -68,11 +73,11 @@ export function ArchiveView() {
 
       if (error) throw error;
 
-      toast.success('تم استعادة العنصر بنجاح');
+      toast.success(isAr ? 'تم استعادة العنصر بنجاح' : 'Item restored successfully');
       queryClient.invalidateQueries({ queryKey: ['archived-items'] });
       queryClient.invalidateQueries({ queryKey: [tableName] });
     } catch {
-      toast.error('حدث خطأ في استعادة العنصر');
+      toast.error(isAr ? 'حدث خطأ في استعادة العنصر' : 'Error restoring item');
     }
   };
 
@@ -85,19 +90,20 @@ export function ArchiveView() {
   }
 
   const totalCount = archivedItems?.length ?? 0;
+  const dateLocale = isAr ? ar : undefined;
 
   return (
     <div className="space-y-5">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-xl font-bold text-foreground">الأرشيف</h2>
-          <p className="text-sm text-muted-foreground">جميع العناصر المؤرشفة من كافة أقسام النظام</p>
+          <h2 className="text-xl font-bold text-foreground">{isAr ? 'الأرشيف' : 'Archive'}</h2>
+          <p className="text-sm text-muted-foreground">{isAr ? 'جميع العناصر المؤرشفة من كافة أقسام النظام' : 'All archived items from every section of the system'}</p>
         </div>
         <div className="flex items-center gap-2 bg-muted/50 rounded-xl px-3 py-2 self-start sm:self-auto">
           <Archive className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm font-semibold">{totalCount}</span>
-          <span className="text-xs text-muted-foreground">عنصر</span>
+          <span className="text-xs text-muted-foreground">{isAr ? 'عنصر' : 'items'}</span>
         </div>
       </div>
 
@@ -105,7 +111,7 @@ export function ArchiveView() {
       <div className="relative">
         <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
-          placeholder="بحث في الأرشيف..."
+          placeholder={isAr ? 'بحث في الأرشيف...' : 'Search archive...'}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pr-10 bg-muted/50 border-border/50"
@@ -122,7 +128,7 @@ export function ArchiveView() {
               : 'bg-muted/60 text-muted-foreground hover:bg-muted'
           }`}
         >
-          الكل
+          {isAr ? 'الكل' : 'All'}
           <span className={`px-1.5 py-0.5 rounded-full text-xs ${activeType === 'all' ? 'bg-white/20' : 'bg-muted'}`}>
             {totalCount}
           </span>
@@ -156,8 +162,8 @@ export function ArchiveView() {
           <div className="w-16 h-16 rounded-2xl bg-muted/40 flex items-center justify-center mx-auto mb-4">
             <Archive className="w-8 h-8 opacity-40" />
           </div>
-          <p className="font-medium mb-1">لا توجد عناصر مؤرشفة</p>
-          <p className="text-xs">العناصر التي تؤرشفها ستظهر هنا</p>
+          <p className="font-medium mb-1">{isAr ? 'لا توجد عناصر مؤرشفة' : 'No archived items'}</p>
+          <p className="text-xs">{isAr ? 'العناصر التي تؤرشفها ستظهر هنا' : 'Items you archive will appear here'}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -190,7 +196,7 @@ export function ArchiveView() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => handleRestore(item)}>
-                        <RotateCcw className="w-4 h-4 ml-2" />استعادة
+                        <RotateCcw className="w-4 h-4 ml-2" />{isAr ? 'استعادة' : 'Restore'}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -201,8 +207,8 @@ export function ArchiveView() {
                 )}
 
                 <div className="flex items-center justify-between text-xs text-muted-foreground pt-0.5 border-t border-border/30">
-                  <span>مؤرشف</span>
-                  <span>{format(new Date(item.archived_at), 'dd MMM yyyy', { locale: ar })}</span>
+                  <span>{isAr ? 'مؤرشف' : 'Archived'}</span>
+                  <span>{format(new Date(item.archived_at), 'dd MMM yyyy', { locale: dateLocale })}</span>
                 </div>
               </div>
             );

@@ -7,6 +7,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/hooks/useLanguage';
 import {
   Eye, AlertTriangle, Info, ChevronRight, ArrowRight,
   CheckCircle2, TrendingDown, Layers, Zap, Clock,
@@ -32,35 +33,39 @@ const TYPE_ICON: Record<PredictionType, React.FC<any>> = {
   energy_drop:     Battery,
 };
 
-const SEVERITY_CFG: Record<PredictionSeverity, {
+function getSeverityCfg(isAr: boolean): Record<PredictionSeverity, {
   bar: string; badge: string; badgeText: string; icon: string;
-}> = {
-  critical: {
-    bar:       'bg-red-500',
-    badge:     'bg-red-500/12 border-red-500/25 text-red-500',
-    badgeText: 'حرج',
-    icon:      'text-red-500',
-  },
-  warning: {
-    bar:       'bg-amber-400',
-    badge:     'bg-amber-400/12 border-amber-400/25 text-amber-500',
-    badgeText: 'تحذير',
-    icon:      'text-amber-500',
-  },
-  info: {
-    bar:       'bg-blue-400',
-    badge:     'bg-blue-400/10 border-blue-400/20 text-blue-500',
-    badgeText: 'معلومة',
-    icon:      'text-blue-500',
-  },
-};
+}> {
+  return {
+    critical: {
+      bar:       'bg-red-500',
+      badge:     'bg-red-500/12 border-red-500/25 text-red-500',
+      badgeText: isAr ? 'حرج' : 'Critical',
+      icon:      'text-red-500',
+    },
+    warning: {
+      bar:       'bg-amber-400',
+      badge:     'bg-amber-400/12 border-amber-400/25 text-amber-500',
+      badgeText: isAr ? 'تحذير' : 'Warning',
+      icon:      'text-amber-500',
+    },
+    info: {
+      bar:       'bg-blue-400',
+      badge:     'bg-blue-400/10 border-blue-400/20 text-blue-500',
+      badgeText: isAr ? 'معلومة' : 'Info',
+      icon:      'text-blue-500',
+    },
+  };
+}
 
-const TIMEFRAME_CFG: Record<PredictionTimeframe, { label: string; color: string }> = {
-  today:     { label: 'اليوم',           color: 'text-red-500 bg-red-500/10' },
-  tomorrow:  { label: 'غداً',            color: 'text-amber-500 bg-amber-500/10' },
-  this_week: { label: 'هذا الأسبوع',    color: 'text-blue-500 bg-blue-500/10' },
-  next_week: { label: 'الأسبوع القادم', color: 'text-slate-500 bg-slate-500/10' },
-};
+function getTimeframeCfg(isAr: boolean): Record<PredictionTimeframe, { label: string; color: string }> {
+  return {
+    today:     { label: isAr ? 'اليوم'           : 'Today',     color: 'text-red-500 bg-red-500/10'     },
+    tomorrow:  { label: isAr ? 'غداً'            : 'Tomorrow',  color: 'text-amber-500 bg-amber-500/10' },
+    this_week: { label: isAr ? 'هذا الأسبوع'    : 'This Week', color: 'text-blue-500 bg-blue-500/10'   },
+    next_week: { label: isAr ? 'الأسبوع القادم' : 'Next Week', color: 'text-slate-500 bg-slate-500/10' },
+  };
+}
 
 // ── Confidence meter ───────────────────────────────────────────────────────────
 
@@ -107,7 +112,6 @@ function RiskGauge({ score, label }: { score: number; label: string }) {
       <div className={cn('text-2xl font-black tabular-nums', color)}>{score}</div>
       <div className="flex-1 space-y-1">
         <div className="text-[10px] text-muted-foreground">{label}</div>
-        {/* Segmented bar */}
         <div className="flex gap-0.5 h-1.5">
           {segments.map(seg => (
             <div
@@ -126,11 +130,13 @@ function RiskGauge({ score, label }: { score: number; label: string }) {
 
 // ── Prediction card ────────────────────────────────────────────────────────────
 
-function PredictionCard({ prediction: p }: { prediction: Prediction }) {
+function PredictionCard({ prediction: p, isAr }: { prediction: Prediction; isAr: boolean }) {
   const [open, setOpen] = useState(false);
   const navigate        = useNavigate();
-  const cfg             = SEVERITY_CFG[p.severity];
-  const tfCfg           = TIMEFRAME_CFG[p.timeframe];
+  const severityCfg     = getSeverityCfg(isAr);
+  const timeframeCfg    = getTimeframeCfg(isAr);
+  const cfg             = severityCfg[p.severity];
+  const tfCfg           = timeframeCfg[p.timeframe];
   const Icon            = TYPE_ICON[p.type];
 
   return (
@@ -149,13 +155,8 @@ function PredictionCard({ prediction: p }: { prediction: Prediction }) {
         className="w-full flex items-start gap-2.5 px-3 py-2.5 text-start"
         onClick={() => setOpen(o => !o)}
       >
-        {/* Severity bar */}
         <div className={cn('w-0.5 rounded-full self-stretch shrink-0 mt-0.5', cfg.bar)} />
-
-        {/* Icon */}
         <Icon className={cn('w-3.5 h-3.5 mt-0.5 shrink-0', cfg.icon)} />
-
-        {/* Content */}
         <div className="flex-1 min-w-0 space-y-1">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-xs font-bold text-foreground/90 truncate">
@@ -173,7 +174,6 @@ function PredictionCard({ prediction: p }: { prediction: Prediction }) {
           </p>
           <ConfidenceMeter value={p.confidence} severity={p.severity} />
         </div>
-
         <ChevronRight
           className={cn(
             'w-3.5 h-3.5 text-muted-foreground/40 shrink-0 mt-1 transition-transform',
@@ -185,10 +185,9 @@ function PredictionCard({ prediction: p }: { prediction: Prediction }) {
       {/* Expanded: reasons + action */}
       {open && (
         <div className="px-4 pb-3 pt-1 border-t border-border/30 space-y-2.5">
-          {/* Reasons */}
           <div className="space-y-1">
             <div className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">
-              لماذا هذا التوقع؟
+              {isAr ? 'لماذا هذا التوقع؟' : 'Why this forecast?'}
             </div>
             {p.reasons.map((r, i) => (
               <div key={i} className="flex items-start gap-1.5">
@@ -197,8 +196,6 @@ function PredictionCard({ prediction: p }: { prediction: Prediction }) {
               </div>
             ))}
           </div>
-
-          {/* Action */}
           {p.preventable && p.actionLabel && (
             <button
               onClick={e => { e.stopPropagation(); navigate(p.actionRoute ?? '/'); }}
@@ -246,12 +243,12 @@ function PredictiveSkeleton() {
 
 // ── Empty state ────────────────────────────────────────────────────────────────
 
-function PredictiveEmpty() {
+function PredictiveEmpty({ isAr }: { isAr: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center gap-2 py-6">
       <CheckCircle2 className="w-8 h-8 text-emerald-500/60" />
       <p className="text-xs text-muted-foreground text-center">
-        لا توقعات سلبية الآن — المسار سليم
+        {isAr ? 'لا توقعات سلبية الآن — المسار سليم' : 'No negative forecasts right now — you\'re on track'}
       </p>
     </div>
   );
@@ -261,18 +258,20 @@ function PredictiveEmpty() {
 
 type FilterTab = 'all' | 'critical' | 'warning' | 'info';
 
-const FILTER_TABS: { id: FilterTab; label: string }[] = [
-  { id: 'all',      label: 'الكل'    },
-  { id: 'critical', label: 'حرج'     },
-  { id: 'warning',  label: 'تحذير'   },
-  { id: 'info',     label: 'معلومة'  },
-];
-
 // ── Main component ─────────────────────────────────────────────────────────────
 
 export function PredictivePanel() {
   const { predictions, riskScore, riskLabel, isLoading } = usePredictiveEngine();
+  const { currentLanguage } = useLanguage();
+  const isAr = currentLanguage === 'ar';
   const [filter, setFilter] = useState<FilterTab>('all');
+
+  const FILTER_TABS: { id: FilterTab; label: string }[] = [
+    { id: 'all',      label: isAr ? 'الكل'    : 'All'      },
+    { id: 'critical', label: isAr ? 'حرج'     : 'Critical' },
+    { id: 'warning',  label: isAr ? 'تحذير'   : 'Warning'  },
+    { id: 'info',     label: isAr ? 'معلومة'  : 'Info'     },
+  ];
 
   const filtered = filter === 'all'
     ? predictions
@@ -291,18 +290,20 @@ export function PredictivePanel() {
             <span className="absolute -top-1 -end-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
           )}
         </div>
-        <span className="text-sm font-black text-foreground">الطبقة التنبؤية</span>
+        <span className="text-sm font-black text-foreground">
+          {isAr ? 'الطبقة التنبؤية' : 'Predictive Layer'}
+        </span>
         <span className="text-[10px] text-muted-foreground/60 flex-1">Predictive Layer</span>
 
         {/* Badge counts */}
         {criticalCount > 0 && (
           <span className="text-[9px] font-black text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-full">
-            {criticalCount} حرج
+            {criticalCount} {isAr ? 'حرج' : 'critical'}
           </span>
         )}
         {warningCount > 0 && (
           <span className="text-[9px] font-black text-amber-500 bg-amber-400/10 px-1.5 py-0.5 rounded-full">
-            {warningCount} تحذير
+            {warningCount} {isAr ? 'تحذير' : 'warning'}
           </span>
         )}
       </div>
@@ -345,11 +346,11 @@ export function PredictivePanel() {
 
             {/* Prediction list */}
             {filtered.length === 0 ? (
-              <PredictiveEmpty />
+              <PredictiveEmpty isAr={isAr} />
             ) : (
               <div className="space-y-2">
                 {filtered.map(p => (
-                  <PredictionCard key={p.id} prediction={p} />
+                  <PredictionCard key={p.id} prediction={p} isAr={isAr} />
                 ))}
               </div>
             )}

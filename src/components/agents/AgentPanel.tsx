@@ -7,11 +7,11 @@
  *   🔁 Habit Agent  — Behavior-outcome correlations
  *
  * Each panel is lazy-rendered (no data fetched until tab opened).
- * Design: compact, action-oriented, Arabic-first.
  */
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/hooks/useLanguage';
 import {
   Brain, ListChecks, Wallet, RefreshCw, ArrowRight,
   AlertTriangle, Lightbulb, Bell, TrendingUp, Zap,
@@ -26,12 +26,6 @@ import { useUpdateTask } from '@/hooks/useTasks';
 // ── Tab configuration ──────────────────────────────────────────────────────────
 
 type AgentTab = 'tasks' | 'finance' | 'habits';
-
-const TABS: { id: AgentTab; label: string; icon: React.FC<any>; color: string }[] = [
-  { id: 'tasks',   label: 'يومي',    icon: ListChecks, color: 'text-blue-500'    },
-  { id: 'finance', label: 'مالي',    icon: Wallet,     color: 'text-emerald-500' },
-  { id: 'habits',  label: 'عادات',   icon: RefreshCw,  color: 'text-violet-500'  },
-];
 
 // ── Suggestion type icon ───────────────────────────────────────────────────────
 
@@ -60,6 +54,8 @@ const PRIO_BAR: Record<string, string> = {
 
 function TaskAgentPanel() {
   const navigate = useNavigate();
+  const { currentLanguage } = useLanguage();
+  const isAr = currentLanguage === 'ar';
   const { plan, isLoading } = useTaskAgent();
   const updateTask = useUpdateTask();
 
@@ -69,9 +65,9 @@ function TaskAgentPanel() {
 
   const blockMap = { morning, afternoon, evening };
   const blockLabels: Record<string, string> = {
-    morning:   '🌅 الصباح',
-    afternoon: '☀️ بعد الظهر',
-    evening:   '🌙 المساء',
+    morning:   isAr ? '🌅 الصباح'    : '🌅 Morning',
+    afternoon: isAr ? '☀️ بعد الظهر' : '☀️ Afternoon',
+    evening:   isAr ? '🌙 المساء'    : '🌙 Evening',
   };
 
   return (
@@ -81,19 +77,21 @@ function TaskAgentPanel() {
         <div className="flex-1 flex items-center gap-2">
           <div className="text-2xl font-black text-foreground">{totalTasks}</div>
           <div className="text-xs text-muted-foreground leading-tight">
-            <div>مهمة نشطة</div>
+            <div>{isAr ? 'مهمة نشطة' : 'active tasks'}</div>
             {completedToday > 0 && (
-              <div className="text-emerald-500 font-semibold">{completedToday} منجزة اليوم ✓</div>
+              <div className="text-emerald-500 font-semibold">
+                {completedToday} {isAr ? 'منجزة اليوم ✓' : 'done today ✓'}
+              </div>
             )}
           </div>
         </div>
         {overloaded && (
           <span className="text-[10px] font-black text-red-500 bg-red-500/10 px-2 py-0.5 rounded-full">
-            مكتظ
+            {isAr ? 'مكتظ' : 'Overloaded'}
           </span>
         )}
         <span className="text-[10px] text-muted-foreground">
-          ذروتك في {blockLabels[peakBlock]}
+          {isAr ? 'ذروتك في' : 'Peak at'} {blockLabels[peakBlock]}
         </span>
       </div>
 
@@ -128,13 +126,13 @@ function TaskAgentPanel() {
                   }}
                   className="opacity-0 group-hover:opacity-100 text-[9px] font-bold text-blue-500 border border-blue-400/30 rounded px-1.5 py-0.5 transition-opacity"
                 >
-                  ابدأ
+                  {isAr ? 'ابدأ' : 'Start'}
                 </button>
               </div>
             ))}
             {tasks.length > 2 && (
               <div className="text-[10px] text-muted-foreground/60 ps-2">
-                + {tasks.length - 2} مهام أخرى
+                + {tasks.length - 2} {isAr ? 'مهام أخرى' : 'more tasks'}
               </div>
             )}
           </div>
@@ -145,7 +143,7 @@ function TaskAgentPanel() {
       {suggestions.length > 0 && (
         <div className="space-y-1.5 pt-1 border-t border-border/40">
           <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
-            اقتراحات الوكيل
+            {isAr ? 'اقتراحات الوكيل' : 'Agent Suggestions'}
           </div>
           {suggestions.slice(0, 3).map(s => (
             <SuggestionRow key={s.id} suggestion={s} onNavigate={() => navigate('/tasks')} />
@@ -199,6 +197,8 @@ function SuggestionRow({
 
 function FinanceAgentPanel() {
   const navigate = useNavigate();
+  const { currentLanguage } = useLanguage();
+  const isAr = currentLanguage === 'ar';
   const { suggestions, healthScore, healthLabel, savingsRate, burnDays, isLoading } = useFinanceAgent();
 
   if (isLoading) return <AgentSkeleton />;
@@ -222,8 +222,15 @@ function FinanceAgentPanel() {
           <div className="text-xs text-muted-foreground">{healthLabel}</div>
         </div>
         <div className="text-end text-[10px] text-muted-foreground space-y-0.5">
-          <div>توفير <span className="font-bold text-foreground">{savingsRate}%</span></div>
-          <div>احتياطي <span className="font-bold text-foreground">{burnDays > 365 ? '+365' : burnDays}</span> يوم</div>
+          <div>
+            {isAr ? 'توفير' : 'Savings'}{' '}
+            <span className="font-bold text-foreground">{savingsRate}%</span>
+          </div>
+          <div>
+            {isAr ? 'احتياطي' : 'Reserve'}{' '}
+            <span className="font-bold text-foreground">{burnDays > 365 ? '+365' : burnDays}</span>{' '}
+            {isAr ? 'يوم' : 'days'}
+          </div>
         </div>
       </div>
 
@@ -238,7 +245,7 @@ function FinanceAgentPanel() {
       {/* Suggestions */}
       {suggestions.length === 0 ? (
         <div className="text-center py-4 text-xs text-muted-foreground">
-          لا توجد قرارات مالية عاجلة الآن
+          {isAr ? 'لا توجد قرارات مالية عاجلة الآن' : 'No urgent financial decisions right now'}
         </div>
       ) : (
         <div className="space-y-1.5">
@@ -270,7 +277,7 @@ function HabitRing({ completionRate }: { completionRate: number }) {
   );
 }
 
-function HabitCard({ habit }: { habit: HabitWithStats }) {
+function HabitCard({ habit, isAr }: { habit: HabitWithStats; isAr: boolean }) {
   return (
     <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-muted/30">
       <div
@@ -288,10 +295,14 @@ function HabitCard({ habit }: { habit: HabitWithStats }) {
             </span>
           )}
           {habit.completedToday && (
-            <span className="text-[9px] font-bold text-emerald-500">✓ اليوم</span>
+            <span className="text-[9px] font-bold text-emerald-500">
+              {isAr ? '✓ اليوم' : '✓ Today'}
+            </span>
           )}
           {!habit.completedToday && (
-            <span className="text-[9px] text-muted-foreground/60">لم تُنجز اليوم</span>
+            <span className="text-[9px] text-muted-foreground/60">
+              {isAr ? 'لم تُنجز اليوم' : 'Not done today'}
+            </span>
           )}
         </div>
       </div>
@@ -324,6 +335,8 @@ function HabitInsightRow({ insight }: { insight: HabitInsight }) {
 
 function HabitAgentPanel() {
   const navigate = useNavigate();
+  const { currentLanguage } = useLanguage();
+  const isAr = currentLanguage === 'ar';
   const { topHabits, atRisk, insights, overallScore, overallLabel, isLoading } = useHabitAgent();
 
   if (isLoading) return <AgentSkeleton />;
@@ -341,7 +354,7 @@ function HabitAgentPanel() {
         <div className="text-xs text-muted-foreground flex-1">{overallLabel}</div>
         {atRisk.length > 0 && (
           <span className="text-[10px] font-black text-red-500 bg-red-500/10 px-2 py-0.5 rounded-full">
-            {atRisk.length} في خطر
+            {atRisk.length} {isAr ? 'في خطر' : 'at risk'}
           </span>
         )}
       </div>
@@ -350,9 +363,9 @@ function HabitAgentPanel() {
       {atRisk.length > 0 && (
         <div className="space-y-1">
           <div className="text-[10px] font-bold text-red-500/80 uppercase tracking-wide">
-            عادات تحتاج اهتماماً
+            {isAr ? 'عادات تحتاج اهتماماً' : 'Habits Needing Attention'}
           </div>
-          {atRisk.slice(0, 2).map(h => <HabitCard key={h.id} habit={h} />)}
+          {atRisk.slice(0, 2).map(h => <HabitCard key={h.id} habit={h} isAr={isAr} />)}
         </div>
       )}
 
@@ -360,9 +373,9 @@ function HabitAgentPanel() {
       {topHabits.length > 0 && (
         <div className="space-y-1">
           <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
-            أبرز العادات
+            {isAr ? 'أبرز العادات' : 'Top Habits'}
           </div>
-          {topHabits.slice(0, 3).map(h => <HabitCard key={h.id} habit={h} />)}
+          {topHabits.slice(0, 3).map(h => <HabitCard key={h.id} habit={h} isAr={isAr} />)}
         </div>
       )}
 
@@ -370,7 +383,7 @@ function HabitAgentPanel() {
       {insights.length > 0 && (
         <div className="space-y-1.5 pt-1 border-t border-border/40">
           <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
-            رؤى الوكيل
+            {isAr ? 'رؤى الوكيل' : 'Agent Insights'}
           </div>
           {insights.slice(0, 3).map(i => (
             <HabitInsightRow key={i.id} insight={i} />
@@ -382,7 +395,7 @@ function HabitAgentPanel() {
         onClick={() => navigate('/habits')}
         className="w-full flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors py-1"
       >
-        عرض كل العادات <ArrowRight className="w-3 h-3" />
+        {isAr ? 'عرض كل العادات' : 'View all habits'} <ArrowRight className="w-3 h-3" />
       </button>
     </div>
   );
@@ -411,13 +424,23 @@ function AgentSkeleton() {
 
 export function AgentPanel() {
   const [activeTab, setActiveTab] = useState<AgentTab>('tasks');
+  const { currentLanguage } = useLanguage();
+  const isAr = currentLanguage === 'ar';
+
+  const TABS: { id: AgentTab; label: string; icon: React.FC<any>; color: string }[] = [
+    { id: 'tasks',   label: isAr ? 'يومي'  : 'Daily',   icon: ListChecks, color: 'text-blue-500'    },
+    { id: 'finance', label: isAr ? 'مالي'  : 'Finance', icon: Wallet,     color: 'text-emerald-500' },
+    { id: 'habits',  label: isAr ? 'عادات' : 'Habits',  icon: RefreshCw,  color: 'text-violet-500'  },
+  ];
 
   return (
     <div className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-sm overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-2 px-4 pt-3.5 pb-2.5 border-b border-border/40">
         <Brain className="w-4 h-4 text-primary shrink-0" />
-        <span className="text-sm font-black text-foreground">وكلاء الذكاء</span>
+        <span className="text-sm font-black text-foreground">
+          {isAr ? 'وكلاء الذكاء' : 'AI Agents'}
+        </span>
         <span className="text-[10px] text-muted-foreground/60 flex-1">Agent Layer</span>
 
         {/* Tab switcher */}
