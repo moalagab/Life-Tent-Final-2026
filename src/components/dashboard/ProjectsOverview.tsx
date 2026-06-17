@@ -1,7 +1,7 @@
-import { ArrowUpRight, Play, Pause, CheckCircle, Loader2, Edit3, Trash2, FolderKanban } from 'lucide-react';
+import { ArrowUpRight, Play, Pause, CheckCircle, Loader2, Edit3, Trash2, FolderKanban, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useProjects, useUpdateProject, useDeleteProject } from '@/hooks/useProjects';
+import { useProjects, useUpdateProject, useDeleteProject, useCreateProject } from '@/hooks/useProjects';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -15,7 +15,20 @@ export function ProjectsOverview() {
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
 
-  const [editingProject, setEditingProject] = useState<{ id: string; title: string } | null>(null);
+  const createProject = useCreateProject();
+  const [editingProject,  setEditingProject]  = useState<{ id: string; title: string } | null>(null);
+  const [addingProject,   setAddingProject]   = useState(false);
+  const [newProjectTitle, setNewProjectTitle] = useState('');
+
+  const handleCreate = async () => {
+    if (!newProjectTitle.trim()) return;
+    try {
+      await createProject.mutateAsync({ title: newProjectTitle.trim(), status: 'active', phase: 'initiation', progress: 0 });
+      toast.success(currentLanguage === 'ar' ? 'تم إنشاء المشروع' : 'Project created');
+      setNewProjectTitle('');
+      setAddingProject(false);
+    } catch { toast.error(t('common.error')); }
+  };
 
   const statusConfig = {
     active: { icon: Play, color: 'text-success', badge: 'bg-success/10 text-success border-success/20', label: t('projects.status.active') },
@@ -54,6 +67,16 @@ export function ProjectsOverview() {
 
   const displayProjects = projects?.filter(p => p.status === 'active' || p.status === 'on_hold').slice(0, 3) || [];
 
+  const addButton = (
+    <button
+      onClick={() => setAddingProject(true)}
+      className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-primary"
+      title={currentLanguage === 'ar' ? 'إضافة مشروع' : 'Add project'}
+    >
+      <Plus className="w-4 h-4" />
+    </button>
+  );
+
   if (isLoading) {
     return (
       <DashboardWidgetShell
@@ -63,6 +86,7 @@ export function ProjectsOverview() {
         iconBg="bg-primary/10"
         linkTo="/projects"
         linkText={t('common.viewAll')}
+        headerAction={addButton}
       >
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-5 h-5 animate-spin text-primary" />
@@ -79,6 +103,7 @@ export function ProjectsOverview() {
       iconBg="bg-primary/10"
       linkTo="/projects"
       linkText={t('common.viewAll')}
+      headerAction={addButton}
     >
       {displayProjects.length > 0 ? (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -153,6 +178,33 @@ export function ProjectsOverview() {
           message={t('projects.noProjects')}
         />
       )}
+
+      {/* Create Dialog */}
+      <Dialog open={addingProject} onOpenChange={v => { setAddingProject(v); setNewProjectTitle(''); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Plus className="w-4 h-4 text-primary" />
+              </div>
+              {currentLanguage === 'ar' ? 'مشروع جديد' : 'New Project'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <Input
+              autoFocus
+              value={newProjectTitle}
+              onChange={e => setNewProjectTitle(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleCreate(); }}
+              placeholder={t('projects.projectTitle')}
+              className="bg-muted/50"
+            />
+            <Button onClick={handleCreate} className="w-full" disabled={createProject.isPending || !newProjectTitle.trim()}>
+              {createProject.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : (currentLanguage === 'ar' ? 'إنشاء' : 'Create')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit Dialog */}
       <Dialog open={!!editingProject} onOpenChange={() => setEditingProject(null)}>

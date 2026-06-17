@@ -1,7 +1,7 @@
-import { Flame, Check, Loader2, Trash2, Edit3, Zap } from 'lucide-react';
+import { Flame, Check, Loader2, Trash2, Edit3, Zap, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useHabits, useHabitLogs, useLogHabit, useDeleteHabit, useUpdateHabit } from '@/hooks/useHabits';
+import { useHabits, useHabitLogs, useLogHabit, useDeleteHabit, useUpdateHabit, useCreateHabit } from '@/hooks/useHabits';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -18,7 +18,20 @@ export function HabitStreaks() {
   const deleteHabit = useDeleteHabit();
   const updateHabit = useUpdateHabit();
 
-  const [editingHabit, setEditingHabit] = useState<{ id: string; name: string } | null>(null);
+  const createHabit = useCreateHabit();
+  const [editingHabit,  setEditingHabit]  = useState<{ id: string; name: string } | null>(null);
+  const [addingHabit,   setAddingHabit]   = useState(false);
+  const [newHabitName,  setNewHabitName]  = useState('');
+  const [newHabitIcon,  setNewHabitIcon]  = useState('✨');
+
+  const handleCreate = async () => {
+    if (!newHabitName.trim()) return;
+    try {
+      await createHabit.mutateAsync({ name: newHabitName.trim(), icon: newHabitIcon });
+      toast.success(t('habits.habitAdded') || (currentLanguage === 'ar' ? 'تم إضافة العادة' : 'Habit added'));
+      setNewHabitName(''); setNewHabitIcon('✨'); setAddingHabit(false);
+    } catch { toast.error(t('common.error')); }
+  };
 
   const today = format(new Date(), 'yyyy-MM-dd');
 
@@ -122,9 +135,18 @@ export function HabitStreaks() {
       iconBg="bg-destructive/10"
       accentColor="bg-destructive/10"
       headerAction={
-        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-destructive/10">
-          <Zap className="w-3.5 h-3.5 text-destructive" />
-          <span className="text-xs font-bold text-foreground">{totalStreak}</span>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-destructive/10">
+            <Zap className="w-3.5 h-3.5 text-destructive" />
+            <span className="text-xs font-bold text-foreground">{totalStreak}</span>
+          </div>
+          <button
+            onClick={() => setAddingHabit(true)}
+            className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-primary"
+            title={currentLanguage === 'ar' ? 'إضافة عادة' : 'Add habit'}
+          >
+            <Plus className="w-4 h-4" />
+          </button>
         </div>
       }
     >
@@ -226,6 +248,41 @@ export function HabitStreaks() {
           message={t('habits.noHabits')}
         />
       )}
+
+      {/* Create Dialog */}
+      <Dialog open={addingHabit} onOpenChange={v => { setAddingHabit(v); setNewHabitName(''); setNewHabitIcon('✨'); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center">
+                <Plus className="w-4 h-4 text-destructive" />
+              </div>
+              {currentLanguage === 'ar' ? 'عادة جديدة' : 'New Habit'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div className="flex gap-2">
+              <Input
+                value={newHabitIcon}
+                onChange={e => setNewHabitIcon(e.target.value)}
+                className="w-16 text-center text-xl bg-muted/50"
+                maxLength={2}
+              />
+              <Input
+                autoFocus
+                value={newHabitName}
+                onChange={e => setNewHabitName(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') handleCreate(); }}
+                placeholder={t('habits.habitName')}
+                className="flex-1 bg-muted/50"
+              />
+            </div>
+            <Button onClick={handleCreate} className="w-full" disabled={createHabit.isPending || !newHabitName.trim()}>
+              {createHabit.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : (currentLanguage === 'ar' ? 'إضافة' : 'Add')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit Dialog */}
       <Dialog open={!!editingHabit} onOpenChange={() => setEditingHabit(null)}>

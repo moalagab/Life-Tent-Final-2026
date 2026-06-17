@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Check, Trash2, Edit3, Loader2, CheckCircle2, ListTodo } from 'lucide-react';
+import { Check, Trash2, Edit3, Loader2, CheckCircle2, ListTodo, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useTasks, useUpdateTask, useDeleteTask } from '@/hooks/useTasks';
+import { useTasks, useUpdateTask, useDeleteTask, useCreateTask } from '@/hooks/useTasks';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,20 @@ export function FocusTasks() {
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
 
-  const [editingTask, setEditingTask] = useState<{ id: string; title: string } | null>(null);
+  const createTask = useCreateTask();
+  const [editingTask,  setEditingTask]  = useState<{ id: string; title: string } | null>(null);
+  const [addingTask,   setAddingTask]   = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+
+  const handleCreate = async () => {
+    if (!newTaskTitle.trim()) return;
+    try {
+      await createTask.mutateAsync({ title: newTaskTitle.trim(), status: 'todo', is_focus: true });
+      toast.success(currentLanguage === 'ar' ? 'تم إضافة المهمة' : 'Task added');
+      setNewTaskTitle('');
+      setAddingTask(false);
+    } catch { toast.error(t('common.error')); }
+  };
 
   const tasks = allTasks?.filter(task => task.is_focus || task.status === 'todo').slice(0, 4) || [];
   const completedCount = tasks.filter(t => t.status === 'done').length;
@@ -84,6 +97,15 @@ export function FocusTasks() {
       iconBg="bg-primary/10"
       linkTo="/tasks"
       linkText={t('common.viewAll')}
+      headerAction={
+        <button
+          onClick={() => setAddingTask(true)}
+          className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-primary"
+          title={currentLanguage === 'ar' ? 'إضافة مهمة' : 'Add task'}
+        >
+          <Plus className="w-4 h-4" />
+        </button>
+      }
     >
       {tasks.length > 0 ? (
         <>
@@ -182,6 +204,33 @@ export function FocusTasks() {
           message={t('tasks.noTasks')}
         />
       )}
+
+      {/* Create Dialog */}
+      <Dialog open={addingTask} onOpenChange={v => { setAddingTask(v); setNewTaskTitle(''); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Plus className="w-4 h-4 text-primary" />
+              </div>
+              {currentLanguage === 'ar' ? 'مهمة جديدة' : 'New Task'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <Input
+              autoFocus
+              value={newTaskTitle}
+              onChange={e => setNewTaskTitle(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleCreate(); }}
+              placeholder={t('tasks.taskTitle')}
+              className="bg-muted/50"
+            />
+            <Button onClick={handleCreate} className="w-full" disabled={createTask.isPending || !newTaskTitle.trim()}>
+              {createTask.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : (currentLanguage === 'ar' ? 'إضافة' : 'Add')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit Dialog */}
       <Dialog open={!!editingTask} onOpenChange={() => setEditingTask(null)}>
