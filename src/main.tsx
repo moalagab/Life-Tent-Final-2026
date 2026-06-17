@@ -10,6 +10,23 @@ import { initMonitoring, connectMonitoringAdapter } from "./lib/monitoring";
 import { initAnalytics } from "./lib/analytics";
 import { registerSW } from "virtual:pwa-register";
 
+// ── Stale-chunk guard ────────────────────────────────────────────────────────
+// When Vercel deploys a new build, old JS chunk hashes disappear from the CDN.
+// Any in-flight lazy import that tries to fetch an old hash gets a network error.
+// Catch it here and reload once — the new index.html will reference correct hashes.
+window.addEventListener('vite:preloadError', () => {
+  window.location.reload();
+});
+// Also catch dynamic import errors that slip past vite:preloadError
+const _handleChunkError = (event: ErrorEvent) => {
+  if (event.message?.includes('Failed to fetch dynamically imported module') ||
+      event.message?.includes('Importing a module script failed')) {
+    event.preventDefault();
+    window.location.reload();
+  }
+};
+window.addEventListener('error', _handleChunkError);
+
 // ── PWA Service Worker registration ─────────────────────────────────────────
 // autoUpdate: SW installs silently; prompts user to reload when new version ready
 registerSW({

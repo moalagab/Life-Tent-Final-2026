@@ -25,14 +25,35 @@ interface State {
  *     <SomePage />
  *   </ErrorBoundary>
  */
+const CHUNK_ERROR_PATTERNS = [
+  'Failed to fetch dynamically imported module',
+  'Importing a module script failed',
+  'Unable to preload CSS',
+  'ChunkLoadError',
+];
+
+const isChunkError = (err: Error) =>
+  CHUNK_ERROR_PATTERNS.some(p => err.message?.includes(p) || err.name?.includes(p));
+
 export class ErrorBoundary extends Component<Props, State> {
   state: State = { error: null };
 
   static getDerivedStateFromError(error: Error): State {
+    // Stale-chunk error after a new deployment → reload once (guard against loops)
+    if (isChunkError(error)) {
+      const reloadKey = 'eb_chunk_reload';
+      if (!sessionStorage.getItem(reloadKey)) {
+        sessionStorage.setItem(reloadKey, '1');
+        window.location.reload();
+        return { error: null }; // keep the tree alive until reload fires
+      }
+      sessionStorage.removeItem(reloadKey);
+    }
     return { error };
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
+    if (isChunkError(error)) return; // already handled above
     logger.error('Unhandled render error', error, {
       componentStack: info.componentStack ?? undefined,
     });
