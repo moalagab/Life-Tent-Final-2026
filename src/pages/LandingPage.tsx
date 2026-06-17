@@ -578,7 +578,7 @@ export default function LandingPage() {
                 info@lifetent.online
               </a>
               <a
-                href="https://wa.me/966500000000"
+                href="https://wa.me/966561167169"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#25D366]/10 border border-[#25D366]/30 text-[#25D366] hover:bg-[#25D366]/20 transition-colors text-sm font-medium"
