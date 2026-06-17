@@ -263,6 +263,7 @@ export function CommandCenter({ open, onClose, focusModeActive, onToggleFocusMod
   );
 
   return (
+    <>
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6"
       aria-modal="true"
@@ -570,5 +571,6 @@ export function CommandCenter({ open, onClose, focusModeActive, onToggleFocusMod
       </div>
     </div>
     {addTaskDialog}
+    </>
   );
 }
