@@ -7,7 +7,7 @@
  *
  * Mobile:   returns null — navigation is via BottomNav.
  */
-import React, { useState, memo } from 'react';
+import React, { memo } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -27,7 +27,6 @@ import {
   Film,
   Settings,
   ChevronLeft,
-  ChevronDown,
   Tent,
   LogOut,
   Timer,
@@ -72,7 +71,6 @@ const BASE_GROUPS: NavGroup[] = [
   {
     labelAr: 'المزيد',
     labelEn: 'More',
-    collapsible: true,
     items: [
       { path: '/habits',    icon: Repeat,    labelKey: 'common.habits'   },
       { path: '/knowledge', icon: BookOpen,  labelKey: 'common.knowledge'},
@@ -107,11 +105,6 @@ const SidebarContent = memo(function SidebarContent({
 }: SidebarContentProps) {
   const isCollapsed = collapsed && !isMobile;
   const isAr = isRTL;
-  const [moreExpanded, setMoreExpanded] = useState(false);
-
-  // Auto-expand "More" if current path matches a more-group item
-  const moreGroup = navGroups.find(g => g.collapsible);
-  const isMoreActive = moreGroup?.items.some(item => locationPath === item.path) ?? false;
 
   return (
     <div className="flex flex-col h-full">
@@ -155,9 +148,6 @@ const SidebarContent = memo(function SidebarContent({
         {navGroups.map((group, gi) => {
           if (group.items.length === 0) return null;
           const groupLabel = isAr ? group.labelAr : group.labelEn;
-          const isMoreGroup = group.collapsible === true;
-          const showMoreItems = isCollapsed || moreExpanded || isMoreActive;
-
           return (
             <div key={gi} className={gi > 0 ? 'mt-2' : ''}>
               {/* Group separator when collapsed */}
@@ -165,29 +155,15 @@ const SidebarContent = memo(function SidebarContent({
                 <div className="my-2 mx-1 h-px bg-border/40" />
               )}
 
-              {/* Group label — "More" is a toggle button when expanded */}
+              {/* Group label */}
               {!isCollapsed && groupLabel && (
-                isMoreGroup ? (
-                  <button
-                    onClick={() => setMoreExpanded(e => !e)}
-                    className="w-full flex items-center gap-1 px-2 pt-1 pb-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors select-none"
-                    aria-expanded={moreExpanded || isMoreActive}
-                  >
-                    <span className="flex-1 text-start">{groupLabel}</span>
-                    <ChevronDown className={cn(
-                      'w-3 h-3 transition-transform duration-200',
-                      (moreExpanded || isMoreActive) && 'rotate-180',
-                    )} />
-                  </button>
-                ) : (
-                  <p className="px-2 pt-1 pb-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground/40 select-none">
-                    {groupLabel}
-                  </p>
-                )
+                <p className="px-2 pt-1 pb-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground/40 select-none">
+                  {groupLabel}
+                </p>
               )}
 
-              {/* Items — hidden for collapsed "More" group in expanded sidebar */}
-              {showMoreItems && (
+              {/* Items — always visible */}
+              {(
                 <div className="space-y-0.5">
                   {group.items.map((item) => {
                     const isActive = locationPath === item.path;
