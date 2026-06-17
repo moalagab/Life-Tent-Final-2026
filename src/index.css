@@ -196,6 +196,14 @@
     @apply border-border;
   }
 
+  /* Form elements don't inherit font-family by default in browsers */
+  input, textarea, select, button {
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+  }
+
   html {
     font-family: 'Lama Sans', sans-serif;
     font-weight: 400;
