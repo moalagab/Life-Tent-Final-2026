@@ -58,10 +58,10 @@ function gradeLabel(score: number): string {
 }
 
 function gradeColor(score: number): string {
-  if (score >= 80) return '#10b981';  // emerald-500
-  if (score >= 60) return '#3b82f6';  // blue-500
-  if (score >= 40) return '#f59e0b';  // amber-500
-  return '#ef4444';                    // red-500
+  if (score >= 80) return 'hsl(var(--success, 142 72% 45%))';
+  if (score >= 60) return 'hsl(var(--primary))';
+  if (score >= 40) return 'hsl(var(--warning, 38 92% 50%))';
+  return 'hsl(var(--destructive))';
 }
 
 function focusInsight(score: number): string {

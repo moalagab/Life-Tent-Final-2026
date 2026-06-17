@@ -271,8 +271,8 @@ const SidebarContent = memo(function SidebarContent({
           </button>
         )}
 
-        {/* Collapse toggle (desktop only) */}
-        {!isMobile && (
+        {/* Collapse toggle — hidden; sidebar is always expanded */}
+        {false && !isMobile && (
           <button
             onClick={onToggleCollapse}
             aria-label={isCollapsed ? t('common.expand') : t('common.collapse')}
@@ -298,15 +298,12 @@ const SidebarContent = memo(function SidebarContent({
 // ── Main Sidebar ───────────────────────────────────────────────────────────────
 
 export function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+  const collapsed = false; // always expanded — no collapse in web
 
   // Communicate sidebar width to MainLayout via CSS variable
   React.useEffect(() => {
-    document.documentElement.style.setProperty(
-      '--sidebar-width',
-      collapsed ? '52px' : '240px',
-    );
-  }, [collapsed]);
+    document.documentElement.style.setProperty('--sidebar-width', '240px');
+  }, []);
 
   const location  = useLocation();
   const navigate  = useNavigate();
@@ -346,7 +343,7 @@ export function Sidebar() {
     onNavClick:       () => {},
     onSignOut:        async () => { await signOut(); navigate('/'); },
     onClose:          () => {},
-    onToggleCollapse: () => setCollapsed(c => !c),
+    onToggleCollapse: () => {},
     userName,
     userInitials,
   };

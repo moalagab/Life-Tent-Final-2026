@@ -16,8 +16,11 @@ import {
   Trophy, Clock, AlertOctagon, Target, CalendarDays,
   X, ChevronRight, ChevronLeft,
   CheckCircle2, AlertTriangle, TrendingUp, TrendingDown,
-  Flame, Folder, Star, BarChart3, ArrowRight,
+  Flame, Folder, Star, BarChart3, ArrowRight, Plus, Minus, Loader2,
 } from 'lucide-react';
+import { useUpdateGoal } from '@/hooks/useGoals';
+import { useUpdateTask } from '@/hooks/useTasks';
+import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format, parseISO } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -337,6 +340,20 @@ const PERSPECTIVE_LABEL: Record<string, string> = {
 };
 
 function InterventionSection({ data }: { data: GoalIntervention | null }) {
+  const updateGoal = useUpdateGoal();
+  const [localValue, setLocalValue] = useState<number | null>(null);
+  const currentValue = localValue ?? (data?.goal.current_value ?? 0);
+
+  const handleUpdateProgress = async (delta: number) => {
+    if (!data) return;
+    const newValue = Math.max(0, currentValue + delta);
+    setLocalValue(newValue);
+    try {
+      await updateGoal.mutateAsync({ id: data.goal.id, current_value: newValue });
+      toast.success('تم تحديث التقدم');
+    } catch { toast.error('حدث خطأ'); }
+  };
+
   if (!data) {
     return (
       <div className="flex flex-col items-center gap-3 py-10">
@@ -422,7 +439,30 @@ function InterventionSection({ data }: { data: GoalIntervention | null }) {
         )}
       </div>
 
-      {/* Action */}
+      {/* Quick progress update */}
+      <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-muted/20 border border-border/30">
+        <span className="text-xs text-muted-foreground flex-1">تحديث التقدم:</span>
+        <button
+          onClick={() => handleUpdateProgress(-1)}
+          disabled={updateGoal.isPending || currentValue <= 0}
+          className="w-7 h-7 rounded-lg bg-muted border border-border hover:bg-muted/80 flex items-center justify-center disabled:opacity-40"
+        >
+          <Minus className="w-3 h-3 text-muted-foreground" />
+        </button>
+        <span className="text-sm font-black tabular-nums w-10 text-center">
+          {updateGoal.isPending ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : currentValue}
+        </span>
+        <button
+          onClick={() => handleUpdateProgress(1)}
+          disabled={updateGoal.isPending}
+          className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 hover:bg-primary/20 flex items-center justify-center disabled:opacity-40"
+        >
+          <Plus className="w-3 h-3 text-primary" />
+        </button>
+        <span className="text-[10px] text-muted-foreground">/ {data.goal.target_value ?? '?'}</span>
+      </div>
+
+      {/* Action hint */}
       <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl bg-muted/20 border border-border/30 text-xs">
         <ArrowRight className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
         <span className="text-muted-foreground">

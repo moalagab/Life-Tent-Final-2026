@@ -15,9 +15,11 @@ import {
   Sun, Calendar, Target, XCircle,
   ChevronRight, CheckCircle2, Circle,
   Flame, Clock, Zap, X, ArrowRight,
-  TrendingUp, TrendingDown, Minus,
+  TrendingUp, TrendingDown, Minus, Plus, Loader2,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCreateTask } from '@/hooks/useTasks';
+import { toast } from 'sonner';
 import { useDailyPlanningCycle } from '@/hooks/useDailyPlanningCycle';
 import type { ScoredTask } from '@/hooks/useAdaptivePriority';
 import type { TimeBlock } from '@/hooks/useTaskAgent';
@@ -165,6 +167,20 @@ function ReviewStep({ yesterday }: { yesterday: ReturnType<typeof useDailyPlanni
 // ── Step 2: Day Plan ──────────────────────────────────────────────────────────
 
 function PlanStep({ plan }: { plan: ReturnType<typeof useDailyPlanningCycle>['plan'] }) {
+  const createTask = useCreateTask();
+  const today = new Date().toISOString().split('T')[0];
+  const [addingTask, setAddingTask] = useState(false);
+  const [newTitle,   setNewTitle]   = useState('');
+
+  const handleAdd = async () => {
+    if (!newTitle.trim()) return;
+    try {
+      await createTask.mutateAsync({ title: newTitle.trim(), status: 'todo', due_date: today });
+      toast.success('تم إضافة المهمة لليوم');
+      setNewTitle(''); setAddingTask(false);
+    } catch { toast.error('حدث خطأ'); }
+  };
+
   return (
     <div className="space-y-4">
       {/* Summary */}
@@ -233,6 +249,36 @@ function PlanStep({ plan }: { plan: ReturnType<typeof useDailyPlanningCycle>['pl
             </span>
           ))}
         </div>
+      )}
+
+      {/* Quick add task */}
+      {addingTask ? (
+        <div className="flex gap-2">
+          <input
+            autoFocus
+            value={newTitle}
+            onChange={e => setNewTitle(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') { setAddingTask(false); setNewTitle(''); } }}
+            placeholder="عنوان المهمة الجديدة…"
+            className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+          />
+          <button onClick={handleAdd} disabled={createTask.isPending || !newTitle.trim()}
+            className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium disabled:opacity-50">
+            {createTask.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : '+ أضف'}
+          </button>
+          <button onClick={() => { setAddingTask(false); setNewTitle(''); }}
+            className="px-2 py-1.5 rounded-lg bg-muted text-muted-foreground text-xs">
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setAddingTask(true)}
+          className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-primary transition-colors py-1"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          إضافة مهمة لليوم
+        </button>
       )}
     </div>
   );

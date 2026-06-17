@@ -152,10 +152,8 @@ export function SystemHealthCard() {
   if (!weakest) return null;
 
   return (
-    <div
-      className="w-full rounded-2xl border bg-card p-4 overflow-hidden"
-      style={{ borderColor: `${health.overallColor}40` }}
-    >
+    <div className="w-full rounded-2xl border border-border/40 bg-card/50 p-4 overflow-hidden hover:border-border/70 transition-colors">
+
       {/* Header */}
       <div className="flex items-center justify-between mb-4" dir="rtl">
         <div className="flex items-center gap-2">

@@ -9,10 +9,17 @@ import { cn } from '@/lib/utils';
 import {
   X, RefreshCw, Zap, XCircle, Sun, Cloud, Moon,
   CheckCircle2, AlertTriangle, Clock, Target,
-  ChevronRight, Crosshair, Flame,
+  ChevronRight, Crosshair, Flame, Plus, CheckSquare,
+  FolderKanban, ListTodo, CalendarDays, Loader2,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCommandCenter, CMD_KILL_THRESHOLD } from '@/hooks/useCommandCenter';
+import { useCreateTask, useUpdateTask } from '@/hooks/useTasks';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import type { ScoredTask } from '@/hooks/useAdaptivePriority';
 import type { TimeBlock } from '@/hooks/useTaskAgent';
 import type { Prediction } from '@/hooks/usePredictiveEngine';
@@ -162,8 +169,33 @@ export function CommandCenter({ open, onClose, focusModeActive, onToggleFocusMod
     isRecalculating, lastRecalculated, recalculate,
   } = useCommandCenter();
 
-  const [killMode, setKillMode] = useState<'off' | 'preview' | 'done'>('off');
-  const [killedCount, setKilledCount] = useState(0);
+  const createTask  = useCreateTask();
+  const updateTask  = useUpdateTask();
+  const navigate    = useNavigate();
+
+  const [killMode,      setKillMode]      = useState<'off' | 'preview' | 'done'>('off');
+  const [killedCount,   setKilledCount]   = useState(0);
+  const [addTaskOpen,   setAddTaskOpen]   = useState(false);
+  const [newTaskTitle,  setNewTaskTitle]  = useState('');
+
+  const handleAddTask = async () => {
+    if (!newTaskTitle.trim()) return;
+    const today = new Date().toISOString().split('T')[0];
+    try {
+      await createTask.mutateAsync({ title: newTaskTitle.trim(), status: 'todo', due_date: today });
+      toast.success('تم إضافة المهمة');
+      setNewTaskTitle('');
+      setAddTaskOpen(false);
+    } catch { toast.error('حدث خطأ'); }
+  };
+
+  const handleCompleteFocus = async () => {
+    if (!focusTask) return;
+    try {
+      await updateTask.mutateAsync({ id: focusTask.id, status: 'done' });
+      toast.success('أحسنت! المهمة مكتملة');
+    } catch { toast.error('حدث خطأ'); }
+  };
 
   useEffect(() => {
     if (!open) { setKillMode('off'); setKilledCount(0); }
@@ -200,6 +232,35 @@ export function CommandCenter({ open, onClose, focusModeActive, onToggleFocusMod
   };
 
   if (!open) return null;
+
+  // Add-task dialog (rendered outside the fixed overlay to avoid z-index issues)
+  const addTaskDialog = (
+    <Dialog open={addTaskOpen} onOpenChange={v => { setAddTaskOpen(v); setNewTaskTitle(''); }}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Plus className="w-4 h-4 text-primary" />
+            </div>
+            مهمة جديدة
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 mt-2">
+          <Input
+            autoFocus
+            value={newTaskTitle}
+            onChange={e => setNewTaskTitle(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleAddTask(); }}
+            placeholder="عنوان المهمة…"
+            className="bg-muted/50"
+          />
+          <Button onClick={handleAddTask} className="w-full" disabled={createTask.isPending || !newTaskTitle.trim()}>
+            {createTask.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'إضافة'}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 
   return (
     <div
@@ -266,6 +327,53 @@ export function CommandCenter({ open, onClose, focusModeActive, onToggleFocusMod
             </div>
           ) : (
             <div className="p-4 sm:p-5 space-y-5">
+
+              {/* ── Quick actions ── */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {[
+                  {
+                    label: 'إنجاز المهمة', icon: CheckSquare,
+                    onClick: handleCompleteFocus,
+                    disabled: !focusTask || updateTask.isPending,
+                    color: 'text-emerald-500',
+                    bg: 'bg-emerald-500/8 border-emerald-500/20 hover:bg-emerald-500/15',
+                  },
+                  {
+                    label: 'مهمة جديدة', icon: Plus,
+                    onClick: () => setAddTaskOpen(true),
+                    disabled: false,
+                    color: 'text-primary',
+                    bg: 'bg-primary/8 border-primary/20 hover:bg-primary/15',
+                  },
+                  {
+                    label: 'المهام', icon: ListTodo,
+                    onClick: () => { navigate('/tasks'); onClose(); },
+                    disabled: false,
+                    color: 'text-blue-500',
+                    bg: 'bg-blue-500/8 border-blue-500/20 hover:bg-blue-500/15',
+                  },
+                  {
+                    label: 'التقويم', icon: CalendarDays,
+                    onClick: () => { navigate('/calendar'); onClose(); },
+                    disabled: false,
+                    color: 'text-violet-500',
+                    bg: 'bg-violet-500/8 border-violet-500/20 hover:bg-violet-500/15',
+                  },
+                ].map(action => (
+                  <button
+                    key={action.label}
+                    onClick={action.onClick}
+                    disabled={action.disabled}
+                    className={cn(
+                      'flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl border transition-all text-center disabled:opacity-40',
+                      action.bg,
+                    )}
+                  >
+                    <action.icon className={cn('w-5 h-5', action.color)} />
+                    <span className={cn('text-[11px] font-bold', action.color)}>{action.label}</span>
+                  </button>
+                ))}
+              </div>
 
               {/* ── Section 1: The Mission ── */}
               <div className="rounded-2xl border border-border/30 bg-muted/20 p-4">
@@ -461,5 +569,6 @@ export function CommandCenter({ open, onClose, focusModeActive, onToggleFocusMod
         </div>
       </div>
     </div>
+    {addTaskDialog}
   );
 }
