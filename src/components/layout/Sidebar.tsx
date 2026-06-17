@@ -300,7 +300,7 @@ export function Sidebar() {
 
   // Admin item — append to the "More" group
   if (isAdmin) {
-    const moreGroup = navGroups.find(g => g.collapsible);
+    const moreGroup = navGroups.find(g => g.labelAr === 'المزيد');
     if (moreGroup) {
       moreGroup.items.push({ path: '/admin', icon: ShieldCheck, labelKey: 'common.admin' });
     }
