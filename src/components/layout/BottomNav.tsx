@@ -1,36 +1,31 @@
 /**
  * BottomNav — Apple Human Interface Guidelines tab bar.
  *
- * Layout:  5 equal tabs (Tasks | Finance | Home | Projects | More).
+ * Layout:  Home | Spaces | [Capture FAB] | Calendar | Finance
  * Style:   translucent, backdrop-blur, hairline top separator.
  * Active:  icon + label in primary color, heavier stroke weight.
  * Inactive: #8E8E93 (iOS systemGray).
- * More tab: opens AllServices sheet (lt-* design-system classes).
+ * Center:  Capture FAB — opens NaturalCapture bottom sheet.
  */
 import { useState } from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, CheckSquare, Wallet, FolderKanban, LayoutGrid,
+  LayoutDashboard, FolderKanban, Wallet, Calendar, Plus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useAuth } from '@/hooks/useAuth';
 import { useModuleAccess } from '@/hooks/useModuleAccess';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
-import { AllServices } from './AllServices';
+import { NaturalCapture } from '@/components/capture/NaturalCapture';
 
-/* ── Primary tabs (4 visible + More) ──────────────────────────────── */
-const PRIMARY_TABS = [
-  { path: '/tasks',     icon: CheckSquare,     ar: 'المهام',    en: 'Tasks'    },
-  { path: '/finance',   icon: Wallet,          ar: 'المالية',   en: 'Finance'  },
-  { path: '/dashboard', icon: LayoutDashboard, ar: 'الرئيسية',  en: 'Home'     },
-  { path: '/projects',  icon: FolderKanban,    ar: 'المشاريع',  en: 'Projects' },
+/* ── Primary tabs (2 left + 2 right around centre FAB) ───────────── */
+const LEFT_TABS = [
+  { path: '/dashboard', icon: LayoutDashboard, ar: 'الرئيسية', en: 'Home'   },
+  { path: '/projects',  icon: FolderKanban,    ar: 'الفضاءات', en: 'Spaces' },
 ];
-
-/* ── Routes that live inside the More sheet (for isMoreActive check) ── */
-const MORE_PATHS = [
-  '/habits', '/calendar', '/knowledge', '/studio',
-  '/pomodoro', '/goals', '/profile', '/settings',
+const RIGHT_TABS = [
+  { path: '/calendar', icon: Calendar, ar: 'التقويم', en: 'Calendar' },
+  { path: '/finance',  icon: Wallet,   ar: 'المالية', en: 'Finance'  },
 ];
 
 /* ── Single tab button ─────────────────────────────────────────────── */
@@ -65,21 +60,12 @@ function TabBtn({
 export function BottomNav() {
   const { pathname }         = useLocation();
   const { currentLanguage }  = useLanguage();
-  const { signOut }          = useAuth();
-  const navigate             = useNavigate();
   const { isModuleActive }   = useModuleAccess();
-  const [moreOpen, setMoreOpen] = useState(false);
+  const [captureOpen, setCaptureOpen] = useState(false);
   const isAr = currentLanguage === 'ar';
 
-  const activePrimary = PRIMARY_TABS.filter(t => isModuleActive(t.path.slice(1)));
-
-  // Build a Set of active module IDs for AllServices filtering
-  const activeIds = new Set(
-    ['knowledge','calendar','habits','tasks','pomodoro','studio','goals','projects','finance']
-      .filter(id => isModuleActive(id))
-  );
-
-  const isMoreActive = MORE_PATHS.some(p => pathname === p);
+  const leftTabs  = LEFT_TABS.filter(t => isModuleActive(t.path.slice(1)));
+  const rightTabs = RIGHT_TABS.filter(t => isModuleActive(t.path.slice(1)));
 
   return (
     <>
@@ -88,7 +74,8 @@ export function BottomNav() {
         className="hig-tab-bar"
         aria-label={isAr ? 'التنقل الرئيسي' : 'Main navigation'}
       >
-        {activePrimary.map(tab => (
+        {/* Left tabs */}
+        {leftTabs.map(tab => (
           <TabBtn
             key={tab.path}
             path={tab.path}
@@ -98,37 +85,39 @@ export function BottomNav() {
           />
         ))}
 
-        {/* More tab */}
+        {/* Centre capture FAB */}
         <button
-          className={cn('hig-tab-item', isMoreActive && 'is-active')}
-          onClick={() => setMoreOpen(true)}
-          aria-label={isAr ? 'المزيد من الخدمات' : 'More services'}
-          aria-haspopup="dialog"
+          onClick={() => setCaptureOpen(true)}
+          aria-label={isAr ? 'التقاط' : 'Capture'}
+          className="hig-tab-item"
         >
-          <LayoutGrid
-            style={{ width: 26, height: 26 }}
-            strokeWidth={isMoreActive ? 2.4 : 1.75}
-            className="transition-colors"
-          />
-          <span className="transition-colors">{isAr ? 'المزيد' : 'More'}</span>
+          <div className="w-[42px] h-[42px] rounded-full bg-primary flex items-center justify-center shadow-md -mt-3 transition-transform active:scale-90">
+            <Plus className="w-6 h-6 text-primary-foreground" strokeWidth={2.5} />
+          </div>
+          <span className="transition-colors text-primary">{isAr ? 'التقاط' : 'Capture'}</span>
         </button>
+
+        {/* Right tabs */}
+        {rightTabs.map(tab => (
+          <TabBtn
+            key={tab.path}
+            path={tab.path}
+            icon={tab.icon}
+            label={isAr ? tab.ar : tab.en}
+            isActive={pathname === tab.path}
+          />
+        ))}
       </nav>
 
-      {/* ── More sheet — uses AllServices (lt-* design system) ── */}
-      <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+      {/* ── Capture sheet ── */}
+      <Sheet open={captureOpen} onOpenChange={setCaptureOpen}>
         <SheetContent
           side="bottom"
-          className="p-0 border-0 bg-transparent max-h-[92vh] overflow-y-auto"
+          className="p-4 border-0 bg-background/95 backdrop-blur-xl max-h-[80vh] overflow-y-auto rounded-t-2xl"
         >
-          <AllServices
-            activeIds={activeIds}
-            onClose={() => setMoreOpen(false)}
-            onNavigate={(path) => { navigate(path); setMoreOpen(false); }}
-            onLogout={() => { signOut(); setMoreOpen(false); }}
-          />
+          <NaturalCapture />
         </SheetContent>
       </Sheet>
     </>
   );
 }
-

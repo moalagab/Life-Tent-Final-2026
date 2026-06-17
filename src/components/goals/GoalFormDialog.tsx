@@ -73,26 +73,35 @@ export function GoalFormDialog({
     }
   }, [initialData]);
 
+  const emptyForm: GoalFormData = {
+    title: '',
+    description: '',
+    perspective: 'personal',
+    target_value: '',
+    current_value: '0',
+    unit: '',
+    start_date: null,
+    end_date: null,
+    project_id: undefined,
+    habit_id: undefined,
+  };
+
   useEffect(() => {
-    if (!open) {
-      setFormData({
-        title: '',
-        description: '',
-        perspective: 'personal',
-        target_value: '',
-        current_value: '0',
-        unit: '',
-        start_date: null,
-        end_date: null,
-        project_id: undefined,
-        habit_id: undefined,
-      });
+    // Only reset form after dialog fully closes AND no submission is in flight.
+    // Prevents data loss if parent closes the dialog while mutation is pending.
+    if (!open && !isLoading) {
+      setFormData(emptyForm);
     }
-  }, [open]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, isLoading]);
 
   const handleSubmit = async () => {
     if (!formData.title.trim()) return;
-    await onSubmit(formData);
+    try {
+      await onSubmit(formData);
+    } catch {
+      // onSubmit threw — keep form data so user doesn't lose their input
+    }
   };
 
   const perspectiveOptions = [
@@ -118,7 +127,11 @@ export function GoalFormDialog({
   );
 
   return (
-    <ResponsiveSheet open={open} onOpenChange={onOpenChange} title={titleNode}>
+    <ResponsiveSheet
+      open={open}
+      onOpenChange={(v) => { if (!isLoading) onOpenChange(v); }}
+      title={titleNode}
+    >
         <div className="space-y-5 mt-4">
           {/* Title */}
           <div className="space-y-2">

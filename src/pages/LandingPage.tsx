@@ -30,7 +30,11 @@ import {
   Rocket,
   Award,
   LineChart,
-  Languages
+  Languages,
+  Lock,
+  Server,
+  MessageCircle,
+  Download
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -218,7 +222,7 @@ export default function LandingPage() {
             </Button>
             <Button 
               variant="gold" 
-              onClick={() => navigate('/auth')}
+              onClick={() => navigate('/auth?mode=signup')}
               className="gap-2 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
             >
               {t('landing.startFree')}
@@ -287,7 +291,7 @@ export default function LandingPage() {
             <Button 
               variant="gold" 
               size="lg" 
-              onClick={() => navigate('/auth')}
+              onClick={() => navigate('/auth?mode=signup')}
               className="text-lg px-10 py-7 gap-3 shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105 group"
             >
               <Rocket className="w-5 h-5 group-hover:animate-bounce" />
@@ -509,7 +513,7 @@ export default function LandingPage() {
               <Button 
                 variant="gold" 
                 size="lg" 
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate('/auth?mode=signup')}
                 className="text-xl px-12 py-8 gap-3 shadow-2xl hover:shadow-primary/30 transition-all duration-300 hover:scale-105 group"
               >
                 <MousePointerClick className="w-6 h-6 group-hover:animate-pulse" />
@@ -517,6 +521,36 @@ export default function LandingPage() {
                 {isRTL ? <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" /> : <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />}
               </Button>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust & Security Section — LT-005 */}
+      <section className="py-20 px-4 bg-gradient-to-b from-background to-secondary/10">
+        <div className="container mx-auto max-w-5xl">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-success/10 border border-success/20 text-success mb-6">
+              <Shield className="w-4 h-4" />
+              <span className="text-sm font-medium">{t('landing.trustTitle')}</span>
+            </div>
+            <p className="text-muted-foreground max-w-2xl mx-auto">{t('landing.trustSubtitle')}</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { icon: Lock,     title: t('landing.trustEncryption'), desc: t('landing.trustEncryptionDesc'), color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+              { icon: Server,   title: t('landing.trustServers'),    desc: t('landing.trustServersDesc'),    color: 'text-blue-500',    bg: 'bg-blue-500/10'   },
+              { icon: Shield,   title: t('landing.trust2FA'),        desc: t('landing.trust2FADesc'),        color: 'text-violet-500',  bg: 'bg-violet-500/10' },
+              { icon: Download, title: t('landing.trustExport'),     desc: t('landing.trustExportDesc'),     color: 'text-primary',     bg: 'bg-primary/10'    },
+            ].map(({ icon: Icon, title, desc, color, bg }) => (
+              <div key={title} className="p-5 rounded-2xl bg-card/60 border border-border/40 hover:border-border transition-colors">
+                <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center mb-4`}>
+                  <Icon className={`w-5 h-5 ${color}`} />
+                </div>
+                <h4 className="font-semibold text-foreground mb-1 text-sm">{title}</h4>
+                <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -535,21 +569,30 @@ export default function LandingPage() {
               </div>
             </div>
             
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-3">
               <p className="text-sm text-muted-foreground">{t('landing.contactUs')}</p>
-              <a 
-                href="mailto:info@lifetent.online" 
-                className="text-primary hover:text-primary/80 transition-colors font-medium text-lg"
+              <a
+                href="mailto:info@lifetent.online"
+                className="text-primary hover:text-primary/80 transition-colors font-medium"
               >
                 info@lifetent.online
+              </a>
+              <a
+                href="https://wa.me/966500000000"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#25D366]/10 border border-[#25D366]/30 text-[#25D366] hover:bg-[#25D366]/20 transition-colors text-sm font-medium"
+              >
+                <MessageCircle className="w-4 h-4" />
+                {t('landing.whatsappContact')}
               </a>
             </div>
             
             <div className="flex flex-col items-center md:items-end rtl:md:items-start gap-3">
               <div className="flex items-center gap-3">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => navigate('/auth')}
                   className="hover:bg-primary/10"
                 >
@@ -558,7 +601,7 @@ export default function LandingPage() {
                 <Button 
                   variant="gold" 
                   size="sm" 
-                  onClick={() => navigate('/auth')}
+                  onClick={() => navigate('/auth?mode=signup')}
                   className="shadow-lg"
                 >
                   {t('landing.startFree')}

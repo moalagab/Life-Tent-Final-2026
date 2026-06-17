@@ -2,7 +2,7 @@
  * Sidebar — Fluent UI 2 nav rail with grouped navigation.
  *
  * Desktop:  fixed left/right rail, collapsible (240px ↔ 52px).
- *           Groups: Core | Workspace | Life | Learn | Tools
+ *           Groups: Layers | Modules | More (collapsible)
  *           Active item: 3px accent bar + subtle tinted fill.
  *
  * Mobile:   returns null — navigation is via BottomNav.
@@ -27,6 +27,7 @@ import {
   Film,
   Settings,
   ChevronLeft,
+  ChevronDown,
   Tent,
   LogOut,
   Timer,
@@ -44,49 +45,41 @@ interface NavGroup {
   labelAr?: string;
   labelEn?: string;
   items: NavItem[];
+  collapsible?: boolean;
 }
 
 // ── Nav groups definition ─────────────────────────────────────────────────────
 
 const BASE_GROUPS: NavGroup[] = [
   {
+    labelAr: 'الطبقات',
+    labelEn: 'Layers',
     items: [
-      { path: '/dashboard', icon: LayoutDashboard, labelKey: 'common.dashboard' },
+      { path: '/dashboard', icon: LayoutDashboard, labelKey: 'common.home'     },
+      { path: '/projects',  icon: FolderKanban,    labelKey: 'common.spaces'   },
+      { path: '/calendar',  icon: Calendar,        labelKey: 'common.calendar' },
     ],
   },
   {
-    labelAr: 'العمل',
-    labelEn: 'Workspace',
+    labelAr: 'الوحدات',
+    labelEn: 'Modules',
     items: [
-      { path: '/tasks',    icon: CheckSquare,  labelKey: 'common.tasks'    },
-      { path: '/projects', icon: FolderKanban, labelKey: 'common.projects' },
-      { path: '/goals',    icon: Target,       labelKey: 'common.goals'    },
+      { path: '/finance', icon: Wallet,      labelKey: 'common.finance' },
+      { path: '/tasks',   icon: CheckSquare, labelKey: 'common.tasks'   },
+      { path: '/goals',   icon: Target,      labelKey: 'common.goals'   },
     ],
   },
   {
-    labelAr: 'الحياة',
-    labelEn: 'Life',
+    labelAr: 'المزيد',
+    labelEn: 'More',
+    collapsible: true,
     items: [
-      { path: '/habits',   icon: Repeat,   labelKey: 'common.habits'   },
-      { path: '/finance',  icon: Wallet,   labelKey: 'common.finance'  },
-      { path: '/calendar', icon: Calendar, labelKey: 'common.calendar' },
-    ],
-  },
-  {
-    labelAr: 'معرفة',
-    labelEn: 'Learn',
-    items: [
-      { path: '/knowledge', icon: BookOpen, labelKey: 'common.knowledge' },
-      { path: '/studio',    icon: Film,     labelKey: 'common.studio'    },
-    ],
-  },
-  {
-    labelAr: 'أدوات',
-    labelEn: 'Tools',
-    items: [
-      { path: '/pomodoro', icon: Timer,    labelKey: 'common.pomodoro' },
-      { path: '/timeline', icon: Activity, labelKey: 'common.timeline' },
-      { path: '/graph',    icon: Network,  labelKey: 'common.graph'    },
+      { path: '/habits',    icon: Repeat,    labelKey: 'common.habits'   },
+      { path: '/knowledge', icon: BookOpen,  labelKey: 'common.knowledge'},
+      { path: '/studio',    icon: Film,      labelKey: 'common.studio'   },
+      { path: '/pomodoro',  icon: Timer,     labelKey: 'common.pomodoro' },
+      { path: '/timeline',  icon: Activity,  labelKey: 'common.timeline' },
+      { path: '/graph',     icon: Network,   labelKey: 'common.graph'    },
     ],
   },
 ];
@@ -114,6 +107,11 @@ const SidebarContent = memo(function SidebarContent({
 }: SidebarContentProps) {
   const isCollapsed = collapsed && !isMobile;
   const isAr = isRTL;
+  const [moreExpanded, setMoreExpanded] = useState(false);
+
+  // Auto-expand "More" if current path matches a more-group item
+  const moreGroup = navGroups.find(g => g.collapsible);
+  const isMoreActive = moreGroup?.items.some(item => locationPath === item.path) ?? false;
 
   return (
     <div className="flex flex-col h-full">
@@ -157,6 +155,8 @@ const SidebarContent = memo(function SidebarContent({
         {navGroups.map((group, gi) => {
           if (group.items.length === 0) return null;
           const groupLabel = isAr ? group.labelAr : group.labelEn;
+          const isMoreGroup = group.collapsible === true;
+          const showMoreItems = isCollapsed || moreExpanded || isMoreActive;
 
           return (
             <div key={gi} className={gi > 0 ? 'mt-2' : ''}>
@@ -165,41 +165,58 @@ const SidebarContent = memo(function SidebarContent({
                 <div className="my-2 mx-1 h-px bg-border/40" />
               )}
 
-              {/* Group label when expanded */}
+              {/* Group label — "More" is a toggle button when expanded */}
               {!isCollapsed && groupLabel && (
-                <p className="px-2 pt-1 pb-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground/40 select-none">
-                  {groupLabel}
-                </p>
+                isMoreGroup ? (
+                  <button
+                    onClick={() => setMoreExpanded(e => !e)}
+                    className="w-full flex items-center gap-1 px-2 pt-1 pb-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors select-none"
+                    aria-expanded={moreExpanded || isMoreActive}
+                  >
+                    <span className="flex-1 text-start">{groupLabel}</span>
+                    <ChevronDown className={cn(
+                      'w-3 h-3 transition-transform duration-200',
+                      (moreExpanded || isMoreActive) && 'rotate-180',
+                    )} />
+                  </button>
+                ) : (
+                  <p className="px-2 pt-1 pb-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground/40 select-none">
+                    {groupLabel}
+                  </p>
+                )
               )}
 
-              <div className="space-y-0.5">
-                {group.items.map((item) => {
-                  const isActive = locationPath === item.path;
-                  return (
-                    <NavLink
-                      key={item.path}
-                      to={item.path}
-                      onClick={onNavClick}
-                      aria-current={isActive ? 'page' : undefined}
-                      title={isCollapsed ? t(item.labelKey) : undefined}
-                      className={cn(
-                        'fluent-nav-item',
-                        isCollapsed && 'justify-center px-0 w-[36px] mx-auto',
-                      )}
-                    >
-                      <item.icon
+              {/* Items — hidden for collapsed "More" group in expanded sidebar */}
+              {showMoreItems && (
+                <div className="space-y-0.5">
+                  {group.items.map((item) => {
+                    const isActive = locationPath === item.path;
+                    return (
+                      <NavLink
+                        key={item.path}
+                        to={item.path}
+                        onClick={onNavClick}
+                        aria-current={isActive ? 'page' : undefined}
+                        title={isCollapsed ? t(item.labelKey) : undefined}
                         className={cn(
-                          'shrink-0 w-[18px] h-[18px] transition-colors',
-                          isActive ? 'text-primary' : 'text-muted-foreground',
+                          'fluent-nav-item',
+                          isCollapsed && 'justify-center px-0 w-[36px] mx-auto',
                         )}
-                      />
-                      {!isCollapsed && (
-                        <span className="flex-1 truncate">{t(item.labelKey)}</span>
-                      )}
-                    </NavLink>
-                  );
-                })}
-              </div>
+                      >
+                        <item.icon
+                          className={cn(
+                            'shrink-0 w-[18px] h-[18px] transition-colors',
+                            isActive ? 'text-primary' : 'text-muted-foreground',
+                          )}
+                        />
+                        {!isCollapsed && (
+                          <span className="flex-1 truncate">{t(item.labelKey)}</span>
+                        )}
+                      </NavLink>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           );
         })}
@@ -308,11 +325,11 @@ export function Sidebar() {
     }),
   }));
 
-  // Admin item — append to tools group or add separate group
+  // Admin item — append to the "More" group
   if (isAdmin) {
-    const toolsGroup = navGroups.find(g => g.labelAr === 'أدوات');
-    if (toolsGroup) {
-      toolsGroup.items.push({ path: '/admin', icon: ShieldCheck, labelKey: 'common.admin' });
+    const moreGroup = navGroups.find(g => g.collapsible);
+    if (moreGroup) {
+      moreGroup.items.push({ path: '/admin', icon: ShieldCheck, labelKey: 'common.admin' });
     }
   }
 

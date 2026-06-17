@@ -5,7 +5,7 @@ import { useEvents } from '@/hooks/useEvents';
 import { useProjects } from '@/hooks/useProjects';
 import { useLanguage } from '@/hooks/useLanguage';
 import { cn } from '@/lib/utils';
-import { isToday, isPast, parseISO, differenceInHours, differenceInMinutes } from 'date-fns';
+import { parseISO, differenceInHours, differenceInMinutes, startOfDay, addDays, isSameDay } from 'date-fns';
 
 type Severity = 'critical' | 'warn' | 'soon' | 'info';
 type Kind = 'overdue' | 'due_today' | 'event_soon' | 'stalled';
@@ -33,12 +33,16 @@ export function AttentionStrip() {
   const { data: projects } = useProjects();
 
   const now = new Date();
+  const todayStart  = startOfDay(now);
   const items: AttentionItem[] = [];
 
   tasks?.forEach((task) => {
     if (task.status === 'done' || !task.due_date) return;
-    const due = parseISO(task.due_date);
-    if (isPast(due) && !isToday(due)) {
+    const due     = parseISO(task.due_date);
+    const dueDay  = startOfDay(due);
+
+    if (dueDay < todayStart) {
+      // Overdue: due date is strictly before today (date-only comparison — timezone-safe)
       const minutesOverdue = Math.max(1, differenceInMinutes(now, due));
       items.push({
         id: `task-overdue-${task.id}`,
@@ -51,7 +55,8 @@ export function AttentionStrip() {
         rank: 0,
         sortValue: -minutesOverdue,
       });
-    } else if (isToday(due)) {
+    } else if (isSameDay(dueDay, todayStart)) {
+      // Due today
       items.push({
         id: `task-today-${task.id}`,
         key: `task:${task.id}`,
@@ -61,6 +66,22 @@ export function AttentionStrip() {
         to: '/tasks?filter=today',
         severity: 'warn',
         rank: 1,
+        sortValue: differenceInMinutes(due, now),
+      });
+    } else if (dueDay <= addDays(todayStart, 7)) {
+      // Upcoming: due within the next 7 days — show so user can find recently added tasks
+      const daysAway = Math.round(differenceInHours(dueDay, todayStart) / 24);
+      items.push({
+        id: `task-soon-${task.id}`,
+        key: `task:${task.id}`,
+        kind: 'due_today',
+        label: task.title,
+        meta: daysAway === 1
+          ? (t('common.today').startsWith('ا') ? 'غداً' : 'Tomorrow')
+          : `${daysAway}${t('common.today').startsWith('ا') ? ' أيام' : ' days'}`,
+        to: '/tasks',
+        severity: 'info',
+        rank: 2,
         sortValue: differenceInMinutes(due, now),
       });
     }

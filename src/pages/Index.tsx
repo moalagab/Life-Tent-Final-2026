@@ -40,24 +40,27 @@ import { NaturalCapture }       from '@/components/capture/NaturalCapture';
 import { SuccessLoopFeedback }  from '@/components/feedback/SuccessLoopFeedback';
 import { SystemHealthCard }     from '@/components/health/SystemHealthCard';
 import { EmptyStateIntelligence } from '@/components/empty/EmptyStateIntelligence';
+import { WorkloadMeter }  from '@/components/layout/WorkloadMeter';
+import { DayTimeline }    from '@/components/layout/DayTimeline';
+import { V3Placeholder }  from '@/components/layout/V3Placeholder';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Activity, LayoutGrid, Sparkles, BookOpen, Wallet, Brain,
-  Eye, Crosshair, Zap, Sun, BarChart3,
+  Eye, Crosshair, Zap, Sun, BarChart3, Moon,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import type { ReactNode } from 'react';
 
 /**
- * Dashboard — focused layout.
- * Hero: FocusEngine + NaturalCapture.
- * Control strip: Planning · Review · Command (compact).
- * Sections: collapsible preset-driven panels.
+ * Dashboard — evolved wireframe layout.
+ * Mobile:  ritual-first: workload → plan card → morning brief → day timeline → bento → shutdown
+ * Desktop: 3-column: context panel (capture + upcoming + v3) | center (existing sections)
  */
 const Index = () => {
   useAutoReminders();
-  const { t, currentLanguage } = useLanguage();
+  const { t, currentLanguage, isRTL } = useLanguage();
   const isMobile = useIsMobile();
   const context  = useContextAwareness();
   const [showFullInMorning, setShowFullInMorning] = useState(false);
@@ -116,6 +119,7 @@ const Index = () => {
   const aiSection  = useSectionState('ai-intelligence',  true);
 
   const isAr = currentLanguage === 'ar';
+  const isShutdownTime = new Date().getHours() >= 18;
 
   // ── Section definitions ────────────────────────────────────────────────────
 
@@ -254,6 +258,84 @@ const Index = () => {
 
   const isMorningFocus = context.focusOnlyMode && !context.isOverridden && !showFullInMorning;
 
+  // ── Shared control strip ───────────────────────────────────────────────────
+  const controlStrip = (
+    <div className="flex items-center rounded-xl border border-border/40 bg-muted/20 overflow-hidden text-xs">
+      <button
+        onClick={() => { openPlanningManually(); setPlanningOpen(true); }}
+        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 hover:bg-background/70 transition-colors"
+      >
+        <Sun className="w-3 h-3 text-amber-400 shrink-0" />
+        <span className="font-semibold text-foreground/80">{isAr ? 'تخطيط اليوم' : 'Daily Plan'}</span>
+        {shouldShowPlanning && <div className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />}
+      </button>
+      <div className="w-px h-5 bg-border/60 shrink-0" />
+      <button
+        onClick={() => { openReviewManually(); setReviewOpen(true); }}
+        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 hover:bg-background/70 transition-colors"
+      >
+        <BarChart3 className="w-3 h-3 text-emerald-500 shrink-0" />
+        <span className="font-semibold text-foreground/80">{isAr ? 'مراجعة الأسبوع' : 'Weekly Review'}</span>
+        {shouldShowReview && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />}
+      </button>
+      <div className="w-px h-5 bg-border/60 shrink-0" />
+      <button
+        onClick={() => setCommandCenterOpen(true)}
+        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 hover:bg-background/70 transition-colors"
+        aria-label={isAr ? 'مركز القيادة — ⌘K' : 'Command Center — ⌘K'}
+      >
+        <Crosshair className="w-3 h-3 text-muted-foreground shrink-0" />
+        <span className="font-semibold text-foreground/80">{isAr ? 'مركز القيادة' : 'Command'}</span>
+        {focusModeActive && <Zap className="w-2.5 h-2.5 text-amber-400 shrink-0" />}
+      </button>
+    </div>
+  );
+
+  // ── Main sections block (shared) ──────────────────────────────────────────
+  const mainSections = isMorningFocus ? (
+    <div className="flex flex-col items-center gap-3 py-6">
+      <p className="text-xs text-muted-foreground text-center max-w-xs">
+        {isAr
+          ? '🌅 وضع الصباح — ركّز على شيء واحد فقط قبل أن تفتح لوحة التحكم'
+          : '🌅 Morning mode — focus on one thing before opening the dashboard'}
+      </p>
+      <button
+        onClick={() => setShowFullInMorning(true)}
+        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-border/50 rounded-xl px-4 py-2 transition-colors hover:bg-muted/30"
+      >
+        <Eye className="w-3.5 h-3.5" />
+        {isAr ? 'فتح لوحة التحكم الكاملة' : 'Open full dashboard'}
+      </button>
+    </div>
+  ) : focusModeActive ? null : (
+    <>
+      <EmptyStateIntelligence />
+      <AttentionStrip />
+      {isMobile && (
+        <div className="flex items-center justify-end">
+          <LayoutPresetSwitcher value={preset} onChange={setPreset} />
+        </div>
+      )}
+      <div className="space-y-3">
+        {arrangements[preset]}
+      </div>
+      {!context.isOverridden && hidden.size > 0 && (
+        <div className="flex items-center justify-center pt-2">
+          <button
+            onClick={context.override}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+          >
+            <Eye className="w-3 h-3" />
+            {hidden.size === 1
+              ? (isAr ? 'قسم واحد مخفي حسب السياق' : '1 section hidden by context')
+              : (isAr ? `${hidden.size} أقسام مخفية حسب السياق` : `${hidden.size} sections hidden`)}
+            {isAr ? ' — اضغط لإظهارها' : ' — tap to show'}
+          </button>
+        </div>
+      )}
+    </>
+  );
+
   return (
     <MainLayout>
       {/* Ambient background tint */}
@@ -263,12 +345,12 @@ const Index = () => {
         />
       )}
 
-      <div className="space-y-4 lg:space-y-6 pb-4 animate-fade-in">
+      <div className="space-y-4 lg:space-y-5 pb-4 animate-fade-in">
 
         {/* Context-aware banner */}
         <ContextBanner context={context} />
 
-        {/* Desktop: greeting + preset switcher */}
+        {/* Desktop greeting + preset switcher */}
         {!isMobile && (
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 sm:gap-3">
             <GreetingSlim />
@@ -281,42 +363,6 @@ const Index = () => {
             </div>
           </div>
         )}
-
-        {/* Hero: Decision Engine */}
-        <FocusEngine />
-
-        {/* Smart capture bar */}
-        <NaturalCapture />
-
-        {/* Compact action strip: Planning · Review · Command */}
-        <div className="flex items-center rounded-xl border border-border/40 bg-muted/20 overflow-hidden text-xs">
-          <button
-            onClick={() => { openPlanningManually(); setPlanningOpen(true); }}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 hover:bg-background/70 transition-colors"
-          >
-            <Sun className="w-3 h-3 text-amber-400 shrink-0" />
-            <span className="font-semibold text-foreground/80">{isAr ? 'تخطيط اليوم' : 'Daily Plan'}</span>
-            {shouldShowPlanning && <div className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />}
-          </button>
-          <div className="w-px h-5 bg-border/60 shrink-0" />
-          <button
-            onClick={() => { openReviewManually(); setReviewOpen(true); }}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 hover:bg-background/70 transition-colors"
-          >
-            <BarChart3 className="w-3 h-3 text-emerald-500 shrink-0" />
-            <span className="font-semibold text-foreground/80">{isAr ? 'مراجعة الأسبوع' : 'Weekly Review'}</span>
-            {shouldShowReview && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />}
-          </button>
-          <div className="w-px h-5 bg-border/60 shrink-0" />
-          <button
-            onClick={() => setCommandCenterOpen(true)}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 hover:bg-background/70 transition-colors"
-          >
-            <Crosshair className="w-3 h-3 text-muted-foreground shrink-0" />
-            <span className="font-semibold text-foreground/80">{isAr ? 'مركز القيادة' : 'Command'}</span>
-            {focusModeActive && <Zap className="w-2.5 h-2.5 text-amber-400 shrink-0" />}
-          </button>
-        </div>
 
         {/* Focus mode active banner */}
         {focusModeActive && (
@@ -337,58 +383,116 @@ const Index = () => {
           </div>
         )}
 
-        {/* Morning focus-only mode */}
-        {isMorningFocus ? (
-          <div className="flex flex-col items-center gap-3 py-6">
-            <p className="text-xs text-muted-foreground text-center max-w-xs">
-              {isAr
-                ? '🌅 وضع الصباح — ركّز على شيء واحد فقط قبل أن تفتح لوحة التحكم'
-                : '🌅 Morning mode — focus on one thing before opening the dashboard'}
-            </p>
-            <button
-              onClick={() => setShowFullInMorning(true)}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-border/50 rounded-xl px-4 py-2 transition-colors hover:bg-muted/30"
-            >
-              <Eye className="w-3.5 h-3.5" />
-              {isAr ? 'فتح لوحة التحكم الكاملة' : 'Open full dashboard'}
-            </button>
-          </div>
-        ) : focusModeActive ? null : (
-          <>
-            {/* Empty state guidance */}
-            <EmptyStateIntelligence />
-
-            {/* Attention ribbon */}
-            <AttentionStrip />
-
-            {/* Mobile: preset switcher */}
-            {isMobile && (
-              <div className="flex items-center justify-end">
-                <LayoutPresetSwitcher value={preset} onChange={setPreset} />
-              </div>
-            )}
-
-            {/* Sections per preset */}
-            <div className="space-y-3">
-              {arrangements[preset]}
+        {/* ── MOBILE: ritual-first layout ── */}
+        {isMobile && (
+          <div className="space-y-3">
+            {/* Workload meter */}
+            <div className="glass-card px-4 py-3">
+              <WorkloadMeter />
             </div>
 
-            {/* Hidden sections indicator */}
-            {!context.isOverridden && hidden.size > 0 && (
-              <div className="flex items-center justify-center pt-2">
+            {/* Plan Your Day card */}
+            <button
+              onClick={() => { openPlanningManually(); setPlanningOpen(true); }}
+              className="w-full flex items-center gap-3 p-4 glass-card rounded-2xl border border-primary/10 active:scale-[0.98] transition-transform text-start"
+            >
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                <Sun className="w-5 h-5 text-amber-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground">{t('layout.planYourDay')}</p>
+                <p className="text-xs text-muted-foreground">{t('layout.autoplan')}</p>
+              </div>
+              {shouldShowPlanning && <div className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />}
+            </button>
+
+            {/* Morning brief */}
+            <MorningBrief />
+
+            {/* Day timeline preview */}
+            <div className="glass-card p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-foreground">{t('layout.dayTimeline')}</h3>
                 <button
-                  onClick={context.override}
-                  className="flex items-center gap-1.5 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                  onClick={() => { openPlanningManually(); setPlanningOpen(true); }}
+                  className="text-xs font-semibold text-primary hover:opacity-80 transition-opacity"
                 >
-                  <Eye className="w-3 h-3" />
-                  {hidden.size === 1
-                    ? (isAr ? 'قسم واحد مخفي حسب السياق' : '1 section hidden by context')
-                    : (isAr ? `${hidden.size} أقسام مخفية حسب السياق` : `${hidden.size} sections hidden`)}
-                  {isAr ? ' — اضغط لإظهارها' : ' — tap to show'}
+                  {t('layout.autoplan')}
                 </button>
               </div>
+              <DayTimeline />
+            </div>
+
+            {/* Hero engine */}
+            <FocusEngine />
+
+            {/* Control strip */}
+            {controlStrip}
+          </div>
+        )}
+
+        {/* ── DESKTOP: 3-column layout ── */}
+        {!isMobile && (
+          <div className={cn(
+            'flex gap-5 items-start',
+            isRTL ? 'flex-row-reverse' : 'flex-row',
+          )}>
+            {/* Center column — main content */}
+            <div className="flex-1 min-w-0 space-y-4">
+              {/* Workload meter */}
+              <div className="glass-card px-4 py-3">
+                <WorkloadMeter />
+              </div>
+
+              {/* Day timeline */}
+              <div className="glass-card p-4">
+                <h3 className="text-sm font-semibold text-foreground mb-3">{t('layout.dayTimeline')}</h3>
+                <DayTimeline />
+              </div>
+
+              {/* Hero: Decision Engine */}
+              <FocusEngine />
+
+              {/* Control strip */}
+              {controlStrip}
+
+              {/* Main sections */}
+              {mainSections}
+            </div>
+
+            {/* Context panel — right (LTR) / left (RTL) */}
+            <div className="w-72 shrink-0 space-y-3 sticky top-4">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 px-1">
+                {t('layout.contextPanel')}
+              </h3>
+              <NaturalCapture />
+              <UpcomingEvents />
+              <V3Placeholder />
+            </div>
+          </div>
+        )}
+
+        {/* ── MOBILE: main sections + shutdown ritual ── */}
+        {isMobile && (
+          <div className="space-y-3">
+            {mainSections}
+
+            {/* Shutdown ritual card — visible after 6pm */}
+            {isShutdownTime && !focusModeActive && (
+              <button
+                onClick={() => { openReviewManually(); setReviewOpen(true); }}
+                className="w-full flex items-center gap-3 p-4 glass-card rounded-2xl border border-violet-500/20 active:scale-[0.98] transition-transform text-start"
+              >
+                <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center shrink-0">
+                  <Moon className="w-5 h-5 text-violet-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground">{t('layout.shutdownRitual')}</p>
+                  <p className="text-xs text-muted-foreground">{isAr ? 'مراجعة نهاية اليوم' : 'End-of-day review'}</p>
+                </div>
+              </button>
             )}
-          </>
+          </div>
         )}
       </div>
 

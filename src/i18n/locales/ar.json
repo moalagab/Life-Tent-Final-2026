@@ -40,7 +40,27 @@
     "update": "تحديث",
     "admin": "لوحة الادمن",
     "timeline": "السجل الزمني",
-    "graph": "خريطة العلاقات"
+    "graph": "خريطة العلاقات",
+    "spaces": "الفضاءات",
+    "home": "الرئيسية",
+    "capture": "التقاط"
+  },
+  "layout": {
+    "layers": "الطبقات",
+    "modules": "الوحدات",
+    "more": "المزيد",
+    "planYourDay": "رتّب يومك",
+    "autoplan": "رتّب يومي",
+    "workloadLight": "حمل خفيف",
+    "workloadMedium": "حمل متوسط",
+    "workloadHeavy": "حمل ثقيل",
+    "inbox": "صندوق الوارد",
+    "upcomingAgenda": "الأجندة القادمة",
+    "v3Coming": "الذكاء التنبؤي — قريباً v3",
+    "shutdownRitual": "طقوس نهاية اليوم",
+    "dayTimeline": "جدول اليوم",
+    "noEventsToday": "لا أحداث اليوم",
+    "contextPanel": "لوحة السياق"
   },
   "dashboard": {
     "greeting": "مرحباً",
@@ -904,6 +924,17 @@
     "fullControl": "تحكم كامل",
     "premiumExperience": "تجربة مميزة",
     "contactUs": "للاستفسارات",
-    "allRightsReserved": "جميع الحقوق محفوظة"
+    "allRightsReserved": "جميع الحقوق محفوظة",
+    "trustTitle": "بياناتك في أمان تام",
+    "trustSubtitle": "نأخذ خصوصيتك وأمان معلوماتك بجدية كاملة",
+    "trustEncryption": "تشفير من طرف لطرف",
+    "trustEncryptionDesc": "كل بياناتك مشفرة أثناء النقل والتخزين بمعايير AES-256",
+    "trustServers": "خوادم سحابية آمنة",
+    "trustServersDesc": "مدعوم بـ Supabase على خوادم معتمدة ISO 27001",
+    "trust2FA": "مصادقة ثنائية",
+    "trust2FADesc": "TOTP + مفاتيح المرور (Passkeys / Face ID) لحماية مضاعفة",
+    "trustExport": "بياناتك ملكك",
+    "trustExportDesc": "صدّر كامل بياناتك بصيغة JSON أو CSV في أي وقت",
+    "whatsappContact": "تواصل عبر واتساب"
   }
 }

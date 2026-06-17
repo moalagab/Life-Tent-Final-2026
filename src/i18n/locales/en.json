@@ -40,7 +40,27 @@
     "update": "Update",
     "admin": "Admin Panel",
     "timeline": "Timeline",
-    "graph": "Relation Graph"
+    "graph": "Relation Graph",
+    "spaces": "Spaces",
+    "home": "Home",
+    "capture": "Capture"
+  },
+  "layout": {
+    "layers": "Layers",
+    "modules": "Modules",
+    "more": "More",
+    "planYourDay": "Plan Your Day",
+    "autoplan": "Autoplan",
+    "workloadLight": "Light load",
+    "workloadMedium": "Medium load",
+    "workloadHeavy": "Heavy load",
+    "inbox": "Inbox",
+    "upcomingAgenda": "Upcoming Agenda",
+    "v3Coming": "Predictive AI — coming v3",
+    "shutdownRitual": "Shutdown Ritual",
+    "dayTimeline": "Day Timeline",
+    "noEventsToday": "No events today",
+    "contextPanel": "Context Panel"
   },
   "dashboard": {
     "greeting": "Hello",
@@ -904,6 +924,17 @@
     "fullControl": "Full Control",
     "premiumExperience": "Premium Experience",
     "contactUs": "For Inquiries",
-    "allRightsReserved": "All Rights Reserved"
+    "allRightsReserved": "All Rights Reserved",
+    "trustTitle": "Your Data is Fully Secure",
+    "trustSubtitle": "We take your privacy and data security with the utmost seriousness",
+    "trustEncryption": "End-to-End Encryption",
+    "trustEncryptionDesc": "All your data is encrypted in transit and at rest with AES-256 standards",
+    "trustServers": "Secure Cloud Servers",
+    "trustServersDesc": "Powered by Supabase on ISO 27001 certified infrastructure",
+    "trust2FA": "Two-Factor Authentication",
+    "trust2FADesc": "TOTP + Passkeys (Face ID) for double-layer protection",
+    "trustExport": "Your Data Belongs to You",
+    "trustExportDesc": "Export all your data as JSON or CSV anytime, no lock-in",
+    "whatsappContact": "Chat on WhatsApp"
   }
 }
