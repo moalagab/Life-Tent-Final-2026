@@ -21,7 +21,7 @@ import type { FocusArea } from './useOnboarding';
 
 /** These routes are always accessible — no module slot required. */
 export const ALWAYS_ON = new Set([
-  'dashboard', 'calendar', 'studio', 'pomodoro',
+  'dashboard', 'calendar', 'studio', 'pomodoro', 'timeline', 'graph',
 ]);
 
 /** Full module pool — granted to existing users who pre-date progressive disclosure. */
