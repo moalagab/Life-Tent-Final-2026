@@ -23,42 +23,42 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
   const startStr = startDate.toISOString().split('T')[0];
   const endStr = endDate.toISOString().split('T')[0];
 
-  // Fetch tasks with scheduled_at
-  const { data: tasks } = useQuery({
+  // Tasks with scheduled_at (precise time)
+  const { data: scheduledTasks } = useQuery({
     queryKey: ['calendar-tasks', user?.id, startStr, endStr],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('tasks')
-        .select('id, title, description, scheduled_at, due_at, status, priority, project_id, projects(title)')
+        .select('id, title, description, scheduled_at, due_date, due_time, status, priority, project_id, projects(title)')
         .not('scheduled_at', 'is', null)
         .gte('scheduled_at', startStr)
-        .lte('scheduled_at', endStr);
-
+        .lte('scheduled_at', endStr + 'T23:59:59')
+        .neq('status', 'done');
       if (error) throw error;
       return data;
     },
     enabled: !!user,
   });
 
-  // Fetch tasks with due_at (no scheduled_at)
+  // Tasks with due_date (no scheduled_at)
   const { data: dueTasks } = useQuery({
     queryKey: ['calendar-due-tasks', user?.id, startStr, endStr],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('tasks')
-        .select('id, title, description, scheduled_at, due_at, status, priority, project_id, projects(title)')
+        .select('id, title, description, scheduled_at, due_date, due_time, status, priority, project_id, projects(title)')
         .is('scheduled_at', null)
-        .not('due_at', 'is', null)
-        .gte('due_at', startStr)
-        .lte('due_at', endStr);
-
+        .not('due_date', 'is', null)
+        .gte('due_date', startStr)
+        .lte('due_date', endStr)
+        .neq('status', 'done');
       if (error) throw error;
       return data;
     },
     enabled: !!user,
   });
 
-  // Fetch events
+  // Calendar events
   const { data: events } = useQuery({
     queryKey: ['calendar-events', user?.id, startStr, endStr],
     queryFn: async () => {
@@ -67,14 +67,13 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
         .select('*')
         .gte('start_time', startStr)
         .lte('start_time', endStr + 'T23:59:59');
-
       if (error) throw error;
       return data;
     },
     enabled: !!user,
   });
 
-  // Fetch project milestones
+  // Project milestones
   const { data: milestones } = useQuery({
     queryKey: ['calendar-milestones', user?.id, startStr, endStr],
     queryFn: async () => {
@@ -83,14 +82,13 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
         .select('*, projects(title)')
         .gte('due_date', startStr)
         .lte('due_date', endStr);
-
       if (error) throw error;
       return data;
     },
     enabled: !!user,
   });
 
-  // Fetch debts with payment dates
+  // Debts with payment dates
   const { data: debts } = useQuery({
     queryKey: ['calendar-debts', user?.id],
     queryFn: async () => {
@@ -98,14 +96,13 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
         .from('debts')
         .select('id, name, monthly_payment, monthly_payment_date, status')
         .eq('status', 'active');
-
       if (error) throw error;
       return data;
     },
     enabled: !!user,
   });
 
-  // Fetch subscriptions
+  // Subscriptions
   const { data: subscriptions } = useQuery({
     queryKey: ['calendar-subscriptions', user?.id],
     queryFn: async () => {
@@ -113,48 +110,52 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
         .from('subscriptions')
         .select('id, name, amount, billing_cycle, next_billing_date, status')
         .eq('status', 'active');
-
       if (error) throw error;
       return data;
     },
     enabled: !!user,
   });
 
-  // Combine all events
   const unifiedEvents = useMemo(() => {
     const allEvents: UnifiedCalendarEvent[] = [];
 
-    // Add scheduled tasks
-    tasks?.forEach((task) => {
+    // Scheduled tasks (have specific time)
+    scheduledTasks?.forEach((task) => {
+      const taskColor = task.priority === 'high' ? '#ef4444' : task.priority === 'medium' ? '#f97316' : '#22c55e';
       allEvents.push({
         id: `task-${task.id}`,
         type: 'task',
         title: task.title,
         description: task.description,
-        date: task.scheduled_at,
-        color: task.priority === 'high' ? '#ef4444' : task.priority === 'medium' ? '#f97316' : '#22c55e',
+        date: task.scheduled_at!,
+        color: taskColor,
         sourceId: task.id,
         sourceType: 'tasks',
-        metadata: { project: task.projects?.title, status: task.status, priority: task.priority },
+        metadata: { project: (task.projects as { title?: string } | null)?.title, status: task.status, priority: task.priority },
       });
     });
 
-    // Add due tasks (as all-day)
+    // Due tasks (date-only deadline)
     dueTasks?.forEach((task) => {
+      // Build full datetime: due_date + due_time (or midnight)
+      const dateStr = task.due_time
+        ? `${task.due_date}T${task.due_time}`
+        : task.due_date!;
+      const taskColor = task.priority === 'high' ? '#ef4444' : task.priority === 'urgent' ? '#dc2626' : '#f59e0b';
       allEvents.push({
         id: `due-${task.id}`,
         type: 'task',
-        title: `📅 ${task.title}`,
+        title: task.title,
         description: task.description,
-        date: task.due_at,
-        color: '#f59e0b',
+        date: dateStr,
+        color: taskColor,
         sourceId: task.id,
         sourceType: 'tasks',
-        metadata: { project: task.projects?.title, status: task.status, isDue: true },
+        metadata: { project: (task.projects as { title?: string } | null)?.title, status: task.status, isDue: true, due_time: task.due_time },
       });
     });
 
-    // Add events
+    // Calendar events
     events?.forEach((event) => {
       allEvents.push({
         id: `event-${event.id}`,
@@ -170,7 +171,7 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
       });
     });
 
-    // Add milestones
+    // Milestones
     milestones?.forEach((milestone) => {
       allEvents.push({
         id: `milestone-${milestone.id}`,
@@ -181,16 +182,15 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
         color: milestone.color || '#8b5cf6',
         sourceId: milestone.id,
         sourceType: 'project_milestones',
-        metadata: { project: milestone.projects?.title, status: milestone.status },
+        metadata: { project: (milestone.projects as { title?: string } | null)?.title, status: milestone.status },
       });
     });
 
-    // Add debt payments (generate for each month in range)
+    // Debt payments
     debts?.forEach((debt) => {
       if (debt.monthly_payment_date) {
         const start = new Date(startDate);
         const end = new Date(endDate);
-        
         for (let d = new Date(start); d <= end; d.setMonth(d.getMonth() + 1)) {
           const paymentDate = new Date(d.getFullYear(), d.getMonth(), debt.monthly_payment_date);
           if (paymentDate >= start && paymentDate <= end) {
@@ -210,7 +210,7 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
       }
     });
 
-    // Add subscription renewals
+    // Subscription renewals
     subscriptions?.forEach((sub) => {
       if (sub.next_billing_date) {
         const billingDate = new Date(sub.next_billing_date);
@@ -231,7 +231,7 @@ export function useUnifiedCalendarEvents(startDate: Date, endDate: Date) {
     });
 
     return allEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [tasks, dueTasks, events, milestones, debts, subscriptions, startDate, endDate]);
+  }, [scheduledTasks, dueTasks, events, milestones, debts, subscriptions, startDate, endDate]);
 
   return { events: unifiedEvents };
 }

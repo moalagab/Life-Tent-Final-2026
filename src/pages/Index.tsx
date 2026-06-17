@@ -22,7 +22,7 @@ import { useSectionState } from '@/hooks/useSectionState';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import {
   Sun, BarChart3, Crosshair, Zap,
-  ListChecks, Activity, FolderKanban, Sparkles, Brain,
+  ListChecks, Activity, FolderKanban, Sparkles, Brain, HeartPulse,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -60,6 +60,7 @@ const Index = () => {
   const secWork     = useSectionState('active-work',   true);
   const secOverview = useSectionState('overview',      false);
   const secBehavior = useSectionState('behavior',      false);
+  const secHealth   = useSectionState('sys-health',    false);
 
   /* ── control strip ── */
   const controlStrip = (
@@ -161,12 +162,9 @@ const Index = () => {
           icon={Sparkles}
           open={secOverview.open}
           onToggle={secOverview.toggle}
-          summary={isAr ? 'المؤشرات الرئيسية · صحة النظام' : 'KPIs · System Health'}
+          summary={isAr ? 'المؤشرات الرئيسية' : 'KPIs'}
         >
-          <div className="space-y-3">
-            <KpiStrip />
-            <SystemHealthCard />
-          </div>
+          <KpiStrip />
         </DashboardSection>
 
         {/* ⑦ تحليل السلوك — closed by default */}
@@ -178,6 +176,17 @@ const Index = () => {
           summary={isAr ? 'أنماط العمل · رؤى ذكية' : 'Work patterns · Smart insights'}
         >
           <BehaviorInsights />
+        </DashboardSection>
+
+        {/* ⑧ صحة النظام — last, closed by default */}
+        <DashboardSection
+          title={isAr ? 'صحة النظام' : 'System Health'}
+          icon={HeartPulse}
+          open={secHealth.open}
+          onToggle={secHealth.toggle}
+          summary={isAr ? 'حالة قاعدة البيانات والخدمات' : 'Database & services status'}
+        >
+          <SystemHealthCard />
         </DashboardSection>
 
       </div>

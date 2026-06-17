@@ -48,6 +48,26 @@ export function useFocusTasks() {
   });
 }
 
+export function useTodayTasks() {
+  const { user } = useAuth();
+  const today = new Date().toISOString().split('T')[0];
+
+  return useQuery({
+    queryKey: ['today-tasks', user?.id, today],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('id, title, status, priority, due_date, due_time, scheduled_at, is_focus, project_id')
+        .eq('due_date', today)
+        .in('status', ['backlog', 'todo', 'in_progress', 'review'])
+        .order('due_time', { ascending: true, nullsFirst: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+}
+
 export function useCreateTask() {
   const queryClient = useQueryClient();
   const { user } = useAuth();

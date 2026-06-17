@@ -1,15 +1,16 @@
 import { useMemo, useState } from 'react';
 import { useEvents, useCreateEvent, useUpdateEvent, useDeleteEvent } from '@/hooks/useEvents';
-import { useFocusTasks } from '@/hooks/useTasks';
+import { useTodayTasks, useUpdateTask } from '@/hooks/useTasks';
 import { useLanguage } from '@/hooks/useLanguage';
 import { cn } from '@/lib/utils';
 import { format, isToday, parseISO, set } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import {
   CalendarClock, ChevronDown, ChevronUp,
-  Plus, Pencil, Trash2, Check, X, CheckSquare, Clock,
+  Plus, Pencil, Trash2, Check, X, CheckSquare, Clock, Link,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 const HOURS = Array.from({ length: 17 }, (_, i) => i + 6); // 6am – 10pm
 
@@ -32,16 +33,25 @@ function buildIso(date: Date, hour: number, minute: number) {
   return set(date, { hours: hour, minutes: minute, seconds: 0, milliseconds: 0 }).toISOString();
 }
 
+const TASK_PRIORITY_COLOR: Record<string, string> = {
+  urgent: '#dc2626',
+  high:   '#ef4444',
+  medium: '#f59e0b',
+  low:    '#6b7280',
+};
+
 export function DayTimeline() {
   const { currentLanguage } = useLanguage();
   const isAr = currentLanguage === 'ar';
   const dateLocale = isAr ? ar : undefined;
+  const navigate = useNavigate();
 
   const { data: allEvents }  = useEvents();
-  const { data: focusTasks } = useFocusTasks();
+  const { data: todayTasks } = useTodayTasks();
   const createEvent  = useCreateEvent();
   const updateEvent  = useUpdateEvent();
   const deleteEvent  = useDeleteEvent();
+  const updateTask   = useUpdateTask();
 
   const [expanded,    setExpanded]   = useState(true);
   const [showForm,    setShowForm]   = useState(false);
@@ -51,20 +61,47 @@ export function DayTimeline() {
 
   const today = useMemo(() => new Date(), []);
 
+  /* ── Calendar events for today ── */
   const todayEvents = useMemo(() => {
     if (!allEvents) return [];
     return allEvents.filter(e => e.start_time && isToday(parseISO(e.start_time)));
   }, [allEvents]);
 
-  const eventsByHour = useMemo(() => {
-    const map = new Map<number, typeof todayEvents>();
-    todayEvents.forEach(e => {
-      const hour = parseISO(e.start_time!).getHours();
-      map.set(hour, [...(map.get(hour) ?? []), e]);
-    });
-    return map;
-  }, [todayEvents]);
+  /* ── Tasks split: scheduled (with due_time) vs unscheduled ── */
+  const { scheduledTasks, unscheduledTasks } = useMemo(() => {
+    if (!todayTasks) return { scheduledTasks: [], unscheduledTasks: [] };
+    const scheduled   = todayTasks.filter(t => t.due_time || t.scheduled_at);
+    const unscheduled = todayTasks.filter(t => !t.due_time && !t.scheduled_at);
+    return { scheduledTasks: scheduled, unscheduledTasks: unscheduled };
+  }, [todayTasks]);
 
+  /* ── Build hour → items map (events + scheduled tasks) ── */
+  const itemsByHour = useMemo(() => {
+    type HourItem =
+      | { kind: 'event'; data: typeof todayEvents[number] }
+      | { kind: 'task';  data: typeof scheduledTasks[number] };
+
+    const map = new Map<number, HourItem[]>();
+
+    todayEvents.forEach(e => {
+      const h = parseISO(e.start_time!).getHours();
+      map.set(h, [...(map.get(h) ?? []), { kind: 'event', data: e }]);
+    });
+
+    scheduledTasks.forEach(t => {
+      let h: number;
+      if (t.due_time) {
+        h = parseInt(t.due_time.split(':')[0], 10);
+      } else if (t.scheduled_at) {
+        h = parseISO(t.scheduled_at).getHours();
+      } else return;
+      map.set(h, [...(map.get(h) ?? []), { kind: 'task', data: t }]);
+    });
+
+    return map;
+  }, [todayEvents, scheduledTasks]);
+
+  const totalItems = todayEvents.length + (todayTasks?.length ?? 0);
   const nowH   = today.getHours();
   const nowMin = today.getMinutes();
 
@@ -110,7 +147,7 @@ export function DayTimeline() {
     } catch { toast.error(isAr ? 'حدث خطأ' : 'Error'); }
   }
 
-  async function handleDelete(id: string) {
+  async function handleDeleteEvent(id: string) {
     try {
       await deleteEvent.mutateAsync(id);
       toast.success(isAr ? 'تم الحذف' : 'Deleted');
@@ -118,9 +155,15 @@ export function DayTimeline() {
     setDeletingId(null);
   }
 
+  async function handleCompleteTask(id: string) {
+    try {
+      await updateTask.mutateAsync({ id, status: 'done' });
+      toast.success(isAr ? 'تم إنجاز المهمة' : 'Task done');
+    } catch { toast.error(isAr ? 'حدث خطأ' : 'Error'); }
+  }
+
   const isSaving = createEvent.isPending || updateEvent.isPending;
 
-  /* ── header date label ── */
   const todayLabel = format(today, isAr ? 'EEEE d MMMM' : 'EEEE, d MMM', { locale: dateLocale });
 
   return (
@@ -136,13 +179,20 @@ export function DayTimeline() {
             {isAr ? 'جدول اليوم' : "Today's Schedule"}
           </span>
           <span className="hidden sm:inline text-xs text-muted-foreground truncate">{todayLabel}</span>
-          {todayEvents.length > 0 && (
+          {totalItems > 0 && (
             <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium shrink-0">
-              {todayEvents.length}
+              {totalItems}
             </span>
           )}
         </div>
         <div className="flex items-center gap-1 shrink-0">
+          <button
+            onClick={e => { e.stopPropagation(); navigate('/calendar'); }}
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+            title={isAr ? 'فتح التقويم' : 'Open calendar'}
+          >
+            <Link className="w-3.5 h-3.5" />
+          </button>
           <button
             onClick={e => { e.stopPropagation(); openAdd(); }}
             className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
@@ -155,9 +205,9 @@ export function DayTimeline() {
       </div>
 
       {/* ── Collapsed summary ── */}
-      {!expanded && todayEvents.length > 0 && (
-        <div className="px-3 pb-2.5 flex gap-1.5 overflow-x-auto scrollbar-none">
-          {todayEvents.slice(0, 4).map(ev => (
+      {!expanded && totalItems > 0 && (
+        <div className="px-3 pb-2.5 flex gap-1.5 flex-wrap">
+          {todayEvents.slice(0, 3).map(ev => (
             <span
               key={ev.id}
               className="shrink-0 text-[11px] text-white px-2 py-0.5 rounded-full truncate max-w-[130px]"
@@ -166,9 +216,18 @@ export function DayTimeline() {
               {format(parseISO(ev.start_time!), 'H:mm')} {ev.title}
             </span>
           ))}
-          {todayEvents.length > 4 && (
+          {unscheduledTasks.slice(0, 2).map(t => (
+            <span
+              key={t.id}
+              className="shrink-0 text-[11px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground truncate max-w-[130px] flex items-center gap-1"
+            >
+              <CheckSquare className="w-2.5 h-2.5" />
+              {t.title}
+            </span>
+          ))}
+          {totalItems > 5 && (
             <span className="shrink-0 text-[11px] text-muted-foreground px-2 py-0.5">
-              +{todayEvents.length - 4}
+              +{totalItems - 5}
             </span>
           )}
         </div>
@@ -181,7 +240,6 @@ export function DayTimeline() {
           {/* Inline form */}
           {showForm && (
             <div className="p-3 rounded-xl bg-muted/40 border border-border/50 space-y-2.5" onClick={e => e.stopPropagation()}>
-              {/* Title */}
               <input
                 autoFocus
                 value={form.title}
@@ -191,7 +249,6 @@ export function DayTimeline() {
                 className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
               />
 
-              {/* Time row */}
               <div className={cn('flex items-center gap-2 text-xs text-muted-foreground', isAr && 'flex-row-reverse')}>
                 <Clock className="w-3.5 h-3.5 shrink-0" />
                 <TimeSelect hour={form.hour} minute={form.minute}
@@ -205,7 +262,6 @@ export function DayTimeline() {
                 />
               </div>
 
-              {/* Color swatches */}
               <div className={cn('flex gap-1.5', isAr && 'flex-row-reverse')}>
                 {COLORS.map(c => (
                   <button
@@ -217,7 +273,6 @@ export function DayTimeline() {
                 ))}
               </div>
 
-              {/* Actions */}
               <div className={cn('flex gap-2', isAr && 'flex-row-reverse')}>
                 <button
                   onClick={handleSave}
@@ -238,13 +293,34 @@ export function DayTimeline() {
             </div>
           )}
 
-          {/* Focus tasks strip */}
-          {focusTasks && focusTasks.length > 0 && (
+          {/* Unscheduled tasks strip (no due_time) */}
+          {unscheduledTasks.length > 0 && (
             <div className="space-y-1">
-              {focusTasks.slice(0, 3).map(task => (
-                <div key={task.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-primary/5 border border-primary/10">
-                  <CheckSquare className="w-3.5 h-3.5 text-primary shrink-0" />
+              <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wide px-1">
+                {isAr ? 'مهام اليوم' : "Today's tasks"}
+              </p>
+              {unscheduledTasks.map(task => (
+                <div
+                  key={task.id}
+                  className="group flex items-center gap-2 px-2 py-1.5 rounded-lg bg-primary/5 border border-primary/10 hover:border-primary/30 transition-colors"
+                >
+                  <button
+                    onClick={() => handleCompleteTask(task.id)}
+                    className="shrink-0 w-4 h-4 rounded border border-primary/40 hover:border-primary hover:bg-primary/10 transition-colors flex items-center justify-center"
+                    title={isAr ? 'إنجاز' : 'Complete'}
+                  >
+                    <Check className="w-2.5 h-2.5 text-primary opacity-0 group-hover:opacity-100" />
+                  </button>
+                  <CheckSquare className="w-3.5 h-3.5 shrink-0"
+                    style={{ color: TASK_PRIORITY_COLOR[task.priority ?? 'medium'] }} />
                   <span className="text-xs text-foreground truncate flex-1">{task.title}</span>
+                  <button
+                    onClick={() => navigate(`/tasks?id=${task.id}`)}
+                    className="opacity-0 group-hover:opacity-100 p-0.5 text-muted-foreground hover:text-primary transition-all"
+                    title={isAr ? 'فتح' : 'Open'}
+                  >
+                    <Link className="w-3 h-3" />
+                  </button>
                 </div>
               ))}
             </div>
@@ -253,13 +329,13 @@ export function DayTimeline() {
           {/* Hour grid */}
           <div className="relative">
             {HOURS.map(h => {
-              const events     = eventsByHour.get(h) ?? [];
+              const items      = itemsByHour.get(h) ?? [];
               const isCurrentH = h === nowH;
               const nowTopPct  = isCurrentH ? (nowMin / 60) * 100 : null;
 
               return (
                 <div key={h} className="flex gap-2 min-h-[36px] relative group/row">
-                  {/* Hour label — click to quick-add */}
+                  {/* Hour label */}
                   <button
                     onClick={() => openAdd(h)}
                     className={cn(
@@ -284,54 +360,79 @@ export function DayTimeline() {
                       </div>
                     )}
 
-                    {events.map(ev => (
-                      <div
-                        key={ev.id}
-                        className="group/ev relative flex items-center gap-1.5 px-2 py-1 rounded-md text-xs text-white font-medium mb-0.5 cursor-pointer"
-                        style={{ backgroundColor: ev.color ?? 'hsl(var(--primary))' }}
-                      >
-                        <Clock className="w-3 h-3 shrink-0" />
-                        <span className="truncate flex-1">{ev.title}</span>
-
-                        {/* Edit / Delete — show on hover */}
-                        <div className="hidden group-hover/ev:flex items-center gap-0.5 shrink-0">
-                          <button
-                            onClick={e => { e.stopPropagation(); openEdit(ev); }}
-                            className="p-0.5 rounded hover:bg-white/20 transition-colors"
-                            title={isAr ? 'تعديل' : 'Edit'}
+                    {items.map(item => {
+                      if (item.kind === 'event') {
+                        const ev = item.data;
+                        return (
+                          <div
+                            key={ev.id}
+                            className="group/ev relative flex items-center gap-1.5 px-2 py-1 rounded-md text-xs text-white font-medium mb-0.5 cursor-pointer"
+                            style={{ backgroundColor: ev.color ?? 'hsl(var(--primary))' }}
                           >
-                            <Pencil className="w-3 h-3" />
-                          </button>
-                          {deletingId === ev.id ? (
-                            <>
+                            <Clock className="w-3 h-3 shrink-0" />
+                            <span className="truncate flex-1">{ev.title}</span>
+                            <div className="hidden group-hover/ev:flex items-center gap-0.5 shrink-0">
                               <button
-                                onClick={e => { e.stopPropagation(); handleDelete(ev.id); }}
+                                onClick={e => { e.stopPropagation(); openEdit(ev); }}
                                 className="p-0.5 rounded hover:bg-white/20 transition-colors"
                               >
-                                <Check className="w-3 h-3" />
+                                <Pencil className="w-3 h-3" />
                               </button>
-                              <button
-                                onClick={e => { e.stopPropagation(); setDeletingId(null); }}
-                                className="p-0.5 rounded hover:bg-white/20 transition-colors"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            </>
-                          ) : (
-                            <button
-                              onClick={e => { e.stopPropagation(); setDeletingId(ev.id); }}
-                              className="p-0.5 rounded hover:bg-white/20 transition-colors"
-                              title={isAr ? 'حذف' : 'Delete'}
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                              {deletingId === ev.id ? (
+                                <>
+                                  <button onClick={e => { e.stopPropagation(); handleDeleteEvent(ev.id); }} className="p-0.5 rounded hover:bg-white/20">
+                                    <Check className="w-3 h-3" />
+                                  </button>
+                                  <button onClick={e => { e.stopPropagation(); setDeletingId(null); }} className="p-0.5 rounded hover:bg-white/20">
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </>
+                              ) : (
+                                <button onClick={e => { e.stopPropagation(); setDeletingId(ev.id); }} className="p-0.5 rounded hover:bg-white/20">
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      }
 
-                    {/* Empty-hour add hint on hover */}
-                    {events.length === 0 && (
+                      // Task in the grid
+                      const task = item.data;
+                      const taskColor = TASK_PRIORITY_COLOR[task.priority ?? 'medium'];
+                      return (
+                        <div
+                          key={task.id}
+                          className="group/task relative flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium mb-0.5 border"
+                          style={{ borderColor: taskColor + '40', backgroundColor: taskColor + '15', color: 'hsl(var(--foreground))' }}
+                        >
+                          <CheckSquare className="w-3 h-3 shrink-0" style={{ color: taskColor }} />
+                          <span className="truncate flex-1">{task.title}</span>
+                          {task.due_time && (
+                            <span className="text-[10px] opacity-60 shrink-0">{task.due_time.slice(0, 5)}</span>
+                          )}
+                          <div className="hidden group-hover/task:flex items-center gap-0.5 shrink-0">
+                            <button
+                              onClick={e => { e.stopPropagation(); handleCompleteTask(task.id); }}
+                              className="p-0.5 rounded hover:bg-muted transition-colors"
+                              title={isAr ? 'إنجاز' : 'Done'}
+                            >
+                              <Check className="w-3 h-3 text-primary" />
+                            </button>
+                            <button
+                              onClick={e => { e.stopPropagation(); navigate(`/tasks?id=${task.id}`); }}
+                              className="p-0.5 rounded hover:bg-muted transition-colors"
+                              title={isAr ? 'فتح' : 'Open'}
+                            >
+                              <Link className="w-3 h-3 text-muted-foreground" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {/* Empty-hour add hint */}
+                    {items.length === 0 && (
                       <button
                         onClick={() => openAdd(h)}
                         className="hidden group-hover/row:flex items-center gap-1 text-[10px] text-muted-foreground/50 hover:text-primary transition-colors"
@@ -351,7 +452,7 @@ export function DayTimeline() {
   );
 }
 
-/* ── Tiny time selects ── */
+/* ── Time selects ── */
 function TimeSelect({ hour, minute, onHour, onMinute }: {
   hour: number; minute: number;
   onHour: (h: number) => void; onMinute: (m: number) => void;
