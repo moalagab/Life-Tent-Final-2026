@@ -72,9 +72,12 @@ export default defineConfig(({ mode }) => ({
         // Serve index.html for all SPA navigation
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/assets/, /^\/api/, /^\/offline/],
-        // Precache ONLY the app shell (html + css + tiny js entry).
-        globPatterns: ["**/*.{css,html,ico,png,svg,woff2}"],
-        // Exclude heavy on-demand chunks from precache
+        // Precache app shell: html + css + small js chunks.
+        // Must include js so there's always ≥1 match even when page CSS files
+        // happen to be excluded by globIgnores.
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        // Exclude heavy on-demand chunks from precache — they load on demand
+        // and are served NetworkFirst via runtimeCaching below.
         globIgnores: [
           "**/jspdf*",
           "**/html2canvas*",
