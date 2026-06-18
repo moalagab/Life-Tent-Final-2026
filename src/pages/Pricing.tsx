@@ -304,7 +304,7 @@ export default function Pricing() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => window.location.href = 'mailto:sales@lifetent.online'}
+              onClick={() => window.location.href = 'mailto:info@lifetent.online'}
             >
               تواصل للحصول على عرض
               <ArrowRight className="w-4 h-4 me-1.5" />
@@ -388,7 +388,7 @@ export default function Pricing() {
               },
               {
                 q: 'هل هناك خصم للطلاب أو المنظمات غير الربحية؟',
-                a: 'نعم، نقدم خصمًا يصل إلى 50% للطلاب والمنظمات غير الربحية. تواصل معنا عبر support@lifetent.online للحصول على التفاصيل.',
+                a: 'نعم، نقدم خصمًا يصل إلى 50% للطلاب والمنظمات غير الربحية. تواصل معنا عبر info@lifetent.online للحصول على التفاصيل.',
               },
             ].map(({ q, a }) => (
               <div key={q} className="rounded-xl border border-border/50 bg-card p-5">
@@ -410,7 +410,7 @@ export default function Pricing() {
               ابدأ مجانًا الآن
               <ArrowRight className="w-4 h-4 me-1.5" />
             </Button>
-            <Button size="lg" variant="outline" onClick={() => window.location.href = 'mailto:sales@lifetent.online'}>
+            <Button size="lg" variant="outline" onClick={() => window.location.href = 'mailto:info@lifetent.online'}>
               تحدث مع فريق المبيعات
             </Button>
           </div>

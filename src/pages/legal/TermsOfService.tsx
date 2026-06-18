@@ -132,8 +132,8 @@ export default function TermsOfService() {
             <h2 className="text-lg font-semibold text-foreground mb-3 pb-2 border-b border-border/50">١٠. التواصل</h2>
             <p className="text-muted-foreground">
               لأي استفسار بشأن هذه الشروط يُرجى التواصل عبر:{' '}
-              <a href="mailto:support@lifetent.online" className="text-primary hover:underline">
-                support@lifetent.online
+              <a href="mailto:info@lifetent.online" className="text-primary hover:underline">
+                info@lifetent.online
               </a>
             </p>
           </section>

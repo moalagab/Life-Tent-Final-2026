@@ -116,8 +116,8 @@ export default function RefundPolicy() {
             <h2 className="text-lg font-semibold text-foreground mb-3 pb-2 border-b border-border/50">٥. كيفية طلب الاسترداد</h2>
             <div className="space-y-4 text-muted-foreground">
               <p>لطلب الاسترداد أرسل بريدًا إلكترونيًا إلى{' '}
-                <a href="mailto:support@lifetent.online" className="text-primary hover:underline">
-                  support@lifetent.online
+                <a href="mailto:info@lifetent.online" className="text-primary hover:underline">
+                  info@lifetent.online
                 </a>{' '}
                 مع المعلومات التالية:
               </p>
@@ -142,8 +142,8 @@ export default function RefundPolicy() {
             <h2 className="text-lg font-semibold text-foreground mb-3 pb-2 border-b border-border/50">٧. التواصل</h2>
             <p className="text-muted-foreground">
               لأي استفسار بشأن هذه السياسة:{' '}
-              <a href="mailto:support@lifetent.online" className="text-primary hover:underline">
-                support@lifetent.online
+              <a href="mailto:info@lifetent.online" className="text-primary hover:underline">
+                info@lifetent.online
               </a>
             </p>
           </section>

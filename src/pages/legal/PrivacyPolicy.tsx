@@ -117,8 +117,8 @@ export default function PrivacyPolicy() {
             </ul>
             <p className="text-muted-foreground mt-3">
               لممارسة أي من هذه الحقوق تواصل معنا عبر:{' '}
-              <a href="mailto:privacy@lifetent.online" className="text-primary hover:underline">
-                privacy@lifetent.online
+              <a href="mailto:info@lifetent.online" className="text-primary hover:underline">
+                info@lifetent.online
               </a>
             </p>
           </section>
@@ -148,8 +148,8 @@ export default function PrivacyPolicy() {
             <h2 className="text-lg font-semibold text-foreground mb-3 pb-2 border-b border-border/50">١٠. التواصل</h2>
             <p className="text-muted-foreground">
               لأي استفسار بشأن هذه السياسة:{' '}
-              <a href="mailto:privacy@lifetent.online" className="text-primary hover:underline">
-                privacy@lifetent.online
+              <a href="mailto:info@lifetent.online" className="text-primary hover:underline">
+                info@lifetent.online
               </a>
             </p>
           </section>
