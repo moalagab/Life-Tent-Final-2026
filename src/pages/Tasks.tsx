@@ -2,7 +2,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import {
   Plus, Filter, Search, MoreHorizontal, Flag, Calendar, Loader2,
   FolderKanban, Target, Sparkles, User, Clock, Trash2, Edit3, GripVertical,
-  Layers, Briefcase
+  Layers, Briefcase, CheckCircle2, RotateCcw, AlarmClock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -417,77 +417,110 @@ export default function Tasks() {
                 return (
                   <div
                     key={task.id}
-                    className="flex items-center gap-3 p-3.5 rounded-xl bg-card border border-border/50 active:scale-[0.98] transition-transform"
+                    className="rounded-xl bg-card border border-border/50 active:scale-[0.98] transition-transform overflow-hidden"
                   >
-                    {/* Priority dot */}
-                    <div className={cn('w-2.5 h-2.5 rounded-full shrink-0', priority.dotColor)} />
+                    {/* Main row */}
+                    <div className="flex items-center gap-3 p-3.5">
+                      {/* Priority dot */}
+                      <div className={cn('w-2.5 h-2.5 rounded-full shrink-0', priority.dotColor)} />
 
-                    {/* Main info */}
-                    <div className="flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/tasks/${task.id}`)}>
-                      <p className="text-sm font-medium text-foreground truncate">{task.title}</p>
-                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                        {project ? (
-                          <span className="flex items-center gap-1 truncate max-w-[120px]">
-                            <div
-                              className="w-1.5 h-1.5 rounded-full shrink-0"
-                              style={{ backgroundColor: project.color || '#6366f1' }}
-                            />
-                            {project.title}
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1">
-                            <User className="w-3 h-3" />
-                            {currentLanguage === 'ar' ? 'شخصي' : 'Personal'}
-                          </span>
-                        )}
-                        {task.due_date && (
-                          <>
-                            <span>·</span>
-                            <span className="flex items-center gap-0.5">
-                              <Calendar className="w-3 h-3" />
-                              {format(new Date(task.due_date), 'MMM d')}
+                      {/* Main info */}
+                      <div className="flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/tasks/${task.id}`)}>
+                        <p className="text-sm font-medium text-foreground truncate">{task.title}</p>
+                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                          {project ? (
+                            <span className="flex items-center gap-1 truncate max-w-[120px]">
+                              <div
+                                className="w-1.5 h-1.5 rounded-full shrink-0"
+                                style={{ backgroundColor: project.color || '#6366f1' }}
+                              />
+                              {project.title}
                             </span>
-                          </>
-                        )}
+                          ) : (
+                            <span className="flex items-center gap-1">
+                              <User className="w-3 h-3" />
+                              {currentLanguage === 'ar' ? 'شخصي' : 'Personal'}
+                            </span>
+                          )}
+                          {task.due_date && (
+                            <>
+                              <span>·</span>
+                              <span className="flex items-center gap-0.5">
+                                <Calendar className="w-3 h-3" />
+                                {format(new Date(task.due_date), 'MMM d')}
+                              </span>
+                            </>
+                          )}
+                        </div>
                       </div>
+
+                      {/* Priority badge */}
+                      <Badge className={cn('text-[11px] shrink-0 hidden xs:flex gap-1', priority.class)}>
+                        <Flag className="w-2.5 h-2.5" />
+                        {priority.label}
+                      </Badge>
+
+                      {/* Dropdown */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="p-1.5 rounded-lg hover:bg-muted transition-colors shrink-0">
+                            <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-52">
+                          {columns
+                            .filter(c => c.id !== mobileActiveColumn)
+                            .map(c => (
+                              <DropdownMenuItem
+                                key={c.id}
+                                className="gap-2"
+                                onClick={() => handleStatusChange(task.id, c.id)}
+                              >
+                                <div className={cn('w-2 h-2 rounded-full', c.color)} />
+                                {currentLanguage === 'ar' ? 'نقل إلى' : 'Move to'} {c.title}
+                              </DropdownMenuItem>
+                            ))}
+                          <DropdownMenuItem
+                            className="gap-2 text-destructive focus:text-destructive mt-1"
+                            onClick={() => handleDelete(task.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            {t('common.delete')}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
 
-                    {/* Priority badge */}
-                    <Badge className={cn('text-[11px] shrink-0 hidden xs:flex gap-1', priority.class)}>
-                      <Flag className="w-2.5 h-2.5" />
-                      {priority.label}
-                    </Badge>
-
-                    {/* Dropdown */}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="p-1.5 rounded-lg hover:bg-muted transition-colors shrink-0">
-                          <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-52">
-                        {/* Move to other columns */}
-                        {columns
-                          .filter(c => c.id !== mobileActiveColumn)
-                          .map(c => (
-                            <DropdownMenuItem
-                              key={c.id}
-                              className="gap-2"
-                              onClick={() => handleStatusChange(task.id, c.id)}
-                            >
-                              <div className={cn('w-2 h-2 rounded-full', c.color)} />
-                              {currentLanguage === 'ar' ? 'نقل إلى' : 'Move to'} {c.title}
-                            </DropdownMenuItem>
-                          ))}
-                        <DropdownMenuItem
-                          className="gap-2 text-destructive focus:text-destructive mt-1"
-                          onClick={() => handleDelete(task.id)}
+                    {/* Quick action buttons row */}
+                    <div className="flex border-t border-border/40">
+                      {task.status !== 'done' ? (
+                        <>
+                          <button
+                            onClick={() => handleStatusChange(task.id, 'done')}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2 text-success text-xs font-medium hover:bg-success/10 transition-colors"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            {currentLanguage === 'ar' ? 'تم الإنجاز' : 'Mark done'}
+                          </button>
+                          <div className="w-px bg-border/40" />
+                          <button
+                            onClick={() => handleStatusChange(task.id, 'backlog')}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2 text-muted-foreground text-xs font-medium hover:bg-muted/50 transition-colors"
+                          >
+                            <AlarmClock className="w-3.5 h-3.5" />
+                            {currentLanguage === 'ar' ? 'تم التأجيل' : 'Postpone'}
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => handleStatusChange(task.id, 'todo')}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2 text-muted-foreground text-xs font-medium hover:bg-muted/50 transition-colors"
                         >
-                          <Trash2 className="w-4 h-4" />
-                          {t('common.delete')}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          <RotateCcw className="w-3.5 h-3.5" />
+                          {currentLanguage === 'ar' ? 'إعادة فتح' : 'Reopen'}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 );
               });
@@ -664,6 +697,36 @@ export default function Tasks() {
                               </span>
                             </div>
                           )}
+
+                          {/* Quick Actions */}
+                          <div className="mt-3 pt-2.5 border-t border-border/40 flex gap-1.5">
+                            {task.status !== 'done' ? (
+                              <>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleStatusChange(task.id, 'done'); }}
+                                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-success/10 hover:bg-success/20 text-success text-xs font-medium transition-colors"
+                                >
+                                  <CheckCircle2 className="w-3.5 h-3.5" />
+                                  {currentLanguage === 'ar' ? 'تم' : 'Done'}
+                                </button>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleStatusChange(task.id, 'backlog'); }}
+                                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground text-xs font-medium transition-colors"
+                                >
+                                  <AlarmClock className="w-3.5 h-3.5" />
+                                  {currentLanguage === 'ar' ? 'تأجيل' : 'Postpone'}
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleStatusChange(task.id, 'todo'); }}
+                                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground text-xs font-medium transition-colors"
+                              >
+                                <RotateCcw className="w-3.5 h-3.5" />
+                                {currentLanguage === 'ar' ? 'إعادة فتح' : 'Reopen'}
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );
