@@ -44,7 +44,7 @@ export default function PrivacyPolicy() {
               </div>
               <div>
                 <p className="font-medium text-foreground/80 mb-1.5">بيانات الاستخدام</p>
-                <p>المهام والأهداف والعادات والملاحظات والبيانات المالية التي تُدخلها أنت شخصيًا في المنصة.</p>
+                <p>المهام والأهداف والعادات والملاحظات والبيانات المالية التي تُدخلها في المنصة هي <strong className="text-foreground/80">معلومات خاصة بك وحدك</strong>. لا نجمعها ولا نطّلع عليها ولا نستخدمها لأي غرض — تُخزَّن مشفّرة وتبقى ملكًا حصريًا لك.</p>
               </div>
               <div>
                 <p className="font-medium text-foreground/80 mb-1.5">بيانات تقنية</p>
