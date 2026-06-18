@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/hooks/useAuth';
+import { SEO } from '@/components/SEO';
 import { useEffect, useState, useMemo } from 'react';
 import { 
   Tent, 
@@ -179,7 +180,54 @@ export default function LandingPage() {
     }
   ];
 
+  const landingSchema = [
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Life Tent",
+      "alternateName": "Life Tent OS",
+      "description": "نظام إدارة الحياة المتكامل للمستخدم العربي — مهام، أهداف، مالية، عادات، وذكاء اصطناعي في مكان واحد.",
+      "url": "https://www.lifetent.online",
+      "logo": "https://www.lifetent.online/pwa-192x192.png",
+      "applicationCategory": "ProductivityApplication",
+      "operatingSystem": "Web, iOS, Android",
+      "inLanguage": ["ar", "en"],
+      "offers": [
+        { "@type": "Offer", "price": "0", "priceCurrency": "USD", "name": "Free" },
+        { "@type": "Offer", "price": "6.99", "priceCurrency": "USD", "name": "Pro", "billingPeriod": "P1M" },
+        { "@type": "Offer", "price": "12", "priceCurrency": "USD", "name": "Business", "billingPeriod": "P1M" }
+      ],
+      "screenshot": "https://www.lifetent.online/og-image.png",
+      "featureList": [
+        "إدارة المهام والمشاريع",
+        "تتبع الأهداف",
+        "إدارة المالية الشخصية",
+        "تتبع العادات اليومية",
+        "مساعد ذكاء اصطناعي",
+        "قاعدة المعرفة الشخصية"
+      ]
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Life Tent",
+      "url": "https://www.lifetent.online",
+      "logo": "https://www.lifetent.online/pwa-192x192.png",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "info@lifetent.online",
+        "contactType": "customer support"
+      }
+    }
+  ];
+
   return (
+    <>
+      <SEO
+        canonical="/"
+        description="Life Tent — نظام إدارة الحياة المتكامل للمستخدم العربي. نظّم مهامك، أهدافك، ماليتك، وعاداتك في مكان واحد مع مساعد ذكاء اصطناعي يتحدث لغتك."
+        schema={landingSchema}
+      />
     <div className="min-h-screen bg-background overflow-x-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Navigation */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
@@ -624,5 +672,6 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
+    </>
   );
 }

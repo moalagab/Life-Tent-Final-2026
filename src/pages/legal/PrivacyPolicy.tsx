@@ -1,8 +1,16 @@
 import { Link } from 'react-router-dom';
 import { Tent, ArrowRight } from 'lucide-react';
+import { SEO } from '@/components/SEO';
 
 export default function PrivacyPolicy() {
   return (
+    <>
+      <SEO
+        title="سياسة الخصوصية"
+        description="سياسة خصوصية Life Tent — كيف نحمي بياناتك ونحترم خصوصيتك. بياناتك ملكك وحدك."
+        canonical="/privacy"
+        noIndex={false}
+      />
     <div className="min-h-screen bg-background text-foreground" dir="rtl">
       {/* Header */}
       <header className="border-b border-border/50 bg-card/80 backdrop-blur-sm sticky top-0 z-10">
@@ -164,5 +172,6 @@ export default function PrivacyPolicy() {
         </div>
       </main>
     </div>
+    </>
   );
 }

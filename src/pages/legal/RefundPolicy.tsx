@@ -1,8 +1,16 @@
 import { Link } from 'react-router-dom';
 import { Tent, ArrowRight } from 'lucide-react';
+import { SEO } from '@/components/SEO';
 
 export default function RefundPolicy() {
   return (
+    <>
+      <SEO
+        title="سياسة الاسترداد"
+        description="سياسة استرداد الأموال لـ Life Tent — ضمان استرداد كامل خلال 14 يوماً بدون أسئلة."
+        canonical="/refund"
+        noIndex={false}
+      />
     <div className="min-h-screen bg-background text-foreground" dir="rtl">
       {/* Header */}
       <header className="border-b border-border/50 bg-card/80 backdrop-blur-sm sticky top-0 z-10">
@@ -158,5 +166,6 @@ export default function RefundPolicy() {
         </div>
       </main>
     </div>
+    </>
   );
 }

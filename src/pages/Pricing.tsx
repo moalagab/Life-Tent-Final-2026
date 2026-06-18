@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { SEO } from '@/components/SEO';
 import { cn } from '@/lib/utils';
 import {
   Tent, Check, X, Zap, Building2, Sparkles,
@@ -127,7 +128,26 @@ export default function Pricing() {
   const proLabel   = annual ? '$59/سنة' : '$6.99/شهر';
   const proSub     = annual ? 'يُدفع $59 سنويًا' : 'يُدفع شهريًا';
 
+  const pricingSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Life Tent",
+    "url": "https://www.lifetent.online",
+    "offers": [
+      { "@type": "Offer", "name": "Free",     "price": "0",    "priceCurrency": "USD" },
+      { "@type": "Offer", "name": "Pro",      "price": "6.99", "priceCurrency": "USD", "billingPeriod": "P1M" },
+      { "@type": "Offer", "name": "Business", "price": "12",   "priceCurrency": "USD", "billingPeriod": "P1M" }
+    ]
+  };
+
   return (
+    <>
+      <SEO
+        title="التسعير — خطط Life Tent"
+        description="اختر الخطة المناسبة لك — Free مجاني للأبد، Pro بـ $6.99/شهر، Business بـ $12/مستخدم. جرّب مجاناً لمدة 14 يوماً."
+        canonical="/pricing"
+        schema={pricingSchema}
+      />
     <div className="min-h-screen bg-background text-foreground" dir="rtl">
 
       {/* ── Nav ── */}
@@ -432,5 +452,6 @@ export default function Pricing() {
         </div>
       </footer>
     </div>
+    </>
   );
 }

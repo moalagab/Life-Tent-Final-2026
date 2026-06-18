@@ -1,8 +1,16 @@
 import { Link } from 'react-router-dom';
 import { Tent, ArrowRight } from 'lucide-react';
+import { SEO } from '@/components/SEO';
 
 export default function TermsOfService() {
   return (
+    <>
+      <SEO
+        title="شروط الاستخدام"
+        description="اقرأ شروط استخدام Life Tent — الحقوق والمسؤوليات والسياسات التي تحكم استخدامك للمنصة."
+        canonical="/terms"
+        noIndex={false}
+      />
     <div className="min-h-screen bg-background text-foreground" dir="rtl">
       {/* Header */}
       <header className="border-b border-border/50 bg-card/80 backdrop-blur-sm sticky top-0 z-10">
@@ -148,5 +156,6 @@ export default function TermsOfService() {
         </div>
       </main>
     </div>
+    </>
   );
 }
