@@ -610,6 +610,13 @@ export default function LandingPage() {
               <p className="text-sm text-muted-foreground text-center">
                 {t('landing.copyright')}
               </p>
+              <div className="flex items-center gap-4 text-xs text-muted-foreground/70">
+                <a href="/terms"   className="hover:text-foreground transition-colors">شروط الاستخدام</a>
+                <span>·</span>
+                <a href="/privacy" className="hover:text-foreground transition-colors">الخصوصية</a>
+                <span>·</span>
+                <a href="/refund"  className="hover:text-foreground transition-colors">الاسترداد</a>
+              </div>
             </div>
           </div>
         </div>

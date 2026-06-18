@@ -40,6 +40,9 @@ const LandingPage     = lazy(() => import("./pages/LandingPage"));
 const Auth            = lazy(() => import("./pages/Auth"));
 const ResetPassword   = lazy(() => import("./pages/ResetPassword"));
 const NotFound        = lazy(() => import("./pages/NotFound"));
+const TermsOfService  = lazy(() => import("./pages/legal/TermsOfService"));
+const PrivacyPolicy   = lazy(() => import("./pages/legal/PrivacyPolicy"));
+const RefundPolicy    = lazy(() => import("./pages/legal/RefundPolicy"));
 const Onboarding      = lazy(() => import("./pages/Onboarding"));
 const AdminDashboard  = lazy(() => import("./pages/admin/AdminDashboard"));
 const Index        = lazy(() => import("./pages/Index"));
@@ -129,6 +132,9 @@ const App = () => (
                 <Route path="/welcome"              element={<LandingPage />} />
                 <Route path="/auth"                 element={<Auth />} />
                 <Route path="/auth/reset-password"  element={<ResetPassword />} />
+                <Route path="/terms"                element={<TermsOfService />} />
+                <Route path="/privacy"              element={<PrivacyPolicy />} />
+                <Route path="/refund"               element={<RefundPolicy />} />
 
                 <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
                 <Route path="/admin"      element={<ProtectedRoute><AdminGuard><AdminDashboard /></AdminGuard></ProtectedRoute>} />
