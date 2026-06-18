@@ -1,6 +1,6 @@
 import { useState, lazy, Suspense } from 'react';
 import {
-  ArrowLeft, BookOpen, GraduationCap, Plus, Check, Clock, FileText,
+  ArrowLeft, ArrowRight, BookOpen, GraduationCap, Plus, Check, Clock, FileText,
   Lightbulb, Play, Trash2, Edit3, MoreVertical, Star, RotateCcw,
   ChevronDown, ChevronUp, ExternalLink, Loader2, Download, Network
 } from 'lucide-react';
@@ -217,7 +217,7 @@ export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetai
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={onBack}>
-          <ArrowLeft className="w-5 h-5" />
+          {currentLanguage === 'ar' ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
         </Button>
         <div className="flex-1">
           <div className="flex items-center gap-3">
