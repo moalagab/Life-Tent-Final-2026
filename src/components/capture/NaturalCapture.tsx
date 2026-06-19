@@ -99,7 +99,7 @@ export function NaturalCapture() {
         {hasContent && (
           <button
             onClick={reset}
-            className="absolute left-4 top-1 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+            className="absolute start-4 top-1 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
           >
             <X className="w-3.5 h-3.5" />
           </button>

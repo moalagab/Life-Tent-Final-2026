@@ -48,8 +48,7 @@ export function useRealtimeSubscription({
         .on(
           'postgres_changes',
           { event: '*', schema: 'public', table },
-          (payload) => {
-            console.log(`[realtime] ${table}:`, payload.eventType);
+          () => {
             queryClient.invalidateQueries({ queryKey });
           },
         )

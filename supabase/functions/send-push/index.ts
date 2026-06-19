@@ -208,11 +208,11 @@ Deno.serve(async (req: Request) => {
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
     const { data: profile } = await adminClient
       .from("profiles")
-      .select("role")
-      .eq("id", user.id)
+      .select("is_admin")
+      .eq("user_id", user.id)
       .single();
-    if (profile?.role !== "admin") {
-      return new Response(JSON.stringify({ error: "Forbidden — admin role required" }), { status: 403, headers: cors });
+    if (!profile?.is_admin) {
+      return new Response(JSON.stringify({ error: "Forbidden — admin required" }), { status: 403, headers: cors });
     }
   }
 

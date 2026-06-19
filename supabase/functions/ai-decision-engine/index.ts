@@ -34,8 +34,10 @@ const ALLOWED_ORIGINS = [
 
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("origin") ?? "";
-  // Allow mobile apps with no origin header (native requests)
-  const allowOrigin = !origin || ALLOWED_ORIGINS.includes(origin) ? (origin || "*") : ALLOWED_ORIGINS[0];
+  // No origin = native mobile app (Capacitor/iOS) — allowed implicitly
+  const allowOrigin = !origin
+    ? ALLOWED_ORIGINS[0]
+    : ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   return {
     "Access-Control-Allow-Origin": allowOrigin,
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -77,9 +79,8 @@ async function checkRateLimit(
     p_window_seconds: windowSeconds,
   });
   if (error) {
-    // Fail open — log but don't block if the rate limit check itself fails
     console.error("Rate limit check error:", error.message);
-    return true;
+    return false; // fail-closed: block on RPC error to protect AI API costs
   }
   return (data as number) <= maxRequests;
 }

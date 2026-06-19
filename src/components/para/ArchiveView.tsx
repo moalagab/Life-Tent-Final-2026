@@ -51,23 +51,21 @@ export function ArchiveView() {
     return acc;
   }, {} as Record<ArchivedItem['type'], ArchivedItem[]>);
 
+  const RESTORE_MAP: Record<ArchivedItem['type'], { table: 'projects' | 'areas' | 'goals' | 'tasks' | 'resources' | 'customers'; data: Record<string, unknown> }> = {
+    project:  { table: 'projects',  data: { para_category: 'project', archived_at: null } },
+    area:     { table: 'areas',     data: { status: 'active', archived_at: null } },
+    goal:     { table: 'goals',     data: { is_active: true, archived_at: null } },
+    task:     { table: 'tasks',     data: { archived_at: null } },
+    resource: { table: 'resources', data: { status: 'active', archived_at: null } },
+    customer: { table: 'customers', data: { archived_at: null } },
+  };
+
   const handleRestore = async (item: ArchivedItem) => {
     try {
-      let tableName = '';
-      let updateData: Record<string, unknown> = {};
-
-      switch (item.type) {
-        case 'project':  tableName = 'projects';   updateData = { para_category: 'project', archived_at: null }; break;
-        case 'area':     tableName = 'areas';       updateData = { status: 'active', archived_at: null };         break;
-        case 'goal':     tableName = 'goals';       updateData = { is_active: true, archived_at: null };          break;
-        case 'task':     tableName = 'tasks';       updateData = { archived_at: null };                           break;
-        case 'resource': tableName = 'resources';   updateData = { status: 'active', archived_at: null };         break;
-        case 'customer': tableName = 'customers';   updateData = { archived_at: null };                           break;
-      }
+      const { table: tableName, data: updateData } = RESTORE_MAP[item.type];
 
       const { error } = await supabase
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .from(tableName as any)
+        .from(tableName)
         .update(updateData)
         .eq('id', item.id);
 

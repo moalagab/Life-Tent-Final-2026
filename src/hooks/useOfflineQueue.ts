@@ -170,10 +170,19 @@ export function useOfflineQueue() {
 
 // ── applyMutation — pure async, no React state ───────────────────────────────
 
+const ALLOWED_OFFLINE_TABLES = new Set([
+  'tasks', 'projects', 'goals', 'habits', 'habit_logs', 'notes', 'courses',
+  'resources', 'areas', 'events', 'finance_transactions', 'media_items',
+  'push_subscriptions', 'customers', 'cases', 'communications',
+]);
+
 async function applyMutation(
   mutation: QueuedMutation,
   detected: ConflictRecord[],
 ): Promise<void> {
+  if (!ALLOWED_OFFLINE_TABLES.has(mutation.table)) {
+    throw new Error(`Offline queue: disallowed table "${mutation.table}"`);
+  }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const table = supabase.from(mutation.table as any);
 

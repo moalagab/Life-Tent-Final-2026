@@ -67,7 +67,7 @@ async function checkRateLimit(
   });
   if (error) {
     console.error("Rate limit check error:", error.message);
-    return true;
+    return false; // fail-closed: block on RPC error to protect AI API costs
   }
   return (data as number) <= maxRequests;
 }

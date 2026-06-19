@@ -66,17 +66,17 @@ const handler = async (req: Request): Promise<Response> => {
       coursesResult,
     ] = await Promise.all([
       supabase.from("profiles").select("*").eq("user_id", user.id).single(),
-      supabase.from("projects").select("*").order("created_at", { ascending: false }),
-      supabase.from("tasks").select("*").order("created_at", { ascending: false }),
-      supabase.from("goals").select("*").order("created_at", { ascending: false }),
-      supabase.from("habits").select("*").order("created_at", { ascending: false }),
-      supabase.from("habit_logs").select("*").order("logged_at", { ascending: false }),
-      supabase.from("transactions").select("*").order("date", { ascending: false }),
-      supabase.from("accounts").select("*"),
-      supabase.from("budgets").select("*"),
-      supabase.from("events").select("*").order("start_at", { ascending: false }),
-      supabase.from("notes").select("*").order("created_at", { ascending: false }),
-      supabase.from("courses").select("*").order("created_at", { ascending: false }),
+      supabase.from("projects").select("*").order("created_at", { ascending: false }).limit(5000),
+      supabase.from("tasks").select("*").order("created_at", { ascending: false }).limit(10000),
+      supabase.from("goals").select("*").order("created_at", { ascending: false }).limit(1000),
+      supabase.from("habits").select("*").order("created_at", { ascending: false }).limit(500),
+      supabase.from("habit_logs").select("*").order("logged_at", { ascending: false }).limit(50000),
+      supabase.from("transactions").select("*").order("date", { ascending: false }).limit(50000),
+      supabase.from("accounts").select("*").limit(500),
+      supabase.from("budgets").select("*").limit(500),
+      supabase.from("events").select("*").order("start_at", { ascending: false }).limit(10000),
+      supabase.from("notes").select("*").order("created_at", { ascending: false }).limit(10000),
+      supabase.from("courses").select("*").order("created_at", { ascending: false }).limit(1000),
     ]);
 
     const exportData = {

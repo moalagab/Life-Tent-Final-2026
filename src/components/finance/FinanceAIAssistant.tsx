@@ -113,33 +113,37 @@ export function FinanceAIAssistant() {
 
       setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
 
-      while (reader) {
-        const { done, value } = await reader.read();
-        if (done) break;
+      try {
+        while (reader) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n');
 
-        for (const line of lines) {
-          if (line.startsWith('data: ') && line !== 'data: [DONE]') {
-            try {
-              const data = JSON.parse(line.slice(6));
-              const content = data.choices?.[0]?.delta?.content;
-              if (content) {
-                assistantContent += content;
-                setMessages(prev => {
-                  const newMessages = [...prev];
-                  if (newMessages[newMessages.length - 1].role === 'assistant') {
-                    newMessages[newMessages.length - 1].content = assistantContent;
-                  }
-                  return newMessages;
-                });
+          for (const line of lines) {
+            if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+              try {
+                const data = JSON.parse(line.slice(6));
+                const content = data.choices?.[0]?.delta?.content;
+                if (content) {
+                  assistantContent += content;
+                  setMessages(prev => {
+                    const newMessages = [...prev];
+                    if (newMessages[newMessages.length - 1].role === 'assistant') {
+                      newMessages[newMessages.length - 1].content = assistantContent;
+                    }
+                    return newMessages;
+                  });
+                }
+              } catch {
+                // Skip invalid JSON lines
               }
-            } catch (e) {
-              // Skip invalid JSON
             }
           }
         }
+      } finally {
+        reader?.cancel().catch(() => {});
       }
     } catch (error) {
       console.error('AI Assistant error:', error);

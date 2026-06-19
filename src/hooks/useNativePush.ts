@@ -64,9 +64,8 @@ export function useNativePush(): NativePushState {
         setPermission('denied');
       }).then(h => cleanupFns.push(() => h.remove())).catch(() => {});
 
-      // Foreground notification received
-      PushNotifications.addListener('pushNotificationReceived', notification => {
-        console.log('[Push] received in foreground:', notification.title);
+      // Foreground notification received (no-op — badge/banner handled by OS)
+      PushNotifications.addListener('pushNotificationReceived', () => {
       }).then(h => cleanupFns.push(() => h.remove())).catch(() => {});
 
       // Notification tapped

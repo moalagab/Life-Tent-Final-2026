@@ -33,7 +33,9 @@ const ALLOWED_ORIGINS = [
 
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("origin") ?? "";
-  const allowOrigin = !origin || ALLOWED_ORIGINS.includes(origin) ? (origin || "*") : ALLOWED_ORIGINS[0];
+  const allowOrigin = !origin
+    ? ALLOWED_ORIGINS[0]
+    : ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   return {
     "Access-Control-Allow-Origin": allowOrigin,
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -72,7 +74,7 @@ async function checkRateLimit(
   });
   if (error) {
     console.error("Rate limit check error:", error.message);
-    return true;
+    return false; // fail-closed: block on RPC error
   }
   return (data as number) <= maxRequests;
 }
