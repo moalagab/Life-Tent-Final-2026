@@ -115,7 +115,7 @@ export function NoteDetailDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
+      <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-hidden flex flex-col" dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}>
         <DialogHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2">

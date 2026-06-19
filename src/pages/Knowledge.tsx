@@ -205,7 +205,7 @@ export default function Knowledge() {
 
   return (
     <MainLayout>
-      <div className="mb-5">
+      <div className="mb-5" dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}>
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm" style={{ background: 'linear-gradient(135deg, var(--lt-hue-know), var(--lt-hue-proj))' }}>
@@ -227,7 +227,7 @@ export default function Knowledge() {
                     <span className="hidden sm:inline">{t('knowledge.newNote')}</span>
                   </button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-lg max-h-[92svh] overflow-y-auto">
+                <DialogContent className="sm:max-w-lg max-h-[92svh] overflow-y-auto" dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}>
                   <DialogHeader>
                     <DialogTitle>{t('knowledge.newNote')}</DialogTitle>
                   </DialogHeader>
@@ -318,7 +318,7 @@ export default function Knowledge() {
                     <span className="hidden sm:inline">{t('knowledge.newCourse')}</span>
                   </button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-lg max-h-[92svh] overflow-y-auto">
+                <DialogContent className="sm:max-w-lg max-h-[92svh] overflow-y-auto" dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}>
                   <DialogHeader>
                     <DialogTitle>{t('knowledge.newCourse')}</DialogTitle>
                   </DialogHeader>
@@ -360,7 +360,7 @@ export default function Knowledge() {
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'notes' | 'courses' | 'archived')} className="space-y-5">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'notes' | 'courses' | 'archived')} className="space-y-5" dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}>
 
         {/* ── Visual tab selector ── */}
         <div className="grid grid-cols-3 gap-3" dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}>
@@ -455,6 +455,7 @@ export default function Knowledge() {
                   key={note.id}
                   onClick={() => navigate(`/knowledge/notes/${note.id}`)}
                   className="glass-card p-4 hover:border-primary/30 transition-all cursor-pointer group"
+                  dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <h4 className="font-medium text-foreground group-hover:text-primary transition-colors line-clamp-1">
@@ -550,6 +551,7 @@ export default function Knowledge() {
                   key={course.id}
                   className="glass-card p-5 hover:border-primary/30 transition-all group cursor-pointer"
                   onClick={() => setSelectedCourse(course)}
+                  dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
@@ -598,7 +600,7 @@ export default function Knowledge() {
                       <span className="text-xs text-muted-foreground">{t('common.progress')}</span>
                       <span className="text-xs font-medium text-foreground">{course.progress || 0}%</span>
                     </div>
-                    <Progress value={course.progress || 0} className="h-2" />
+                    <div dir="ltr"><Progress value={course.progress || 0} className="h-2" /></div>
                   </div>
 
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -638,6 +640,7 @@ export default function Knowledge() {
                 <div
                   key={note.id}
                   className="glass-card p-4 opacity-75 hover:opacity-100 transition-all group"
+                  dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <h4 className="font-medium text-foreground line-clamp-1">

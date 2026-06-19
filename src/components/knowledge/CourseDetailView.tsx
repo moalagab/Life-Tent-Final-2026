@@ -213,7 +213,7 @@ export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetai
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={onBack}>
@@ -251,7 +251,7 @@ export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetai
           </div>
           <div className="text-2xl font-bold text-primary">{progress}%</div>
         </div>
-        <Progress value={progress} className="h-3" />
+        <div dir="ltr"><Progress value={progress} className="h-3" /></div>
 
         <div className="grid grid-cols-3 gap-4 mt-4">
           <div className="text-center p-3 rounded-lg bg-muted/30">
@@ -273,7 +273,7 @@ export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetai
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}>
         <div className="flex items-center justify-between">
           <TabsList>
             <TabsTrigger value="lessons" className="flex items-center gap-2">
@@ -642,7 +642,7 @@ export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetai
 
       {/* Add Lesson Dialog */}
       <Dialog open={isAddLessonOpen} onOpenChange={setIsAddLessonOpen}>
-        <DialogContent>
+        <DialogContent dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}>
           <DialogHeader>
             <DialogTitle>{currentLanguage === 'ar' ? 'إضافة درس جديد' : 'Add New Lesson'}</DialogTitle>
           </DialogHeader>
@@ -673,7 +673,7 @@ export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetai
 
       {/* Add Note Dialog */}
       <Dialog open={isAddNoteOpen} onOpenChange={(open) => { setIsAddNoteOpen(open); if (!open) setSelectedLessonId(null); }}>
-        <DialogContent>
+        <DialogContent dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}>
           <DialogHeader>
             <DialogTitle>{currentLanguage === 'ar' ? 'إضافة ملاحظة' : 'Add Note'}</DialogTitle>
           </DialogHeader>
@@ -718,7 +718,7 @@ export function CourseDetailView({ course, onBack, onUpdateCourse }: CourseDetai
 
       {/* Add Flashcard Dialog */}
       <Dialog open={isAddFlashcardOpen} onOpenChange={(open) => { setIsAddFlashcardOpen(open); if (!open) setSelectedLessonId(null); }}>
-        <DialogContent>
+        <DialogContent dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}>
           <DialogHeader>
             <DialogTitle>{currentLanguage === 'ar' ? 'إضافة بطاقة تعليمية' : 'Add Flashcard'}</DialogTitle>
           </DialogHeader>
