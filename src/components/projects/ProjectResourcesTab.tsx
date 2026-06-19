@@ -86,7 +86,7 @@ export function ProjectResourcesTab({ projectId }: ProjectResourcesTabProps) {
       <div className="flex items-center justify-between">
         <span className="text-sm text-muted-foreground">{allResources?.length || 0} {currentLanguage === 'ar' ? 'موارد' : 'resources'}</span>
         <Button onClick={() => setIsCreateOpen(true)} className="bg-gradient-gold text-primary-foreground">
-          <Plus className="w-4 h-4 ml-2" />
+          <Plus className="w-4 h-4 me-2" />
           {currentLanguage === 'ar' ? 'مورد جديد' : 'New Resource'}
         </Button>
       </div>
@@ -119,12 +119,12 @@ export function ProjectResourcesTab({ projectId }: ProjectResourcesTabProps) {
                     <DropdownMenuContent align="end">
                       {resource.source_url && (
                         <DropdownMenuItem onClick={() => window.open(resource.source_url, '_blank')}>
-                          <ExternalLink className="w-4 h-4 ml-2" />
+                          <ExternalLink className="w-4 h-4 me-2" />
                           {currentLanguage === 'ar' ? 'فتح الرابط' : 'Open Link'}
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuItem onClick={() => handleDelete(resource.id)} className="text-destructive">
-                        <Trash2 className="w-4 h-4 ml-2" />
+                        <Trash2 className="w-4 h-4 me-2" />
                         {currentLanguage === 'ar' ? 'حذف' : 'Delete'}
                       </DropdownMenuItem>
                     </DropdownMenuContent>

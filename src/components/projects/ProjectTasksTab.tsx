@@ -170,7 +170,7 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
           </Select>
         </div>
         <Button onClick={() => setIsCreateOpen(true)} className="bg-gradient-gold text-primary-foreground">
-          <Plus className="w-4 h-4 ml-2" />
+          <Plus className="w-4 h-4 me-2" />
           {currentLanguage === 'ar' ? 'مهمة جديدة' : 'New Task'}
         </Button>
       </div>
@@ -180,15 +180,15 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
         <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
           <span className="text-sm text-muted-foreground">{currentLanguage === 'ar' ? `تم تحديد ${selectedTasks.length} مهام` : `${selectedTasks.length} tasks selected`}</span>
           <Button size="sm" variant="outline" onClick={() => handleBulkAction('complete')}>
-            <CheckSquare className="w-4 h-4 ml-1" />
+            <CheckSquare className="w-4 h-4 me-1" />
             {currentLanguage === 'ar' ? 'إكمال' : 'Complete'}
           </Button>
           <Button size="sm" variant="outline" onClick={() => handleBulkAction('archive')}>
-            <Archive className="w-4 h-4 ml-1" />
+            <Archive className="w-4 h-4 me-1" />
             {currentLanguage === 'ar' ? 'أرشفة' : 'Archive'}
           </Button>
           <Button size="sm" variant="destructive" onClick={() => handleBulkAction('delete')}>
-            <Trash2 className="w-4 h-4 ml-1" />
+            <Trash2 className="w-4 h-4 me-1" />
             {currentLanguage === 'ar' ? 'حذف' : 'Delete'}
           </Button>
         </div>
@@ -262,7 +262,7 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => deleteTask.mutateAsync(task.id)}>
-                          <Trash2 className="w-4 h-4 ml-2" />
+                          <Trash2 className="w-4 h-4 me-2" />
                           {currentLanguage === 'ar' ? 'حذف' : 'Delete'}
                         </DropdownMenuItem>
                       </DropdownMenuContent>

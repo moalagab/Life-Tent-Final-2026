@@ -187,19 +187,19 @@ export function AreasView() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                   <DropdownMenuItem onClick={() => handleOpenDialog(area)}>
-                    <Pencil className="w-4 h-4 ml-2" />تعديل
+                    <Pencil className="w-4 h-4 me-2" />تعديل
                   </DropdownMenuItem>
                   {area.status === 'active' ? (
                     <DropdownMenuItem onClick={() => handleArchive(area.id)}>
-                      <Archive className="w-4 h-4 ml-2" />أرشفة
+                      <Archive className="w-4 h-4 me-2" />أرشفة
                     </DropdownMenuItem>
                   ) : (
                     <DropdownMenuItem onClick={() => handleRestore(area.id)}>
-                      <RotateCcw className="w-4 h-4 ml-2" />استعادة
+                      <RotateCcw className="w-4 h-4 me-2" />استعادة
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem onClick={() => setDeleteId(area.id)} className="text-destructive">
-                    <Trash2 className="w-4 h-4 ml-2" />حذف
+                    <Trash2 className="w-4 h-4 me-2" />حذف
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -225,7 +225,7 @@ export function AreasView() {
           <p className="font-medium mb-1">لا توجد مجالات حتى الآن</p>
           <p className="text-xs mb-4">أنشئ مجالاً لتتبع مسؤولياتك المستمرة</p>
           <Button variant="outline" size="sm" onClick={() => handleOpenDialog()}>
-            <Plus className="w-4 h-4 ml-1" />أنشئ أول مجال
+            <Plus className="w-4 h-4 me-1" />أنشئ أول مجال
           </Button>
         </div>
       )}

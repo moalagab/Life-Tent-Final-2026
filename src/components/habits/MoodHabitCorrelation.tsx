@@ -51,8 +51,8 @@ function CorrelationBar({ data }: CorrelationBarProps) {
             isNegative && 'bg-gradient-to-r from-destructive to-orange-500',
             isNeutral && 'bg-muted-foreground'
           )}
-          style={{ 
-            left: isNegative ? `${percentage}%` : '50%',
+          style={{
+            insetInlineStart: isNegative ? `${percentage}%` : '50%',
             width: `${Math.abs(percentage - 50)}%`,
           }}
         />

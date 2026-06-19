@@ -191,12 +191,32 @@ Deno.serve(async (req: Request) => {
 
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
-  // Auth — require service role or admin
-  const authHeader = req.headers.get("Authorization") ?? "";
-  const supabase   = createClient(
-    Deno.env.get("SUPABASE_URL")       ?? "",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-  );
+  // Auth — require service role key (cron/edge-function callers) OR admin user JWT
+  const authHeader     = req.headers.get("Authorization") ?? "";
+  const token          = authHeader.replace("Bearer ", "");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  const supabaseUrl    = Deno.env.get("SUPABASE_URL") ?? "";
+
+  const isServiceRole = token.length > 0 && token === serviceRoleKey;
+
+  if (!isServiceRole) {
+    const anonClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY") ?? "");
+    const { data: { user }, error: authErr } = await anonClient.auth.getUser(token);
+    if (authErr || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: cors });
+    }
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+    const { data: profile } = await adminClient
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (profile?.role !== "admin") {
+      return new Response(JSON.stringify({ error: "Forbidden — admin role required" }), { status: 403, headers: cors });
+    }
+  }
+
+  const supabase = createClient(supabaseUrl, serviceRoleKey);
 
   let body: { user_id: string; title: string; body: string; url?: string; icon?: string };
   try {

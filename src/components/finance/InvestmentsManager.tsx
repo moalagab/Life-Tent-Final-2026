@@ -129,8 +129,7 @@ export function InvestmentsManager() {
       totalValue += value;
       totalCost += h.quantity * h.avg_cost;
       
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((h as any).is_zakatable) {
+      if (h.is_zakatable) {
         zakatableValue += value;
       }
     });
@@ -152,8 +151,7 @@ export function InvestmentsManager() {
     holdings.forEach(h => {
       const type = h.asset?.type || 'stock';
       const value = h.quantity * (h.current_price || h.avg_cost);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const target = (h as any).target_allocation_percent || 0;
+      const target = h.target_allocation_percent || 0;
       
       if (!allocationMap[type]) {
         allocationMap[type] = { value: 0, target: 0 };
@@ -189,26 +187,20 @@ export function InvestmentsManager() {
     
     return holdings.filter(h => {
       const currentPrice = h.current_price || h.avg_cost;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const entryTarget = (h as any).entry_target_price;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const stopLoss = (h as any).stop_loss_price;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const takeProfit = (h as any).take_profit_price;
+      const entryTarget = h.entry_target_price;
+      const stopLoss = h.stop_loss_price;
+      const takeProfit = h.take_profit_price;
 
       if (entryTarget && currentPrice <= entryTarget) return true;
       if (stopLoss && currentPrice <= stopLoss) return true;
       if (takeProfit && currentPrice >= takeProfit) return true;
-      
+
       return false;
     }).map(h => {
       const currentPrice = h.current_price || h.avg_cost;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const entryTarget = (h as any).entry_target_price;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const stopLoss = (h as any).stop_loss_price;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const takeProfit = (h as any).take_profit_price;
+      const entryTarget = h.entry_target_price;
+      const stopLoss = h.stop_loss_price;
+      const takeProfit = h.take_profit_price;
 
       let alertType: 'opportunity' | 'stop_loss' | 'take_profit' = 'opportunity';
       if (stopLoss && currentPrice <= stopLoss) alertType = 'stop_loss';
@@ -865,8 +857,7 @@ export function InvestmentsManager() {
             const pl = value - cost;
             const plPercent = cost > 0 ? (pl / cost) * 100 : 0;
             const Icon = ASSET_ICONS[h.asset?.type as keyof typeof ASSET_ICONS] || BarChart3;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const targetAlloc = (h as any).target_allocation_percent || 0;
+            const targetAlloc = h.target_allocation_percent || 0;
             const currentAlloc = metrics.totalValue > 0 ? (value / metrics.totalValue) * 100 : 0;
 
             return (
@@ -919,11 +910,9 @@ export function InvestmentsManager() {
                   </div>
                 </div>
 
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                {(h as any).investment_journal && (
+                {h.investment_journal && (
                   <div className="mt-3 p-2 rounded-lg bg-muted/30 text-sm">
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    <p className="text-muted-foreground line-clamp-2">{(h as any).investment_journal}</p>
+                    <p className="text-muted-foreground line-clamp-2">{h.investment_journal}</p>
                   </div>
                 )}
               </div>

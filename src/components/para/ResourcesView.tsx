@@ -235,12 +235,12 @@ export function ResourcesView() {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Search className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           placeholder={isAr ? 'بحث في الموارد...' : 'Search resources...'}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pr-10 bg-muted/50 border-border/50"
+          className="pe-10 bg-muted/50 border-border/50"
         />
       </div>
 
@@ -418,9 +418,9 @@ export function ResourcesView() {
                     {resource.source_url && (
                       <DropdownMenuItem onClick={() => window.open(resource.source_url!, '_blank')}>
                         {(resource.type === 'file' || resource.type === 'media') ? (
-                          <Download className="w-4 h-4 ml-2" />
+                          <Download className="w-4 h-4 me-2" />
                         ) : (
-                          <ExternalLink className="w-4 h-4 ml-2" />
+                          <ExternalLink className="w-4 h-4 me-2" />
                         )}
                         {resource.type === 'file'
                           ? (isAr ? 'تنزيل الملف' : 'Download File')
@@ -430,19 +430,19 @@ export function ResourcesView() {
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem onClick={() => handleOpenDialog(resource)}>
-                      <Pencil className="w-4 h-4 ml-2" />{isAr ? 'تعديل' : 'Edit'}
+                      <Pencil className="w-4 h-4 me-2" />{isAr ? 'تعديل' : 'Edit'}
                     </DropdownMenuItem>
                     {resource.status === 'active' ? (
                       <DropdownMenuItem onClick={() => handleArchive(resource.id)}>
-                        <Archive className="w-4 h-4 ml-2" />{isAr ? 'أرشفة' : 'Archive'}
+                        <Archive className="w-4 h-4 me-2" />{isAr ? 'أرشفة' : 'Archive'}
                       </DropdownMenuItem>
                     ) : (
                       <DropdownMenuItem onClick={() => handleRestore(resource.id)}>
-                        <RotateCcw className="w-4 h-4 ml-2" />{isAr ? 'استعادة' : 'Restore'}
+                        <RotateCcw className="w-4 h-4 me-2" />{isAr ? 'استعادة' : 'Restore'}
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem onClick={() => setDeleteId(resource.id)} className="text-destructive">
-                      <Trash2 className="w-4 h-4 ml-2" />{isAr ? 'حذف' : 'Delete'}
+                      <Trash2 className="w-4 h-4 me-2" />{isAr ? 'حذف' : 'Delete'}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -494,7 +494,7 @@ export function ResourcesView() {
           <p className="font-medium mb-1">{isAr ? 'لا توجد موارد' : 'No resources'}</p>
           <p className="text-xs mb-4">{isAr ? 'أضف ملاحظات، روابط، ملفات، أو دورات' : 'Add notes, links, files, or courses'}</p>
           <Button variant="outline" size="sm" onClick={() => handleOpenDialog()}>
-            <Plus className="w-4 h-4 ml-1" />{isAr ? 'أضف أول مورد' : 'Add first resource'}
+            <Plus className="w-4 h-4 me-1" />{isAr ? 'أضف أول مورد' : 'Add first resource'}
           </Button>
         </div>
       )}

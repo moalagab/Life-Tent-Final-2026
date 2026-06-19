@@ -138,7 +138,7 @@ export function ProjectGoalsTab({ projectId }: ProjectGoalsTabProps) {
                   <div className="flex items-center gap-2">
                     <Badge variant="outline">{progress}%</Badge>
                     <Button size="sm" variant="outline" onClick={() => openCreateKr(goal.id)}>
-                      <Plus className="w-4 h-4 ml-1" />
+                      <Plus className="w-4 h-4 me-1" />
                       KR
                     </Button>
                   </div>
@@ -172,7 +172,7 @@ export function ProjectGoalsTab({ projectId }: ProjectGoalsTabProps) {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem onClick={() => handleDeleteKr(kr.id)}>
-                                  <Trash2 className="w-4 h-4 ml-2" />
+                                  <Trash2 className="w-4 h-4 me-2" />
                                   {currentLanguage === 'ar' ? 'حذف' : 'Delete'}
                                 </DropdownMenuItem>
                               </DropdownMenuContent>

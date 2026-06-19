@@ -98,6 +98,12 @@ export interface InvestmentHolding {
   current_price?: number;
   target_allocation?: number;
   asset?: InvestmentAsset;
+  is_zakatable?: boolean | null;
+  target_allocation_percent?: number | null;
+  entry_target_price?: number | null;
+  stop_loss_price?: number | null;
+  take_profit_price?: number | null;
+  investment_journal?: string | null;
 }
 
 export interface InvestmentTransaction {

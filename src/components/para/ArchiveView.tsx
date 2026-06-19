@@ -109,12 +109,12 @@ export function ArchiveView() {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Search className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           placeholder={isAr ? 'بحث في الأرشيف...' : 'Search archive...'}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pr-10 bg-muted/50 border-border/50"
+          className="pe-10 bg-muted/50 border-border/50"
         />
       </div>
 
@@ -196,7 +196,7 @@ export function ArchiveView() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => handleRestore(item)}>
-                        <RotateCcw className="w-4 h-4 ml-2" />{isAr ? 'استعادة' : 'Restore'}
+                        <RotateCcw className="w-4 h-4 me-2" />{isAr ? 'استعادة' : 'Restore'}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
