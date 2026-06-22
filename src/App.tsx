@@ -16,6 +16,7 @@ import { isNative } from "@/lib/capacitor";
 import { useTheme } from "@/hooks/useTheme";
 import { LightboxProvider } from "@/components/lightbox/LightboxProvider";
 import { PageViewTracker } from "@/components/PageViewTracker";
+import { ReferralBootstrap } from "@/components/ReferralBootstrap";
 
 /**
  * PlatformInit — sets data-platform on <html> so CSS tokens apply.
@@ -126,6 +127,7 @@ const App = () => (
           <PWAUpdatePrompt />
           <BrowserRouter>
             <PageViewTracker />
+            <ReferralBootstrap />
             <OnboardingProvider>
             <Suspense fallback={<PageLoader />}>
               <Routes>

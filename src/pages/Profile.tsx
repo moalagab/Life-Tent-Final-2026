@@ -1,4 +1,5 @@
 import { MainLayout } from '@/components/layout/MainLayout';
+import { ReferralCard } from '@/components/referral/ReferralCard';
 import { User, Camera, Loader2, Save, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -191,6 +192,9 @@ export default function Profile() {
             </Button>
           </div>
         </div>
+
+        {/* Referral Loop */}
+        <ReferralCard />
 
         {/* Account Info */}
         <div className="glass-card p-6 mt-6">

@@ -42,6 +42,14 @@ export default function Auth() {
   const [searchParams] = useSearchParams();
   const initialMode = (searchParams.get('mode') === 'signup' ? 'signup' : 'login') as AuthMode;
   const [mode, setMode] = useState<AuthMode>(initialMode);
+
+  // Capture referral code from URL and persist until after signup
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    if (ref && ref.length >= 4) {
+      localStorage.setItem('lt_pending_ref', ref.toUpperCase());
+    }
+  }, [searchParams]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
