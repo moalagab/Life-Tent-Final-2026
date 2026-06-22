@@ -27,13 +27,17 @@ import {
   FolderKanban, CheckSquare, Target, Database,
   Layers, Activity, Plus, ExternalLink, FileText,
   Link2, Film, BookOpen, File, RotateCcw,
-  Calendar, AlertTriangle, StickyNote, MoreVertical, Trash2, ArrowUpRight,
+  Calendar, AlertTriangle, StickyNote, MoreVertical, Trash2, ArrowUpRight, Zap, Table2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { InitiativesTab } from '@/components/initiatives/InitiativesTab';
+import { SmartTablesSection } from '@/components/tables/SmartTable';
+import { WorkspaceAI } from '@/components/workspace-ai/WorkspaceAI';
+import { useInitiatives } from '@/hooks/useInitiatives';
 
-type WorkspaceTab = 'overview' | 'projects' | 'tasks' | 'goals' | 'resources' | 'notes' | 'archive';
+type WorkspaceTab = 'overview' | 'projects' | 'tasks' | 'goals' | 'initiatives' | 'tables' | 'resources' | 'notes' | 'archive';
 
 const RESOURCE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   note: FileText, file: File, link: Link2, course: BookOpen, media: Film, document: FileText,
@@ -47,13 +51,15 @@ export default function AreaWorkspace() {
   const dateLocale = isAr ? ar : undefined;
 
   const TABS: { id: WorkspaceTab; label: string; icon: React.ComponentType<{ className?: string; strokeWidth?: number }> }[] = [
-    { id: 'overview',  label: isAr ? 'نظرة عامة' : 'Overview',  icon: Activity },
-    { id: 'projects',  label: isAr ? 'مشاريع'    : 'Projects',  icon: FolderKanban },
-    { id: 'tasks',     label: isAr ? 'مهام'       : 'Tasks',     icon: CheckSquare },
-    { id: 'goals',     label: isAr ? 'أهداف'      : 'Goals',     icon: Target },
-    { id: 'resources', label: isAr ? 'موارد'      : 'Resources', icon: Database },
-    { id: 'notes',     label: isAr ? 'ملاحظات'   : 'Notes',     icon: StickyNote },
-    { id: 'archive',   label: isAr ? 'أرشيف'      : 'Archive',   icon: Archive },
+    { id: 'overview',     label: isAr ? 'نظرة عامة' : 'Overview',     icon: Activity },
+    { id: 'projects',     label: isAr ? 'مشاريع'    : 'Projects',     icon: FolderKanban },
+    { id: 'tasks',        label: isAr ? 'مهام'       : 'Tasks',        icon: CheckSquare },
+    { id: 'goals',        label: isAr ? 'أهداف'      : 'Goals',        icon: Target },
+    { id: 'initiatives',  label: isAr ? 'مبادرات'    : 'Initiatives',  icon: Zap },
+    { id: 'tables',       label: isAr ? 'جداول'      : 'Tables',       icon: Table2 },
+    { id: 'resources',    label: isAr ? 'موارد'      : 'Resources',    icon: Database },
+    { id: 'notes',        label: isAr ? 'ملاحظات'    : 'Notes',        icon: StickyNote },
+    { id: 'archive',      label: isAr ? 'أرشيف'      : 'Archive',      icon: Archive },
   ];
 
   const STATUS_LABELS: Record<string, string> = {
@@ -118,6 +124,7 @@ export default function AreaWorkspace() {
   const { data: resources }     = useResources({ area_id: id });
   const { data: archivedItems } = useArchivedItems();
   const { data: areaNotes = [], isLoading: notesLoading } = useAreaNotes(id ?? null);
+  const { data: areaInitiatives = [] } = useInitiatives({ area_id: id });
 
   const updateArea  = useUpdateArea();
   const archiveArea = useArchiveArea();
@@ -511,8 +518,21 @@ export default function AreaWorkspace() {
           </div>
         </div>
 
+        {/* AI Assistant */}
+        {id && area && (
+          <WorkspaceAI
+            entityType="area"
+            entityId={id}
+            entityTitle={area.name}
+            workspaceData={{
+              tasks: areaTasks.map((t: { id: string; title: string }) => ({ id: t.id, title: t.title })),
+              initiatives: areaInitiatives.map(i => ({ id: i.id, title: i.title })),
+            }}
+          />
+        )}
+
         {/* Tab Selector */}
-        <div className="grid grid-cols-3 sm:grid-cols-7 gap-2">
+        <div className="grid grid-cols-3 sm:grid-cols-9 gap-1.5">
           {TABS.map(({ id: tabId, label, icon: Icon }) => {
             const active = activeTab === tabId;
             return (
@@ -959,6 +979,16 @@ export default function AreaWorkspace() {
                 </div>
               )}
             </div>
+          )}
+
+          {/* ── INITIATIVES ───────────────────────────────────────────────── */}
+          {activeTab === 'initiatives' && id && (
+            <InitiativesTab areaId={id} />
+          )}
+
+          {/* ── TABLES ────────────────────────────────────────────────────── */}
+          {activeTab === 'tables' && id && (
+            <SmartTablesSection entityType="area" entityId={id} />
           )}
 
           {/* ── NOTES ────────────────────────────────────────────────────── */}

@@ -16,7 +16,7 @@ import {
   ArrowRight, FolderKanban, Pencil, Check, X,
   ListTodo, Target, Database, Users, TrendingUp,
   LayoutGrid, Eye, StickyNote, Archive, Play, Pause,
-  CheckCircle, Calendar, Share2, Loader2, Network,
+  CheckCircle, Calendar, Share2, Loader2, Network, Zap, Table2,
 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 
@@ -31,8 +31,12 @@ import { ShareDialog }        from '@/components/ui/ShareDialog';
 import { useEntityRelations } from '@/hooks/useEntityRelations';
 import { RelationGraph }      from '@/components/graph/RelationGraph';
 import { RelationEditor }     from '@/components/graph/RelationEditor';
+import { InitiativesTab }     from '@/components/initiatives/InitiativesTab';
+import { SmartTablesSection } from '@/components/tables/SmartTable';
+import { WorkspaceAI }        from '@/components/workspace-ai/WorkspaceAI';
+import { useInitiatives }     from '@/hooks/useInitiatives';
 
-type WorkspaceTab = 'overview' | 'tasks' | 'kanban' | 'goals' | 'resources' | 'crm' | 'okrs' | 'notes' | 'graph';
+type WorkspaceTab = 'overview' | 'tasks' | 'kanban' | 'goals' | 'resources' | 'crm' | 'okrs' | 'initiatives' | 'tables' | 'notes' | 'graph';
 
 const PHASE_STEPS = ['initiation', 'planning', 'execution', 'monitoring', 'closing'] as const;
 const STATUS_COLORS: Record<string, string> = {
@@ -52,15 +56,17 @@ export default function ProjectWorkspace() {
   const isAr = currentLanguage === 'ar';
 
   const TABS: { id: WorkspaceTab; label: string; icon: React.ComponentType<{ className?: string; strokeWidth?: number }> }[] = [
-    { id: 'overview',   label: isAr ? 'نظرة عامة' : 'Overview',   icon: Eye },
-    { id: 'tasks',      label: isAr ? 'مهام'       : 'Tasks',      icon: ListTodo },
-    { id: 'kanban',     label: isAr ? 'كانبان'     : 'Kanban',     icon: LayoutGrid },
-    { id: 'goals',      label: isAr ? 'أهداف'      : 'Goals',      icon: Target },
-    { id: 'resources',  label: isAr ? 'موارد'      : 'Resources',  icon: Database },
-    { id: 'crm',        label: 'CRM',                               icon: Users },
-    { id: 'okrs',       label: 'OKRs',                              icon: TrendingUp },
-    { id: 'notes',      label: isAr ? 'ملاحظات'    : 'Notes',      icon: StickyNote },
-    { id: 'graph',      label: isAr ? 'العلاقات'   : 'Relations',  icon: Network },
+    { id: 'overview',     label: isAr ? 'نظرة عامة' : 'Overview',     icon: Eye },
+    { id: 'tasks',        label: isAr ? 'مهام'       : 'Tasks',        icon: ListTodo },
+    { id: 'kanban',       label: isAr ? 'كانبان'     : 'Kanban',       icon: LayoutGrid },
+    { id: 'goals',        label: isAr ? 'أهداف'      : 'Goals',        icon: Target },
+    { id: 'initiatives',  label: isAr ? 'مبادرات'    : 'Initiatives',  icon: Zap },
+    { id: 'resources',    label: isAr ? 'موارد'      : 'Resources',    icon: Database },
+    { id: 'crm',          label: 'CRM',                                 icon: Users },
+    { id: 'okrs',         label: 'OKRs',                                icon: TrendingUp },
+    { id: 'tables',       label: isAr ? 'جداول'      : 'Tables',       icon: Table2 },
+    { id: 'notes',        label: isAr ? 'ملاحظات'    : 'Notes',        icon: StickyNote },
+    { id: 'graph',        label: isAr ? 'العلاقات'   : 'Relations',    icon: Network },
   ];
 
   const PHASE_LABELS: Record<string, string> = isAr
@@ -77,6 +83,7 @@ export default function ProjectWorkspace() {
 
   const { data: projects } = useProjects();
   const { data: allTasks } = useTasks();
+  const { data: projectInitiatives = [] } = useInitiatives({ project_id: id });
   const { data: relations = [] } = useEntityRelations(id ?? '');
   const updateProject = useUpdateProject();
 
@@ -315,7 +322,7 @@ export default function ProjectWorkspace() {
         </div>
 
         {/* ── Tab Selector ── */}
-        <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
+        <div className="grid grid-cols-4 sm:grid-cols-11 gap-1.5">
           {TABS.map(({ id: tabId, label, icon: Icon }) => {
             const active = activeTab === tabId;
             return (
@@ -340,6 +347,19 @@ export default function ProjectWorkspace() {
             );
           })}
         </div>
+
+        {/* ── AI Assistant ── */}
+        {id && project && (
+          <WorkspaceAI
+            entityType="project"
+            entityId={id}
+            entityTitle={project.title}
+            workspaceData={{
+              tasks: projectTasks.map(t => ({ id: t.id, title: t.title })),
+              initiatives: projectInitiatives.map(i => ({ id: i.id, title: i.title })),
+            }}
+          />
+        )}
 
         {/* ── Tab Content ── */}
         <div className="pb-8">
@@ -406,9 +426,11 @@ export default function ProjectWorkspace() {
           {activeTab === 'tasks' && <ProjectTasksTab projectId={project.id} />}
           {activeTab === 'kanban' && <KanbanBoard projectId={project.id} tasks={projectTasks} />}
           {activeTab === 'goals' && <ProjectGoalsTab projectId={project.id} />}
+          {activeTab === 'initiatives' && <InitiativesTab projectId={project.id} />}
           {activeTab === 'resources' && <ProjectResourcesTab projectId={project.id} />}
           {activeTab === 'crm' && <ProjectCRMTab projectId={project.id} />}
           {activeTab === 'okrs' && <ProjectOkrsView projectId={project.id} />}
+          {activeTab === 'tables' && <SmartTablesSection entityType="project" entityId={project.id} />}
           {activeTab === 'notes' && <ProjectNotesTab projectId={project.id} />}
 
           {activeTab === 'graph' && (

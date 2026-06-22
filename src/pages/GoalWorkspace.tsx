@@ -11,6 +11,9 @@ import { useEntityRelations } from '@/hooks/useEntityRelations';
 import { RelationGraph } from '@/components/graph/RelationGraph';
 import { RelationEditor } from '@/components/graph/RelationEditor';
 import { NotesTab } from '@/components/notes/NotesTab';
+import { InitiativesTab } from '@/components/initiatives/InitiativesTab';
+import { SmartTablesSection } from '@/components/tables/SmartTable';
+import { WorkspaceAI } from '@/components/workspace-ai/WorkspaceAI';
 import { BackButton } from '@/components/ui/BackButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,11 +27,13 @@ import { toast } from 'sonner';
 import {
   Target, Pencil, Check, X, Archive, Plus, Trash2,
   Network, Flame, Calendar, TrendingUp, Activity, RotateCcw,
-  Loader2, User, Users, Cog, GraduationCap, StickyNote,
+  Loader2, User, Users, Cog, GraduationCap, StickyNote, Table2, Zap,
 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useTasks } from '@/hooks/useTasks';
+import { useInitiatives } from '@/hooks/useInitiatives';
 
-type Tab = 'overview' | 'keyresults' | 'notes' | 'connections';
+type Tab = 'overview' | 'keyresults' | 'initiatives' | 'tables' | 'notes' | 'connections';
 
 const PERSPECTIVE_CONFIG: Record<string, { label: string; color: string; icon: typeof User }> = {
   personal:  { label: 'شخصي',   color: 'text-primary',     icon: User },
@@ -45,10 +50,12 @@ export default function GoalWorkspace() {
   const isAr = currentLanguage === 'ar';
 
   const TABS = [
-    { id: 'overview'    as Tab, label: isAr ? 'نظرة عامة'       : 'Overview',      icon: Activity  },
-    { id: 'keyresults'  as Tab, label: isAr ? 'النتائج الرئيسية' : 'Key Results',   icon: TrendingUp },
-    { id: 'notes'       as Tab, label: isAr ? 'ملاحظات'          : 'Notes',         icon: StickyNote },
-    { id: 'connections' as Tab, label: isAr ? 'خريطة العلاقات'   : 'Relations',     icon: Network   },
+    { id: 'overview'     as Tab, label: isAr ? 'نظرة عامة'       : 'Overview',      icon: Activity   },
+    { id: 'keyresults'   as Tab, label: isAr ? 'النتائج'          : 'Key Results',   icon: TrendingUp },
+    { id: 'initiatives'  as Tab, label: isAr ? 'مبادرات'          : 'Initiatives',   icon: Zap        },
+    { id: 'tables'       as Tab, label: isAr ? 'جداول'            : 'Tables',        icon: Table2     },
+    { id: 'notes'        as Tab, label: isAr ? 'ملاحظات'          : 'Notes',         icon: StickyNote },
+    { id: 'connections'  as Tab, label: isAr ? 'العلاقات'         : 'Relations',     icon: Network    },
   ];
 
   const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -67,6 +74,9 @@ export default function GoalWorkspace() {
   const { data: habits } = useHabits();
   const { data: goalNotes = [], isLoading: notesLoading } = useGoalNotes(id ?? null);
   const { data: relations = [] } = useEntityRelations(id ?? '');
+  const { data: allTasks = [] } = useTasks();
+  const { data: goalInitiatives = [] } = useInitiatives({ goal_id: id });
+  const goalTasks = allTasks.filter(t => (t as Record<string, unknown>).goal_id === id || (t as Record<string, unknown>).initiative_id);
   const updateGoal = useUpdateGoal();
   const archiveGoal = useArchiveGoal();
   const updateKr = useUpdateKeyResult();
@@ -235,19 +245,32 @@ export default function GoalWorkspace() {
         </div>
 
         {/* Tabs */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
           {TABS.map(({ id: tabId, label, icon: Icon }) => {
             const active = activeTab === tabId;
             return (
               <button key={tabId} onClick={() => setActiveTab(tabId)}
-                className={cn('flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl border transition-all active:scale-95',
+                className={cn('flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-2xl border transition-all active:scale-95',
                   active ? 'bg-card/80 border-border/50 shadow-sm' : 'border-transparent bg-muted/30 hover:bg-muted/50')}>
                 <Icon className={cn('w-5 h-5', active ? 'text-primary' : 'text-muted-foreground')} strokeWidth={active ? 2 : 1.75} />
-                <span className={cn('text-xs font-semibold', active ? 'text-foreground' : 'text-foreground/60')}>{label}</span>
+                <span className={cn('text-[10px] font-semibold leading-none', active ? 'text-foreground' : 'text-foreground/60')}>{label}</span>
               </button>
             );
           })}
         </div>
+
+        {/* AI Assistant */}
+        {id && goal && (
+          <WorkspaceAI
+            entityType="goal"
+            entityId={id}
+            entityTitle={goal.title}
+            workspaceData={{
+              tasks: goalTasks.map(t => ({ id: t.id, title: t.title })),
+              initiatives: goalInitiatives.map(i => ({ id: i.id, title: i.title })),
+            }}
+          />
+        )}
 
         {/* Content */}
         <div className="pb-8">
@@ -381,6 +404,16 @@ export default function GoalWorkspace() {
                 </div>
               )}
             </div>
+          )}
+
+          {/* INITIATIVES */}
+          {activeTab === 'initiatives' && id && (
+            <InitiativesTab goalId={id} />
+          )}
+
+          {/* TABLES */}
+          {activeTab === 'tables' && id && (
+            <SmartTablesSection entityType="goal" entityId={id} />
           )}
 
           {/* NOTES */}
