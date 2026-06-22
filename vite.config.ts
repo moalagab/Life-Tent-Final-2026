@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { VitePWA } from "vite-plugin-pwa";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -133,6 +134,15 @@ export default defineConfig(({ mode }) => ({
         enabled: false, // disable SW in dev to avoid confusion
       },
     }),
+    // Sentry source maps — only runs when auth token is present (CI / Vercel)
+    process.env.SENTRY_AUTH_TOKEN && sentryVitePlugin({
+      org:     process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      release: { name: process.env.VITE_APP_VERSION ?? "dev" },
+      sourcemaps: { assets: "./dist/**" },
+      telemetry: false,
+    }),
   ].filter(Boolean),
   resolve: {
     alias: {
@@ -140,6 +150,8 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    // Source maps needed for Sentry to show original TS code in errors
+    sourcemap: process.env.SENTRY_AUTH_TOKEN ? true : false,
     chunkSizeWarningLimit: 800,
     rollupOptions: {
       output: {
