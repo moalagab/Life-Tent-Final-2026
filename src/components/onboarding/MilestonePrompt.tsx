@@ -132,16 +132,8 @@ function useDay3Stats(enabled: boolean) {
 
 async function triggerMilestoneEmail(milestone: Milestone, user: { id: string; email?: string }, data?: Record<string, unknown>) {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
-    await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/onboarding-journey-email`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.access_token}`,
-        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-      },
-      body: JSON.stringify({ milestone, user_id: user.id, email: user.email, data }),
+    await supabase.functions.invoke('onboarding-journey-email', {
+      body: { milestone, user_id: user.id, email: user.email, data },
     });
   } catch { /* non-critical */ }
 }

@@ -115,28 +115,16 @@ export function WorkspaceAI({ entityType, entityId, entityTitle, workspaceData }
     setResult(null);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
-
-      const res = await fetch(
-        `https://oocddixbjiynladnvdfx.supabase.co/functions/v1/workspace-ai`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          },
-          body: JSON.stringify({
-            command: command.trim(),
-            context: { entity_type: entityType, entity_id: entityId, entity_title: entityTitle },
-            workspace_data: workspaceData ?? {},
-          }),
+      const { data, error: fnError } = await supabase.functions.invoke('workspace-ai', {
+        body: {
+          command: command.trim(),
+          context: { entity_type: entityType, entity_id: entityId, entity_title: entityTitle },
+          workspace_data: workspaceData ?? {},
         },
-      );
+      });
 
-      const json = await res.json();
-      setResult(json as AIResult);
+      if (fnError) throw fnError;
+      setResult(data as AIResult);
     } catch (e) {
       toast.error(isAr ? 'خطأ في الاتصال بالذكاء الاصطناعي' : 'AI connection error');
     } finally {

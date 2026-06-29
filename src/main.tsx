@@ -54,6 +54,11 @@ if (SENTRY_DSN) {
       dsn: SENTRY_DSN,
       environment: import.meta.env.MODE,
       release: import.meta.env.VITE_APP_VERSION ?? "dev",
+      // tracePropagationTargets: [] — prevent Sentry from injecting baggage/sentry-trace
+      // headers into outgoing fetch requests. Without this, the baggage header would
+      // include sentry-transaction=<page-title> which contains Arabic (non-ISO-8859-1)
+      // and causes Chrome to throw "String contains non ISO-8859-1 code point".
+      tracePropagationTargets: [],
       integrations: [
         Sentry.browserTracingIntegration(),
         Sentry.replayIntegration({ maskAllText: false, blockAllMedia: false }),

@@ -429,7 +429,12 @@ export default function Auth() {
                 className="w-full flex items-center justify-center gap-3 h-11 border-border hover:bg-secondary/60 transition-colors"
                 onClick={async () => {
                   const { error } = await signInWithGoogle();
-                  if (error) toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
+                  if (error) {
+                    const msg = error.message?.includes('ISO-8859-1') || error.message?.includes('fetch')
+                      ? (t('auth.networkError') || 'خطأ في الاتصال — تحقق من الإنترنت وأعد المحاولة')
+                      : error.message;
+                    toast({ title: t('common.error'), description: msg, variant: 'destructive' });
+                  }
                 }}
               >
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
