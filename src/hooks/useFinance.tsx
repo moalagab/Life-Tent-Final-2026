@@ -74,11 +74,11 @@ export function useMonthlyStats() {
       
       if (txError) throw txError;
 
-      const netWorth = accounts.reduce((sum, acc) => sum + (acc.balance || 0), 0);
-      const income = transactions
+      const netWorth = (accounts ?? []).reduce((sum, acc) => sum + (acc.balance || 0), 0);
+      const income = (transactions ?? [])
         .filter(tx => tx.type === 'income')
         .reduce((sum, tx) => sum + tx.amount, 0);
-      const expenses = transactions
+      const expenses = (transactions ?? [])
         .filter(tx => tx.type === 'expense')
         .reduce((sum, tx) => sum + tx.amount, 0);
       const savingsRate = income > 0 ? ((income - expenses) / income) * 100 : 0;
