@@ -17,6 +17,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { LightboxProvider } from "@/components/lightbox/LightboxProvider";
 import { PageViewTracker } from "@/components/PageViewTracker";
 import { ReferralBootstrap } from "@/components/ReferralBootstrap";
+import { MilestonePrompt } from "@/components/onboarding/MilestonePrompt";
 
 /**
  * PlatformInit — sets data-platform on <html> so CSS tokens apply.
@@ -129,6 +130,7 @@ const App = () => (
             <PageViewTracker />
             <ReferralBootstrap />
             <OnboardingProvider>
+            <MilestonePrompt />
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/"                     element={<LandingPage />} />
