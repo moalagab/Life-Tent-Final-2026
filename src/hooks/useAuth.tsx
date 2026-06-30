@@ -35,9 +35,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             email:      session.user.email,
             created_at: session.user.created_at,
           });
-          // After OAuth callback: clean token from URL and redirect to dashboard.
-          // Supabase returns access_token in hash (implicit flow) — we detect
-          // it here, navigate away so the token never stays visible in the URL.
+        }
+
+        // Redirect to dashboard after OAuth callback.
+        // Supabase processes the hash token during createClient() — BEFORE
+        // this listener is registered — so the first event we see is
+        // INITIAL_SESSION (not SIGNED_IN). We must handle both.
+        if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
           if (window.location.hash.includes('access_token') ||
               window.location.search.includes('code=')) {
             window.location.replace('/dashboard');
