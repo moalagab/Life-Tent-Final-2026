@@ -73,11 +73,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
-    const appOrigin = (import.meta.env.VITE_APP_ORIGIN as string | undefined)
-      ?? (import.meta.env.PROD ? 'https://www.lifetent.online' : window.location.origin);
+    const APP_ORIGIN = import.meta.env.PROD
+      ? 'https://www.lifetent.online'
+      : window.location.origin;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${appOrigin}/auth/callback` },
+      options: { redirectTo: `${APP_ORIGIN}/auth/callback` },
     });
     if (!error) capture(EVENTS.USER_SIGNED_IN_GOOGLE);
     return { error: error as Error | null };
