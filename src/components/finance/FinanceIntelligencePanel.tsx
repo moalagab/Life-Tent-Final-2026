@@ -13,6 +13,7 @@ import {
   BarChart2, CalendarDays, TrendingUp, Brain,
   AlertTriangle, Clock, CheckCircle2, ChevronRight,
   ArrowUpRight, ArrowDownRight, Minus,
+  type LucideIcon,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -27,7 +28,7 @@ import { ar } from 'date-fns/locale';
 
 type IntelTab = 'commitment' | 'obligations' | 'cashflow' | 'behavior';
 
-const TABS: { id: IntelTab; label: string; icon: React.FC<any> }[] = [
+const TABS: { id: IntelTab; label: string; icon: LucideIcon }[] = [
   { id: 'commitment',  label: 'الالتزامات', icon: BarChart2    },
   { id: 'obligations', label: 'المستقبل',   icon: CalendarDays },
   { id: 'cashflow',    label: 'التدفق',     icon: TrendingUp   },
@@ -79,12 +80,13 @@ function PanelSkeleton() {
 
 // ── Custom tooltip ─────────────────────────────────────────────────────────────
 
-function ChartTooltip({ active, payload, label }: any) {
+interface TooltipPayload { dataKey: string; name: string; fill?: string; stroke?: string; value: number; }
+function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: TooltipPayload[]; label?: string }) {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-popover border border-border rounded-xl px-3 py-2 shadow-lg text-xs space-y-1">
       <div className="font-bold text-foreground mb-1">{label}</div>
-      {payload.map((p: any) => (
+      {payload.map((p) => (
         <div key={p.dataKey} className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full" style={{ background: p.fill ?? p.stroke }} />
           <span className="text-muted-foreground">{p.name}:</span>
@@ -333,7 +335,7 @@ function CashflowForecast() {
               name="الرصيد"
               stroke={COLORS.balance}
               strokeWidth={2}
-              dot={(props: any) => {
+              dot={(props: { cx: number; cy: number; index: number }) => {
                 const isTight = cashflowWeeks[props.index]?.isTight;
                 return (
                   <circle

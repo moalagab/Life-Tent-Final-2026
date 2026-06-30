@@ -16,6 +16,7 @@ import {
   Brain, ListChecks, Wallet, RefreshCw, ArrowRight,
   AlertTriangle, Lightbulb, Bell, TrendingUp, Zap,
   CheckCircle2, Clock, Flame, Star, ChevronRight,
+  type LucideIcon,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTaskAgent,   type TaskAgentSuggestion  } from '@/hooks/useTaskAgent';
@@ -427,7 +428,7 @@ export function AgentPanel() {
   const { currentLanguage } = useLanguage();
   const isAr = currentLanguage === 'ar';
 
-  const TABS: { id: AgentTab; label: string; icon: React.FC<any>; color: string }[] = [
+  const TABS: { id: AgentTab; label: string; icon: LucideIcon; color: string }[] = [
     { id: 'tasks',   label: isAr ? 'يومي'  : 'Daily',   icon: ListChecks, color: 'text-blue-500'    },
     { id: 'finance', label: isAr ? 'مالي'  : 'Finance', icon: Wallet,     color: 'text-emerald-500' },
     { id: 'habits',  label: isAr ? 'عادات' : 'Habits',  icon: RefreshCw,  color: 'text-violet-500'  },

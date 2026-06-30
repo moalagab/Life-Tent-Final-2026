@@ -11,6 +11,7 @@ import {
   CheckCircle2, AlertTriangle, Clock, Target,
   ChevronRight, Crosshair, Flame, Plus, CheckSquare,
   FolderKanban, ListTodo, CalendarDays, Loader2,
+  type LucideIcon,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCommandCenter, CMD_KILL_THRESHOLD } from '@/hooks/useCommandCenter';
@@ -35,7 +36,7 @@ interface Props {
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const BLOCK_CFG: Record<TimeBlock, { label: string; icon: React.FC<any>; color: string }> = {
+const BLOCK_CFG: Record<TimeBlock, { label: string; icon: LucideIcon; color: string }> = {
   morning:   { label: 'الصباح',    icon: Sun,   color: 'text-amber-500'  },
   afternoon: { label: 'بعد الظهر', icon: Cloud, color: 'text-blue-500'   },
   evening:   { label: 'المساء',    icon: Moon,  color: 'text-violet-500' },

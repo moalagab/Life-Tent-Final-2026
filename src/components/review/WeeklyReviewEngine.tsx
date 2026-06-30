@@ -17,6 +17,7 @@ import {
   X, ChevronRight, ChevronLeft,
   CheckCircle2, AlertTriangle, TrendingUp, TrendingDown,
   Flame, Folder, Star, BarChart3, ArrowRight, Plus, Minus, Loader2,
+  type LucideIcon,
 } from 'lucide-react';
 import { useUpdateGoal } from '@/hooks/useGoals';
 import { useUpdateTask } from '@/hooks/useTasks';
@@ -37,7 +38,7 @@ type ReviewTab = 'accomplishments' | 'delays' | 'stalled' | 'intervention' | 'ne
 interface TabCfg {
   id:    ReviewTab;
   label: string;
-  icon:  React.FC<any>;
+  icon:  LucideIcon;
   color: string;
 }
 

@@ -93,6 +93,7 @@ const DAY_NAMES_AR = ['الأحد', 'الاثنين', 'الثلاثاء', 'ال�
 
 // ── Prediction builders ────────────────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function predictTaskDelays(
   tasks: any[],
   procScore: number,
@@ -159,8 +160,11 @@ function predictTaskDelays(
   }).filter(Boolean) as Prediction[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function predictProjectAbandonment(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   projects: any[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tasks: any[],
   abandonThreshold = 14,
 ): Prediction[] {
@@ -234,6 +238,7 @@ function predictProjectAbandonment(
   }).filter(Boolean) as Prediction[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function predictPressureSpike(
   tasks: any[],
   procScore: number,
@@ -328,6 +333,7 @@ function predictPressureSpike(
   return [];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function predictHabitBreaks(
   habits: any[],
   fragileIds: string[],
@@ -339,6 +345,7 @@ function predictHabitBreaks(
   return habits
     .filter(h => {
       const logs         = h.logs ?? [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const completedToday = logs.some((l: any) => l.completed_at?.startsWith(todayStr));
       const isFragile    = fragileIds.includes(h.id);
       const hasStreak    = logs.length > 0;
@@ -351,6 +358,7 @@ function predictHabitBreaks(
         let s = 0;
         for (let i = 1; i < 60; i++) {
           const d = format(addDays(new Date(), -i), 'yyyy-MM-dd');
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           if (logs.some((l: any) => l.completed_at?.startsWith(d))) s++;
           else break;
         }
@@ -389,6 +397,7 @@ function predictHabitBreaks(
     });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function predictOverloadRisk(
   tasks: any[],
   overcommitScore: number,

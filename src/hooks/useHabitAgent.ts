@@ -27,6 +27,7 @@ export type HabitInsightType =
   | 'warning'        // about to break
   | 'achievement'    // hit a milestone
   | 'recommendation' // do this today
+  | 'insight'        // general behavioral insight
 
 export interface HabitInsight {
   id:            string;
@@ -233,7 +234,7 @@ export function useHabitAgent(): HabitAgentResult {
       if (profile.weekendProductivityRatio < 0.5) {
         insights.push({
           id:       'weekend-habits',
-          type:     'insight' as any,
+          type:     'insight',
           habitId:  '',
           habitName: '',
           title:    'إنتاجيتك في عطل نهاية الأسبوع منخفضة',

@@ -4,7 +4,7 @@ import { SEO } from '@/components/SEO';
 import { cn } from '@/lib/utils';
 import {
   Tent, Check, X, Zap, Building2, Sparkles,
-  ArrowRight, Shield, Users, Bot, Infinity,
+  ArrowRight, Shield, Users, Bot, Infinity as InfinityIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -363,7 +363,7 @@ export default function Pricing() {
               desc: 'مشفّرة بالكامل. لا نطّلع عليها ولا نشاركها مع أي طرف ثالث.',
             },
             {
-              icon: Infinity,
+              icon: InfinityIcon,
               title: 'لا قيود مخفية',
               desc: 'ما تراه في الخطة هو ما تحصل عليه. لا رسوم إضافية مفاجئة.',
             },

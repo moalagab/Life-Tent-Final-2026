@@ -12,6 +12,7 @@ import {
   Eye, AlertTriangle, Info, ChevronRight, ArrowRight,
   CheckCircle2, TrendingDown, Layers, Zap, Clock,
   FolderOpen, RefreshCw, Battery,
+  type LucideIcon,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -24,7 +25,7 @@ import {
 
 // ── Config maps ────────────────────────────────────────────────────────────────
 
-const TYPE_ICON: Record<PredictionType, React.FC<any>> = {
+const TYPE_ICON: Record<PredictionType, LucideIcon> = {
   task_delay:      Clock,
   project_abandon: FolderOpen,
   pressure_spike:  Layers,
