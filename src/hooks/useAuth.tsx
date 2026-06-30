@@ -35,6 +35,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             email:      session.user.email,
             created_at: session.user.created_at,
           });
+          // Clean OAuth code/token from URL after PKCE exchange
+          const url = new URL(window.location.href);
+          if (url.searchParams.has('code') || url.hash.includes('access_token')) {
+            url.searchParams.delete('code');
+            url.searchParams.delete('state');
+            window.history.replaceState({}, '', url.pathname);
+          }
         }
         if (event === 'SIGNED_OUT') {
           analyticsReset();
