@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+Allow: /pricing
+Allow: /terms
+Allow: /privacy
+Allow: /refund
+
+# Block protected app routes (require auth — no value for crawlers)
+Disallow: /dashboard
+Disallow: /tasks
+Disallow: /projects
+Disallow: /goals
+Disallow: /finance
+Disallow: /knowledge
+Disallow: /habits
+Disallow: /calendar
+Disallow: /studio
+Disallow: /pomodoro
+Disallow: /settings
+Disallow: /profile
+Disallow: /admin
+Disallow: /auth
+
+Sitemap: https://www.lifetent.online/sitemap.xml

@@ -1,0 +1,344 @@
+/**
+ * send-notifications — General-purpose email notification dispatcher
+ *
+ * POST body:
+ * {
+ *   type: 'task_reminder' | 'habit_reminder' | 'debt_due' | 'subscription_renewal' | 'budget_alert' | 'goal_progress' | 'backup_complete',
+ *   to: string,            // recipient email
+ *   userName?: string,
+ *   data: Record<string, unknown>  // type-specific payload
+ * }
+ *
+ * Requires env: RESEND_API_KEY
+ */
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { Resend } from "https://esm.sh/resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const FROM = "Life Tent OS <notifications@lifetent.online>";
+
+const ALLOWED_ORIGINS = [
+  "https://www.lifetent.online",
+  "https://lifetent.online",
+  "http://localhost:8080",
+  "http://localhost:8081",
+  "http://localhost:8082",
+  "http://localhost:8083",
+  "https://localhost",
+  "lifetent://localhost",
+  "capacitor://localhost",
+  "ionic://localhost",
+];
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("origin") ?? "";
+  const allowOrigin = !origin
+    ? ALLOWED_ORIGINS[0]
+    : ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
+}
+
+async function verifyAuth(req: Request): Promise<string | null> {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return null;
+  const token = authHeader.replace("Bearer ", "");
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+  );
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  return error || !user ? null : user.id;
+}
+
+async function checkRateLimit(
+  userId: string,
+  functionName: string,
+  maxRequests: number,
+  windowSeconds: number,
+): Promise<boolean> {
+  // Must use service_role key — the RPC has REVOKE EXECUTE FROM anon
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+  );
+  const { data, error } = await supabase.rpc("check_rate_limit", {
+    p_user_id:        userId,
+    p_function:       functionName,
+    p_max_requests:   maxRequests,
+    p_window_seconds: windowSeconds,
+  });
+  if (error) {
+    console.error("Rate limit check error:", error.message);
+    return false; // fail-closed: block on RPC error
+  }
+  return (data as number) <= maxRequests;
+}
+
+// ── HTML escaping — prevents XSS from user-controlled data ───────────────────
+function esc(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// ── HTML email base ──────────────────────────────────────────────────────────
+function baseHtml(title: string, preheader: string, bodyHtml: string) {
+  return `<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0f0f1a;color:#e2e8f0;direction:rtl}
+  .wrap{max-width:580px;margin:40px auto;background:#1a1a2e;border-radius:20px;overflow:hidden;border:1px solid #2d2d4e}
+  .head{background:linear-gradient(135deg,#d4a017,#b8860b);padding:32px 28px;text-align:center}
+  .head h1{color:#0f0f1a;font-size:22px;font-weight:800;margin-top:8px}
+  .logo{font-size:28px;font-weight:900;color:#0f0f1a;letter-spacing:1px}
+  .body{padding:28px}
+  .card{background:#0f0f1a;border-radius:12px;padding:20px;margin:16px 0;border:1px solid #2d2d4e}
+  .badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
+  .badge-warn{background:#fef3c7;color:#92400e}
+  .badge-danger{background:#fee2e2;color:#991b1b}
+  .badge-ok{background:#d1fae5;color:#065f46}
+  .btn{display:inline-block;margin-top:20px;padding:12px 28px;background:linear-gradient(135deg,#d4a017,#b8860b);color:#0f0f1a;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px}
+  .foot{padding:20px 28px;text-align:center;font-size:11px;color:#64748b;border-top:1px solid #2d2d4e}
+  h3{font-size:15px;color:#e2e8f0;margin-bottom:4px}
+  p{color:#94a3b8;font-size:14px;line-height:1.7}
+  .divider{border:none;border-top:1px solid #2d2d4e;margin:16px 0}
+</style>
+</head>
+<body>
+<div style="display:none;max-height:0;overflow:hidden">${preheader}</div>
+<div class="wrap">
+  <div class="head">
+    <div class="logo">⛺ LIFE TENT</div>
+    <h1>${title}</h1>
+  </div>
+  <div class="body">${bodyHtml}</div>
+  <div class="foot">
+    <p>تم الإرسال تلقائياً من نظام Life Tent OS · <a href="#" style="color:#d4a017">إلغاء الاشتراك</a></p>
+  </div>
+</div>
+</body>
+</html>`;
+}
+
+// ── Per-type renderers ───────────────────────────────────────────────────────
+type NotifType =
+  | 'task_reminder'
+  | 'habit_reminder'
+  | 'debt_due'
+  | 'subscription_renewal'
+  | 'budget_alert'
+  | 'goal_progress'
+  | 'backup_complete';
+
+interface EmailSpec { subject: string; title: string; preheader: string; body: string; }
+
+function buildEmail(type: NotifType, userName: string, data: Record<string, unknown>): EmailSpec {
+  const name = userName || 'المستخدم';
+
+  switch (type) {
+    case 'task_reminder':
+      return {
+        subject: `⏰ تذكير: ${esc(data.taskTitle)}`,
+        title: 'تذكير بمهمة',
+        preheader: `مهمتك "${esc(data.taskTitle)}" تستحق انتباهك`,
+        body: `
+          <p>مرحباً ${esc(name)}،</p>
+          <div class="card">
+            <h3>${esc(data.taskTitle)}</h3>
+            <p>${esc(data.description)}</p>
+            ${data.dueDate ? `<p style="margin-top:8px">📅 الاستحقاق: <strong>${esc(data.dueDate)}</strong></p>` : ''}
+            ${data.priority ? `<span class="badge badge-warn">${esc(data.priority)}</span>` : ''}
+          </div>
+          <a class="btn" href="${esc(data.appUrl) || 'https://lifetent.app/tasks'}">فتح التطبيق</a>`,
+      };
+
+    case 'habit_reminder':
+      return {
+        subject: `🔁 حان وقت عادتك: ${esc(data.habitName)}`,
+        title: 'تذكير بالعادة اليومية',
+        preheader: `لا تنسَ عادتك "${esc(data.habitName)}" اليوم`,
+        body: `
+          <p>مرحباً ${esc(name)}،</p>
+          <div class="card">
+            <h3>${esc(data.habitName)}</h3>
+            ${data.streak ? `<p>🔥 سلسلتك الحالية: <strong>${esc(data.streak)} يوم</strong></p>` : ''}
+            ${data.targetTime ? `<p>⏰ الوقت المستهدف: ${esc(data.targetTime)}</p>` : ''}
+          </div>
+          <a class="btn" href="${esc(data.appUrl) || 'https://lifetent.app/habits'}">تسجيل الإنجاز</a>`,
+      };
+
+    case 'debt_due':
+      return {
+        subject: `💳 تذكير سداد: ${esc(data.debtName)}`,
+        title: 'موعد سداد دين',
+        preheader: `موعد سداد "${esc(data.debtName)}" قريب`,
+        body: `
+          <p>مرحباً ${esc(name)}،</p>
+          <div class="card">
+            <h3>${esc(data.debtName)}</h3>
+            <p>المبلغ المستحق: <strong>${esc(data.amount)} ${esc(data.currency) || 'SAR'}</strong></p>
+            <p>📅 تاريخ الاستحقاق: <strong>${esc(data.dueDate)}</strong></p>
+            ${(data.daysLeft as number) <= 3
+              ? `<span class="badge badge-danger">⚠️ ${esc(data.daysLeft)} أيام متبقية</span>`
+              : `<span class="badge badge-warn">📅 ${esc(data.daysLeft)} أيام متبقية</span>`}
+          </div>
+          <a class="btn" href="${esc(data.appUrl) || 'https://lifetent.app/finance?tab=debts'}">عرض الديون</a>`,
+      };
+
+    case 'subscription_renewal':
+      return {
+        subject: `🔄 تجديد قريب: ${esc(data.subscriptionName)}`,
+        title: 'موعد تجديد اشتراك',
+        preheader: `اشتراكك في "${esc(data.subscriptionName)}" سيُجدَّد قريباً`,
+        body: `
+          <p>مرحباً ${esc(name)}،</p>
+          <div class="card">
+            <h3>${esc(data.subscriptionName)}</h3>
+            <p>المبلغ: <strong>${esc(data.amount)} ${esc(data.currency) || 'SAR'}</strong></p>
+            <p>📅 تاريخ التجديد: <strong>${esc(data.renewalDate)}</strong></p>
+            <span class="badge badge-warn">${esc(data.daysLeft)} أيام</span>
+          </div>
+          <a class="btn" href="${esc(data.appUrl) || 'https://lifetent.app/finance?tab=subscriptions'}">عرض الاشتراكات</a>`,
+      };
+
+    case 'budget_alert':
+      return {
+        subject: `⚠️ تنبيه ميزانية: ${esc(data.categoryName)}`,
+        title: 'تجاوز حد الميزانية',
+        preheader: `اقتربت من حد ميزانية "${esc(data.categoryName)}"`,
+        body: `
+          <p>مرحباً ${esc(name)}،</p>
+          <div class="card">
+            <h3>فئة: ${esc(data.categoryName)}</h3>
+            <p>المصروف: <strong>${esc(data.spent)} ${esc(data.currency) || 'SAR'}</strong> من أصل <strong>${esc(data.budget)} ${esc(data.currency) || 'SAR'}</strong></p>
+            <p>نسبة الاستهلاك: <strong>${esc(data.percent)}%</strong></p>
+            ${(data.percent as number) >= 100
+              ? `<span class="badge badge-danger">تجاوزت الميزانية</span>`
+              : `<span class="badge badge-warn">قاربت على النفاد</span>`}
+          </div>
+          <a class="btn" href="${esc(data.appUrl) || 'https://lifetent.app/finance?tab=budget'}">عرض الميزانية</a>`,
+      };
+
+    case 'goal_progress':
+      return {
+        subject: `🎯 تقرير تقدم: ${esc(data.goalTitle)}`,
+        title: 'تقرير تقدم الأهداف',
+        preheader: `تقرير أسبوعي لهدفك "${esc(data.goalTitle)}"`,
+        body: `
+          <p>مرحباً ${esc(name)}،</p>
+          <div class="card">
+            <h3>${esc(data.goalTitle)}</h3>
+            <p>نسبة الإنجاز: <strong>${esc(data.progress)}%</strong></p>
+            <div style="background:#2d2d4e;border-radius:99px;height:8px;margin:8px 0">
+              <div style="background:linear-gradient(90deg,#d4a017,#b8860b);width:${Number(data.progress) || 0}%;height:100%;border-radius:99px"></div>
+            </div>
+            ${data.dueDate ? `<p>📅 الموعد النهائي: ${esc(data.dueDate)}</p>` : ''}
+          </div>
+          <a class="btn" href="${esc(data.appUrl) || 'https://lifetent.app/goals'}">عرض الأهداف</a>`,
+      };
+
+    case 'backup_complete':
+      return {
+        subject: `✅ تم إنشاء نسخة احتياطية`,
+        title: 'النسخة الاحتياطية جاهزة',
+        preheader: `تم حفظ بياناتك بنجاح`,
+        body: `
+          <p>مرحباً ${name}،</p>
+          <div class="card">
+            <span class="badge badge-ok">✓ تمت العملية بنجاح</span>
+            <p style="margin-top:12px">تم إنشاء نسخة احتياطية شاملة لبياناتك في <strong>${data.timestamp}</strong></p>
+            ${data.size ? `<p>الحجم: ${data.size}</p>` : ''}
+          </div>
+          <a class="btn" href="${data.downloadUrl || '#'}">تنزيل النسخة الاحتياطية</a>`,
+      };
+
+    default:
+      return {
+        subject: 'إشعار من Life Tent OS',
+        title: 'إشعار',
+        preheader: '',
+        body: `<p>مرحباً ${name}،</p><p>لديك إشعار جديد.</p>`,
+      };
+  }
+}
+
+// ── Handler ──────────────────────────────────────────────────────────────────
+const handler = async (req: Request): Promise<Response> => {
+  const corsHeaders = getCorsHeaders(req);
+
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // ── Authentication check ─────────────────────────────────────────────────
+  const userId = await verifyAuth(req);
+  if (!userId) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
+
+  // ── Rate limit: 20 emails per hour per user ───────────────────────────────
+  const withinLimit = await checkRateLimit(userId, "send-notifications", 20, 3600);
+  if (!withinLimit) {
+    return new Response(JSON.stringify({ error: "تجاوزت الحد المسموح من الإشعارات. يرجى المحاولة بعد ساعة." }), {
+      status: 429, headers: { "Content-Type": "application/json", "Retry-After": "3600", ...corsHeaders },
+    });
+  }
+
+  try {
+    const { type, to, userName, data } = await req.json() as {
+      type: NotifType;
+      to: string;
+      userName?: string;
+      data: Record<string, unknown>;
+    };
+
+    if (!type || !to) {
+      return new Response(JSON.stringify({ error: "type and to are required" }), {
+        status: 400, headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    // Validate email format to prevent header injection
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(to)) {
+      return new Response(JSON.stringify({ error: "Invalid email address" }), {
+        status: 400, headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const spec = buildEmail(type, userName ?? '', data ?? {});
+
+    const { error } = await resend.emails.send({
+      from: FROM,
+      to: [to],
+      subject: spec.subject,
+      html: baseHtml(spec.title, spec.preheader, spec.body),
+    });
+
+    if (error) throw new Error(error.message);
+
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200, headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500, headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
+};
+
+serve(handler);

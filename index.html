@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-EW6YKBNVDH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EW6YKBNVDH');
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Life Tent — نظم حياتك</title>
+    <meta name="description" content="Life Tent OS — نظام إدارة الحياة المتكامل: مشاريع، مهام، أهداف، مالية، عادات، ومزيد." />
+    <meta name="author" content="Life Tent OS" />
+    <meta name="robots" content="index,follow" />
+    <meta name="keywords" content="نظام إدارة الحياة, تنظيم الوقت, إدارة المهام, تتبع الأهداف, إدارة المالية, عادات يومية, منظومة شخصية, life management, productivity, task manager, goal tracker, Arabic productivity app" />
+    <link rel="canonical" href="https://www.lifetent.online" />
+
+    <!-- Preconnect to external origins -->
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    <link rel="preconnect" href="https://oocddixbjiynladnvdfx.supabase.co" />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+
+    <!-- Theme color (Android status bar + browser UI) -->
+    <meta name="theme-color" content="#1a1a2e" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/pwa-512x512.png" />
+
+    <!-- iOS PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Life Tent" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Life Tent" />
+    <meta property="og:locale" content="ar_SA" />
+    <meta property="og:title" content="Life Tent — نظم حياتك" />
+    <meta property="og:description" content="نظام إدارة الحياة المتكامل: مشاريع، مهام، أهداف، مالية، عادات، ومزيد." />
+    <meta property="og:url" content="https://www.lifetent.online" />
+    <meta property="og:image" content="https://www.lifetent.online/og-image.png" />
+    <meta property="og:image:width" content="5000" />
+    <meta property="og:image:height" content="2625" />
+    <meta property="og:image:alt" content="Life Tent — نظام إدارة الحياة المتكامل" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@LifeTentOS" />
+    <meta name="twitter:title" content="Life Tent — نظم حياتك" />
+    <meta name="twitter:description" content="نظام إدارة الحياة المتكامل: مشاريع، مهام، أهداف، مالية، عادات، ومزيد." />
+    <meta name="twitter:image" content="https://www.lifetent.online/og-image.png" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+
+    <!-- SW health check: if React fails to mount within 6s, clear SW and reload -->
+    <script>
+      (function () {
+        var TIMEOUT = 6000;
+        var timer = setTimeout(function () {
+          var root = document.getElementById('root');
+          if (!root || !root.firstChild) {
+            // React never mounted — stale SW likely serving broken chunks
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.getRegistrations().then(function (regs) {
+                var tasks = regs.map(function (r) { return r.unregister(); });
+                return Promise.all(tasks);
+              }).then(function () {
+                // Clear all caches
+                if ('caches' in window) {
+                  return caches.keys().then(function (keys) {
+                    return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+                  });
+                }
+              }).then(function () {
+                window.location.reload(true);
+              }).catch(function () {
+                window.location.reload(true);
+              });
+            } else {
+              window.location.reload(true);
+            }
+          }
+        }, TIMEOUT);
+
+        // Cancel if React mounted successfully
+        document.addEventListener('DOMContentLoaded', function () {
+          var observer = new MutationObserver(function () {
+            if (document.getElementById('root') && document.getElementById('root').firstChild) {
+              clearTimeout(timer);
+              observer.disconnect();
+            }
+          });
+          observer.observe(document.getElementById('root') || document.body, { childList: true, subtree: true });
+        });
+      })();
+    </script>
+  </body>
+</html>

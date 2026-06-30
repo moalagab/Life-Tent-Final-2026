@@ -1,0 +1,117 @@
+workflows:
+
+  # ── iOS Build ──────────────────────────────────────────────────────────────────
+  ios-release:
+    name: Life Tent iOS
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+
+    integrations:
+      app_store_connect: codemagic_api_key   # set this in Codemagic dashboard
+
+    environment:
+      ios_signing:
+        distribution_type: development
+        bundle_identifier: online.lifetent.app
+      vars:
+        BUNDLE_ID: online.lifetent.app
+        APP_NAME: "Life Tent"
+        XCODE_WORKSPACE: ios/App/App.xcworkspace
+        XCODE_SCHEME: App
+      node: 20.17.0
+      xcode: 16.2
+      cocoapods: default
+
+    scripts:
+      - name: Install npm dependencies
+        script: npm ci
+
+      - name: Build web app
+        script: npm run build
+
+      - name: Add iOS platform
+        script: |
+          if [ ! -d "ios" ]; then
+            npx cap add ios
+          fi
+
+      - name: Sync Capacitor iOS
+        script: npx cap sync ios
+
+      - name: Install CocoaPods
+        script: |
+          cd ios/App
+          pod install --repo-update
+
+      - name: Set up code signing
+        script: xcode-project use-profiles
+
+      - name: Build IPA
+        script: |
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      email:
+        recipients:
+          - moalagab@gmail.com
+        notify:
+          success: true
+          failure: true
+
+  # ── Android Build ─────────────────────────────────────────────────────────────
+  android-release:
+    name: Life Tent Android
+    max_build_duration: 60
+    instance_type: linux_x2
+
+    environment:
+      android_signing:
+        - lifetent_keystore
+      vars:
+        PACKAGE_NAME: online.lifetent.app
+      node: 20.17.0
+      java: 21
+
+    scripts:
+      - name: Install npm dependencies
+        script: npm ci
+
+      - name: Build web app
+        script: npm run build
+
+      - name: Sync Capacitor Android
+        script: npx cap sync android
+
+      - name: Build APK / AAB
+        script: |
+          cd android
+          ./gradlew bundleRelease
+
+      - name: Sign AAB
+        script: |
+          android-app-bundle sign \
+            --ks $CM_KEYSTORE_PATH \
+            --ks-key-alias $CM_KEY_ALIAS \
+            --ks-pass $CM_KEYSTORE_PASSWORD \
+            --key-pass $CM_KEY_PASSWORD
+
+    artifacts:
+      - android/app/build/outputs/**/*.aab
+      - android/app/build/outputs/**/*.apk
+
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+      email:
+        recipients:
+          - moalagab@gmail.com
+        notify:
+          success: true
+          failure: true

@@ -1,0 +1,1152 @@
+/* ── Lama Sans — self-hosted (Arabic + Latin) ────────────────────────────── */
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-Thin.woff') format('woff'); font-weight: 100; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-ThinItalic.woff') format('woff'); font-weight: 100; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-ExtraLight.woff') format('woff'); font-weight: 200; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-ExtraLightItalic.woff') format('woff'); font-weight: 200; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-Light.woff') format('woff'); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-LightItalic.woff') format('woff'); font-weight: 300; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-Regular.woff') format('woff'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-RegularItalic.woff') format('woff'); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-Medium.woff') format('woff'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-MediumItalic.woff') format('woff'); font-weight: 500; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-SemiBold.woff') format('woff'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-SemiBoldItalic.woff') format('woff'); font-weight: 600; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-Bold.woff') format('woff'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-BoldItalic.woff') format('woff'); font-weight: 700; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-ExtraBold.woff') format('woff'); font-weight: 800; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-ExtraBoldItalic.woff') format('woff'); font-weight: 800; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-Black.woff') format('woff'); font-weight: 900; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Lama Sans'; src: url('/fonts/LamaSans-BlackItalic.woff') format('woff'); font-weight: 900; font-style: italic; font-display: swap; }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ============================================
+       Life Tent Light — Midnight Navy + Coral
+       #E6EBF7 base · #F3F6FD surface · #2E63E8 primary · #E2674A accent
+       ============================================ */
+
+    /* Surfaces — #E6EBF7 base · #F3F6FD cards */
+    --background: 222 52% 94%;           /* #E6EBF7 */
+    --foreground: 228 42% 14%;           /* #121A30 */
+
+    --card: 222 71% 97%;                 /* #F3F6FD */
+    --card-foreground: 228 42% 14%;
+
+    --popover: 0 0% 100%;                /* #FFFFFF */
+    --popover-foreground: 228 42% 14%;
+
+    /* Primary — Brand Blue #2E63E8 */
+    --primary: 221 77% 55%;              /* #2E63E8 */
+    --primary-foreground: 0 0% 100%;
+
+    /* Module semantic colors */
+    --module-tasks:     221 77% 55%;     /* #2E63E8 blue */
+    --module-finance:   161 72% 37%;     /* #18A878 green */
+    --module-goals:     35 67% 48%;      /* #C9892F amber */
+    --module-habits:    160 84% 39%;     /* teal */
+    --module-projects:  271 81% 56%;     /* purple */
+    --module-knowledge: 258 90% 66%;     /* violet */
+    --module-studio:    14 77% 65%;      /* #EC7E62 coral */
+    --module-calendar:  199 89% 48%;     /* sky */
+    --module-pomodoro:  5 70% 52%;       /* red */
+
+    /* Neutral scale */
+    --secondary: 222 52% 91%;
+    --secondary-foreground: 225 22% 35%;  /* #45506B */
+
+    --muted: 222 43% 92%;                /* #E2E7F3 */
+    --muted-foreground: 222 15% 44%;     /* #607283 — WCAG AA 4.5:1 */
+
+    --accent: 12 73% 58%;               /* #E2674A coral */
+    --accent-foreground: 228 42% 14%;   /* dark navy on coral — WCAG AA 4.6:1 */
+
+    /* Status */
+    --destructive: 5 66% 52%;            /* #D6493B */
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 161 72% 30%;              /* #0E7A5C — WCAG AA 5.2:1 vs white */
+    --success-foreground: 0 0% 100%;
+
+    --warning: 35 67% 36%;               /* #8E5F1D — WCAG AA 4.7:1 vs white */
+    --warning-foreground: 0 0% 100%;
+
+    /* Lines & focus */
+    --border: 221 38% 88%;               /* #D5DCEC */
+    --input: 222 42% 92%;                /* #E2E7F3 */
+    --ring: 221 77% 55%;                 /* blue focus */
+
+    --radius: 1.25rem;                   /* 20px — lt-app card radius */
+
+    /* Glass */
+    --glass-bg: rgba(255,255,255,0.62);
+    --glass-bg-hover: rgba(255,255,255,0.82);
+    --glass-bg-active: rgba(255,255,255,0.94);
+    --glass-bg-disabled: rgba(255,255,255,0.35);
+    --glass-border: rgba(18,26,48,0.06);
+    --glass-border-hover: rgba(18,26,48,0.12);
+    --glass-border-active: rgba(46,99,232,0.32);
+    --glass-border-disabled: rgba(18,26,48,0.03);
+    --glass-blur: 22px;
+
+    /* Elevation — kept minimal, no heavy shadows */
+    --elev-1: 0 1px 2px rgba(18,26,48,0.04);
+    --elev-2: 0 1px 3px rgba(18,26,48,0.06);
+    --elev-3: 0 2px 6px rgba(18,26,48,0.08);
+    --elev-4: 0 4px 12px rgba(18,26,48,0.10);
+
+    /* Focus ring — blue halo */
+    --focus-ring: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(221 77% 55% / 0.50);
+
+    /* Gradients */
+    --gradient-gold: linear-gradient(135deg, #2E63E8 0%, #E2674A 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.62) 0%, rgba(238,242,250,0.40) 100%);
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 228 42% 14%;
+    --sidebar-primary: 221 77% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 54% 96%;
+    --sidebar-accent-foreground: 225 20% 42%;
+    --sidebar-border: 222 44% 92%;
+    --sidebar-ring: 221 77% 55%;
+  }
+
+  .dark, [data-theme="dark"] {
+    /* ============================================
+       Life Tent Dark — Midnight Navy + Coral  (canonical --d-* tokens)
+       #131C32 bg · #18223C surface · #1F2B49 elevated
+       #5285F2 primary · #EC7E62 accent
+       ============================================ */
+    --background: 222 45% 14%;           /* #131C32 */
+    --foreground: 221 60% 95%;           /* #EAF0FB */
+
+    --card: 222 43% 16%;                 /* #18223C */
+    --card-foreground: 221 60% 95%;
+
+    --popover: 222 40% 20%;              /* #1F2B49 */
+    --popover-foreground: 221 60% 95%;
+
+    --primary: 224 85% 64%;              /* #5285F2 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 222 40% 22%;
+    --secondary-foreground: 221 40% 80%;
+
+    --muted: 222 38% 20%;
+    --muted-foreground: 222 16% 50%;     /* #6A7693 */
+
+    --accent: 14 77% 65%;               /* #EC7E62 coral */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 5 73% 60%;            /* #E2604E */
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 159 52% 48%;              /* #35C28E */
+    --success-foreground: 0 0% 100%;
+
+    --warning: 35 72% 58%;               /* #E2A24B */
+    --warning-foreground: 222 45% 14%;
+
+    --border: 224 36% 26%;               /* #2A3759 */
+    --input: 224 39% 23%;                /* #243152 */
+    --ring: 224 85% 64%;
+
+    /* Glass */
+    --glass-bg: rgba(28,38,64,0.62);
+    --glass-bg-hover: rgba(28,38,64,0.78);
+    --glass-bg-active: rgba(28,38,64,0.88);
+    --glass-bg-disabled: rgba(28,38,64,0.30);
+    --glass-border: rgba(255,255,255,0.06);
+    --glass-border-hover: rgba(255,255,255,0.12);
+    --glass-border-active: rgba(82,133,242,0.45);
+    --glass-border-disabled: rgba(255,255,255,0.03);
+    --glass-blur: 22px;
+
+    /* Elevation — kept minimal, no heavy shadows */
+    --elev-1: 0 1px 2px rgba(0,0,0,0.15);
+    --elev-2: 0 1px 3px rgba(0,0,0,0.20);
+    --elev-3: 0 2px 8px rgba(0,0,0,0.25);
+    --elev-4: 0 4px 16px rgba(0,0,0,0.30);
+
+    /* Focus ring — blue halo on dark */
+    --focus-ring: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(224 85% 64% / 0.65);
+
+    /* Gradients */
+    --gradient-gold: linear-gradient(135deg, #5285F2 0%, #EC7E62 100%);
+
+    /* Sidebar */
+    --sidebar-background: 222 48% 10%;
+    --sidebar-foreground: 221 60% 95%;
+    --sidebar-primary: 224 85% 64%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 43% 14%;
+    --sidebar-accent-foreground: 221 60% 95%;
+    --sidebar-border: 224 36% 24%;
+    --sidebar-ring: 224 85% 64%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  /* Form elements don't inherit font-family by default in browsers */
+  input, textarea, select, button {
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+  }
+
+  html {
+    font-family: 'Lama Sans', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Light mode — Liquid Glass ambient: blue top-right + coral bottom-left */
+  body {
+    background:
+      radial-gradient(820px 460px at 88% -6%, rgba(46, 99, 232, 0.14), transparent 62%),
+      radial-gradient(620px 460px at 2% 104%, rgba(226, 103, 74, 0.10), transparent 60%),
+      hsl(var(--background));
+  }
+
+  .dark body, [data-theme="dark"] body {
+    background:
+      radial-gradient(820px 460px at 88% -6%, rgba(82, 133, 242, 0.22), transparent 62%),
+      radial-gradient(620px 460px at 2% 104%, rgba(236, 126, 98, 0.15), transparent 60%),
+      hsl(var(--background));
+  }
+}
+
+@layer components {
+  /* ============================================
+     Unified Glass Card — state machine
+     default → hover → active → disabled
+     One source of truth across all sections.
+     ============================================ */
+  .glass-card {
+    @apply relative overflow-hidden rounded-2xl transition-all duration-300;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--elev-2);
+  }
+
+  .glass-card:hover {
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--elev-3);
+  }
+
+  .glass-card:active,
+  .glass-card[data-state="active"],
+  .glass-card.is-active {
+    background: var(--glass-bg-active);
+    border-color: var(--glass-border-active);
+    box-shadow: var(--elev-2);
+  }
+
+  .glass-card[aria-disabled="true"],
+  .glass-card.is-disabled,
+  .glass-card:disabled {
+    background: var(--glass-bg-disabled);
+    border-color: var(--glass-border-disabled);
+    box-shadow: var(--elev-1);
+    opacity: 0.6;
+    pointer-events: none;
+    transform: none;
+  }
+
+  .dark .glass-card {
+    box-shadow: var(--elev-2), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+  .dark .glass-card:hover {
+    box-shadow: var(--elev-3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  /* ============================================
+     Elevation scale utilities (light + dark)
+     Use semantically: elev-1 chips, elev-2 cards,
+     elev-3 popovers/menus, elev-4 dialogs/modals.
+     ============================================ */
+  .elev-1 { box-shadow: var(--elev-1); }
+  .elev-2 { box-shadow: var(--elev-2); }
+  .elev-3 { box-shadow: var(--elev-3); }
+  .elev-4 { box-shadow: var(--elev-4); }
+
+  /* ============================================
+     Focus ring — gold halo, AA-visible, RTL-safe
+     (uses box-shadow so it never affects layout
+      and works identically in LTR/RTL).
+     ============================================ */
+  .focus-ring-brand {
+    @apply outline-none;
+  }
+  .focus-ring-brand:focus-visible {
+    box-shadow: var(--focus-ring);
+    border-radius: inherit;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  [role="tab"]:focus-visible,
+  [role="menuitem"]:focus-visible,
+  [role="option"]:focus-visible,
+  summary:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-radius: 0.5rem;
+  }
+
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  }
+
+  /* Interactive Card with enhanced hover */
+  .interactive-card {
+    @apply relative overflow-hidden rounded-2xl transition-all duration-300 cursor-pointer;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+  }
+
+  .interactive-card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 12px 28px rgba(18, 26, 48, 0.12),
+      0 0 0 1px hsla(221, 77%, 55%, 0.20);
+  }
+
+  .interactive-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, hsla(221, 77%, 55%, 0) 0%, hsla(221, 77%, 55%, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .interactive-card:hover::after {
+    opacity: 1;
+  }
+
+  /* Button hover enhancements */
+  .btn-hover-lift {
+    @apply transition-all duration-300;
+  }
+
+  .btn-hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px hsla(221, 77%, 55%, 0.28);
+  }
+
+  .btn-hover-lift:active {
+    transform: translateY(0);
+  }
+
+  /* Icon hover effect */
+  .icon-hover {
+    @apply transition-all duration-300;
+  }
+
+  .icon-hover:hover {
+    transform: scale(1.1) rotate(5deg);
+    color: hsl(43, 100%, 50%);
+  }
+
+  /* ─── Clean card (no heavy backdrop-filter) ──────────────────────────────── */
+  .lt-card {
+    @apply relative rounded-2xl border border-border/50 bg-card transition-all duration-200;
+    box-shadow: var(--elev-1);
+  }
+  .lt-card:hover {
+    box-shadow: var(--elev-2);
+    @apply border-border;
+  }
+
+  /* ─── Slide-up animation utility ─────────────────────────────────────────── */
+  @keyframes slide-up-anim {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0);    }
+  }
+  @keyframes bounce-in-anim {
+    0%   { opacity: 0; transform: scale(0.92); }
+    60%  { transform: scale(1.03); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  .slide-up   { animation: slide-up-anim   0.25s ease-out both; }
+  .bounce-in  { animation: bounce-in-anim  0.30s ease-out both; }
+
+  /* ─── Custom scrollbar ────────────────────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 999px; }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.4); }
+
+  /* ─── Gradient text (brand) ───────────────────────────────────────────────── */
+  .brand-text {
+    background: linear-gradient(135deg, hsl(221, 77%, 55%) 0%, hsl(12, 73%, 58%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .dark .brand-text {
+    background: linear-gradient(135deg, hsl(224, 85%, 64%) 0%, hsl(14, 77%, 65%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ─── Module accent borders (left/right handled by RTL) ──────────────────── */
+  .module-tasks     { --mod-color: hsl(var(--module-tasks));     }
+  .module-finance   { --mod-color: hsl(var(--module-finance));   }
+  .module-goals     { --mod-color: hsl(var(--module-goals));     }
+  .module-habits    { --mod-color: hsl(var(--module-habits));    }
+  .module-projects  { --mod-color: hsl(var(--module-projects));  }
+  .module-knowledge { --mod-color: hsl(var(--module-knowledge)); }
+  .module-studio    { --mod-color: hsl(var(--module-studio));    }
+  .module-calendar  { --mod-color: hsl(var(--module-calendar));  }
+  .module-pomodoro  { --mod-color: hsl(var(--module-pomodoro));  }
+
+  /* Link underline animation */
+  .link-underline {
+    @apply relative;
+  }
+
+  .link-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    inset-inline-start: 0;
+    width: 0;
+    height: 2px;
+    background: hsl(var(--primary));
+    transition: width 0.3s ease;
+  }
+
+  .link-underline:hover::after {
+    width: 100%;
+  }
+
+  .gold-glow {
+    box-shadow: 0 0 30px hsla(221, 77%, 55%, 0.30);
+  }
+
+  .gold-text {
+    background: linear-gradient(135deg, #5285F2 0%, #EC7E62 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 4s ease-in-out infinite;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
+    background-size: 200% 100%;
+  }
+
+  /* Hover glow effect */
+  .hover-glow {
+    @apply transition-all duration-300;
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 0 30px hsla(221, 77%, 55%, 0.22);
+  }
+
+  /* Subtle bounce on hover */
+  .hover-bounce {
+    @apply transition-transform duration-300;
+  }
+
+  .hover-bounce:hover {
+    animation: subtle-bounce 0.5s ease;
+  }
+
+  /* ============================================
+     2026 Modern Design Utilities — Bento / Aurora / Spotlight
+     ============================================ */
+
+  /* Bento Cell — modern dashboard tile */
+  .bento-cell {
+    @apply relative overflow-hidden rounded-3xl transition-all duration-500;
+    background: linear-gradient(
+      145deg,
+      hsl(var(--card) / 0.85) 0%,
+      hsl(var(--card) / 0.55) 100%
+    );
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    border: 1px solid hsl(var(--border) / 0.4);
+    box-shadow:
+      0 1px 0 hsl(var(--foreground) / 0.04) inset,
+      0 8px 24px -12px hsl(var(--background) / 0.5);
+  }
+
+  .bento-cell:hover {
+    border-color: hsl(var(--primary) / 0.35);
+    box-shadow:
+      0 1px 0 hsl(var(--primary) / 0.15) inset,
+      0 20px 50px -20px hsl(var(--primary) / 0.25);
+  }
+
+  .dark .bento-cell {
+    background: linear-gradient(
+      145deg,
+      hsl(224 44% 19% / 0.75) 0%,
+      hsl(225 43% 14% / 0.55) 100%
+    );
+    box-shadow:
+      0 1px 0 hsl(0 0% 100% / 0.06) inset,
+      0 12px 32px -16px hsl(0 0% 0% / 0.6);
+  }
+
+  /* Spotlight effect — follows hover */
+  .spotlight {
+    position: relative;
+  }
+
+  .spotlight::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: radial-gradient(
+      400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      hsl(var(--primary) / 0.15),
+      transparent 40%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .spotlight:hover::before {
+    opacity: 1;
+  }
+
+  /* Aurora gradient backdrop */
+  .aurora-bg {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .aurora-bg::before {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    background:
+      radial-gradient(circle at 20% 30%, hsl(var(--primary) / 0.18), transparent 40%),
+      radial-gradient(circle at 80% 20%, hsl(43 100% 60% / 0.12), transparent 45%),
+      radial-gradient(circle at 50% 80%, hsl(213 80% 40% / 0.15), transparent 50%);
+    animation: aurora-drift 20s ease-in-out infinite;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Mesh gradient header */
+  .mesh-header {
+    background:
+      radial-gradient(at 20% 0%, hsl(var(--primary) / 0.15) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsl(213 70% 30% / 0.2) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, hsl(43 100% 50% / 0.08) 0px, transparent 50%),
+      hsl(var(--card) / 0.6);
+  }
+
+  /* Glow ring on focus/active */
+  .glow-ring {
+    position: relative;
+  }
+
+  .glow-ring::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary) / 0.6),
+      transparent 40%,
+      hsl(var(--primary) / 0.4)
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+
+  .glow-ring:hover::after {
+    opacity: 1;
+  }
+
+  /* Section heading divider — modern */
+  .section-heading {
+    @apply flex items-center gap-3 text-sm font-semibold uppercase tracking-widest text-muted-foreground;
+  }
+
+  .section-heading::before,
+  .section-heading::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(var(--border)), transparent);
+  }
+
+  /* Number ticker — for stats */
+  .ticker-num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+    letter-spacing: -0.02em;
+  }
+}
+
+@keyframes aurora-drift {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(3%, -2%) rotate(2deg); }
+  66% { transform: translate(-2%, 3%) rotate(-2deg); }
+}
+
+@keyframes subtle-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes slide-up {
+  from { 
+    opacity: 0; 
+    transform: translateY(30px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PLATFORM DESIGN SYSTEMS
+   ── Fluent UI 2  ──  [data-platform="fluent"]  ──  Web / Desktop
+   ── Apple HIG    ──  [data-platform="hig"]     ──  iOS / Mobile
+═══════════════════════════════════════════════════════════════════════ */
+
+/* ─── Fluent UI 2 — Windows 11 / Web design language ─────────────────
+   References: https://github.com/microsoft/fluentui
+   Token names mirror @fluentui/tokens naming convention.
+─────────────────────────────────────────────────────────────────────── */
+[data-platform="fluent"] {
+  font-family: "Lama Sans", "Segoe UI Variable", "Segoe UI",
+               system-ui, sans-serif;
+
+  /* Radius — Fluent 2 scale (functional, tight) */
+  --radius:    0.25rem;   /* 4px  — inputs, chips */
+  --radius-md: 0.5rem;    /* 8px  — cards, panels */
+  --radius-lg: 0.75rem;   /* 12px — dialogs */
+
+  /* Fill tokens (Fluent Neutral) */
+  --fluent-fill-subtle:   rgba(0,0,0,0.04);
+  --fluent-fill-hover:    rgba(0,0,0,0.06);
+  --fluent-fill-pressed:  rgba(0,0,0,0.10);
+  --fluent-fill-selected: hsl(var(--primary) / 0.09);
+
+  /* Elevation (Depth 4 / 8 / 16 / 64) */
+  --elev-1: 0 1px 2px rgba(0,0,0,0.07), 0 0 1px rgba(0,0,0,0.04);
+  --elev-2: 0 2px 4px rgba(0,0,0,0.08), 0 0 2px rgba(0,0,0,0.05);
+  --elev-3: 0 4px 8px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06);
+  --elev-4: 0 8px 16px rgba(0,0,0,0.12),0 2px 8px rgba(0,0,0,0.07);
+
+  /* Motion tokens */
+  --fluent-fast:         100ms;
+  --fluent-normal:       200ms;
+  --fluent-slow:         300ms;
+  --fluent-curve:        cubic-bezier(0.33, 0, 0.67, 1);
+  --fluent-curve-decel:  cubic-bezier(0, 0, 0, 1);
+  --fluent-curve-accel:  cubic-bezier(1, 0, 1, 1);
+
+  /* Mica-simulated sidebar */
+  --sidebar-background: 220 22% 98%;
+  --sidebar-accent:     220 14% 93%;
+  --sidebar-border:     220 14% 90%;
+}
+
+.dark[data-platform="fluent"],
+[data-theme="dark"][data-platform="fluent"] {
+  font-family: "Lama Sans", "Segoe UI Variable", "Segoe UI",
+               system-ui, sans-serif;
+
+  --fluent-fill-subtle:   rgba(255,255,255,0.05);
+  --fluent-fill-hover:    rgba(255,255,255,0.08);
+  --fluent-fill-pressed:  rgba(255,255,255,0.12);
+  --fluent-fill-selected: hsl(var(--primary) / 0.22);
+
+  --elev-1: 0 1px 2px rgba(0,0,0,0.40),  0 0 1px rgba(0,0,0,0.30);
+  --elev-2: 0 2px 6px rgba(0,0,0,0.45),  0 4px 12px rgba(0,0,0,0.35);
+  --elev-3: 0 4px 12px rgba(0,0,0,0.50), 0 8px 24px rgba(0,0,0,0.40);
+  --elev-4: 0 8px 20px rgba(0,0,0,0.55), 0 16px 48px rgba(0,0,0,0.50);
+
+  --sidebar-background: 225 50% 8%;
+  --sidebar-accent:     224 40% 14%;
+  --sidebar-border:     224 36% 18%;
+}
+
+/* Flatten glass/card to Fluent surface style on web */
+[data-platform="fluent"] .lt-card,
+[data-platform="fluent"] .glass-card {
+  border-radius: var(--radius-md);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  box-shadow: var(--elev-2);
+}
+[data-platform="fluent"] .lt-card:hover,
+[data-platform="fluent"] .glass-card:hover {
+  transform: none;
+  box-shadow: var(--elev-3);
+  border-color: hsl(var(--border));
+}
+
+/* ─── Fluent Nav Item — sidebar navigation ───────────────────────── */
+.fluent-nav-item {
+  @apply relative flex items-center gap-3 h-9 w-full px-3 text-sm
+         text-muted-foreground rounded-[4px] no-underline;
+  transition: background 100ms cubic-bezier(0.33,0,0.67,1),
+              color     100ms cubic-bezier(0.33,0,0.67,1);
+}
+.fluent-nav-item:hover {
+  background: var(--fluent-fill-hover, rgba(0,0,0,0.06));
+  @apply text-foreground;
+}
+.fluent-nav-item[aria-current="page"] {
+  background: var(--fluent-fill-selected, rgba(0,0,0,0.08));
+  @apply text-foreground font-semibold;
+}
+/* Accent bar — Fluent active indicator */
+.fluent-nav-item[aria-current="page"]::before {
+  content: '';
+  position: absolute;
+  inset-block: 20%;
+  inset-inline-start: 0;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: hsl(var(--primary));
+}
+[dir="rtl"] .fluent-nav-item[aria-current="page"]::before {
+  border-radius: 3px 0 0 3px;
+}
+
+/* ─── Fluent command bar top strip ───────────────────────────────── */
+.fluent-command-bar {
+  @apply sticky top-0 z-40 flex items-center gap-3;
+  height: 48px;
+  background-color: hsl(var(--background) / 0.92);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border-bottom: 1px solid hsl(var(--border) / 0.60);
+  box-shadow: var(--elev-1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Apple Human Interface Guidelines — iOS / iPadOS design language
+   References: https://developer.apple.com/design/human-interface-guidelines/
+═══════════════════════════════════════════════════════════════════ */
+[data-platform="hig"] {
+  /* iOS radius scale — موروثة من HIG، لا تتداخل مع الثيم */
+  --radius:            0.625rem;   /* 10px */
+  --ios-radius-modal:  1.25rem;    /* 20px */
+  --ios-radius-icon:   0.8125rem;  /* 13px */
+
+  /* iOS semantic system colors (للمكوّنات الـ iOS فقط) */
+  --ios-blue:   211 100% 50%;
+  --ios-green:  142  70% 49%;
+  --ios-red:      4  90% 58%;
+  --ios-orange:  35 100% 50%;
+  --ios-gray:   240   2% 56%;
+  --ios-gray-4: 240   5% 82%;
+  --ios-gray-5: 240   5% 90%;
+  --ios-gray-6: 240   5% 95%;
+
+  /* iOS elevation */
+  --elev-1: 0 1px 3px rgba(0,0,0,0.08);
+  --elev-2: 0 2px 8px rgba(0,0,0,0.10);
+  --elev-3: 0 4px 20px rgba(0,0,0,0.12);
+  --elev-4: 0 8px 40px rgba(0,0,0,0.15);
+
+  /* iOS safe-area & sizing */
+  --ios-nav-height:   44px;
+  --ios-tab-height:   49px;
+  --ios-touch-min:    44px;
+
+  /* iOS motion */
+  --ios-ease:   cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ios-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* !! لا نُعيّن --background / --card / --border هنا
+     حتى تعمل توكنات life-tent-theme.css الكانونية
+     (--lt-bg / --background / إلخ.) بشكل صحيح على الموبايل !! */
+}
+
+/* iOS Navigation Bar — يستخدم --lt-bg مباشرة من life-tent-theme.css */
+.hig-nav-bar {
+  @apply fixed top-0 inset-x-0 z-50 flex items-end justify-between px-4;
+  @apply backdrop-blur-2xl;
+  background-color: color-mix(in srgb, var(--lt-bg) 88%, transparent);
+  height: calc(44px + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: 8px;
+  border-bottom: 0.5px solid var(--lt-hair);
+}
+.dark .hig-nav-bar,
+[data-theme="dark"] .hig-nav-bar {
+  border-bottom-color: var(--lt-border);
+}
+
+/* iOS Tab Bar */
+.hig-tab-bar {
+  @apply fixed bottom-0 inset-x-0 z-50 flex items-start justify-around;
+  @apply backdrop-blur-2xl;
+  background-color: color-mix(in srgb, var(--lt-bg) 88%, transparent);
+  height: calc(49px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-top: 0;
+  border-top: 0.5px solid var(--lt-hair);
+}
+.dark .hig-tab-bar,
+[data-theme="dark"] .hig-tab-bar {
+  border-top-color: var(--lt-border);
+}
+
+/* iOS Tab Item */
+.hig-tab-item {
+  @apply flex flex-col items-center justify-center gap-0.5 py-2 flex-1
+         no-underline;
+  min-width: 44px;
+  color: var(--lt-muted);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: -0.15px;
+  transition: color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.hig-tab-item.is-active,
+.dark .hig-tab-item.is-active,
+[data-theme="dark"] .hig-tab-item.is-active {
+  color: var(--lt-primary);
+}
+
+/* iOS grouped list section */
+.hig-section {
+  @apply bg-card overflow-hidden mb-5;
+  border-radius: 10px;
+  box-shadow: var(--elev-1);
+}
+.hig-cell {
+  @apply flex items-center gap-3 px-4 py-3 bg-card transition-colors;
+  min-height: 44px;
+  border-bottom: 0.5px solid rgba(60,60,67,0.18);
+}
+.hig-cell:last-child { border-bottom: none; }
+.hig-cell:active { background: hsl(var(--ios-gray-5, 240 5% 90%)); }
+
+/* iOS Large Title (appears below nav bar, scrolls away) */
+.hig-large-title {
+  @apply font-bold leading-tight tracking-tight px-4 pb-2 pt-1;
+  font-size: 34px;
+}
+
+/* ─── Platform input overrides ────────────────────────────────────── */
+
+/* Fluent: bottom underline on focus, small radius */
+[data-platform="fluent"] input.lt-input {
+  border-radius: 4px;
+}
+[data-platform="fluent"] input.lt-input:focus-visible {
+  --tw-ring-shadow: none;
+  box-shadow: 0 2px 0 0 hsl(var(--primary)), var(--elev-1);
+  border-color: hsl(var(--primary));
+  outline: none;
+}
+
+/* HIG: filled tray, 44px touch target, no outer border, pill-ish radius */
+[data-platform="hig"] input.lt-input {
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(120, 120, 128, 0.12);
+  border-color: transparent;
+}
+.dark[data-platform="hig"] input.lt-input,
+[data-theme="dark"][data-platform="hig"] input.lt-input {
+  background: rgba(118, 118, 128, 0.24);
+}
+[data-platform="hig"] input.lt-input:focus-visible {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--card));
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.20);
+  --tw-ring-shadow: none;
+}
+
+/* ─── Fluent dialog / radix overrides ────────────────────────────── */
+[data-platform="fluent"] [role="dialog"],
+[data-platform="fluent"] [data-radix-popper-content-wrapper] > * {
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: var(--elev-4);
+}
+
+/* ─── HIG sheet / dialog overrides ───────────────────────────────── */
+[data-platform="hig"] [data-radix-dialog-content] {
+  border-radius: 20px 20px 0 0;
+}
+[data-platform="hig"] [data-radix-popper-content-wrapper] > * {
+  border-radius: 13px;
+  box-shadow: var(--elev-3);
+}
+
+/* ─── Fluent badge / chip ─────────────────────────────────────────── */
+[data-platform="fluent"] .badge,
+[data-platform="fluent"] [data-slot="badge"] {
+  border-radius: 4px;
+  font-size: 12px;
+  padding: 0 6px;
+  height: 20px;
+}
+
+/* ─── HIG badge ───────────────────────────────────────────────────── */
+[data-platform="hig"] .badge,
+[data-platform="hig"] [data-slot="badge"] {
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+}
+
+@keyframes scale-in {
+  from { 
+    opacity: 0; 
+    transform: scale(0.9); 
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+}
+
+@keyframes slide-in-right {
+  from { 
+    opacity: 0; 
+    transform: translateX(30px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
+}
+
+@keyframes slide-in-left {
+  from { 
+    opacity: 0; 
+    transform: translateX(-30px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px hsla(221, 77%, 55%, 0.22);
+  }
+  50% {
+    box-shadow: 0 0 40px hsla(221, 77%, 55%, 0.40);
+  }
+}
+
+.slide-up {
+  animation: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-gradient {
+  animation: gradient 6s ease infinite;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* RTL Support */
+[dir="rtl"] {
+  text-align: right;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FLAT DESIGN — Remove all card/box shadows globally
+   Covers: CSS elevation tokens · component classes · Tailwind utilities
+═══════════════════════════════════════════════════════════════ */
+
+/* ① Zero-out the elevation token system */
+:root,
+.dark,
+[data-theme="dark"],
+[data-platform="fluent"],
+[data-platform="hig"],
+.dark[data-platform="fluent"],
+[data-theme="dark"][data-platform="fluent"] {
+  --elev-1: none;
+  --elev-2: none;
+  --elev-3: none;
+  --elev-4: none;
+}
+
+/* ② Remove box-shadow from every CSS component class */
+.glass-card,
+.glass-card:hover,
+.glass-card:active,
+.glass-card[data-state="active"],
+.glass-card.is-active,
+.glass-card.is-disabled,
+.glass-card:disabled,
+.dark .glass-card,
+.dark .glass-card:hover,
+.lt-card,
+.lt-card:hover,
+.bento-cell,
+.bento-cell:hover,
+.dark .bento-cell,
+.interactive-card,
+.interactive-card:hover,
+.btn-hover-lift:hover,
+.hover-glow:hover,
+.gold-glow,
+.animate-glow-pulse,
+.hig-section,
+.fluent-command-bar,
+[data-platform="fluent"] .lt-card,
+[data-platform="fluent"] .glass-card,
+[data-platform="fluent"] .lt-card:hover,
+[data-platform="fluent"] .glass-card:hover,
+[data-platform="fluent"] [role="dialog"],
+[data-platform="fluent"] [data-radix-popper-content-wrapper] > *,
+[data-platform="hig"] [data-radix-dialog-content],
+[data-platform="hig"] [data-radix-popper-content-wrapper] > * {
+  box-shadow: none !important;
+}
+
+/* ③ Override Tailwind shadow utilities — preserve ring utilities */
+.shadow-sm,
+.shadow,
+.shadow-md,
+.shadow-lg,
+.shadow-xl,
+.shadow-2xl,
+.shadow-inner,
+.shadow-none {
+  --tw-shadow: 0 0 #0000 !important;
+  --tw-shadow-colored: 0 0 #0000 !important;
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
+              var(--tw-ring-shadow, 0 0 #0000),
+              var(--tw-shadow) !important;
+}
