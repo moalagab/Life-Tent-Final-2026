@@ -19,7 +19,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage:            localStorage,
     persistSession:     true,
     autoRefreshToken:   true,
-    detectSessionInUrl: false,   // we call exchangeCodeForSession manually in AuthCallback
+    detectSessionInUrl: true,    // auto-exchanges ?code= on page load (PKCE)
     flowType:           'pkce',
   },
 });
