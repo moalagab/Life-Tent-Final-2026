@@ -39,6 +39,7 @@ function PlatformInit() {
 // Lazy-load all pages — nothing is eagerly bundled into the critical path
 const LandingPage     = lazy(() => import("./pages/LandingPage"));
 const Auth            = lazy(() => import("./pages/Auth"));
+const AuthCallback    = lazy(() => import("./pages/AuthCallback"));
 const ResetPassword   = lazy(() => import("./pages/ResetPassword"));
 const NotFound        = lazy(() => import("./pages/NotFound"));
 const TermsOfService  = lazy(() => import("./pages/legal/TermsOfService"));
@@ -134,6 +135,7 @@ const App = () => (
                 <Route path="/"                     element={<LandingPage />} />
                 <Route path="/welcome"              element={<LandingPage />} />
                 <Route path="/auth"                 element={<Auth />} />
+                <Route path="/auth/callback"        element={<AuthCallback />} />
                 <Route path="/auth/reset-password"  element={<ResetPassword />} />
                 <Route path="/terms"                element={<TermsOfService />} />
                 <Route path="/privacy"              element={<PrivacyPolicy />} />
