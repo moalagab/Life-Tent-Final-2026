@@ -246,26 +246,6 @@ const SidebarContent = memo(function SidebarContent({
             <LogOut className="w-[18px] h-[18px] text-muted-foreground" />
           </button>
         )}
-
-        {/* Collapse toggle — hidden; sidebar is always expanded */}
-        {false && !isMobile && (
-          <button
-            onClick={onToggleCollapse}
-            aria-label={isCollapsed ? t('common.expand') : t('common.collapse')}
-            className={cn('fluent-nav-item mt-1', isCollapsed && 'justify-center px-0 w-[36px] mx-auto')}
-          >
-            <ChevronLeft className={cn(
-              'w-[18px] h-[18px] text-muted-foreground transition-transform duration-200',
-              isRTL && '-scale-x-100',
-              isCollapsed && 'rotate-180',
-            )} />
-            {!isCollapsed && (
-              <span className="text-xs text-muted-foreground flex-1">
-                {t('common.collapse')}
-              </span>
-            )}
-          </button>
-        )}
       </div>
     </div>
   );

@@ -81,7 +81,10 @@ export function useOnboardingJourney() {
     return Math.floor((Date.now() - new Date(ref).getTime()) / 86_400_000);
   }, [profile]);
 
-  const milestones: Record<string, boolean> = profile?.journey_milestones ?? {};
+  const milestones: Record<string, boolean> = useMemo(
+    () => profile?.journey_milestones ?? {},
+    [profile?.journey_milestones],
+  );
 
   // Find the highest-day unseen milestone the user has reached
   const pendingMilestone = useMemo((): Milestone | null => {

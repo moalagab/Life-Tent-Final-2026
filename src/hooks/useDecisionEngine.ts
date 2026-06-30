@@ -132,7 +132,6 @@ export function useDecisionEngine(): DecisionEngineResult {
       (!snoozed.has(t.id) || (snoozed.get(t.id) ?? 0) <= now)
     );
   // version dep forces re-filter after skip/snooze
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scoredTasks, skipped, snoozed]);
 
   const skip = useCallback((id: string) => {

@@ -104,6 +104,7 @@ export function useTaskAgent() {
 
     // Quick wins — tasks with estimated time ≤ 30 min
     const quickWins = scored.filter(t => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const est = (t as any).estimated_minutes ?? (t as any).estimated_time ?? null;
       return est !== null && Number(est) <= 30;
     }).slice(0, 5);
@@ -163,6 +164,7 @@ export function useTaskAgent() {
         type: 'quickwin',
         priority: 'medium',
         title: 'ابدأ بانتصار سريع',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         detail: `${quickWins[0].title} — ${(quickWins[0] as any).estimated_minutes ?? 20} دقيقة تكسر الجمود`,
         taskIds: [quickWins[0].id],
       });

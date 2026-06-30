@@ -35,6 +35,7 @@ interface Props {
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const BLOCK_CFG: Record<TimeBlock, { label: string; icon: React.FC<any>; color: string }> = {
   morning:   { label: 'الصباح',    icon: Sun,   color: 'text-amber-500'  },
   afternoon: { label: 'بعد الظهر', icon: Cloud, color: 'text-blue-500'   },

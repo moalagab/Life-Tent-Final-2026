@@ -74,7 +74,7 @@ export default function GraphPage() {
   const toggleEntity = (t: EntityType) => {
     setEntityFilter(prev => {
       const next = new Set(prev);
-      next.has(t) ? next.delete(t) : next.add(t);
+      if (next.has(t)) { next.delete(t); } else { next.add(t); }
       return next;
     });
   };
@@ -82,7 +82,7 @@ export default function GraphPage() {
   const toggleRelation = (t: RelationType) => {
     setRelationFilter(prev => {
       const next = new Set(prev);
-      next.has(t) ? next.delete(t) : next.add(t);
+      if (next.has(t)) { next.delete(t); } else { next.add(t); }
       return next;
     });
   };

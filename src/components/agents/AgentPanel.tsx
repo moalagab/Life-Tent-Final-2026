@@ -427,6 +427,7 @@ export function AgentPanel() {
   const { currentLanguage } = useLanguage();
   const isAr = currentLanguage === 'ar';
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const TABS: { id: AgentTab; label: string; icon: React.FC<any>; color: string }[] = [
     { id: 'tasks',   label: isAr ? 'يومي'  : 'Daily',   icon: ListChecks, color: 'text-blue-500'    },
     { id: 'finance', label: isAr ? 'مالي'  : 'Finance', icon: Wallet,     color: 'text-emerald-500' },

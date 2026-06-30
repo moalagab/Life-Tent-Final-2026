@@ -214,7 +214,7 @@ function parseDate(text: string): { date: ParsedDate; raw: string } | null {
   today.setHours(0, 0, 0, 0);
 
   // 1. "غداً" / "غداﹰ" / "بكرة"
-  if (/غد[اً]|غد\b|بكر[ةه]/.test(text)) {
+  if (/غدا|غدً|غد\b|بكر[ةه]/.test(text)) {
     const d = addDays(today, 1);
     return { date: { date: d, label: 'غداً' }, raw: 'غداً' };
   }

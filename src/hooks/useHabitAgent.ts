@@ -233,6 +233,7 @@ export function useHabitAgent(): HabitAgentResult {
       if (profile.weekendProductivityRatio < 0.5) {
         insights.push({
           id:       'weekend-habits',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           type:     'insight' as any,
           habitId:  '',
           habitName: '',
@@ -263,7 +264,7 @@ export function useHabitAgent(): HabitAgentResult {
       overallScore,
       overallLabel,
     };
-  }, [habitsStats, profile, rawTasks]);
+  }, [habitsStats, profile]);
 
   return {
     ...result,

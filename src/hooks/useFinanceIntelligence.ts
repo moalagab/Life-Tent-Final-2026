@@ -139,12 +139,15 @@ export function useFinanceIntelligence(): FinanceIntelligenceData {
   });
 
   const data = useMemo<Omit<FinanceIntelligenceData, 'isLoading'>>(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const debts = (debtsRaw as any[]).filter(d => d.status === 'active');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const subs  = (subscriptions as any[]).filter(s => s.is_active);
     const today = new Date();
     const todayStr = format(today, 'yyyy-MM-dd');
 
     // ── Liquid balance ─────────────────────────────────────────────────────
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const liquidBalance = (accounts as any[]).reduce(
       (s, a) => s + (a.balance ?? 0), 0,
     );
@@ -185,6 +188,7 @@ export function useFinanceIntelligence(): FinanceIntelligenceData {
     // ── 2. Future obligations (90 days) ───────────────────────────────────
     const futureObligations: FutureObligation[] = [];
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     debts.forEach((d: any) => {
       const payDay = d.monthly_payment_date ?? 1;
       for (let m = 0; m < 3; m++) {
@@ -206,6 +210,7 @@ export function useFinanceIntelligence(): FinanceIntelligenceData {
       }
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     subs.forEach((sub: any) => {
       if (!sub.next_billing_date) return;
       const daysUntil = differenceInDays(parseISO(sub.next_billing_date), today);

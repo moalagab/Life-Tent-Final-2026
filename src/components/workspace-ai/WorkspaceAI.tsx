@@ -40,7 +40,6 @@ interface WorkspaceAIProps {
 
 // ── DB executors ──────────────────────────────────────────────────────────────
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const TABLE_MAP: Record<OpEntity, string> = {
   task: 'tasks', initiative: 'initiatives', goal: 'goals', project: 'projects', table: 'custom_tables',
 };

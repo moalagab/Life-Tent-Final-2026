@@ -47,6 +47,7 @@ export default function NoteWorkspace() {
     if (note) {
       setEditContent(note.content ?? '');
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [note?.id]);
 
   const linkedProject = projects?.find(p => p.id === note?.project_id);

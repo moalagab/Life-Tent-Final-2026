@@ -27,6 +27,7 @@ import { ar } from 'date-fns/locale';
 
 type IntelTab = 'commitment' | 'obligations' | 'cashflow' | 'behavior';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const TABS: { id: IntelTab; label: string; icon: React.FC<any> }[] = [
   { id: 'commitment',  label: 'الالتزامات', icon: BarChart2    },
   { id: 'obligations', label: 'المستقبل',   icon: CalendarDays },
@@ -45,6 +46,7 @@ const COLORS = {
   tight:  '#f97316',
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const STATUS_CFG: Record<string, { color: string; label: string; icon: React.FC<any> }> = {
   overdue:   { color: 'text-red-500 bg-red-500/10 border-red-500/20',    label: 'متأخر',      icon: AlertTriangle },
   today:     { color: 'text-red-500 bg-red-500/10 border-red-500/20',    label: 'اليوم',      icon: AlertTriangle },
@@ -79,11 +81,13 @@ function PanelSkeleton() {
 
 // ── Custom tooltip ─────────────────────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function ChartTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-popover border border-border rounded-xl px-3 py-2 shadow-lg text-xs space-y-1">
       <div className="font-bold text-foreground mb-1">{label}</div>
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       {payload.map((p: any) => (
         <div key={p.dataKey} className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full" style={{ background: p.fill ?? p.stroke }} />
@@ -333,6 +337,7 @@ function CashflowForecast() {
               name="الرصيد"
               stroke={COLORS.balance}
               strokeWidth={2}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               dot={(props: any) => {
                 const isTight = cashflowWeeks[props.index]?.isTight;
                 return (

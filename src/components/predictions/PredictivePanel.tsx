@@ -24,6 +24,7 @@ import {
 
 // ── Config maps ────────────────────────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const TYPE_ICON: Record<PredictionType, React.FC<any>> = {
   task_delay:      Clock,
   project_abandon: FolderOpen,

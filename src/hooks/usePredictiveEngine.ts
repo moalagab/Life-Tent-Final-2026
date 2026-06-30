@@ -94,6 +94,7 @@ const DAY_NAMES_AR = ['الأحد', 'الاثنين', 'الثلاثاء', 'ال�
 // ── Prediction builders ────────────────────────────────────────────────────────
 
 function predictTaskDelays(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tasks: any[],
   procScore: number,
   stalledIds: string[],
@@ -160,7 +161,9 @@ function predictTaskDelays(
 }
 
 function predictProjectAbandonment(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   projects: any[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tasks: any[],
   abandonThreshold = 14,
 ): Prediction[] {
@@ -235,6 +238,7 @@ function predictProjectAbandonment(
 }
 
 function predictPressureSpike(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tasks: any[],
   procScore: number,
   overcommitScore: number,
@@ -329,6 +333,7 @@ function predictPressureSpike(
 }
 
 function predictHabitBreaks(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   habits: any[],
   fragileIds: string[],
 ): Prediction[] {
@@ -339,6 +344,7 @@ function predictHabitBreaks(
   return habits
     .filter(h => {
       const logs         = h.logs ?? [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const completedToday = logs.some((l: any) => l.completed_at?.startsWith(todayStr));
       const isFragile    = fragileIds.includes(h.id);
       const hasStreak    = logs.length > 0;
@@ -351,6 +357,7 @@ function predictHabitBreaks(
         let s = 0;
         for (let i = 1; i < 60; i++) {
           const d = format(addDays(new Date(), -i), 'yyyy-MM-dd');
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           if (logs.some((l: any) => l.completed_at?.startsWith(d))) s++;
           else break;
         }
@@ -390,6 +397,7 @@ function predictHabitBreaks(
 }
 
 function predictOverloadRisk(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tasks: any[],
   overcommitScore: number,
   procScore: number,
@@ -523,7 +531,7 @@ export function usePredictiveEngine(): PredictiveReport {
     return allPredictions
       .sort((a, b) => SEV[a.severity] - SEV[b.severity] || b.confidence - a.confidence)
       .slice(0, 8); // max 8 predictions
-  }, [rawTasks, projects, habitsWithLogs, profile]);
+  }, [rawTasks, projects, habitsWithLogs, profile, memory]);
 
   const riskScore = useMemo(() => {
     if (predictions.length === 0) return 0;

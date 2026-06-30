@@ -87,6 +87,7 @@ export function useFinanceAgent(): FinanceAgentResult {
 
     // Debt ratio (total debt / net worth)
     const debts = debtsRaw;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const totalDebt = debts.reduce((s: number, d: any) => s + (d.remaining_amount ?? 0), 0);
     const debtRatio = netWorth > 0 ? totalDebt / netWorth : 0;
 
@@ -95,7 +96,9 @@ export function useFinanceAgent(): FinanceAgentResult {
 
     // ── 1. Upcoming debt payments ─────────────────────────────────────────
     debts
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .filter((d: any) => d.status === 'active' && d.monthly_payment_date)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .forEach((d: any) => {
         const today = new Date();
         const payDay = d.monthly_payment_date as number;
@@ -143,8 +146,10 @@ export function useFinanceAgent(): FinanceAgentResult {
     // ── 3. Low balance alert ──────────────────────────────────────────────
     const monthlyThreshold = monthlyExpenses * 0.1;
     accounts
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .filter((a: any) => a.balance !== null && a.balance < monthlyThreshold && a.balance >= 0)
       .slice(0, 2)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .forEach((a: any) => {
         suggestions.push({
           id:       `low-balance-${a.id}`,
@@ -159,12 +164,14 @@ export function useFinanceAgent(): FinanceAgentResult {
       });
 
     // ── 4. Subscription audit ─────────────────────────────────────────────
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const upcomingSubs = subscriptions.filter((s: any) => {
       if (!s.next_billing_date) return false;
       const days = differenceInDays(parseISO(s.next_billing_date), new Date());
       return days >= 0 && days <= 5;
     });
     if (upcomingSubs.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const total = upcomingSubs.reduce((sum: number, s: any) => sum + (s.amount ?? 0), 0);
       suggestions.push({
         id:       'subscriptions-due',
@@ -181,7 +188,9 @@ export function useFinanceAgent(): FinanceAgentResult {
     // ── 5. Debt payoff opportunity ────────────────────────────────────────
     const cashflow = monthlyIncome - monthlyExpenses;
     const highInterestDebt = debts
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .filter((d: any) => d.status === 'active' && d.interest_rate && d.interest_rate > 10)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .sort((a: any, b: any) => (b.interest_rate ?? 0) - (a.interest_rate ?? 0))[0];
 
     if (cashflow > 500 && highInterestDebt) {
@@ -230,7 +239,7 @@ export function useFinanceAgent(): FinanceAgentResult {
       healthScore: score,
       healthLabel: healthLabel(score),
     };
-  }, [accounts, txRaw, stats, subscriptions, debtsRaw]);
+  }, [accounts, stats, subscriptions, debtsRaw]);
 
   return {
     ...result,

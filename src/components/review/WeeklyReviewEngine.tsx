@@ -37,6 +37,7 @@ type ReviewTab = 'accomplishments' | 'delays' | 'stalled' | 'intervention' | 'ne
 interface TabCfg {
   id:    ReviewTab;
   label: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon:  React.FC<any>;
   color: string;
 }
