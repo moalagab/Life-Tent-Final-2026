@@ -239,7 +239,7 @@ export function useFinanceAgent(): FinanceAgentResult {
       healthScore: score,
       healthLabel: healthLabel(score),
     };
-  }, [accounts, txRaw, stats, subscriptions, debtsRaw]);
+  }, [accounts, stats, subscriptions, debtsRaw]);
 
   return {
     ...result,

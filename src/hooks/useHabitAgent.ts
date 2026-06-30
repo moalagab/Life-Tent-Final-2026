@@ -264,7 +264,7 @@ export function useHabitAgent(): HabitAgentResult {
       overallScore,
       overallLabel,
     };
-  }, [habitsStats, profile, rawTasks]);
+  }, [habitsStats, profile]);
 
   return {
     ...result,

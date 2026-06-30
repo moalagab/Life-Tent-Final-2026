@@ -531,7 +531,7 @@ export function usePredictiveEngine(): PredictiveReport {
     return allPredictions
       .sort((a, b) => SEV[a.severity] - SEV[b.severity] || b.confidence - a.confidence)
       .slice(0, 8); // max 8 predictions
-  }, [rawTasks, projects, habitsWithLogs, profile]);
+  }, [rawTasks, projects, habitsWithLogs, profile, memory]);
 
   const riskScore = useMemo(() => {
     if (predictions.length === 0) return 0;

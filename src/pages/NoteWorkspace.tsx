@@ -47,7 +47,7 @@ export default function NoteWorkspace() {
     if (note) {
       setEditContent(note.content ?? '');
     }
-  }, [note?.id]);
+  }, [note]);
 
   const linkedProject = projects?.find(p => p.id === note?.project_id);
   const linkedGoal    = goals?.find(g => g.id === note?.goal_id);
