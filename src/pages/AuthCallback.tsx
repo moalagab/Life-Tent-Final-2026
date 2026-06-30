@@ -1,65 +1,72 @@
 /**
- * AuthCallback — OAuth redirect landing page.
+ * AuthCallback — PKCE OAuth code exchange.
  *
- * Supabase redirects here after Google/OAuth login.
- * The hash (#access_token=...) or code param is processed,
- * session is established, then user is forwarded to dashboard.
+ * Flow:
+ *  1. Extract ?code= from URL
+ *  2. Call exchangeCodeForSession (PKCE code → session)
+ *  3. Wait for AuthProvider to update user state
+ *  4. Navigate to /dashboard (or /onboarding for new users)
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function AuthCallback() {
-  const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
+  const navigate   = useNavigate();
+  const { user, loading } = useAuth();
+  const exchanged  = useRef(false);
+  const redirected = useRef(false);
 
+  // Step 1 — exchange code once
   useEffect(() => {
-    let cancelled = false;
+    if (exchanged.current) return;
+    exchanged.current = true;
 
-    async function handleCallback() {
-      // Give Supabase JS time to detect + process the URL hash/code
-      const { data: { session }, error } = await supabase.auth.getSession();
+    const code = new URLSearchParams(window.location.search).get('code');
 
-      if (cancelled) return;
-
-      if (error) {
-        console.error('[AuthCallback] session error:', error.message);
-        setError(error.message);
-        setTimeout(() => navigate('/auth', { replace: true }), 3000);
-        return;
-      }
-
-      if (session) {
-        navigate('/dashboard', { replace: true });
-      } else {
-        // Wait one tick — let onAuthStateChange fire first
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          (event, s) => {
-            if (cancelled) return;
-            if (s) {
-              subscription.unsubscribe();
-              navigate('/dashboard', { replace: true });
-            } else if (event === 'INITIAL_SESSION') {
-              subscription.unsubscribe();
-              navigate('/auth', { replace: true });
-            }
-          }
-        );
-      }
+    if (!code) {
+      navigate('/auth', { replace: true });
+      return;
     }
 
-    handleCallback();
-    return () => { cancelled = true; };
+    supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+      if (error) {
+        console.error('[AuthCallback] exchange error:', error.message);
+        navigate('/auth', { replace: true });
+      }
+      // On success, onAuthStateChange in AuthProvider fires → user state updates
+      // Step 2 (below) watches for user to be set then navigates
+    });
   }, [navigate]);
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-center p-6">
-        <p className="text-destructive text-sm">{error}</p>
-        <p className="text-muted-foreground text-xs">سيتم توجيهك لصفحة تسجيل الدخول…</p>
-      </div>
-    );
-  }
+  // Step 2 — navigate once auth state is ready
+  useEffect(() => {
+    if (redirected.current) return;
+    if (loading) return;          // still initialising
+    if (!exchanged.current) return; // exchange hasn't fired yet
+
+    redirected.current = true;
+    if (user) {
+      navigate('/dashboard', { replace: true });
+    } else {
+      // exchange may still be in-flight; wait one more tick via onAuthStateChange
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (event, session) => {
+          if (redirected.current) return;
+          if (session) {
+            redirected.current = true;
+            subscription.unsubscribe();
+            navigate('/dashboard', { replace: true });
+          } else if (event === 'SIGNED_OUT') {
+            redirected.current = true;
+            subscription.unsubscribe();
+            navigate('/auth', { replace: true });
+          }
+        }
+      );
+    }
+  }, [loading, user, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
