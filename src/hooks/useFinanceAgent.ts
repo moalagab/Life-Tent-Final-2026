@@ -95,7 +95,6 @@ export function useFinanceAgent(): FinanceAgentResult {
     const suggestions: FinanceSuggestion[] = [];
 
     // ── 1. Upcoming debt payments ─────────────────────────────────────────
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     debts
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .filter((d: any) => d.status === 'active' && d.monthly_payment_date)

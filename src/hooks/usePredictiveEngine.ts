@@ -93,8 +93,8 @@ const DAY_NAMES_AR = ['الأحد', 'الاثنين', 'الثلاثاء', 'ال�
 
 // ── Prediction builders ────────────────────────────────────────────────────────
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function predictTaskDelays(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tasks: any[],
   procScore: number,
   stalledIds: string[],
@@ -160,7 +160,6 @@ function predictTaskDelays(
   }).filter(Boolean) as Prediction[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function predictProjectAbandonment(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   projects: any[],
@@ -238,8 +237,8 @@ function predictProjectAbandonment(
   }).filter(Boolean) as Prediction[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function predictPressureSpike(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tasks: any[],
   procScore: number,
   overcommitScore: number,
@@ -333,8 +332,8 @@ function predictPressureSpike(
   return [];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function predictHabitBreaks(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   habits: any[],
   fragileIds: string[],
 ): Prediction[] {
@@ -397,8 +396,8 @@ function predictHabitBreaks(
     });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function predictOverloadRisk(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tasks: any[],
   overcommitScore: number,
   procScore: number,

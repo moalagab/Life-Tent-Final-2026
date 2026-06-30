@@ -46,7 +46,7 @@ const COLORS = {
   tight:  '#f97316',
 };
 
-const STATUS_CFG: Record<string, { color: string; label: string; icon: React.FC<any> }> = {
+const STATUS_CFG: Record<string, { color: string; label: string; icon: LucideIcon }> = {
   overdue:   { color: 'text-red-500 bg-red-500/10 border-red-500/20',    label: 'متأخر',      icon: AlertTriangle },
   today:     { color: 'text-red-500 bg-red-500/10 border-red-500/20',    label: 'اليوم',      icon: AlertTriangle },
   this_week: { color: 'text-amber-500 bg-amber-400/10 border-amber-400/20', label: 'هذا الأسبوع', icon: Clock },
