@@ -3,6 +3,15 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { identify, analyticsReset, capture, EVENTS } from '@/lib/analytics';
 
+// Capture BEFORE Supabase's async initialize() clears the URL via history.replaceState.
+// Module-level code runs synchronously during import — the hash / code param is still
+// present at this point even though createClient() has been called.
+const IS_OAUTH_CALLBACK =
+  typeof window !== 'undefined' &&
+  (window.location.pathname === '/' || window.location.pathname === '/welcome') &&
+  (window.location.hash.includes('access_token') ||
+   window.location.search.includes('code='));
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -38,14 +47,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         // Redirect to dashboard after OAuth callback.
-        // Supabase processes the hash token during createClient() — BEFORE
-        // this listener is registered — so the first event we see is
-        // INITIAL_SESSION (not SIGNED_IN). We must handle both.
-        if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
-          if (window.location.hash.includes('access_token') ||
-              window.location.search.includes('code=')) {
-            window.location.replace('/dashboard');
-          }
+        // Use the module-level flag — by the time this listener fires, Supabase
+        // has already cleared the hash via history.replaceState, so checking
+        // window.location.hash here would always return false.
+        if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user && IS_OAUTH_CALLBACK) {
+          window.location.replace('/dashboard');
         }
         if (event === 'SIGNED_OUT') {
           analyticsReset();
