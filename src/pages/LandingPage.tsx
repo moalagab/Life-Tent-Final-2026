@@ -4,6 +4,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/hooks/useAuth';
 import { SEO } from '@/components/SEO';
 import { useEffect, useState, useMemo } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Tent, 
   Target, 
@@ -69,6 +70,22 @@ export default function LandingPage() {
       navigate('/dashboard', { replace: true });
     }
   }, [user, navigate]);
+
+  // Handle OAuth callback: #access_token in hash means we just returned from
+  // Google login. Don't rely on React state timing — call getSession() directly
+  // and navigate away as soon as the session is confirmed.
+  useEffect(() => {
+    if (!window.location.hash.includes('access_token')) return;
+    let cancelled = false;
+    const redirect = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!cancelled && session) {
+        window.location.replace('/dashboard');
+      }
+    };
+    redirect();
+    return () => { cancelled = true; };
+  }, []);
 
   // Memoize particle positions to prevent re-randomizing on every render
   const particles = useMemo(() =>

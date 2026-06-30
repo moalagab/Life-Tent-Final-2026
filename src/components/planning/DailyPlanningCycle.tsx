@@ -21,6 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useCreateTask } from '@/hooks/useTasks';
 import { toast } from 'sonner';
 import { useDailyPlanningCycle } from '@/hooks/useDailyPlanningCycle';
+import type { LucideIcon } from 'lucide-react';
 import type { ScoredTask } from '@/hooks/useAdaptivePriority';
 import type { TimeBlock } from '@/hooks/useTaskAgent';
 
@@ -29,7 +30,7 @@ import type { TimeBlock } from '@/hooks/useTaskAgent';
 interface Step {
   id:    number;
   label: string;
-  icon:  React.FC<any>;
+  icon:  LucideIcon;
   color: string;
 }
 
@@ -40,7 +41,7 @@ const STEPS: Step[] = [
   { id: 3, label: 'التأجيل',   icon: XCircle,    color: 'text-violet-400'  },
 ];
 
-const BLOCK_LABEL: Record<TimeBlock, { label: string; icon: React.FC<any>; color: string }> = {
+const BLOCK_LABEL: Record<TimeBlock, { label: string; icon: LucideIcon; color: string }> = {
   morning:   { label: 'الصباح',    icon: Sun,      color: 'text-amber-400'  },
   afternoon: { label: 'بعد الظهر', icon: ArrowRight, color: 'text-blue-400' },
   evening:   { label: 'المساء',    icon: Zap,      color: 'text-violet-400' },
