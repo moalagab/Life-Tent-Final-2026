@@ -16,10 +16,10 @@ if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    storage:          localStorage,
-    persistSession:   true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    flowType:         'pkce',
-  }
+    storage:            localStorage,
+    persistSession:     true,
+    autoRefreshToken:   true,
+    detectSessionInUrl: false,   // we call exchangeCodeForSession manually in AuthCallback
+    flowType:           'pkce',
+  },
 });

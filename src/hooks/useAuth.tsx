@@ -73,9 +73,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
+    // Use canonical domain — never window.location.origin (may vary between www/non-www)
+    const canonical = 'https://lifetent.online';
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${canonical}/auth/callback` },
     });
     if (!error) capture(EVENTS.USER_SIGNED_IN_GOOGLE);
     return { error: error as Error | null };
