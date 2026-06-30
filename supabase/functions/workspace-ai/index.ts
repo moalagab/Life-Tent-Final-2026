@@ -88,6 +88,23 @@ Deno.serve(async (req: Request) => {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 
+  // Rate limiting: 30 requests per minute per user
+  const rlClient = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+  );
+  const { data: rlOk } = await rlClient.rpc("check_rate_limit", {
+    p_user_id: userId,
+    p_function_name: "workspace-ai",
+    p_max_requests: 30,
+    p_window_seconds: 60,
+  });
+  if (!rlOk) {
+    return new Response(JSON.stringify({ error: "Rate limit exceeded. Try again in a minute." }), {
+      status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   // deno-lint-ignore no-explicit-any
   let body: Record<string, any>;
   try { body = await req.json(); }

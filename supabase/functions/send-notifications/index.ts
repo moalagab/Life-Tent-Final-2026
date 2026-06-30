@@ -11,9 +11,9 @@
  *
  * Requires env: RESEND_API_KEY
  */
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const FROM = "Life Tent OS <notifications@lifetent.online>";
@@ -311,9 +311,9 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Validate email format to prevent header injection
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(to)) {
+    // Validate email — RFC 5322 simplified, prevents header injection
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(to) || to.length > 254) {
       return new Response(JSON.stringify({ error: "Invalid email address" }), {
         status: 400, headers: { "Content-Type": "application/json", ...corsHeaders },
       });
@@ -341,4 +341,4 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-serve(handler);
+Deno.serve(handler);

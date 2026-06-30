@@ -31,11 +31,28 @@ if (!SERVICE_ROLE_KEY) {
   throw new Error("SUPABASE_SERVICE_ROLE_KEY is not configured");
 }
 
-const CORS = {
-  "Access-Control-Allow-Origin":  "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+const ALLOWED_ORIGINS = [
+  "https://www.lifetent.online",
+  "https://lifetent.online",
+  "http://localhost:8080",
+  "http://localhost:8081",
+  "http://localhost:8082",
+  "http://localhost:8083",
+  "https://localhost",
+  "lifetent://localhost",
+  "capacitor://localhost",
+  "ionic://localhost",
+];
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("origin") ?? "";
+  const allowOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    "Access-Control-Allow-Origin":  allowOrigin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -128,7 +145,8 @@ async function sendForUser(
 // ── Handler ───────────────────────────────────────────────────────────────────
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
+  const corsHeaders = getCorsHeaders(req);
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
   const authHeader  = req.headers.get("Authorization") ?? "";
@@ -143,7 +161,7 @@ Deno.serve(async (req: Request) => {
     });
     const { data: { user } } = await userClient.auth.getUser();
     if (!user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
     }
     userIds = [user.id];
   } else {
@@ -157,7 +175,7 @@ Deno.serve(async (req: Request) => {
   if (!userIds.length) {
     return new Response(
       JSON.stringify({ processed: 0, sent: [] }),
-      { status: 200, headers: { ...CORS, "Content-Type": "application/json" } },
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 
@@ -167,6 +185,6 @@ Deno.serve(async (req: Request) => {
 
   return new Response(
     JSON.stringify({ processed: userIds.length, sent }),
-    { status: 200, headers: { ...CORS, "Content-Type": "application/json" } },
+    { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
   );
 });

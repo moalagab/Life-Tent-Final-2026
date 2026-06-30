@@ -2,18 +2,35 @@
  * send-welcome-email
  * Colors: Midnight Navy #131C32 | Primary Blue #2E63E8 | Coral #E2674A
  */
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const resend  = new Resend(Deno.env.get("RESEND_API_KEY"));
 const FROM    = "Life Tent <info@lifetent.online>";
 const APP_URL = "https://www.lifetent.online";
 
-const CORS = {
-  "Access-Control-Allow-Origin":  "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+const ALLOWED_ORIGINS = [
+  "https://www.lifetent.online",
+  "https://lifetent.online",
+  "http://localhost:8080",
+  "http://localhost:8081",
+  "http://localhost:8082",
+  "http://localhost:8083",
+  "https://localhost",
+  "lifetent://localhost",
+  "capacitor://localhost",
+  "ionic://localhost",
+];
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("origin") ?? "";
+  const allowOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    "Access-Control-Allow-Origin":  allowOrigin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
+}
 
 function welcomeHtml(email: string, name: string): string {
   const displayName = name || email.split("@")[0];
@@ -173,13 +190,14 @@ function welcomeHtml(email: string, name: string): string {
 </html>`;
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: CORS });
+    return new Response(null, { status: 204, headers: corsHeaders });
   }
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
-      status: 405, headers: { ...CORS, "Content-Type": "application/json" },
+      status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
@@ -192,7 +210,7 @@ serve(async (req) => {
 
     if (!email) {
       return new Response(JSON.stringify({ error: "No email in payload" }), {
-        status: 400, headers: { ...CORS, "Content-Type": "application/json" },
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -206,18 +224,18 @@ serve(async (req) => {
     if (error) {
       console.error("Resend error:", error);
       return new Response(JSON.stringify({ error }), {
-        status: 500, headers: { ...CORS, "Content-Type": "application/json" },
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     console.log("Welcome email sent:", email, data?.id);
     return new Response(JSON.stringify({ ok: true, id: data?.id }), {
-      status: 200, headers: { ...CORS, "Content-Type": "application/json" },
+      status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
     console.error("Unexpected error:", err);
     return new Response(JSON.stringify({ error: String(err) }), {
-      status: 500, headers: { ...CORS, "Content-Type": "application/json" },
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
