@@ -35,12 +35,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             email:      session.user.email,
             created_at: session.user.created_at,
           });
-          // Clean OAuth code/token from URL after PKCE exchange
-          const url = new URL(window.location.href);
-          if (url.searchParams.has('code') || url.hash.includes('access_token')) {
-            url.searchParams.delete('code');
-            url.searchParams.delete('state');
-            window.history.replaceState({}, '', url.pathname);
+          // After OAuth callback: clean token from URL and redirect to dashboard.
+          // Supabase returns access_token in hash (implicit flow) — we detect
+          // it here, navigate away so the token never stays visible in the URL.
+          if (window.location.hash.includes('access_token') ||
+              window.location.search.includes('code=')) {
+            window.location.replace('/dashboard');
           }
         }
         if (event === 'SIGNED_OUT') {
