@@ -18,6 +18,8 @@ const NotificationIcon = ({ type }: { type: Notification['type'] }) => {
       return <Calendar className="w-4 h-4 text-blue-500" />;
     case 'habit':
       return <Target className="w-4 h-4 text-green-500" />;
+    default:
+      return <Bell className="w-4 h-4 text-muted-foreground" />;
   }
 };
 

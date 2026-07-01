@@ -95,6 +95,7 @@ export function useOfflineQueue() {
 
   /** Conflicts detected during the last replay. Reset on each new replay. */
   const [conflicts, setConflicts] = useState<ConflictRecord[]>([]);
+  const [pendingCount, setPendingCount] = useState(() => loadQueue().length);
 
   // ── Replay the queue when back online ──────────────────────────────────────
 
@@ -123,6 +124,7 @@ export function useOfflineQueue() {
 
     saveQueue(failed);
     setConflicts(detected);
+    setPendingCount(failed.length);
 
     if (detected.length > 0) {
       console.warn(
@@ -153,6 +155,7 @@ export function useOfflineQueue() {
         enqueuedAt: new Date().toISOString(),
       });
       saveQueue(queue);
+      setPendingCount(queue.length);
     },
     [],
   );
@@ -161,10 +164,6 @@ export function useOfflineQueue() {
 
   const clearConflicts = useCallback(() => setConflicts([]), []);
 
-  // ── Queue stats ───────────────────────────────────────────────────────────
-
-  const pendingCount = loadQueue().length;
-
   return { enqueue, replayQueue, pendingCount, isOnline, conflicts, clearConflicts };
 }
 
@@ -172,7 +171,7 @@ export function useOfflineQueue() {
 
 const ALLOWED_OFFLINE_TABLES = new Set([
   'tasks', 'projects', 'goals', 'habits', 'habit_logs', 'notes', 'courses',
-  'resources', 'areas', 'events', 'finance_transactions', 'media_items',
+  'resources', 'areas', 'events', 'transactions', 'media_items',
   'push_subscriptions', 'customers', 'cases', 'communications',
 ]);
 

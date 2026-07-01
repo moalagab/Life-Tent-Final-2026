@@ -16,6 +16,7 @@ import { useProjectFinance, useCreateProjectFinance, ProjectFinance } from '@/ho
 import { useProjects } from '@/hooks/useProjects';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { parseMoneyInput } from '@/lib/parseMoneyInput';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export function ProjectFinanceManager() {
@@ -38,10 +39,15 @@ export function ProjectFinanceManager() {
       toast.error(language === 'ar' ? 'يرجى ملء جميع الحقول' : 'Please fill all fields');
       return;
     }
+    const plannedBudgetTotal = parseMoneyInput(newFinance.planned_budget_total);
+    if (plannedBudgetTotal === null) {
+      toast.error(language === 'ar' ? 'الميزانية غير صالحة' : 'Invalid budget amount');
+      return;
+    }
     try {
       await createProjectFinance.mutateAsync({
         project_id: selectedProjectId,
-        planned_budget_total: parseFloat(newFinance.planned_budget_total),
+        planned_budget_total: plannedBudgetTotal,
         currency: newFinance.currency,
         evm_enabled: newFinance.evm_enabled,
         actual_spend_total: 0,

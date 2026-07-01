@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useLanguage } from './useLanguage';
 
 export type NotificationType = 'task' | 'event' | 'habit' | 'subscription' | 'debt' | 'project';
@@ -14,7 +14,39 @@ export interface Notification {
   sourceType?: string;
 }
 
-export function useNotifications() {
+interface NotificationsContextType {
+  permission: NotificationPermission;
+  enabled: boolean;
+  notifications: Notification[];
+  unreadCount: number;
+  requestPermission: () => Promise<NotificationPermission>;
+  enableNotifications: () => Promise<boolean>;
+  disableNotifications: () => void;
+  sendNotification: (
+    title: string,
+    body: string,
+    type: NotificationType,
+    sourceId?: string,
+    sourceType?: string,
+  ) => globalThis.Notification | undefined;
+  markAsRead: (id: string) => void;
+  markAllAsRead: () => void;
+  clearAll: () => void;
+  scheduleTaskReminder: (taskTitle: string, dueDate: Date) => void;
+  scheduleEventReminder: (eventTitle: string, startTime: Date) => void;
+  sendHabitReminder: (habitName: string) => void;
+  scheduleSubscriptionReminder: (
+    subscriptionName: string,
+    amount: number,
+    billingDate: Date,
+    subscriptionId: string,
+  ) => void;
+  sendDebtReminder: (debtName: string, amount: number, debtId: string) => void;
+}
+
+const NotificationsContext = createContext<NotificationsContextType | undefined>(undefined);
+
+export function NotificationsProvider({ children }: { children: ReactNode }) {
   const { t } = useLanguage();
   const [permission, setPermission] = useState<NotificationPermission>('default');
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -59,11 +91,11 @@ export function useNotifications() {
   }, []);
 
   const sendNotification = useCallback((
-    title: string, 
-    body: string, 
+    title: string,
+    body: string,
     type: NotificationType,
     sourceId?: string,
-    sourceType?: string
+    sourceType?: string,
   ) => {
     if (!enabled || permission !== 'granted') return;
 
@@ -150,7 +182,7 @@ export function useNotifications() {
 
   const sendHabitReminder = useCallback((habitName: string) => {
     if (!enabled) return;
-    
+
     sendNotification(
       t('notifications.habitReminder'),
       habitName,
@@ -159,8 +191,8 @@ export function useNotifications() {
   }, [enabled, sendNotification, t]);
 
   const scheduleSubscriptionReminder = useCallback((
-    subscriptionName: string, 
-    amount: number, 
+    subscriptionName: string,
+    amount: number,
     billingDate: Date,
     subscriptionId: string
   ) => {
@@ -184,12 +216,12 @@ export function useNotifications() {
   }, [enabled, sendNotification, t]);
 
   const sendDebtReminder = useCallback((
-    debtName: string, 
+    debtName: string,
     amount: number,
     debtId: string
   ) => {
     if (!enabled) return;
-    
+
     sendNotification(
       t('notifications.debtPayment') || 'موعد سداد دين',
       `${debtName} - ${amount}`,
@@ -215,22 +247,35 @@ export function useNotifications() {
     }
   }, [unreadCount]);
 
-  return {
-    permission,
-    enabled,
-    notifications,
-    unreadCount,
-    requestPermission,
-    enableNotifications,
-    disableNotifications,
-    sendNotification,
-    markAsRead,
-    markAllAsRead,
-    clearAll,
-    scheduleTaskReminder,
-    scheduleEventReminder,
-    sendHabitReminder,
-    scheduleSubscriptionReminder,
-    sendDebtReminder,
-  };
+  return (
+    <NotificationsContext.Provider value={{
+      permission,
+      enabled,
+      notifications,
+      unreadCount,
+      requestPermission,
+      enableNotifications,
+      disableNotifications,
+      sendNotification,
+      markAsRead,
+      markAllAsRead,
+      clearAll,
+      scheduleTaskReminder,
+      scheduleEventReminder,
+      sendHabitReminder,
+      scheduleSubscriptionReminder,
+      sendDebtReminder,
+    }}>
+      {children}
+    </NotificationsContext.Provider>
+  );
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
+export function useNotifications() {
+  const context = useContext(NotificationsContext);
+  if (context === undefined) {
+    throw new Error('useNotifications must be used within a NotificationsProvider');
+  }
+  return context;
 }

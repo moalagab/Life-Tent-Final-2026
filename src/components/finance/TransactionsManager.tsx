@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { parseMoneyInput } from '@/lib/parseMoneyInput';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAccounts, useTransactions, useCreateTransaction, Transaction } from '@/hooks/useFinance';
 import { useCategories } from '@/hooks/useAdvancedFinance';
@@ -97,10 +98,16 @@ export function TransactionsManager() {
       return;
     }
 
+    const amount = parseMoneyInput(newTransaction.amount);
+    if (amount === null) {
+      toast.error(language === 'ar' ? 'المبلغ غير صالح' : 'Invalid amount');
+      return;
+    }
+
     try {
       await createTransaction.mutateAsync({
         description: newTransaction.description,
-        amount: parseFloat(newTransaction.amount),
+        amount,
         type: newTransaction.type,
         category: newTransaction.category || null,
         account_id: newTransaction.account_id,
@@ -122,11 +129,17 @@ export function TransactionsManager() {
       return;
     }
 
+    const amount = parseMoneyInput(editTransaction.amount);
+    if (amount === null) {
+      toast.error(language === 'ar' ? 'المبلغ غير صالح' : 'Invalid amount');
+      return;
+    }
+
     try {
       await updateTransaction.mutateAsync({
         id: editTransaction.id,
         description: editTransaction.description,
-        amount: parseFloat(editTransaction.amount),
+        amount,
         type: editTransaction.type,
         category: editTransaction.category || null,
         date: editTransaction.date,

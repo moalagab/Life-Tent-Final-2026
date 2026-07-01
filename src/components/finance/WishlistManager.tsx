@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
+import { parseMoneyInput } from '@/lib/parseMoneyInput';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useLightbox } from '@/components/lightbox/useLightbox';
 import { useWishlistItems, useCreateWishlistItem, useUpdateWishlistItem, useDeleteWishlistItem, WishlistItem } from '@/hooks/useWishlist';
@@ -463,18 +464,25 @@ export function WishlistManager() {
       return;
     }
 
+    const estimatedPrice = formData.estimated_price ? parseMoneyInput(formData.estimated_price) : null;
+    const savedAmount = formData.saved_amount ? parseMoneyInput(formData.saved_amount) : 0;
+    if ((formData.estimated_price && estimatedPrice === null) || (formData.saved_amount && savedAmount === null)) {
+      toast.error(language === 'ar' ? 'قيمة رقمية غير صالحة' : 'Invalid numeric value');
+      return;
+    }
+
     try {
       await createItem.mutateAsync({
         name: formData.name,
         description: formData.description || null,
-        estimated_price: parseFloat(formData.estimated_price) || null,
+        estimated_price: estimatedPrice,
         currency: formData.currency,
         priority: formData.priority,
         category: formData.category || null,
         url: formData.url || null,
         image_url: formData.image_url || null,
         target_date: formData.target_date || null,
-        saved_amount: parseFloat(formData.saved_amount) || 0,
+        saved_amount: savedAmount ?? 0,
         linked_envelope_id: formData.linked_envelope_id || null,
         linked_sinking_fund_id: formData.linked_sinking_fund_id || null,
         notes: formData.notes || null,
@@ -491,19 +499,26 @@ export function WishlistManager() {
   const handleUpdate = async () => {
     if (!editingItem) return;
 
+    const estimatedPrice = formData.estimated_price ? parseMoneyInput(formData.estimated_price) : null;
+    const savedAmount = formData.saved_amount ? parseMoneyInput(formData.saved_amount) : 0;
+    if ((formData.estimated_price && estimatedPrice === null) || (formData.saved_amount && savedAmount === null)) {
+      toast.error(language === 'ar' ? 'قيمة رقمية غير صالحة' : 'Invalid numeric value');
+      return;
+    }
+
     try {
       await updateItem.mutateAsync({
         id: editingItem.id,
         name: formData.name,
         description: formData.description || null,
-        estimated_price: parseFloat(formData.estimated_price) || null,
+        estimated_price: estimatedPrice,
         currency: formData.currency,
         priority: formData.priority,
         category: formData.category || null,
         url: formData.url || null,
         image_url: formData.image_url || null,
         target_date: formData.target_date || null,
-        saved_amount: parseFloat(formData.saved_amount) || 0,
+        saved_amount: savedAmount ?? 0,
         linked_envelope_id: formData.linked_envelope_id || null,
         linked_sinking_fund_id: formData.linked_sinking_fund_id || null,
         notes: formData.notes || null,

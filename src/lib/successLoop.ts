@@ -2,10 +2,17 @@
  * runSuccessLoop — cascading updates triggered after a task is marked done.
  *
  * Order of operations (all non-blocking, non-fatal):
- *   1. Recompute + write goal progress  (if task.goal_id)
- *   2. Recompute + write project progress (if task.project_id)
- *   3. Invalidate all downstream React Query caches
- *   4. Dispatch `success-loop:complete` event for UI feedback
+ *   1. Recompute + write project progress (if task.project_id)
+ *   2. Invalidate all downstream React Query caches
+ *   3. Dispatch `success-loop:complete` event for UI feedback
+ *
+ * Note: goal-progress cascade was removed — it read a `tasks.goal_id`
+ * column and wrote a `goals.progress` column that no longer exist in the
+ * schema (tasks now link to goals indirectly via `kr_id` -> key_results ->
+ * goal_id, and goals/key_results track progress via current_value/
+ * target_value, not a completion percentage). Re-adding this needs a
+ * product decision on how a goal's progress should be derived from its
+ * key results before it can be reimplemented correctly.
  */
 import { QueryClient } from '@tanstack/react-query';
 import { supabase }    from '@/integrations/supabase/client';
@@ -21,7 +28,6 @@ export interface ProgressUpdate {
 
 export interface SuccessLoopResult {
   taskTitle:       string;
-  goalUpdate:      ProgressUpdate | null;
   projectUpdate:   ProgressUpdate | null;
   cachesRefreshed: number;
   timestamp:       number;
@@ -50,18 +56,12 @@ export async function runSuccessLoop(
   completedTask: {
     id:         string;
     title:      string;
-    goal_id?:   string | null;
     project_id?: string | null;
   },
 ): Promise<SuccessLoopResult> {
-  const [goalUpdate, projectUpdate] = await Promise.all([
-    completedTask.goal_id
-      ? recomputeGoalProgress(completedTask.goal_id)
-      : Promise.resolve(null),
-    completedTask.project_id
-      ? recomputeProjectProgress(completedTask.project_id)
-      : Promise.resolve(null),
-  ]);
+  const projectUpdate = completedTask.project_id
+    ? await recomputeProjectProgress(completedTask.project_id)
+    : null;
 
   // Invalidate all downstream caches in parallel
   await Promise.all(
@@ -70,7 +70,6 @@ export async function runSuccessLoop(
 
   const result: SuccessLoopResult = {
     taskTitle:       completedTask.title,
-    goalUpdate,
     projectUpdate,
     cachesRefreshed: DOWNSTREAM_CACHES.length,
     timestamp:       Date.now(),
@@ -84,27 +83,6 @@ export async function runSuccessLoop(
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-async function recomputeGoalProgress(goalId: string): Promise<ProgressUpdate | null> {
-  try {
-    const [{ data: goal }, { data: tasks }] = await Promise.all([
-      supabase.from('goals').select('id, title, progress').eq('id', goalId).single(),
-      supabase.from('tasks').select('id, status').eq('goal_id' as never, goalId),
-    ]);
-
-    if (!goal || !tasks || tasks.length === 0) return null;
-
-    const done        = tasks.filter((t: { status: string }) => t.status === 'done').length;
-    const newProgress = Math.round((done / tasks.length) * 100);
-    const oldProgress = goal.progress ?? 0;
-
-    await supabase.from('goals').update({ progress: newProgress }).eq('id', goalId);
-
-    return { id: goal.id, title: goal.title, oldProgress, newProgress };
-  } catch {
-    return null;
-  }
-}
 
 async function recomputeProjectProgress(projectId: string): Promise<ProgressUpdate | null> {
   try {

@@ -92,13 +92,26 @@ export function useFileUpload({
 
       setProgress(80);
 
-      const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(filePath);
+      // Only `avatars` is a public bucket. `attachments`/`media` are private
+      // (owner-only RLS) — getPublicUrl() on those returns a URL that 403s,
+      // so we sign it instead. Long expiry since the URL is persisted
+      // (e.g. resources.source_url) and re-signing on every render isn't wired up.
+      let url: string;
+      if (bucket === 'avatars') {
+        url = supabase.storage.from(bucket).getPublicUrl(filePath).data.publicUrl;
+      } else {
+        const { data: signedData, error: signError } = await supabase.storage
+          .from(bucket)
+          .createSignedUrl(filePath, 60 * 60 * 24 * 365 * 10); // ~10 years
+        if (signError || !signedData) throw signError ?? new Error('تعذر إنشاء رابط الملف');
+        url = signedData.signedUrl;
+      }
 
       setProgress(100);
 
       return {
         path: filePath,
-        url: urlData.publicUrl,
+        url,
         name: file.name,
         size: file.size,
         type: file.type,

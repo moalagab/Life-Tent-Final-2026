@@ -17,7 +17,7 @@ export function useTasks() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('tasks')
-        .select('id, title, description, status, priority, due_date, due_time, scheduled_at, completed_at, archived_at, position, is_focus, project_id, goal_id, user_id, created_at, updated_at, projects(title)')
+        .select('id, title, description, status, priority, due_date, due_time, scheduled_at, completed_at, archived_at, position, is_focus, project_id, kr_id, user_id, created_at, updated_at, projects(title)')
         .order('position', { ascending: true });
       
       if (error) throw error;
@@ -121,11 +121,10 @@ export function useUpdateTask() {
       queryClient.invalidateQueries({ queryKey: ['archived-items'] });
       if (data?.status === 'done') {
         vibrate.success();
-        // Fire success loop — cascade goal/project/cache/memory updates
+        // Fire success loop — cascade project/cache/memory updates
         runSuccessLoop(queryClient, {
           id:         data.id,
           title:      data.title,
-          goal_id:    (data as never as { goal_id?: string | null }).goal_id,
           project_id: data.project_id,
         }).catch(() => {});
       }

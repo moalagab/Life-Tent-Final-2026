@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { parseMoneyInput } from '@/lib/parseMoneyInput';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useSubscriptions, useAccounts, Subscription } from '@/hooks/useFinance';
 import { useCreateSubscription, useUpdateSubscription, useDeleteSubscription } from '@/hooks/useAdvancedFinance';
@@ -322,11 +323,17 @@ export function SubscriptionsManager() {
       return;
     }
 
+    const amount = parseMoneyInput(formData.amount);
+    if (amount === null) {
+      toast.error(language === 'ar' ? 'المبلغ غير صالح' : 'Invalid amount');
+      return;
+    }
+
     try {
       const result = await createSubscription.mutateAsync({
         name: formData.name,
         provider: formData.provider || null,
-        amount: parseFloat(formData.amount),
+        amount,
         currency: formData.currency,
         billing_cycle: formData.billing_cycle,
         next_billing_date: formData.next_billing_date,
@@ -335,12 +342,12 @@ export function SubscriptionsManager() {
         notes: formData.notes || null,
         is_active: true,
       });
-      
+
       // Schedule notification
       if (notificationsEnabled && result) {
         scheduleSubscriptionReminder(
           formData.name,
-          parseFloat(formData.amount),
+          amount,
           new Date(formData.next_billing_date),
           result.id
         );
@@ -360,12 +367,18 @@ export function SubscriptionsManager() {
       return;
     }
 
+    const amount = parseMoneyInput(formData.amount);
+    if (amount === null) {
+      toast.error(language === 'ar' ? 'المبلغ غير صالح' : 'Invalid amount');
+      return;
+    }
+
     try {
       await updateSubscription.mutateAsync({
         id: editingSub.id,
         name: formData.name,
         provider: formData.provider || null,
-        amount: parseFloat(formData.amount),
+        amount,
         currency: formData.currency,
         billing_cycle: formData.billing_cycle,
         next_billing_date: formData.next_billing_date || editingSub.next_billing_date,

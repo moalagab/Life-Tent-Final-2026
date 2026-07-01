@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { rateLimit } from "../_shared/upstash.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://www.lifetent.online',
@@ -7,10 +8,37 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+// Returns the authenticated user's ID, or null if the request is unauthenticated.
+async function verifyAuth(req: Request): Promise<string | null> {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  const token = authHeader.replace('Bearer ', '');
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+  );
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  return error || !user ? null : user.id;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
+    const userId = await verifyAuth(req);
+    if (!userId) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const allowed = await rateLimit(userId, 'calculate-project-health', 30, 60);
+    if (!allowed) {
+      return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), {
+        status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const { project_id } = await req.json() as { project_id: string };
     if (!project_id) {
       return new Response(JSON.stringify({ error: 'project_id required' }), {
@@ -23,9 +51,10 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
 
+    // Service-role client bypasses RLS, so ownership must be enforced explicitly here.
     const [{ data: project, error: projErr }, { data: tasks, error: tasksErr }] = await Promise.all([
-      supabaseAdmin.from('projects').select('*').eq('id', project_id).single(),
-      supabaseAdmin.from('tasks').select('id, status, due_date, completed_at').eq('project_id', project_id),
+      supabaseAdmin.from('projects').select('*').eq('id', project_id).eq('user_id', userId).single(),
+      supabaseAdmin.from('tasks').select('id, status, due_date, completed_at').eq('project_id', project_id).eq('user_id', userId),
     ]);
 
     if (projErr || !project) throw new Error(projErr?.message ?? 'Project not found');

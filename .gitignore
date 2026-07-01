@@ -32,11 +32,17 @@ lint-issues*.json
 # Nested git repos / worktrees (excluded to avoid submodule conflicts)
 life-tent-os-892e4657/
 life-tent-os-892e4657.worktrees/
+Life-Tent-Final-2026/
 
-# Screenshots / test artifacts
-*.png
+# Screenshots / test artifacts (root-level only — do not shadow public/*.png assets)
+/screenshot_*.png
+/test_*.png
 playwright-report-e2e/
 lint-current.json
 
 .env.prod
 .env.vercel
+.env.local
+
+# tsc -b build cache
+*.tsbuildinfo

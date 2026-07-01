@@ -29,6 +29,7 @@ import { format } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { PieChart as RechartsPie, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { cn } from '@/lib/utils';
+import { parseMoneyInput } from '@/lib/parseMoneyInput';
 
 const ASSET_COLORS = {
   stock: 'hsl(var(--chart-1))',
@@ -252,14 +253,28 @@ export function InvestmentsManager() {
       return;
     }
 
+    const quantity = newHolding.quantity ? parseMoneyInput(newHolding.quantity) : 0;
+    const avgCost = newHolding.avg_cost ? parseMoneyInput(newHolding.avg_cost) : 0;
+    const currentPrice = newHolding.current_price ? parseMoneyInput(newHolding.current_price) : null;
+    const targetAllocation = newHolding.target_allocation ? parseMoneyInput(newHolding.target_allocation) : null;
+    const anyInvalid =
+      (newHolding.quantity && quantity === null) ||
+      (newHolding.avg_cost && avgCost === null) ||
+      (newHolding.current_price && currentPrice === null) ||
+      (newHolding.target_allocation && targetAllocation === null);
+    if (anyInvalid) {
+      toast.error(language === 'ar' ? 'قيمة رقمية غير صالحة' : 'Invalid numeric value');
+      return;
+    }
+
     try {
       await createHolding.mutateAsync({
         portfolio_id: selectedPortfolioId,
         asset_id: newHolding.asset_id,
-        quantity: parseFloat(newHolding.quantity) || 0,
-        avg_cost: parseFloat(newHolding.avg_cost) || 0,
-        current_price: parseFloat(newHolding.current_price) || null,
-        target_allocation: parseFloat(newHolding.target_allocation) || null,
+        quantity: quantity ?? 0,
+        avg_cost: avgCost ?? 0,
+        current_price: currentPrice,
+        target_allocation: targetAllocation,
       });
       toast.success(language === 'ar' ? 'تمت إضافة الحيازة' : 'Holding added');
       setIsHoldingDialogOpen(false);
@@ -286,9 +301,13 @@ export function InvestmentsManager() {
       return;
     }
 
-    const quantity = parseFloat(newTransaction.quantity) || 0;
-    const price = parseFloat(newTransaction.price) || 0;
-    const fees = parseFloat(newTransaction.fees) || 0;
+    const quantity = parseMoneyInput(newTransaction.quantity);
+    const price = parseMoneyInput(newTransaction.price);
+    const fees = newTransaction.fees ? parseMoneyInput(newTransaction.fees) : 0;
+    if (quantity === null || price === null || fees === null) {
+      toast.error(language === 'ar' ? 'قيمة رقمية غير صالحة' : 'Invalid numeric value');
+      return;
+    }
 
     try {
       await createTransaction.mutateAsync({

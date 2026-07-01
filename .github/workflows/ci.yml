@@ -30,6 +30,10 @@ jobs:
       - name: Lint
         run: npx eslint src --max-warnings 0
 
+      - name: Typecheck (non-blocking — tracked debt, does not fail the build yet)
+        run: npm run typecheck
+        continue-on-error: true
+
       - name: Unit tests
         run: npx vitest run --reporter=verbose
         env:

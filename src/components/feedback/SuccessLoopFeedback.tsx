@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { CheckCircle2, Target, FolderOpen, Brain, Cpu, TrendingUp } from 'lucide-react';
+import { CheckCircle2, FolderOpen, Brain, Cpu, TrendingUp } from 'lucide-react';
 import type { SuccessLoopResult, ProgressUpdate } from '@/lib/successLoop';
 import { cn } from '@/lib/utils';
 
@@ -82,16 +82,6 @@ function FeedbackCard({ result, onDismiss }: FeedbackCardProps) {
   }, [onDismiss]);
 
   const steps: StepProps[] = [];
-
-  if (result.goalUpdate) {
-    steps.push({
-      icon:   Target,
-      label:  result.goalUpdate.title,
-      detail: <ProgressChip update={result.goalUpdate} />,
-      delay:  120,
-      color:  'bg-violet-500',
-    });
-  }
 
   if (result.projectUpdate) {
     steps.push({

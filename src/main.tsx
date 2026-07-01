@@ -56,7 +56,7 @@ if (SENTRY_DSN) {
       release: import.meta.env.VITE_APP_VERSION ?? "dev",
       integrations: [
         Sentry.browserTracingIntegration(),
-        Sentry.replayIntegration({ maskAllText: false, blockAllMedia: false }),
+        Sentry.replayIntegration(), // defaults: maskAllText true, blockAllMedia true — this is a personal finance/life app
       ],
       tracesSampleRate: import.meta.env.PROD ? 0.2 : 1.0,
       replaysSessionSampleRate: 0.05,

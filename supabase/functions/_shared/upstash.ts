@@ -92,6 +92,17 @@ export async function idempotencyCheck(key: string, ttlSeconds = 86400): Promise
   }
 }
 
+// Releases a claim taken by idempotencyCheck(). Call this when processing
+// failed after the claim was made, so a legitimate webhook retry for the
+// same event isn't permanently swallowed as a "duplicate".
+export async function idempotencyRelease(key: string): Promise<void> {
+  try {
+    await redis("DEL", `idempotent:${key}`);
+  } catch (err) {
+    console.error("[Upstash] idempotencyRelease error:", err);
+  }
+}
+
 // ── Deduplication — prevent sending the same notification twice ──────────────
 // Returns true if this notification has NOT been sent recently.
 

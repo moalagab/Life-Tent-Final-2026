@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { parseMoneyInput } from '@/lib/parseMoneyInput';
 
 interface FxRate {
   id: string;
@@ -148,10 +149,15 @@ export function CurrencyManager() {
       toast.error(language === 'ar' ? 'يرجى إدخال السعر' : 'Please enter the rate');
       return;
     }
+    const rate = parseMoneyInput(newRate.rate);
+    if (rate === null) {
+      toast.error(language === 'ar' ? 'سعر الصرف غير صالح' : 'Invalid exchange rate');
+      return;
+    }
     addRateMutation.mutate({
       from_currency: newRate.from_currency,
       to_currency: newRate.to_currency,
-      rate: parseFloat(newRate.rate),
+      rate,
     });
   };
 
@@ -164,8 +170,9 @@ export function CurrencyManager() {
     return acc;
   }, {} as Record<string, FxRate>);
 
-  const convertedAmount = convertAmount 
-    ? convertCurrency(parseFloat(convertAmount), convertFrom, convertTo)
+  const parsedConvertAmount = convertAmount ? parseMoneyInput(convertAmount) : null;
+  const convertedAmount = parsedConvertAmount !== null
+    ? convertCurrency(parsedConvertAmount, convertFrom, convertTo)
     : null;
 
   if (isLoading) {

@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
+import { parseMoneyInput } from '@/lib/parseMoneyInput';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAccounts, useCreateAccount, useUpdateAccount, useDeleteAccount, useTransactions } from '@/hooks/useFinance';
 import { useReconcileAccount, useReconcileTransactions } from '@/hooks/useAdvancedFinance';
@@ -104,11 +105,17 @@ export function AccountsManager() {
       return;
     }
 
+    const balance = newAccount.balance ? parseMoneyInput(newAccount.balance) : 0;
+    if (balance === null) {
+      toast.error(language === 'ar' ? 'الرصيد غير صالح' : 'Invalid balance');
+      return;
+    }
+
     try {
       await createAccount.mutateAsync({
         name: newAccount.name,
         type: newAccount.type,
-        balance: parseFloat(newAccount.balance) || 0,
+        balance,
         currency: newAccount.currency,
         icon: newAccount.icon || undefined,
         color: newAccount.color || accountColors[newAccount.type],
@@ -127,12 +134,18 @@ export function AccountsManager() {
       return;
     }
 
+    const balance = newAccount.balance ? parseMoneyInput(newAccount.balance) : 0;
+    if (balance === null) {
+      toast.error(language === 'ar' ? 'الرصيد غير صالح' : 'Invalid balance');
+      return;
+    }
+
     try {
       await updateAccount.mutateAsync({
         id: editingAccountId,
         name: newAccount.name,
         type: newAccount.type,
-        balance: parseFloat(newAccount.balance) || 0,
+        balance,
         currency: newAccount.currency,
         icon: newAccount.icon || undefined,
         color: newAccount.color || accountColors[newAccount.type],
@@ -161,10 +174,16 @@ export function AccountsManager() {
   const handleReconcile = async () => {
     if (!selectedAccountId || !reconcileBalance) return;
 
+    const balance = parseMoneyInput(reconcileBalance);
+    if (balance === null) {
+      toast.error(language === 'ar' ? 'الرصيد غير صالح' : 'Invalid balance');
+      return;
+    }
+
     try {
       await reconcileAccount.mutateAsync({
         accountId: selectedAccountId,
-        balance: parseFloat(reconcileBalance),
+        balance,
       });
 
       if (selectedTxIds.length > 0) {

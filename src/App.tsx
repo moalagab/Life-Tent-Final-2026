@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { NotificationsProvider } from "@/hooks/useNotifications";
 import { OnboardingProvider } from "@/hooks/useOnboarding";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { AdminGuard } from "@/components/admin/AdminGuard";
@@ -119,6 +120,7 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <NotificationsProvider>
         <TooltipProvider>
           <LightboxProvider>
           <PlatformInit />
@@ -177,6 +179,7 @@ const App = () => (
           </BrowserRouter>
           </LightboxProvider>
         </TooltipProvider>
+        </NotificationsProvider>
       </AuthProvider>
     </QueryClientProvider>
   </ErrorBoundary>

@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from '@/lib/utils';
+import { parseMoneyInput } from '@/lib/parseMoneyInput';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useDebts, useCreateDebt, useUpdateDebt, useDebtSchedules, useMarkInstallmentPaid, Debt } from '@/hooks/useAdvancedFinance';
 import { toast } from 'sonner';
@@ -443,21 +444,77 @@ export function DebtsManager() {
     return Math.max(0, totalInterest);
   };
 
+  /** Parses every money field in the debt form. Returns null (after toasting
+   *  the first invalid field) if anything doesn't parse, instead of silently
+   *  coercing bad input to 0. */
+  const parseDebtMoneyFields = () => {
+    const totalAmount = parseMoneyInput(newDebt.total_amount);
+    if (totalAmount === null) {
+      toast.error(language === 'ar' ? 'المبلغ الإجمالي غير صالح' : 'Invalid total amount');
+      return null;
+    }
+
+    let remainingAmount = totalAmount;
+    if (newDebt.remaining_amount) {
+      const parsed = parseMoneyInput(newDebt.remaining_amount);
+      if (parsed === null) {
+        toast.error(language === 'ar' ? 'المبلغ المتبقي غير صالح' : 'Invalid remaining amount');
+        return null;
+      }
+      remainingAmount = parsed;
+    }
+
+    let interestRate = 0;
+    if (newDebt.interest_rate) {
+      const parsed = parseMoneyInput(newDebt.interest_rate);
+      if (parsed === null) {
+        toast.error(language === 'ar' ? 'نسبة الفائدة غير صالحة' : 'Invalid interest rate');
+        return null;
+      }
+      interestRate = parsed;
+    }
+
+    let minimumPayment: number | null = null;
+    if (newDebt.minimum_payment) {
+      const parsed = parseMoneyInput(newDebt.minimum_payment);
+      if (parsed === null) {
+        toast.error(language === 'ar' ? 'الحد الأدنى للدفع غير صالح' : 'Invalid minimum payment');
+        return null;
+      }
+      minimumPayment = parsed;
+    }
+
+    let monthlyPayment: number | null = minimumPayment;
+    if (newDebt.monthly_payment) {
+      const parsed = parseMoneyInput(newDebt.monthly_payment);
+      if (parsed === null) {
+        toast.error(language === 'ar' ? 'الدفعة الشهرية غير صالحة' : 'Invalid monthly payment');
+        return null;
+      }
+      monthlyPayment = parsed;
+    }
+
+    return { totalAmount, remainingAmount, interestRate, minimumPayment, monthlyPayment };
+  };
+
   const handleCreateDebt = async () => {
     if (!newDebt.name || !newDebt.total_amount) {
       toast.error(language === 'ar' ? 'يرجى ملء الحقول المطلوبة' : 'Please fill required fields');
       return;
     }
 
+    const parsed = parseDebtMoneyFields();
+    if (!parsed) return;
+
     try {
       await createDebt.mutateAsync({
         name: newDebt.name,
         lender: newDebt.lender || null,
-        total_amount: parseFloat(newDebt.total_amount),
-        remaining_amount: parseFloat(newDebt.remaining_amount) || parseFloat(newDebt.total_amount),
-        interest_rate: parseFloat(newDebt.interest_rate) || 0,
-        minimum_payment: parseFloat(newDebt.minimum_payment) || null,
-        monthly_payment: parseFloat(newDebt.monthly_payment) || parseFloat(newDebt.minimum_payment) || null,
+        total_amount: parsed.totalAmount,
+        remaining_amount: parsed.remainingAmount,
+        interest_rate: parsed.interestRate,
+        minimum_payment: parsed.minimumPayment,
+        monthly_payment: parsed.monthlyPayment,
         monthly_payment_date: parseInt(newDebt.monthly_payment_date) || 1,
         start_date: newDebt.start_date || null,
         end_date: newDebt.end_date || null,
@@ -481,16 +538,19 @@ export function DebtsManager() {
       return;
     }
 
+    const parsed = parseDebtMoneyFields();
+    if (!parsed) return;
+
     try {
       await updateDebt.mutateAsync({
         id: editingDebt.id,
         name: newDebt.name,
         lender: newDebt.lender || null,
-        total_amount: parseFloat(newDebt.total_amount),
-        remaining_amount: parseFloat(newDebt.remaining_amount) || parseFloat(newDebt.total_amount),
-        interest_rate: parseFloat(newDebt.interest_rate) || 0,
-        minimum_payment: parseFloat(newDebt.minimum_payment) || null,
-        monthly_payment: parseFloat(newDebt.monthly_payment) || parseFloat(newDebt.minimum_payment) || null,
+        total_amount: parsed.totalAmount,
+        remaining_amount: parsed.remainingAmount,
+        interest_rate: parsed.interestRate,
+        minimum_payment: parsed.minimumPayment,
+        monthly_payment: parsed.monthlyPayment,
         monthly_payment_date: parseInt(newDebt.monthly_payment_date) || 1,
         start_date: newDebt.start_date || null,
         end_date: newDebt.end_date || null,

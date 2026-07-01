@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { parseMoneyInput } from '@/lib/parseMoneyInput';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useMonthlyStats, useTransactions } from '@/hooks/useFinance';
 import { useEnvelopes, useCreateEnvelope, useUpdateEnvelope, useSinkingFunds, useCreateSinkingFund, useUpdateSinkingFund, useCategories, Envelope, SinkingFund } from '@/hooks/useAdvancedFinance';
@@ -122,10 +123,16 @@ export function BudgetManager() {
       return;
     }
 
+    const targetAmount = parseMoneyInput(newEnvelope.target_amount);
+    if (targetAmount === null) {
+      toast.error(language === 'ar' ? 'المبلغ المستهدف غير صالح' : 'Invalid target amount');
+      return;
+    }
+
     try {
       await createEnvelope.mutateAsync({
         name: newEnvelope.name,
-        target_amount: parseFloat(newEnvelope.target_amount) || 0,
+        target_amount: targetAmount,
         color: newEnvelope.color,
         available_amount: 0,
       });
@@ -143,18 +150,31 @@ export function BudgetManager() {
       return;
     }
 
-    let monthlyContribution = parseFloat(newFund.monthly_contribution) || 0;
-    if (newFund.target_date && !newFund.monthly_contribution) {
+    const targetAmount = parseMoneyInput(newFund.target_amount);
+    if (targetAmount === null) {
+      toast.error(language === 'ar' ? 'المبلغ المستهدف غير صالح' : 'Invalid target amount');
+      return;
+    }
+
+    let monthlyContribution = 0;
+    if (newFund.monthly_contribution) {
+      const parsed = parseMoneyInput(newFund.monthly_contribution);
+      if (parsed === null) {
+        toast.error(language === 'ar' ? 'المساهمة الشهرية غير صالحة' : 'Invalid monthly contribution');
+        return;
+      }
+      monthlyContribution = parsed;
+    } else if (newFund.target_date) {
       const months = differenceInMonths(new Date(newFund.target_date), new Date());
       if (months > 0) {
-        monthlyContribution = parseFloat(newFund.target_amount) / months;
+        monthlyContribution = targetAmount / months;
       }
     }
 
     try {
       await createSinkingFund.mutateAsync({
         name: newFund.name,
-        target_amount: parseFloat(newFund.target_amount),
+        target_amount: targetAmount,
         target_date: newFund.target_date || null,
         monthly_contribution: monthlyContribution,
         current_amount: 0,
@@ -174,10 +194,16 @@ export function BudgetManager() {
       return;
     }
 
+    const limitAmount = parseMoneyInput(newBudget.limit_amount);
+    if (limitAmount === null) {
+      toast.error(language === 'ar' ? 'الحد الأقصى غير صالح' : 'Invalid limit amount');
+      return;
+    }
+
     try {
       await createBudget.mutateAsync({
         category: newBudget.category,
-        limit_amount: parseFloat(newBudget.limit_amount),
+        limit_amount: limitAmount,
         month: selectedMonth,
         year: selectedYear,
         status: 'active',
@@ -194,11 +220,21 @@ export function BudgetManager() {
   const handleUpdateBudget = async () => {
     if (!selectedBudget) return;
 
+    let limitAmount = selectedBudget.limit_amount;
+    if (newBudget.limit_amount) {
+      const parsed = parseMoneyInput(newBudget.limit_amount);
+      if (parsed === null) {
+        toast.error(language === 'ar' ? 'الحد الأقصى غير صالح' : 'Invalid limit amount');
+        return;
+      }
+      limitAmount = parsed;
+    }
+
     try {
       await updateBudget.mutateAsync({
         id: selectedBudget.id,
         category: newBudget.category || selectedBudget.category,
-        limit_amount: parseFloat(newBudget.limit_amount) || selectedBudget.limit_amount,
+        limit_amount: limitAmount,
         notes: newBudget.notes,
       });
       toast.success(language === 'ar' ? 'تم تحديث الميزانية' : 'Budget updated');
@@ -242,11 +278,18 @@ export function BudgetManager() {
 
   const handleUpdateEnvelope = async () => {
     if (!selectedEnvelope) return;
+
+    const targetAmount = parseMoneyInput(newEnvelope.target_amount);
+    if (targetAmount === null) {
+      toast.error(language === 'ar' ? 'المبلغ المستهدف غير صالح' : 'Invalid target amount');
+      return;
+    }
+
     try {
       await updateEnvelope.mutateAsync({
         id: selectedEnvelope.id,
         name: newEnvelope.name,
-        target_amount: parseFloat(newEnvelope.target_amount) || 0,
+        target_amount: targetAmount,
         color: newEnvelope.color,
       });
       toast.success(language === 'ar' ? 'تم تحديث المظروف' : 'Envelope updated');
@@ -260,13 +303,29 @@ export function BudgetManager() {
 
   const handleUpdateFund = async () => {
     if (!selectedFund) return;
+
+    const targetAmount = parseMoneyInput(newFund.target_amount);
+    if (targetAmount === null) {
+      toast.error(language === 'ar' ? 'المبلغ المستهدف غير صالح' : 'Invalid target amount');
+      return;
+    }
+    let monthlyContribution = 0;
+    if (newFund.monthly_contribution) {
+      const parsed = parseMoneyInput(newFund.monthly_contribution);
+      if (parsed === null) {
+        toast.error(language === 'ar' ? 'المساهمة الشهرية غير صالحة' : 'Invalid monthly contribution');
+        return;
+      }
+      monthlyContribution = parsed;
+    }
+
     try {
       await updateSinkingFund.mutateAsync({
         id: selectedFund.id,
         name: newFund.name,
-        target_amount: parseFloat(newFund.target_amount),
+        target_amount: targetAmount,
         target_date: newFund.target_date || null,
-        monthly_contribution: parseFloat(newFund.monthly_contribution) || 0,
+        monthly_contribution: monthlyContribution,
       });
       toast.success(language === 'ar' ? 'تم تحديث صندوق الادخار' : 'Sinking fund updated');
       setIsEditFundDialogOpen(false);

@@ -13,7 +13,7 @@
  *   SUPABASE_SERVICE_ROLE_KEY
  */
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { idempotencyCheck } from "../_shared/upstash.ts";
+import { idempotencyCheck, idempotencyRelease } from "../_shared/upstash.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 // ── Config ────────────────────────────────────────────────────────────────────
@@ -110,9 +110,14 @@ Deno.serve(async (req: Request) => {
 
   console.log(`[LS] event=${eventName} variant=${attrs?.variant_id}`);
 
-  // Idempotency: skip duplicate webhook deliveries (Lemon Squeezy retries on timeout)
-  const eventId = String(payload?.meta?.event_id ?? payload?.meta?.test_mode ?? `${eventName}-${data?.id}`);
-  const isNew = await idempotencyCheck(`ls:${eventId}`, 86400);
+  // Idempotency: skip duplicate webhook deliveries (Lemon Squeezy retries on timeout).
+  // `meta` has no `event_id` field — the actual delivery id is the X-Event-Id header.
+  // (Previous fallback used `meta.test_mode`, a boolean that is `false` — not nullish —
+  // in production, collapsing every event's key to the literal string "false".)
+  const eventId = req.headers.get("X-Event-Id") ??
+    `${eventName}:${data?.id}:${attrs?.updated_at ?? attrs?.renews_at ?? ""}`;
+  const idemKey = `ls:${eventId}`;
+  const isNew = await idempotencyCheck(idemKey, 86400);
   if (!isNew) {
     console.log(`[LS] duplicate event ${eventId} — skipping`);
     return new Response(JSON.stringify({ ok: true, skipped: "duplicate" }), {
@@ -179,6 +184,7 @@ Deno.serve(async (req: Request) => {
 
       if (error) {
         console.error("[LS] upsert error:", error.message);
+        await idempotencyRelease(idemKey);
         return new Response(JSON.stringify({ error: error.message }), {
           status: 500,
           headers: { "Content-Type": "application/json" },
@@ -204,6 +210,7 @@ Deno.serve(async (req: Request) => {
 
       if (error) {
         console.error("[LS] cancel error:", error.message);
+        await idempotencyRelease(idemKey);
         return new Response(JSON.stringify({ error: error.message }), {
           status: 500,
           headers: { "Content-Type": "application/json" },
@@ -225,6 +232,7 @@ Deno.serve(async (req: Request) => {
 
       if (error) {
         console.error("[LS] expire error:", error.message);
+        await idempotencyRelease(idemKey);
         return new Response(JSON.stringify({ error: error.message }), {
           status: 500,
           headers: { "Content-Type": "application/json" },
