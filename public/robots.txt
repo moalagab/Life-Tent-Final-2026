@@ -1,37 +1,10 @@
 # General public crawling
+# Applies to all bots not explicitly listed below (including ClaudeBot, Googlebot,
+# Google-Extended, OAI-SearchBot, PerplexityBot, Perplexity-User, and others).
 User-agent: *
 Allow: /
 
-# ChatGPT Search
-User-agent: OAI-SearchBot
-Allow: /
-
-# OpenAI model training - optional
-# Keep blocked unless you explicitly want Life Tent content used for model training.
-User-agent: GPTBot
-Disallow: /
-
-# Claude / Anthropic
-User-agent: ClaudeBot
-Allow: /
-
-# Google Search, AI Overviews, and Google Search discovery
-User-agent: Googlebot
-Allow: /
-
-# Gemini grounding and future Gemini model training
-# Allow only if you accept both grounding and future-model training use.
-User-agent: Google-Extended
-Allow: /
-
-# Perplexity
-User-agent: PerplexityBot
-Allow: /
-
-User-agent: Perplexity-User
-Allow: /
-
-# Protected application routes
+# Protected application routes (require authentication — no value for crawlers)
 Disallow: /dashboard
 Disallow: /tasks
 Disallow: /projects
@@ -46,5 +19,10 @@ Disallow: /settings
 Disallow: /profile
 Disallow: /admin
 Disallow: /auth
+
+# OpenAI model training — blocked
+# Remove this block only if you want Life Tent content used for GPT model training.
+User-agent: GPTBot
+Disallow: /
 
 Sitemap: https://www.lifetent.online/sitemap.xml
