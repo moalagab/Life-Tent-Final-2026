@@ -13,6 +13,7 @@
  *   SUPABASE_SERVICE_ROLE_KEY
  */
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { idempotencyCheck } from "../_shared/upstash.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 // ── Config ────────────────────────────────────────────────────────────────────
@@ -108,6 +109,16 @@ Deno.serve(async (req: Request) => {
   const customData: Record<string, any> = payload?.meta?.custom_data ?? {};
 
   console.log(`[LS] event=${eventName} variant=${attrs?.variant_id}`);
+
+  // Idempotency: skip duplicate webhook deliveries (Lemon Squeezy retries on timeout)
+  const eventId = String(payload?.meta?.event_id ?? payload?.meta?.test_mode ?? `${eventName}-${data?.id}`);
+  const isNew = await idempotencyCheck(`ls:${eventId}`, 86400);
+  if (!isNew) {
+    console.log(`[LS] duplicate event ${eventId} — skipping`);
+    return new Response(JSON.stringify({ ok: true, skipped: "duplicate" }), {
+      status: 200, headers: { "Content-Type": "application/json" },
+    });
+  }
 
   // 4. Admin Supabase client (bypasses RLS)
   const supabase = createClient(

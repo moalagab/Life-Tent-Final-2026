@@ -12,6 +12,7 @@
  * Requires env: RESEND_API_KEY
  */
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { rateLimit } from "../_shared/upstash.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
@@ -61,22 +62,7 @@ async function checkRateLimit(
   maxRequests: number,
   windowSeconds: number,
 ): Promise<boolean> {
-  // Must use service_role key — the RPC has REVOKE EXECUTE FROM anon
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-  );
-  const { data, error } = await supabase.rpc("check_rate_limit", {
-    p_user_id:        userId,
-    p_function:       functionName,
-    p_max_requests:   maxRequests,
-    p_window_seconds: windowSeconds,
-  });
-  if (error) {
-    console.error("Rate limit check error:", error.message);
-    return false; // fail-closed: block on RPC error
-  }
-  return (data as number) <= maxRequests;
+  return rateLimit(userId, functionName, maxRequests, windowSeconds);
 }
 
 // ── HTML escaping — prevents XSS from user-controlled data ───────────────────

@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { cacheGet, cacheSet } from "../_shared/upstash.ts";
 
 // ── CORS — restricted to known origins only ──────────────────────────────────
 const ALLOWED_ORIGINS = [
@@ -103,15 +104,35 @@ const handler = async (req: Request): Promise<Response> => {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const [habitsResult, habitLogsResult, tasksResult, transactionsResult] =
-      await Promise.all([
-        supabase.from("habits").select("id, name, frequency").eq("is_active", true),
-        supabase.from("habit_logs").select("habit_id, logged_at, completed")
-          .gte("logged_at", thirtyDaysAgo.toISOString()),
-        supabase.from("tasks").select("id, status, due_date"),
-        supabase.from("transactions").select("amount, type, date")
-          .gte("date", thirtyDaysAgo.toISOString().split("T")[0]),
-      ]);
+    const cacheKey = `analytics:${userId}:${thirtyDaysAgo.toISOString().split("T")[0]}`;
+    type RawData = { habits: unknown[]; habitLogs: unknown[]; tasks: unknown[]; transactions: unknown[] };
+    let rawData = await cacheGet<RawData>(cacheKey);
+
+    let habitsResult: { data: unknown[] | null }, habitLogsResult: { data: unknown[] | null },
+        tasksResult: { data: unknown[] | null }, transactionsResult: { data: unknown[] | null };
+
+    if (rawData) {
+      habitsResult      = { data: rawData.habits };
+      habitLogsResult   = { data: rawData.habitLogs };
+      tasksResult       = { data: rawData.tasks };
+      transactionsResult = { data: rawData.transactions };
+    } else {
+      [habitsResult, habitLogsResult, tasksResult, transactionsResult] =
+        await Promise.all([
+          supabase.from("habits").select("id, name, frequency").eq("is_active", true),
+          supabase.from("habit_logs").select("habit_id, logged_at, completed")
+            .gte("logged_at", thirtyDaysAgo.toISOString()),
+          supabase.from("tasks").select("id, status, due_date"),
+          supabase.from("transactions").select("amount, type, date")
+            .gte("date", thirtyDaysAgo.toISOString().split("T")[0]),
+        ]);
+      await cacheSet(cacheKey, {
+        habits: habitsResult.data ?? [],
+        habitLogs: habitLogsResult.data ?? [],
+        tasks: tasksResult.data ?? [],
+        transactions: transactionsResult.data ?? [],
+      }, 300); // cache 5 minutes
+    }
 
     const habitStreaks: HabitStreak[] = (habitsResult.data ?? []).map(habit => {
       const logs = (habitLogsResult.data ?? []).filter(l => l.habit_id === habit.id);
