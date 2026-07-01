@@ -11,6 +11,7 @@
  * Saves behavioral insights to user_ai_insights table.
  */
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { recallMemories, storeMemory } from "../_shared/pinecone.ts";
 import Anthropic from "npm:@anthropic-ai/sdk";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
@@ -190,6 +191,27 @@ Deno.serve(async (req: Request) => {
   // Build user context from DB
   const userContext = await buildUserContext(userId, supabaseClient);
 
+  // Recall relevant memories from Pinecone (chat mode only)
+  let memoryContext = "";
+  if (mode === "chat" && message) {
+    try {
+      const memories = await recallMemories(userId, message, 5);
+      const relevant = memories.filter(m => m.score > 0.75);
+      if (relevant.length > 0) {
+        memoryContext = "\n\n## ذاكرة المحادثات السابقة (ذات صلة):\n" +
+          relevant.map(m => `- ${m.metadata?.role ?? "?"}: ${m.metadata?.content ?? m.id}`).join("\n");
+      }
+    } catch (e) {
+      console.warn("[ai-coach] memory recall failed:", e);
+    }
+  }
+
+  // Store user message in Pinecone for future recall (fire-and-forget)
+  if (mode === "chat" && message) {
+    const memId = `${userId}:${Date.now()}:user`;
+    storeMemory(userId, memId, "user", message).catch(() => {});
+  }
+
   // Select model: Haiku for briefings (short output), Sonnet for chat
   const model = mode === "briefing" ? "claude-haiku-4-5-20251001" : "claude-sonnet-4-6";
 
@@ -198,6 +220,7 @@ Deno.serve(async (req: Request) => {
     IDENTITY_PROMPT,
     "",
     userContext,
+    memoryContext,
     ...(mode === "briefing" ? ["", BRIEFING_INSTRUCTION] : []),
   ].join("\n");
 
