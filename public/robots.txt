@@ -1,11 +1,10 @@
+# General public crawling
+# Applies to all bots not explicitly listed below (including ClaudeBot, Googlebot,
+# Google-Extended, OAI-SearchBot, PerplexityBot, Perplexity-User, and others).
 User-agent: *
 Allow: /
-Allow: /pricing
-Allow: /terms
-Allow: /privacy
-Allow: /refund
 
-# Block protected app routes (require auth — no value for crawlers)
+# Protected application routes (require authentication — no value for crawlers)
 Disallow: /dashboard
 Disallow: /tasks
 Disallow: /projects
@@ -20,5 +19,10 @@ Disallow: /settings
 Disallow: /profile
 Disallow: /admin
 Disallow: /auth
+
+# OpenAI model training — blocked
+# Remove this block only if you want Life Tent content used for GPT model training.
+User-agent: GPTBot
+Disallow: /
 
 Sitemap: https://www.lifetent.online/sitemap.xml
