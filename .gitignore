@@ -37,3 +37,6 @@ life-tent-os-892e4657.worktrees/
 *.png
 playwright-report-e2e/
 lint-current.json
+
+.env.prod
+.env.vercel
